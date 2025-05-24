@@ -11,7 +11,7 @@ interface DogFormData {
   age: string;
   breed: string;
   mobilityIssues: string[];
-  image?: string;
+  image: string | undefined;
   notes: string;
 }
 
