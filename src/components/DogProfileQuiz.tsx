@@ -142,11 +142,51 @@ const DogProfileQuiz: React.FC<DogProfileQuizProps> = ({ onComplete, onClose }) 
     }
   };
 
+  const generateReason = (pillar: string, score: number): string => {
+    const reasons = {
+      mental: score >= 4 ? 'High problem-solving interest' : score >= 2 ? 'Moderate mental stimulation needs' : 'Prefers simple activities',
+      physical: score >= 4 ? 'High energy, needs lots of exercise' : score >= 2 ? 'Moderate activity needs' : 'Low energy, gentle exercise preferred',
+      social: score >= 4 ? 'Very social, loves interaction' : score >= 2 ? 'Enjoys social time with guidance' : 'Prefers quiet, familiar company',
+      environmental: score >= 4 ? 'Adventurous explorer' : score >= 2 ? 'Cautious but curious' : 'Prefers familiar environments',
+      instinctual: score >= 4 ? 'Strong natural instincts' : score >= 2 ? 'Some instinctual interests' : 'Limited instinctual behaviors'
+    };
+    return reasons[pillar as keyof typeof reasons] || 'Needs assessment';
+  };
+
+  const determinePersonality = (scores: Record<string, number>): string => {
+    const maxScore = Math.max(...Object.values(scores));
+    const maxPillar = Object.entries(scores).find(([_, score]) => score === maxScore)?.[0];
+    
+    const personalities = {
+      mental: 'Problem Solver',
+      physical: 'Active Athlete',
+      social: 'Social Butterfly',
+      environmental: 'Curious Explorer',
+      instinctual: 'Natural Hunter'
+    };
+    
+    return personalities[maxPillar as keyof typeof personalities] || 'Balanced Companion';
+  };
+
+  const generateRecommendations = (topPillars: Array<{pillar: string; rank: number; score: number; reason: string}>): string[] => {
+    const recommendations: Record<string, string[]> = {
+      mental: ['Puzzle feeders', 'Training sessions', 'Hide and seek games'],
+      physical: ['Daily walks', 'Fetch games', 'Agility training'],
+      social: ['Dog park visits', 'Playdates', 'Group training classes'],
+      environmental: ['New walking routes', 'Different surfaces', 'Outdoor adventures'],
+      instinctual: ['Sniff walks', 'Digging boxes', 'Scent games']
+    };
+    
+    return topPillars.flatMap(pillar => 
+      recommendations[pillar.pillar]?.slice(0, 2) || []
+    ).slice(0, 4);
+  };
+
   const analyzeResults = async () => {
     setIsAnalyzing(true);
     
     // Calculate pillar scores
-    const pillarScores = {
+    const pillarScores: Record<string, number> = {
       mental: 0,
       physical: 0,
       social: 0,
@@ -159,7 +199,7 @@ const DogProfileQuiz: React.FC<DogProfileQuizProps> = ({ onComplete, onClose }) 
       if (answer) {
         const option = question.options.find(opt => opt.value === answer);
         if (option) {
-          pillarScores[question.pillar as keyof typeof pillarScores] += option.weight;
+          pillarScores[question.pillar] += option.weight;
         }
       }
     });
@@ -188,46 +228,6 @@ const DogProfileQuiz: React.FC<DogProfileQuizProps> = ({ onComplete, onClose }) 
       setIsAnalyzing(false);
       onComplete(results);
     }, 2000);
-  };
-
-  const generateReason = (pillar: string, score: number): string => {
-    const reasons = {
-      mental: score >= 4 ? 'High problem-solving interest' : score >= 2 ? 'Moderate mental stimulation needs' : 'Prefers simple activities',
-      physical: score >= 4 ? 'High energy, needs lots of exercise' : score >= 2 ? 'Moderate activity needs' : 'Low energy, gentle exercise preferred',
-      social: score >= 4 ? 'Very social, loves interaction' : score >= 2 ? 'Enjoys social time with guidance' : 'Prefers quiet, familiar company',
-      environmental: score >= 4 ? 'Adventurous explorer' : score >= 2 ? 'Cautious but curious' : 'Prefers familiar environments',
-      instinctual: score >= 4 ? 'Strong natural instincts' : score >= 2 ? 'Some instinctual interests' : 'Limited instinctual behaviors'
-    };
-    return reasons[pillar as keyof typeof reasons] || 'Needs assessment';
-  };
-
-  const determinePersonality = (scores: typeof pillarScores): string => {
-    const maxScore = Math.max(...Object.values(scores));
-    const maxPillar = Object.entries(scores).find(([_, score]) => score === maxScore)?.[0];
-    
-    const personalities = {
-      mental: 'Problem Solver',
-      physical: 'Active Athlete',
-      social: 'Social Butterfly',
-      environmental: 'Curious Explorer',
-      instinctual: 'Natural Hunter'
-    };
-    
-    return personalities[maxPillar as keyof typeof personalities] || 'Balanced Companion';
-  };
-
-  const generateRecommendations = (topPillars: typeof ranking): string[] => {
-    const recommendations: Record<string, string[]> = {
-      mental: ['Puzzle feeders', 'Training sessions', 'Hide and seek games'],
-      physical: ['Daily walks', 'Fetch games', 'Agility training'],
-      social: ['Dog park visits', 'Playdates', 'Group training classes'],
-      environmental: ['New walking routes', 'Different surfaces', 'Outdoor adventures'],
-      instinctual: ['Sniff walks', 'Digging boxes', 'Scent games']
-    };
-    
-    return topPillars.flatMap(pillar => 
-      recommendations[pillar.pillar]?.slice(0, 2) || []
-    ).slice(0, 4);
   };
 
   const progress = ((currentQuestion + 1) / questions.length) * 100;
