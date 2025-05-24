@@ -211,13 +211,13 @@ export const ActivityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     if (!currentDog || isDiscovering) return;
     
     setIsDiscovering(true);
-    console.log('Starting content discovery for', currentDog.name);
+    console.log('Starting enhanced content discovery for', currentDog.name);
     
     try {
-      const existingActivities = getCombinedActivityLibrary();
+      const existingActivities = [...activityLibrary, ...discoveredActivities];
       const newActivities = await ContentDiscoveryService.discoverNewActivities(
         existingActivities,
-        discoveryConfig
+        { ...discoveryConfig, maxActivitiesPerDiscovery: 8 } // Force higher discovery count
       );
       
       if (newActivities.length > 0) {
@@ -225,7 +225,6 @@ export const ActivityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setDiscoveredActivities(updatedDiscovered);
         saveDiscoveredActivities(currentDog.id, updatedDiscovered);
         
-        // Update last discovery run
         const updatedConfig = {
           ...discoveryConfig,
           lastDiscoveryRun: new Date().toISOString()
@@ -233,7 +232,14 @@ export const ActivityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setDiscoveryConfig(updatedConfig);
         localStorage.setItem(`discoveryConfig-${currentDog.id}`, JSON.stringify(updatedConfig));
         
-        console.log(`Discovered ${newActivities.length} new activities for ${currentDog.name}`);
+        const autoApproved = newActivities.filter(a => a.approved).length;
+        const needsReview = newActivities.filter(a => !a.approved && !a.rejected).length;
+        
+        console.log(`Discovery complete! Found ${newActivities.length} new activities for ${currentDog.name}:`);
+        console.log(`- ${autoApproved} automatically added to library (high quality)`);
+        console.log(`- ${needsReview} pending your review`);
+      } else {
+        console.log('No new unique activities found in this discovery session');
       }
     } catch (error) {
       console.error('Discovery failed:', error);
@@ -286,7 +292,6 @@ export const ActivityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     const weeklyProgress = getWeeklyProgress();
     
-    // Calculate current streak
     let currentStreak = 0;
     for (let i = weeklyProgress.length - 1; i >= 0; i--) {
       if (weeklyProgress[i].completed) {
@@ -296,10 +301,8 @@ export const ActivityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       }
     }
     
-    // Calculate best streak (simplified - would need more historical data)
-    const bestStreak = Math.max(currentStreak, 12); // Keep existing best or current
+    const bestStreak = Math.max(currentStreak, 12);
     
-    // Calculate completion rate
     const completedDays = weeklyProgress.filter(day => day.completed).length;
     const completionRate = weeklyProgress.length > 0 ? (completedDays / weeklyProgress.length) * 100 : 0;
     
@@ -322,7 +325,7 @@ export const ActivityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       const date = new Date(today);
       date.setDate(today.getDate() - i);
       const dateStr = date.toISOString().split('T')[0];
-      const dayIndex = (date.getDay() + 6) % 7; // Convert Sunday=0 to Monday=0
+      const dayIndex = (date.getDay() + 6) % 7;
       
       const dayActivities = scheduledActivities.filter(activity => 
         activity.scheduledDate === dateStr && 
@@ -375,11 +378,9 @@ export const ActivityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       return { mental: 1, physical: 1, social: 1, environmental: 1, instinctual: 1 };
     }
     
-    // Set goals based on quiz results - top pillars get higher goals
     const ranking = currentDog.quizResults.ranking;
     const goals: PillarGoals = { mental: 1, physical: 1, social: 1, environmental: 1, instinctual: 1 };
     
-    // Top 2 pillars get 2 activities per day, others get 1
     if (ranking.length >= 2) {
       goals[ranking[0].pillar as keyof PillarGoals] = 2;
       goals[ranking[1].pillar as keyof PillarGoals] = 2;

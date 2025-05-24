@@ -1,11 +1,10 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Brain, Zap, Users, TreePine, Target, Clock, Star, Search, Plus, Loader2, Sparkles } from 'lucide-react';
+import { Brain, Zap, Users, TreePine, Target, Clock, Star, Search, Plus, Loader2, Sparkles, CheckCircle } from 'lucide-react';
 import { searchCombinedActivities } from '@/data/activityLibrary';
 import { ActivityLibraryItem } from '@/types/activity';
 import { DiscoveredActivity } from '@/types/discovery';
@@ -80,6 +79,9 @@ const ActivityLibrary = () => {
     await discoverNewActivities();
   };
 
+  const pendingReviewCount = discoveredActivities.filter(a => !a.approved && !a.rejected).length;
+  const autoApprovedCount = discoveredActivities.filter(a => a.approved).length;
+
   return (
     <div className="space-y-6">
       {/* Discovery Review Section */}
@@ -90,7 +92,15 @@ const ActivityLibrary = () => {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="text-xl font-bold text-gray-800">Activity Library</CardTitle>
-              <p className="text-gray-600">Discover enriching activities for your dog across all five pillars of wellness</p>
+              <p className="text-gray-600">
+                Discover enriching activities for your dog across all five pillars of wellness
+                {autoApprovedCount > 0 && (
+                  <span className="ml-2 text-sm text-green-600">
+                    <CheckCircle className="w-4 h-4 inline mr-1" />
+                    {autoApprovedCount} activities auto-added from discovery
+                  </span>
+                )}
+              </p>
             </div>
             <Button 
               onClick={handleDiscoverMore}
@@ -110,6 +120,14 @@ const ActivityLibrary = () => {
               )}
             </Button>
           </div>
+          {isDiscovering && (
+            <div className="mt-2 text-sm text-blue-600">
+              <div className="flex items-center space-x-2">
+                <div className="animate-pulse">🔍</div>
+                <span>Searching for new activities from trusted sources...</span>
+              </div>
+            </div>
+          )}
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Search and Filters */}
@@ -165,9 +183,15 @@ const ActivityLibrary = () => {
                 <span>Curated ({combinedActivities.filter(a => !isDiscoveredActivity(a)).length})</span>
               </span>
               <span className="flex items-center space-x-1">
-                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                <span>Discovered ({combinedActivities.filter(a => isDiscoveredActivity(a)).length})</span>
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span>Auto-Added ({autoApprovedCount})</span>
               </span>
+              {pendingReviewCount > 0 && (
+                <span className="flex items-center space-x-1">
+                  <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                  <span>Pending Review ({pendingReviewCount})</span>
+                </span>
+              )}
             </div>
           </div>
         </CardContent>
@@ -192,9 +216,18 @@ const ActivityLibrary = () => {
                       {activity.difficulty}
                     </Badge>
                     {isDiscovered && (
-                      <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700">
-                        <Sparkles className="w-3 h-3 mr-1" />
-                        Discovered
+                      <Badge variant="secondary" className={`text-xs ${activity.approved ? 'bg-green-100 text-green-700' : 'bg-purple-100 text-purple-700'}`}>
+                        {activity.approved ? (
+                          <>
+                            <CheckCircle className="w-3 h-3 mr-1" />
+                            Auto-Added
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="w-3 h-3 mr-1" />
+                            Discovered
+                          </>
+                        )}
                       </Badge>
                     )}
                   </div>
@@ -216,7 +249,7 @@ const ActivityLibrary = () => {
                   </div>
                   {isDiscovered && activity.qualityScore && (
                     <div className="flex items-center space-x-1">
-                      <span className="text-xs text-purple-600">
+                      <span className={`text-xs ${activity.approved ? 'text-green-600' : 'text-purple-600'}`}>
                         {Math.round(activity.qualityScore * 100)}% quality
                       </span>
                     </div>

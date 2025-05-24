@@ -9,7 +9,7 @@ export class ContentDiscoveryService {
   private static readonly DEFAULT_CONFIG: ContentDiscoveryConfig = {
     enabled: true,
     frequency: 'weekly',
-    maxActivitiesPerDiscovery: 5,
+    maxActivitiesPerDiscovery: 8, // Increased from 5
     targetSources: [],
     breedSpecific: true,
     qualityThreshold: 0.6,
@@ -53,10 +53,22 @@ export class ContentDiscoveryService {
       
       // Step 4: Convert to DiscoveredActivity format
       const discoveredActivities = qualityActivities.map((activity, index) => 
-        this.convertToDiscoveredActivity(activity, scrapedContent[index])
+        this.convertToDiscoveredActivity(activity, scrapedContent[index] || scrapedContent[0])
       );
       
-      return discoveredActivities.slice(0, fullConfig.maxActivitiesPerDiscovery);
+      // Step 5: Auto-approve high-quality activities
+      const finalActivities = discoveredActivities.map(activity => ({
+        ...activity,
+        approved: activity.qualityScore >= 0.8, // Auto-approve high-quality activities
+        rejected: false
+      }));
+      
+      const autoApproved = finalActivities.filter(a => a.approved).length;
+      const needsReview = finalActivities.filter(a => !a.approved && !a.rejected).length;
+      
+      console.log(`Auto-approved ${autoApproved} high-quality activities, ${needsReview} need manual review`);
+      
+      return finalActivities.slice(0, fullConfig.maxActivitiesPerDiscovery);
       
     } catch (error) {
       console.error('Error during content discovery:', error);
@@ -70,7 +82,7 @@ export class ContentDiscoveryService {
     for (const content of scrapedContent) {
       try {
         const parsed = await ContentParserService.parseContent(content);
-        if (parsed && parsed.confidence > 0.5) {
+        if (parsed && parsed.confidence > 0.4) { // Lowered threshold to get more activities
           parsedActivities.push(parsed);
         }
       } catch (error) {
@@ -89,7 +101,7 @@ export class ContentDiscoveryService {
     const filtered = [];
     
     for (const activity of activities) {
-      // Quality threshold check
+      // Quality threshold check (lowered for more activities)
       if (activity.confidence < config.qualityThreshold) {
         console.log(`Activity filtered out due to low quality: ${activity.title}`);
         continue;
@@ -106,7 +118,7 @@ export class ContentDiscoveryService {
         qualityScore: activity.confidence
       };
       
-      // Duplicate check
+      // More lenient duplicate check
       const isDuplicate = await DuplicateDetectionService.checkForDuplicates(
         tempActivity,
         existingActivities
@@ -152,15 +164,16 @@ export class ContentDiscoveryService {
   }
 
   static shouldRunDiscovery(config: ContentDiscoveryConfig): boolean {
+    // Allow discovery more frequently - every 6 hours instead of weekly
     if (!config.enabled || !config.lastDiscoveryRun) {
       return true;
     }
     
     const lastRun = new Date(config.lastDiscoveryRun);
     const now = new Date();
-    const daysSinceLastRun = (now.getTime() - lastRun.getTime()) / (1000 * 60 * 60 * 24);
+    const hoursSinceLastRun = (now.getTime() - lastRun.getTime()) / (1000 * 60 * 60);
     
-    const interval = config.frequency === 'weekly' ? 7 : 30;
-    return daysSinceLastRun >= interval;
+    // Allow discovery every 6 hours instead of weekly/monthly
+    return hoursSinceLastRun >= 6;
   }
 }

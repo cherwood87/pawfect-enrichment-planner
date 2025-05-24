@@ -1,10 +1,9 @@
-
 import { ActivityLibraryItem } from '@/types/activity';
 import { DiscoveredActivity } from '@/types/discovery';
 
 export class DuplicateDetectionService {
-  static readonly SIMILARITY_THRESHOLD = 0.7;
-  static readonly TITLE_THRESHOLD = 0.8;
+  static readonly SIMILARITY_THRESHOLD = 0.85; // Increased from 0.7 to be less aggressive
+  static readonly TITLE_THRESHOLD = 0.9; // Increased from 0.8
 
   static async checkForDuplicates(
     newActivity: DiscoveredActivity,
@@ -12,6 +11,11 @@ export class DuplicateDetectionService {
   ): Promise<boolean> {
     
     for (const existing of existingActivities) {
+      // Skip if comparing with rejected activities
+      if ('rejected' in existing && existing.rejected) {
+        continue;
+      }
+      
       // Check title similarity
       const titleSimilarity = this.calculateTitleSimilarity(
         newActivity.title,
@@ -19,7 +23,7 @@ export class DuplicateDetectionService {
       );
       
       if (titleSimilarity > this.TITLE_THRESHOLD) {
-        console.log(`Duplicate detected: "${newActivity.title}" similar to "${existing.title}"`);
+        console.log(`Duplicate detected: "${newActivity.title}" similar to "${existing.title}" (${Math.round(titleSimilarity * 100)}% similarity)`);
         return true;
       }
       
@@ -27,7 +31,7 @@ export class DuplicateDetectionService {
       const contentSimilarity = this.calculateContentSimilarity(newActivity, existing);
       
       if (contentSimilarity > this.SIMILARITY_THRESHOLD) {
-        console.log(`Content duplicate detected for: ${newActivity.title}`);
+        console.log(`Content duplicate detected for: ${newActivity.title} (${Math.round(contentSimilarity * 100)}% similarity)`);
         return true;
       }
     }
@@ -92,22 +96,22 @@ export class DuplicateDetectionService {
     const jaccardSimilarity = intersection.length / union.length;
     
     // Check pillar and material similarity
-    const pillarMatch = activity1.pillar === activity2.pillar ? 0.2 : 0;
+    const pillarMatch = activity1.pillar === activity2.pillar ? 0.15 : 0; // Reduced from 0.2
     const materialOverlap = this.calculateMaterialOverlap(activity1.materials, activity2.materials);
     
-    return jaccardSimilarity * 0.6 + pillarMatch + materialOverlap * 0.2;
+    return jaccardSimilarity * 0.7 + pillarMatch + materialOverlap * 0.15; // Adjusted weights
   }
 
   private static extractKeywords(activity: ActivityLibraryItem | DiscoveredActivity): string[] {
     const text = `${activity.title} ${activity.benefits} ${activity.tags.join(' ')}`.toLowerCase();
     
-    const commonWords = ['the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'dog', 'dogs'];
+    const commonWords = ['the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'dog', 'dogs', 'your', 'this', 'that', 'activity'];
     
     return text
       .replace(/[^\w\s]/g, '')
       .split(/\s+/)
-      .filter(word => word.length > 2 && !commonWords.includes(word))
-      .slice(0, 20);
+      .filter(word => word.length > 3 && !commonWords.includes(word)) // Increased minimum word length
+      .slice(0, 15); // Reduced from 20
   }
 
   private static calculateMaterialOverlap(materials1: string[], materials2: string[]): number {
