@@ -33,7 +33,7 @@ const Benefits_Overview: React.FC = () => {
             Why Dogs Need Enrichment
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            A fulfilled dog is a happy, healthy dog. Our comprehensive approach ensures your furry friend 
+            A fulfilled dog is a happy, healthy dog. Our comprehensive approach ensures your dog 
             gets the mental, physical, and emotional stimulation they need to thrive.
           </p>
         </div>
