@@ -29,7 +29,7 @@ const Index = () => {
               <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-orange-500 rounded-full flex items-center justify-center">
                 <span className="text-white font-bold text-sm">🐕</span>
               </div>
-              <h1 className="text-xl font-bold text-gray-800">PawPlan</h1>
+              <h1 className="text-xl font-bold text-gray-800">Beyond Busy Dog Enrichment Planner</h1>
             </div>
             <div className="flex items-center space-x-2">
               <DogSelector />
