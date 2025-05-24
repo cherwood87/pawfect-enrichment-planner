@@ -30,7 +30,7 @@ const CTA_AddDog: React.FC = () => {
                   <span className="text-xl font-bold text-blue-600">1</span>
                 </div>
                 <h3 className="font-semibold text-gray-800 mb-2">Add Your Dog</h3>
-                <p className="text-sm text-gray-600">Tell us about your furry friend</p>
+                <p className="text-sm text-gray-600">Tell us about your dog</p>
               </div>
               <div className="text-center">
                 <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
