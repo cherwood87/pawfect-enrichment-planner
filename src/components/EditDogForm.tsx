@@ -1,13 +1,12 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
 import { X, Trash2 } from 'lucide-react';
 import { useDog } from '@/contexts/DogContext';
-import { Dog, MOBILITY_ISSUES } from '@/types/dog';
-import ImageUpload from './ImageUpload';
+import { Dog } from '@/types/dog';
+import DeleteConfirmation from './DeleteConfirmation';
+import DogFormFields from './DogFormFields';
 
 interface EditDogFormProps {
   dog: Dog;
@@ -50,52 +49,13 @@ const EditDogForm: React.FC<EditDogFormProps> = ({ dog, onClose }) => {
     onClose();
   };
 
-  const handleMobilityIssueChange = (issue: string, checked: boolean) => {
-    if (issue === 'None') {
-      setFormData(prev => ({
-        ...prev,
-        mobilityIssues: checked ? ['None'] : []
-      }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        mobilityIssues: checked 
-          ? [...prev.mobilityIssues.filter(i => i !== 'None'), issue]
-          : prev.mobilityIssues.filter(i => i !== issue)
-      }));
-    }
-  };
-
   if (showDeleteConfirm) {
     return (
-      <Card className="max-w-lg mx-auto">
-        <CardHeader className="pb-4">
-          <CardTitle className="text-lg font-bold text-gray-800 text-center">
-            Delete {dog.name}?
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="text-center space-y-4">
-          <p className="text-gray-600">
-            This will permanently delete {dog.name}'s profile and all associated data. This action cannot be undone.
-          </p>
-          <div className="flex space-x-3">
-            <Button 
-              variant="outline" 
-              onClick={() => setShowDeleteConfirm(false)}
-              className="flex-1"
-            >
-              Cancel
-            </Button>
-            <Button 
-              variant="destructive" 
-              onClick={handleDelete}
-              className="flex-1"
-            >
-              Delete Profile
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      <DeleteConfirmation
+        dog={dog}
+        onConfirm={handleDelete}
+        onCancel={() => setShowDeleteConfirm(false)}
+      />
     );
   }
 
@@ -122,80 +82,10 @@ const EditDogForm: React.FC<EditDogFormProps> = ({ dog, onClose }) => {
 
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Photo Upload */}
-          <div className="flex justify-center">
-            <ImageUpload
-              currentImage={formData.image}
-              onImageChange={(image) => setFormData(prev => ({ ...prev, image }))}
-            />
-          </div>
-
-          {/* Basic Info */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="name">Name *</Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                placeholder="Enter dog's name"
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="age">Age (years)</Label>
-              <Input
-                id="age"
-                type="number"
-                min="0"
-                max="30"
-                value={formData.age}
-                onChange={(e) => setFormData(prev => ({ ...prev, age: e.target.value }))}
-                placeholder="Age"
-              />
-            </div>
-          </div>
-
-          {/* Breed */}
-          <div>
-            <Label htmlFor="breed">Breed</Label>
-            <Input
-              id="breed"
-              value={formData.breed}
-              onChange={(e) => setFormData(prev => ({ ...prev, breed: e.target.value }))}
-              placeholder="Enter dog's breed"
-            />
-          </div>
-
-          {/* Mobility Issues */}
-          <div>
-            <Label>Mobility Considerations</Label>
-            <div className="grid grid-cols-2 gap-2 mt-2">
-              {MOBILITY_ISSUES.map((issue) => (
-                <div key={issue} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={issue}
-                    checked={formData.mobilityIssues.includes(issue)}
-                    onCheckedChange={(checked) => handleMobilityIssueChange(issue, !!checked)}
-                  />
-                  <Label htmlFor={issue} className="text-sm cursor-pointer">
-                    {issue}
-                  </Label>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Notes */}
-          <div>
-            <Label htmlFor="notes">Notes (Optional)</Label>
-            <Input
-              id="notes"
-              value={formData.notes}
-              onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-              placeholder="Special considerations or notes"
-            />
-          </div>
+          <DogFormFields
+            formData={formData}
+            onFormDataChange={setFormData}
+          />
 
           {/* Submit Button */}
           <Button 
