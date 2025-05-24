@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -6,7 +7,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Heart, Edit, Brain, Trophy } from 'lucide-react';
 import { QuizResults } from '@/types/quiz';
 import DogProfileQuiz from './DogProfileQuiz';
-import QuizResults from './QuizResults';
+import QuizResultsComponent from './QuizResults';
 
 const DogProfile = () => {
   const [showQuiz, setShowQuiz] = useState(false);
@@ -127,7 +128,7 @@ const DogProfile = () => {
       <Dialog open={showResults} onOpenChange={setShowResults}>
         <DialogContent className="p-0 max-w-lg">
           {quizResults && (
-            <QuizResults 
+            <QuizResultsComponent 
               results={quizResults}
               onRetakeQuiz={handleRetakeQuiz}
               onClose={handleCloseResults}
