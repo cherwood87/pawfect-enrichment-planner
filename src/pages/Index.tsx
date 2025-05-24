@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -81,10 +80,12 @@ const Index = () => {
                     <Library className="mr-2 h-4 w-4" />
                     <span>Activity Library</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem disabled>
+                  <DropdownMenuItem 
+                    onClick={() => handleNavigation('/resource-hub')}
+                    className={isCurrentPage('/resource-hub') ? 'bg-blue-50 text-blue-700' : ''}
+                  >
                     <BookOpen className="mr-2 h-4 w-4" />
                     <span>Resource Hub</span>
-                    <span className="ml-auto text-xs text-gray-400">Coming Soon</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem disabled>
