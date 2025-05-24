@@ -4,10 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { X } from 'lucide-react';
 import { useDog } from '@/contexts/DogContext';
-import { MOBILITY_ISSUES, POPULAR_BREEDS } from '@/types/dog';
+import { MOBILITY_ISSUES } from '@/types/dog';
 import ImageUpload from './ImageUpload';
 import { useNavigate } from 'react-router-dom';
 
@@ -22,7 +21,6 @@ const AddDogForm: React.FC<AddDogFormProps> = ({ onClose }) => {
     name: '',
     age: '',
     breed: '',
-    customBreed: '',
     mobilityIssues: [] as string[],
     image: undefined as string | undefined,
     notes: ''
@@ -33,12 +31,10 @@ const AddDogForm: React.FC<AddDogFormProps> = ({ onClose }) => {
     
     if (!formData.name.trim()) return;
     
-    const breed = formData.breed === 'Other' ? formData.customBreed : formData.breed;
-    
     addDog({
       name: formData.name.trim(),
       age: parseInt(formData.age) || 0,
-      breed: breed || 'Unknown',
+      breed: formData.breed.trim() || 'Unknown',
       mobilityIssues: formData.mobilityIssues,
       image: formData.image,
       notes: formData.notes.trim()
@@ -115,25 +111,12 @@ const AddDogForm: React.FC<AddDogFormProps> = ({ onClose }) => {
           {/* Breed */}
           <div>
             <Label htmlFor="breed">Breed</Label>
-            <Select value={formData.breed} onValueChange={(value) => setFormData(prev => ({ ...prev, breed: value }))}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select breed" />
-              </SelectTrigger>
-              <SelectContent>
-                {POPULAR_BREEDS.map((breed) => (
-                  <SelectItem key={breed} value={breed}>{breed}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            
-            {formData.breed === 'Other' && (
-              <Input
-                className="mt-2"
-                value={formData.customBreed}
-                onChange={(e) => setFormData(prev => ({ ...prev, customBreed: e.target.value }))}
-                placeholder="Enter breed"
-              />
-            )}
+            <Input
+              id="breed"
+              value={formData.breed}
+              onChange={(e) => setFormData(prev => ({ ...prev, breed: e.target.value }))}
+              placeholder="Enter dog's breed"
+            />
           </div>
 
           {/* Mobility Issues */}
