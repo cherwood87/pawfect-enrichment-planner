@@ -7,12 +7,14 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Heart, Edit, Brain, Trophy, Settings } from 'lucide-react';
 import { QuizResults } from '@/types/quiz';
 import { useDog } from '@/contexts/DogContext';
+import { useActivity } from '@/contexts/ActivityContext';
 import DogProfileQuiz from './DogProfileQuiz';
 import QuizResultsComponent from './QuizResults';
 import EditDogForm from './EditDogForm';
 
 const DogProfile = () => {
   const { currentDog, updateDog } = useDog();
+  const { getPillarBalance, getDailyGoals } = useActivity();
   const [showQuiz, setShowQuiz] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
@@ -41,6 +43,13 @@ const DogProfile = () => {
 
   const topPillars = currentDog.quizResults?.ranking.slice(0, 2);
   const hasCompletedQuiz = !!currentDog.quizResults;
+  const pillarBalance = getPillarBalance();
+  const dailyGoals = getDailyGoals();
+
+  // Calculate goal progress
+  const totalGoalsToday = Object.values(dailyGoals).reduce((sum, goal) => sum + goal, 0);
+  const totalCompletedToday = Object.values(pillarBalance).reduce((sum, completed) => sum + completed, 0);
+  const goalProgress = totalGoalsToday > 0 ? (totalCompletedToday / totalGoalsToday) * 100 : 0;
 
   return (
     <>
@@ -117,16 +126,19 @@ const DogProfile = () => {
               <div className="mt-4 p-3 bg-gradient-to-r from-blue-50 to-orange-50 rounded-lg">
                 <div className="flex items-center space-x-2 mb-2">
                   <Trophy className="w-4 h-4 text-orange-500" />
-                  <span className="text-sm font-medium text-gray-800">Personalized Goals for {currentDog.name}</span>
+                  <span className="text-sm font-medium text-gray-800">Today's Goals for {currentDog.name}</span>
                 </div>
                 <p className="text-sm text-gray-700 mb-2">
                   Focus on <span className="font-medium">{topPillars?.[0]?.pillar}</span> and <span className="font-medium">{topPillars?.[1]?.pillar}</span> activities
                 </p>
                 <div className="flex items-center space-x-2">
                   <div className="flex-1 bg-white rounded-full h-2">
-                    <div className="bg-gradient-to-r from-blue-500 to-orange-500 h-2 rounded-full" style={{width: '60%'}}></div>
+                    <div 
+                      className="bg-gradient-to-r from-blue-500 to-orange-500 h-2 rounded-full transition-all duration-300" 
+                      style={{width: `${Math.min(goalProgress, 100)}%`}}
+                    ></div>
                   </div>
-                  <span className="text-xs text-gray-600">2/3</span>
+                  <span className="text-xs text-gray-600">{totalCompletedToday}/{totalGoalsToday}</span>
                 </div>
                 <Button 
                   variant="ghost" 

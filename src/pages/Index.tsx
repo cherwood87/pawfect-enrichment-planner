@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Plus, Calendar, Target, Trophy, Settings } from 'lucide-react';
 import { useDog } from '@/contexts/DogContext';
+import { useActivity } from '@/contexts/ActivityContext';
 import DogSelector from '@/components/DogSelector';
 import DogProfile from '@/components/DogProfile';
 import EnrichmentPillars from '@/components/EnrichmentPillars';
@@ -13,11 +14,18 @@ import ActivityModal from '@/components/ActivityModal';
 
 const Index = () => {
   const { currentDog } = useDog();
+  const { getStreakData, getPillarBalance } = useActivity();
   const [isActivityModalOpen, setIsActivityModalOpen] = useState(false);
   const [selectedPillar, setSelectedPillar] = useState<string | null>(null);
 
   // Get user preferences from current dog's quiz results
   const userPreferences = currentDog?.quizResults?.ranking;
+  
+  // Get real data for stats
+  const streakData = currentDog ? getStreakData() : null;
+  const pillarBalance = currentDog ? getPillarBalance() : {};
+  const activeDays = streakData?.weeklyProgress.filter(d => d.completed).length || 0;
+  const totalActivitiesToday = Object.values(pillarBalance).reduce((sum, count) => sum + count, 0);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-orange-50">
@@ -55,7 +63,7 @@ const Index = () => {
                 <CardContent className="pt-4 pb-3">
                   <div className="flex flex-col items-center space-y-1">
                     <Calendar className="w-5 h-5 text-blue-500" />
-                    <span className="text-lg font-bold text-gray-800">7</span>
+                    <span className="text-lg font-bold text-gray-800">{activeDays}</span>
                     <span className="text-xs text-gray-600">Days Active</span>
                   </div>
                 </CardContent>
@@ -65,7 +73,7 @@ const Index = () => {
                 <CardContent className="pt-4 pb-3">
                   <div className="flex flex-col items-center space-y-1">
                     <Target className="w-5 h-5 text-green-500" />
-                    <span className="text-lg font-bold text-gray-800">85%</span>
+                    <span className="text-lg font-bold text-gray-800">{streakData?.completionRate || 0}%</span>
                     <span className="text-xs text-gray-600">Goals Met</span>
                   </div>
                 </CardContent>
@@ -75,7 +83,7 @@ const Index = () => {
                 <CardContent className="pt-4 pb-3">
                   <div className="flex flex-col items-center space-y-1">
                     <Trophy className="w-5 h-5 text-orange-500" />
-                    <span className="text-lg font-bold text-gray-800">12</span>
+                    <span className="text-lg font-bold text-gray-800">{streakData?.currentStreak || 0}</span>
                     <span className="text-xs text-gray-600">Streak</span>
                   </div>
                 </CardContent>
