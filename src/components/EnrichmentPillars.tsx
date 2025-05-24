@@ -40,7 +40,7 @@ const EnrichmentPillars: React.FC<EnrichmentPillarsProps> = ({ onPillarSelect, u
       id: 'social',
       title: 'Social',
       icon: Users,
-      description: 'Dog parks, meetups',
+      description: 'Dog parks,joint activities meetups',
       todayCount: 0,
       weeklyGoal: 3,
       color: 'blue',
