@@ -41,6 +41,7 @@ const EditDogForm: React.FC<EditDogFormProps> = ({ dog, onClose }) => {
       notes: formData.notes.trim()
     });
     
+    // Close the modal and stay on the current page (dogs dashboard)
     onClose();
   };
 
