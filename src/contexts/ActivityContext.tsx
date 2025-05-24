@@ -1,31 +1,13 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { ScheduledActivity, UserActivity, ActivityLibraryItem, StreakData, WeeklyProgress, PillarGoals } from '@/types/activity';
+import { ScheduledActivity, UserActivity } from '@/types/activity';
 import { DiscoveredActivity, ContentDiscoveryConfig } from '@/types/discovery';
-import { activityLibrary, getActivityById, getCombinedActivities, getDiscoveredActivities, saveDiscoveredActivities } from '@/data/activityLibrary';
+import { ActivityContextType } from '@/types/activityContext';
+import { getDiscoveredActivities } from '@/data/activityLibrary';
 import { ContentDiscoveryService } from '@/services/ContentDiscoveryService';
 import { useDog } from '@/contexts/DogContext';
-
-interface ActivityContextType {
-  scheduledActivities: ScheduledActivity[];
-  userActivities: UserActivity[];
-  discoveredActivities: DiscoveredActivity[];
-  discoveryConfig: ContentDiscoveryConfig;
-  isDiscovering: boolean;
-  addScheduledActivity: (activity: Omit<ScheduledActivity, 'id' | 'dogId'>) => void;
-  toggleActivityCompletion: (activityId: string) => void;
-  addUserActivity: (activity: Omit<UserActivity, 'id' | 'createdAt' | 'dogId'>) => void;
-  getTodaysActivities: () => ScheduledActivity[];
-  getActivityDetails: (activityId: string) => ActivityLibraryItem | UserActivity | DiscoveredActivity | undefined;
-  getStreakData: () => StreakData;
-  getWeeklyProgress: () => WeeklyProgress[];
-  getPillarBalance: () => Record<string, number>;
-  getDailyGoals: () => PillarGoals;
-  getCombinedActivityLibrary: () => (ActivityLibraryItem | DiscoveredActivity)[];
-  discoverNewActivities: () => Promise<void>;
-  approveDiscoveredActivity: (activityId: string) => void;
-  rejectDiscoveredActivity: (activityId: string) => void;
-  updateDiscoveryConfig: (config: Partial<ContentDiscoveryConfig>) => void;
-}
+import { useActivityOperations } from '@/hooks/useActivityOperations';
+import { useDiscoveryOperations } from '@/hooks/useDiscoveryOperations';
 
 const ActivityContext = createContext<ActivityContextType | undefined>(undefined);
 
@@ -45,7 +27,6 @@ export const ActivityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [discoveryConfig, setDiscoveryConfig] = useState<ContentDiscoveryConfig>(
     ContentDiscoveryService.getDefaultConfig()
   );
-  const [isDiscovering, setIsDiscovering] = useState(false);
 
   // Load dog-specific data from localStorage
   useEffect(() => {
@@ -142,6 +123,23 @@ export const ActivityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   }, [discoveredActivities, currentDog]);
 
+  // Activity operations hook
+  const activityOps = useActivityOperations(
+    scheduledActivities,
+    userActivities,
+    discoveredActivities,
+    currentDog
+  );
+
+  // Discovery operations hook
+  const discoveryOps = useDiscoveryOperations(
+    discoveredActivities,
+    setDiscoveredActivities,
+    discoveryConfig,
+    setDiscoveryConfig,
+    currentDog
+  );
+
   const addScheduledActivity = (activity: Omit<ScheduledActivity, 'id' | 'dogId'>) => {
     if (!currentDog) return;
     
@@ -179,216 +177,6 @@ export const ActivityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setUserActivities(prev => [...prev, newActivity]);
   };
 
-  const getTodaysActivities = (): ScheduledActivity[] => {
-    if (!currentDog) return [];
-    const today = new Date().toISOString().split('T')[0];
-    return scheduledActivities.filter(activity => 
-      activity.scheduledDate === today && activity.dogId === currentDog.id
-    );
-  };
-
-  const getActivityDetails = (activityId: string): ActivityLibraryItem | UserActivity | DiscoveredActivity | undefined => {
-    // First check library activities
-    const libraryActivity = getActivityById(activityId);
-    if (libraryActivity) return libraryActivity;
-    
-    // Then check user activities for current dog
-    const userActivity = userActivities.find(activity => 
-      activity.id === activityId && activity.dogId === currentDog?.id
-    );
-    if (userActivity) return userActivity;
-
-    // Finally check discovered activities
-    return discoveredActivities.find(activity => activity.id === activityId);
-  };
-
-  const getCombinedActivityLibrary = (): (ActivityLibraryItem | DiscoveredActivity)[] => {
-    const approvedDiscovered = discoveredActivities.filter(activity => activity.approved);
-    return getCombinedActivities(approvedDiscovered);
-  };
-
-  const discoverNewActivities = async (): Promise<void> => {
-    if (!currentDog || isDiscovering) return;
-    
-    setIsDiscovering(true);
-    console.log('Starting enhanced content discovery for', currentDog.name);
-    
-    try {
-      const existingActivities = [...activityLibrary, ...discoveredActivities];
-      const newActivities = await ContentDiscoveryService.discoverNewActivities(
-        existingActivities,
-        { ...discoveryConfig, maxActivitiesPerDiscovery: 8 } // Force higher discovery count
-      );
-      
-      if (newActivities.length > 0) {
-        const updatedDiscovered = [...discoveredActivities, ...newActivities];
-        setDiscoveredActivities(updatedDiscovered);
-        saveDiscoveredActivities(currentDog.id, updatedDiscovered);
-        
-        const updatedConfig = {
-          ...discoveryConfig,
-          lastDiscoveryRun: new Date().toISOString()
-        };
-        setDiscoveryConfig(updatedConfig);
-        localStorage.setItem(`discoveryConfig-${currentDog.id}`, JSON.stringify(updatedConfig));
-        
-        const autoApproved = newActivities.filter(a => a.approved).length;
-        const needsReview = newActivities.filter(a => !a.approved && !a.rejected).length;
-        
-        console.log(`Discovery complete! Found ${newActivities.length} new activities for ${currentDog.name}:`);
-        console.log(`- ${autoApproved} automatically added to library (high quality)`);
-        console.log(`- ${needsReview} pending your review`);
-      } else {
-        console.log('No new unique activities found in this discovery session');
-      }
-    } catch (error) {
-      console.error('Discovery failed:', error);
-    } finally {
-      setIsDiscovering(false);
-    }
-  };
-
-  const approveDiscoveredActivity = (activityId: string) => {
-    const updated = discoveredActivities.map(activity =>
-      activity.id === activityId 
-        ? { ...activity, approved: true, rejected: false, verified: true }
-        : activity
-    );
-    setDiscoveredActivities(updated);
-    if (currentDog) {
-      saveDiscoveredActivities(currentDog.id, updated);
-    }
-  };
-
-  const rejectDiscoveredActivity = (activityId: string) => {
-    const updated = discoveredActivities.map(activity =>
-      activity.id === activityId 
-        ? { ...activity, approved: false, rejected: true }
-        : activity
-    );
-    setDiscoveredActivities(updated);
-    if (currentDog) {
-      saveDiscoveredActivities(currentDog.id, updated);
-    }
-  };
-
-  const updateDiscoveryConfig = (config: Partial<ContentDiscoveryConfig>) => {
-    const updated = { ...discoveryConfig, ...config };
-    setDiscoveryConfig(updated);
-    if (currentDog) {
-      localStorage.setItem(`discoveryConfig-${currentDog.id}`, JSON.stringify(updated));
-    }
-  };
-
-  const getStreakData = (): StreakData => {
-    if (!currentDog) {
-      return {
-        currentStreak: 0,
-        bestStreak: 0,
-        completionRate: 0,
-        weeklyProgress: []
-      };
-    }
-
-    const weeklyProgress = getWeeklyProgress();
-    
-    let currentStreak = 0;
-    for (let i = weeklyProgress.length - 1; i >= 0; i--) {
-      if (weeklyProgress[i].completed) {
-        currentStreak++;
-      } else {
-        break;
-      }
-    }
-    
-    const bestStreak = Math.max(currentStreak, 12);
-    
-    const completedDays = weeklyProgress.filter(day => day.completed).length;
-    const completionRate = weeklyProgress.length > 0 ? (completedDays / weeklyProgress.length) * 100 : 0;
-    
-    return {
-      currentStreak,
-      bestStreak,
-      completionRate: Math.round(completionRate),
-      weeklyProgress
-    };
-  };
-
-  const getWeeklyProgress = (): WeeklyProgress[] => {
-    if (!currentDog) return [];
-    
-    const today = new Date();
-    const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    const progress: WeeklyProgress[] = [];
-    
-    for (let i = 6; i >= 0; i--) {
-      const date = new Date(today);
-      date.setDate(today.getDate() - i);
-      const dateStr = date.toISOString().split('T')[0];
-      const dayIndex = (date.getDay() + 6) % 7;
-      
-      const dayActivities = scheduledActivities.filter(activity => 
-        activity.scheduledDate === dateStr && 
-        activity.dogId === currentDog.id
-      );
-      
-      const completedCount = dayActivities.filter(a => a.completed).length;
-      
-      progress.push({
-        day: weekDays[dayIndex],
-        completed: completedCount > 0,
-        activities: completedCount,
-        date: dateStr
-      });
-    }
-    
-    return progress;
-  };
-
-  const getPillarBalance = (): Record<string, number> => {
-    if (!currentDog) return {};
-    
-    const today = new Date().toISOString().split('T')[0];
-    const completedToday = scheduledActivities.filter(activity => 
-      activity.scheduledDate === today && 
-      activity.completed && 
-      activity.dogId === currentDog.id
-    );
-    
-    const pillarCounts: Record<string, number> = {
-      mental: 0,
-      physical: 0,
-      social: 0,
-      environmental: 0,
-      instinctual: 0
-    };
-    
-    completedToday.forEach(activity => {
-      const details = getActivityDetails(activity.activityId);
-      if (details) {
-        pillarCounts[details.pillar] = (pillarCounts[details.pillar] || 0) + 1;
-      }
-    });
-    
-    return pillarCounts;
-  };
-
-  const getDailyGoals = (): PillarGoals => {
-    if (!currentDog?.quizResults) {
-      return { mental: 1, physical: 1, social: 1, environmental: 1, instinctual: 1 };
-    }
-    
-    const ranking = currentDog.quizResults.ranking;
-    const goals: PillarGoals = { mental: 1, physical: 1, social: 1, environmental: 1, instinctual: 1 };
-    
-    if (ranking.length >= 2) {
-      goals[ranking[0].pillar as keyof PillarGoals] = 2;
-      goals[ranking[1].pillar as keyof PillarGoals] = 2;
-    }
-    
-    return goals;
-  };
-
   return (
     <ActivityContext.Provider
       value={{
@@ -396,21 +184,21 @@ export const ActivityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         userActivities,
         discoveredActivities,
         discoveryConfig,
-        isDiscovering,
+        isDiscovering: discoveryOps.isDiscovering,
         addScheduledActivity,
         toggleActivityCompletion,
         addUserActivity,
-        getTodaysActivities,
-        getActivityDetails,
-        getStreakData,
-        getWeeklyProgress,
-        getPillarBalance,
-        getDailyGoals,
-        getCombinedActivityLibrary,
-        discoverNewActivities,
-        approveDiscoveredActivity,
-        rejectDiscoveredActivity,
-        updateDiscoveryConfig
+        getTodaysActivities: activityOps.getTodaysActivities,
+        getActivityDetails: activityOps.getActivityDetails,
+        getStreakData: activityOps.getStreakData,
+        getWeeklyProgress: activityOps.getWeeklyProgress,
+        getPillarBalance: activityOps.getPillarBalance,
+        getDailyGoals: activityOps.getDailyGoals,
+        getCombinedActivityLibrary: discoveryOps.getCombinedActivityLibrary,
+        discoverNewActivities: discoveryOps.discoverNewActivities,
+        approveDiscoveredActivity: discoveryOps.approveDiscoveredActivity,
+        rejectDiscoveredActivity: discoveryOps.rejectDiscoveredActivity,
+        updateDiscoveryConfig: discoveryOps.updateDiscoveryConfig
       }}
     >
       {children}
