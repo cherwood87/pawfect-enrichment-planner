@@ -74,13 +74,14 @@ const ActivityModal: React.FC<ActivityModalProps> = ({ isOpen, onClose, selected
 
   const handleLibraryActivitySelect = (activity: any) => {
     const now = new Date();
-    const scheduledTime = scheduledTime || `${now.getHours() + 1}:00 ${now.getHours() + 1 >= 12 ? 'PM' : 'AM'}`;
-    const scheduledDate = now.toISOString().split('T')[0];
+    const defaultTime = `${now.getHours() + 1}:00 ${now.getHours() + 1 >= 12 ? 'PM' : 'AM'}`;
+    const scheduleTime = scheduledTime || defaultTime;
+    const scheduleDate = now.toISOString().split('T')[0];
 
     addScheduledActivity({
       activityId: activity.id,
-      scheduledTime,
-      scheduledDate,
+      scheduledTime: scheduleTime,
+      scheduledDate: scheduleDate,
       completed: false
     });
 
