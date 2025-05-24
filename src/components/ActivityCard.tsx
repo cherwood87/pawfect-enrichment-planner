@@ -1,0 +1,171 @@
+
+import React from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
+import { Clock, Star, Calendar, CheckCircle, Target } from 'lucide-react';
+import { ActivityLibraryItem } from '@/types/activity';
+import { useActivity } from '@/contexts/ActivityContext';
+
+interface ActivityCardProps {
+  activity: ActivityLibraryItem;
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const ActivityCard: React.FC<ActivityCardProps> = ({ activity, isOpen, onClose }) => {
+  const { addScheduledActivity } = useActivity();
+
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty) {
+      case 'Easy': return 'bg-green-100 text-green-700';
+      case 'Medium': return 'bg-yellow-100 text-yellow-700';
+      case 'Hard': return 'bg-red-100 text-red-700';
+      default: return 'bg-gray-100 text-gray-700';
+    }
+  };
+
+  const handleScheduleActivity = () => {
+    const now = new Date();
+    const scheduledTime = `${now.getHours() + 1}:00 ${now.getHours() + 1 >= 12 ? 'PM' : 'AM'}`;
+    const scheduledDate = now.toISOString().split('T')[0];
+
+    addScheduledActivity({
+      activityId: activity.id,
+      scheduledTime,
+      scheduledDate,
+      completed: false
+    });
+
+    onClose();
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <DialogTitle className="text-xl font-bold text-gray-800 mb-2">
+                {activity.title}
+              </DialogTitle>
+              <div className="flex items-center space-x-2 mb-3">
+                <Badge variant="secondary" className={`text-xs ${getDifficultyColor(activity.difficulty)}`}>
+                  {activity.difficulty}
+                </Badge>
+                <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700">
+                  {activity.pillar}
+                </Badge>
+                <Badge variant="secondary" className="text-xs">
+                  {activity.ageGroup}
+                </Badge>
+              </div>
+            </div>
+          </div>
+        </DialogHeader>
+
+        <div className="space-y-6">
+          {/* Quick Stats */}
+          <div className="grid grid-cols-3 gap-4">
+            <Card>
+              <CardContent className="pt-4 pb-3 text-center">
+                <Clock className="w-5 h-5 text-blue-500 mx-auto mb-1" />
+                <p className="text-sm font-medium">{activity.duration} min</p>
+                <p className="text-xs text-gray-600">Duration</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-4 pb-3 text-center">
+                <Star className="w-5 h-5 text-orange-500 mx-auto mb-1" />
+                <p className="text-sm font-medium">{activity.energyLevel}</p>
+                <p className="text-xs text-gray-600">Energy</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-4 pb-3 text-center">
+                <Target className="w-5 h-5 text-green-500 mx-auto mb-1" />
+                <p className="text-sm font-medium">{activity.difficulty}</p>
+                <p className="text-xs text-gray-600">Difficulty</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Benefits */}
+          <div>
+            <h3 className="font-semibold text-gray-800 mb-2">Benefits</h3>
+            <p className="text-gray-600 text-sm">{activity.benefits}</p>
+          </div>
+
+          {/* Materials Needed */}
+          <div>
+            <h3 className="font-semibold text-gray-800 mb-2">Materials Needed</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              {activity.materials.map((material, index) => (
+                <div key={index} className="flex items-center space-x-2 text-sm">
+                  <CheckCircle className="w-4 h-4 text-green-500" />
+                  <span>{material}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Emotional Goals */}
+          <div>
+            <h3 className="font-semibold text-gray-800 mb-2">Emotional Goals</h3>
+            <div className="flex flex-wrap gap-2">
+              {activity.emotionalGoals.map((goal, index) => (
+                <Badge key={index} variant="secondary" className="text-xs bg-purple-100 text-purple-700">
+                  {goal}
+                </Badge>
+              ))}
+            </div>
+          </div>
+
+          {/* Instructions */}
+          <div>
+            <h3 className="font-semibold text-gray-800 mb-2">Step-by-Step Instructions</h3>
+            <ol className="space-y-2">
+              {activity.instructions.map((instruction, index) => (
+                <li key={index} className="flex items-start space-x-3">
+                  <span className="flex-shrink-0 w-6 h-6 bg-blue-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
+                    {index + 1}
+                  </span>
+                  <span className="text-sm text-gray-600">{instruction}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+
+          {/* Tags */}
+          <div>
+            <h3 className="font-semibold text-gray-800 mb-2">Tags</h3>
+            <div className="flex flex-wrap gap-2">
+              {activity.tags.map((tag, index) => (
+                <Badge key={index} variant="outline" className="text-xs">
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex space-x-3 pt-4 border-t">
+            <Button variant="outline" onClick={onClose} className="flex-1">
+              Close
+            </Button>
+            <Button 
+              onClick={handleScheduleActivity}
+              className="flex-1 bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600"
+            >
+              <Calendar className="w-4 h-4 mr-2" />
+              Schedule for Today
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export default ActivityCard;
