@@ -1,9 +1,15 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { useNavigate } from 'react-router-dom';
 
 const Hero_Intro: React.FC = () => {
+  const navigate = useNavigate();
+
+  const handleGetStarted = () => {
+    navigate('/app');
+  };
+
   return (
     <section className="py-20 px-6">
       <div className="max-w-6xl mx-auto text-center">
@@ -20,19 +26,13 @@ const Hero_Intro: React.FC = () => {
           Track activities across five essential pillars of canine wellness.
         </p>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+        <div className="flex justify-center mb-12">
           <Button 
+            onClick={handleGetStarted}
             size="lg" 
             className="bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600 text-lg px-8 py-4"
           >
             Start Your Dog's Journey
-          </Button>
-          <Button 
-            size="lg" 
-            variant="outline" 
-            className="text-lg px-8 py-4 border-2"
-          >
-            Learn More
           </Button>
         </div>
 
