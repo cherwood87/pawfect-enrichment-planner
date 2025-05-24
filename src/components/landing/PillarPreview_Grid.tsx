@@ -107,7 +107,7 @@ const PillarPreview_Grid: React.FC = () => {
               your dog values most, so you can focus your energy where it matters.
             </p>
             <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-purple-100 to-orange-100 rounded-full px-6 py-3">
-              <span className="text-sm font-medium text-gray-700">🧠 Take the quiz → Get custom plan → Track progress → Happy dog! 🐕</span>
+              <span className="text-sm font-medium text-gray-700"> Take the quiz → Get custom plan → Track progress → Happy dog! </span>
             </div>
           </div>
         </div>
