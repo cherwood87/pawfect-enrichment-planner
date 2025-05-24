@@ -2,7 +2,15 @@
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, Calendar, Target, Trophy, Settings } from 'lucide-react';
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Plus, Calendar, Target, Trophy, Settings, Home, Library, BookOpen } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useDog } from '@/contexts/DogContext';
 import { useActivity } from '@/contexts/ActivityContext';
 import DogSelector from '@/components/DogSelector';
@@ -17,6 +25,8 @@ const Index = () => {
   const { getStreakData, getPillarBalance } = useActivity();
   const [isActivityModalOpen, setIsActivityModalOpen] = useState(false);
   const [selectedPillar, setSelectedPillar] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   // Get user preferences from current dog's quiz results
   const userPreferences = currentDog?.quizResults?.ranking;
@@ -26,6 +36,14 @@ const Index = () => {
   const pillarBalance = currentDog ? getPillarBalance() : {};
   const activeDays = streakData?.weeklyProgress.filter(d => d.completed).length || 0;
   const totalActivitiesToday = Object.values(pillarBalance).reduce((sum, count) => sum + count, 0);
+
+  const handleNavigation = (path: string) => {
+    navigate(path);
+  };
+
+  const isCurrentPage = (path: string) => {
+    return location.pathname === path;
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-orange-50">
@@ -42,9 +60,40 @@ const Index = () => {
             </div>
             <div className="flex items-center space-x-2">
               <DogSelector />
-              <Button variant="ghost" size="sm">
-                <Settings className="w-5 h-5" />
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm">
+                    <Settings className="w-5 h-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuItem 
+                    onClick={() => handleNavigation('/app')}
+                    className={isCurrentPage('/app') ? 'bg-blue-50 text-blue-700' : ''}
+                  >
+                    <Home className="mr-2 h-4 w-4" />
+                    <span>Dashboard</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={() => handleNavigation('/activity-library')}
+                    className={isCurrentPage('/activity-library') ? 'bg-blue-50 text-blue-700' : ''}
+                  >
+                    <Library className="mr-2 h-4 w-4" />
+                    <span>Activity Library</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem disabled>
+                    <BookOpen className="mr-2 h-4 w-4" />
+                    <span>Resource Hub</span>
+                    <span className="ml-auto text-xs text-gray-400">Coming Soon</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem disabled>
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Account Settings</span>
+                    <span className="ml-auto text-xs text-gray-400">Coming Soon</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </div>
