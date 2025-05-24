@@ -4,22 +4,30 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { Heart, Edit, Brain, Trophy } from 'lucide-react';
+import { Heart, Edit, Brain, Trophy, Settings } from 'lucide-react';
 import { QuizResults } from '@/types/quiz';
+import { useDog } from '@/contexts/DogContext';
 import DogProfileQuiz from './DogProfileQuiz';
 import QuizResultsComponent from './QuizResults';
+import EditDogForm from './EditDogForm';
 
 const DogProfile = () => {
+  const { currentDog, updateDog } = useDog();
   const [showQuiz, setShowQuiz] = useState(false);
   const [showResults, setShowResults] = useState(false);
-  const [quizResults, setQuizResults] = useState<QuizResults | null>(null);
-  const [hasCompletedQuiz, setHasCompletedQuiz] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
+
+  if (!currentDog) {
+    return null;
+  }
 
   const handleQuizComplete = (results: QuizResults) => {
-    setQuizResults(results);
+    updateDog({
+      ...currentDog,
+      quizResults: results
+    });
     setShowQuiz(false);
     setShowResults(true);
-    setHasCompletedQuiz(true);
   };
 
   const handleRetakeQuiz = () => {
@@ -31,7 +39,8 @@ const DogProfile = () => {
     setShowResults(false);
   };
 
-  const topPillars = quizResults?.ranking.slice(0, 2);
+  const topPillars = currentDog.quizResults?.ranking.slice(0, 2);
+  const hasCompletedQuiz = !!currentDog.quizResults;
 
   return (
     <>
@@ -40,7 +49,15 @@ const DogProfile = () => {
           <div className="flex items-center space-x-4">
             <div className="relative">
               <div className="w-16 h-16 bg-gradient-to-br from-orange-200 to-orange-300 rounded-full flex items-center justify-center">
-                <span className="text-2xl">🐕</span>
+                {currentDog.image ? (
+                  <img 
+                    src={currentDog.image} 
+                    alt={currentDog.name} 
+                    className="w-16 h-16 rounded-full object-cover"
+                  />
+                ) : (
+                  <span className="text-2xl">🐕</span>
+                )}
               </div>
               <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
                 <Heart className="w-3 h-3 text-white fill-current" />
@@ -49,16 +66,27 @@ const DogProfile = () => {
             
             <div className="flex-1">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-bold text-gray-800">Buddy</h2>
-                <Edit className="w-4 h-4 text-gray-400" />
+                <h2 className="text-lg font-bold text-gray-800">{currentDog.name}</h2>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setShowEditForm(true)}
+                >
+                  <Edit className="w-4 h-4 text-gray-400" />
+                </Button>
               </div>
-              <p className="text-sm text-gray-600">Golden Retriever • 3 years</p>
-              <div className="flex space-x-2 mt-2">
+              <p className="text-sm text-gray-600">{currentDog.breed} • {currentDog.age} years</p>
+              <div className="flex flex-wrap gap-1 mt-2">
                 <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700">Active</Badge>
                 <Badge variant="secondary" className="text-xs bg-green-100 text-green-700">Social</Badge>
-                {hasCompletedQuiz && quizResults && (
+                {hasCompletedQuiz && currentDog.quizResults && (
                   <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700">
-                    {quizResults.personality}
+                    {currentDog.quizResults.personality}
+                  </Badge>
+                )}
+                {currentDog.mobilityIssues.length > 0 && !currentDog.mobilityIssues.includes('None') && (
+                  <Badge variant="secondary" className="text-xs bg-orange-100 text-orange-700">
+                    Special Needs
                   </Badge>
                 )}
               </div>
@@ -71,7 +99,7 @@ const DogProfile = () => {
               <div className="flex items-center space-x-3">
                 <Brain className="w-5 h-5 text-purple-600" />
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-800">Discover Your Dog's Personality</p>
+                  <p className="text-sm font-medium text-gray-800">Discover {currentDog.name}'s Personality</p>
                   <p className="text-xs text-gray-600">Take our quiz for personalized recommendations</p>
                 </div>
                 <Button 
@@ -89,7 +117,7 @@ const DogProfile = () => {
               <div className="mt-4 p-3 bg-gradient-to-r from-blue-50 to-orange-50 rounded-lg">
                 <div className="flex items-center space-x-2 mb-2">
                   <Trophy className="w-4 h-4 text-orange-500" />
-                  <span className="text-sm font-medium text-gray-800">Personalized Goals</span>
+                  <span className="text-sm font-medium text-gray-800">Personalized Goals for {currentDog.name}</span>
                 </div>
                 <p className="text-sm text-gray-700 mb-2">
                   Focus on <span className="font-medium">{topPillars?.[0]?.pillar}</span> and <span className="font-medium">{topPillars?.[1]?.pillar}</span> activities
@@ -118,6 +146,7 @@ const DogProfile = () => {
       <Dialog open={showQuiz} onOpenChange={setShowQuiz}>
         <DialogContent className="p-0 max-w-lg">
           <DogProfileQuiz 
+            dogName={currentDog.name}
             onComplete={handleQuizComplete}
             onClose={() => setShowQuiz(false)}
           />
@@ -127,13 +156,23 @@ const DogProfile = () => {
       {/* Results Dialog */}
       <Dialog open={showResults} onOpenChange={setShowResults}>
         <DialogContent className="p-0 max-w-lg">
-          {quizResults && (
+          {currentDog.quizResults && (
             <QuizResultsComponent 
-              results={quizResults}
+              results={currentDog.quizResults}
               onRetakeQuiz={handleRetakeQuiz}
               onClose={handleCloseResults}
             />
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Dog Dialog */}
+      <Dialog open={showEditForm} onOpenChange={setShowEditForm}>
+        <DialogContent className="p-0 max-w-lg">
+          <EditDogForm 
+            dog={currentDog}
+            onClose={() => setShowEditForm(false)}
+          />
         </DialogContent>
       </Dialog>
     </>

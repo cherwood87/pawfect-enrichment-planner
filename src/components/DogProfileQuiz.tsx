@@ -12,11 +12,12 @@ import { analyzeQuizResults } from '@/utils/quizAnalysis';
 import QuizAnalyzing from './QuizAnalyzing';
 
 interface DogProfileQuizProps {
+  dogName: string;
   onComplete: (results: QuizResults) => void;
   onClose: () => void;
 }
 
-const DogProfileQuiz: React.FC<DogProfileQuizProps> = ({ onComplete, onClose }) => {
+const DogProfileQuiz: React.FC<DogProfileQuizProps> = ({ dogName, onComplete, onClose }) => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -60,7 +61,7 @@ const DogProfileQuiz: React.FC<DogProfileQuizProps> = ({ onComplete, onClose }) 
     <Card className="max-w-md mx-auto">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-bold text-gray-800">Dog Personality Quiz</CardTitle>
+          <CardTitle className="text-lg font-bold text-gray-800">{dogName}'s Personality Quiz</CardTitle>
           <Button variant="ghost" size="sm" onClick={onClose}>✕</Button>
         </div>
         <div className="space-y-2">

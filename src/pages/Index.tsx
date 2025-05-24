@@ -1,10 +1,10 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { Plus, Calendar, Target, Trophy, Settings } from 'lucide-react';
+import { useDog } from '@/contexts/DogContext';
+import DogSelector from '@/components/DogSelector';
 import DogProfile from '@/components/DogProfile';
 import EnrichmentPillars from '@/components/EnrichmentPillars';
 import TodaySchedule from '@/components/TodaySchedule';
@@ -12,15 +12,12 @@ import StreakTracker from '@/components/StreakTracker';
 import ActivityModal from '@/components/ActivityModal';
 
 const Index = () => {
+  const { currentDog } = useDog();
   const [isActivityModalOpen, setIsActivityModalOpen] = useState(false);
   const [selectedPillar, setSelectedPillar] = useState<string | null>(null);
-  // This would typically come from a context or state management solution
-  const [userPreferences, setUserPreferences] = useState<Array<{
-    pillar: string;
-    rank: number;
-    reason: string;
-    score: number;
-  }> | undefined>(undefined);
+
+  // Get user preferences from current dog's quiz results
+  const userPreferences = currentDog?.quizResults?.ranking;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-orange-50">
@@ -34,84 +31,92 @@ const Index = () => {
               </div>
               <h1 className="text-xl font-bold text-gray-800">PawPlan</h1>
             </div>
-            <Button variant="ghost" size="sm">
-              <Settings className="w-5 h-5" />
-            </Button>
+            <div className="flex items-center space-x-2">
+              <DogSelector />
+              <Button variant="ghost" size="sm">
+                <Settings className="w-5 h-5" />
+              </Button>
+            </div>
           </div>
         </div>
       </div>
 
       <div className="max-w-md mx-auto px-4 py-6 space-y-6">
-        {/* Dog Profile Section */}
-        <DogProfile />
+        {/* Show dog profile only if there's a current dog */}
+        {currentDog && (
+          <>
+            {/* Dog Profile Section */}
+            <DogProfile />
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-3 gap-3">
-          <Card className="text-center">
-            <CardContent className="pt-4 pb-3">
-              <div className="flex flex-col items-center space-y-1">
-                <Calendar className="w-5 h-5 text-blue-500" />
-                <span className="text-lg font-bold text-gray-800">7</span>
-                <span className="text-xs text-gray-600">Days Active</span>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="text-center">
-            <CardContent className="pt-4 pb-3">
-              <div className="flex flex-col items-center space-y-1">
-                <Target className="w-5 h-5 text-green-500" />
-                <span className="text-lg font-bold text-gray-800">85%</span>
-                <span className="text-xs text-gray-600">Goals Met</span>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="text-center">
-            <CardContent className="pt-4 pb-3">
-              <div className="flex flex-col items-center space-y-1">
-                <Trophy className="w-5 h-5 text-orange-500" />
-                <span className="text-lg font-bold text-gray-800">12</span>
-                <span className="text-xs text-gray-600">Streak</span>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+            {/* Quick Stats */}
+            <div className="grid grid-cols-3 gap-3">
+              <Card className="text-center">
+                <CardContent className="pt-4 pb-3">
+                  <div className="flex flex-col items-center space-y-1">
+                    <Calendar className="w-5 h-5 text-blue-500" />
+                    <span className="text-lg font-bold text-gray-800">7</span>
+                    <span className="text-xs text-gray-600">Days Active</span>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="text-center">
+                <CardContent className="pt-4 pb-3">
+                  <div className="flex flex-col items-center space-y-1">
+                    <Target className="w-5 h-5 text-green-500" />
+                    <span className="text-lg font-bold text-gray-800">85%</span>
+                    <span className="text-xs text-gray-600">Goals Met</span>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="text-center">
+                <CardContent className="pt-4 pb-3">
+                  <div className="flex flex-col items-center space-y-1">
+                    <Trophy className="w-5 h-5 text-orange-500" />
+                    <span className="text-lg font-bold text-gray-800">12</span>
+                    <span className="text-xs text-gray-600">Streak</span>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
 
-        {/* Today's Schedule */}
-        <TodaySchedule />
+            {/* Today's Schedule */}
+            <TodaySchedule />
 
-        {/* Enrichment Pillars */}
-        <EnrichmentPillars 
-          onPillarSelect={(pillar) => {
-            setSelectedPillar(pillar);
-            setIsActivityModalOpen(true);
-          }}
-          userPreferences={userPreferences}
-        />
+            {/* Enrichment Pillars */}
+            <EnrichmentPillars 
+              onPillarSelect={(pillar) => {
+                setSelectedPillar(pillar);
+                setIsActivityModalOpen(true);
+              }}
+              userPreferences={userPreferences}
+            />
 
-        {/* Streak Tracker */}
-        <StreakTracker />
+            {/* Streak Tracker */}
+            <StreakTracker />
 
-        {/* Quick Add Button */}
-        <div className="fixed bottom-6 right-6">
-          <Button 
-            onClick={() => setIsActivityModalOpen(true)}
-            className="w-14 h-14 rounded-full bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600 shadow-lg"
-          >
-            <Plus className="w-6 h-6 text-white" />
-          </Button>
-        </div>
+            {/* Quick Add Button */}
+            <div className="fixed bottom-6 right-6">
+              <Button 
+                onClick={() => setIsActivityModalOpen(true)}
+                className="w-14 h-14 rounded-full bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600 shadow-lg"
+              >
+                <Plus className="w-6 h-6 text-white" />
+              </Button>
+            </div>
 
-        {/* Activity Modal */}
-        <ActivityModal 
-          isOpen={isActivityModalOpen}
-          onClose={() => {
-            setIsActivityModalOpen(false);
-            setSelectedPillar(null);
-          }}
-          selectedPillar={selectedPillar}
-        />
+            {/* Activity Modal */}
+            <ActivityModal 
+              isOpen={isActivityModalOpen}
+              onClose={() => {
+                setIsActivityModalOpen(false);
+                setSelectedPillar(null);
+              }}
+              selectedPillar={selectedPillar}
+            />
+          </>
+        )}
       </div>
     </div>
   );
