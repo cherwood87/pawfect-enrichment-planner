@@ -14,6 +14,13 @@ import ActivityModal from '@/components/ActivityModal';
 const Index = () => {
   const [isActivityModalOpen, setIsActivityModalOpen] = useState(false);
   const [selectedPillar, setSelectedPillar] = useState<string | null>(null);
+  // This would typically come from a context or state management solution
+  const [userPreferences, setUserPreferences] = useState<Array<{
+    pillar: string;
+    rank: number;
+    reason: string;
+    score: number;
+  }> | undefined>(undefined);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-orange-50">
@@ -75,10 +82,13 @@ const Index = () => {
         <TodaySchedule />
 
         {/* Enrichment Pillars */}
-        <EnrichmentPillars onPillarSelect={(pillar) => {
-          setSelectedPillar(pillar);
-          setIsActivityModalOpen(true);
-        }} />
+        <EnrichmentPillars 
+          onPillarSelect={(pillar) => {
+            setSelectedPillar(pillar);
+            setIsActivityModalOpen(true);
+          }}
+          userPreferences={userPreferences}
+        />
 
         {/* Streak Tracker */}
         <StreakTracker />
