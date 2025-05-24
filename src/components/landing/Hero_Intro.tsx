@@ -15,21 +15,16 @@ const Hero_Intro: React.FC = () => {
       <div className="max-w-6xl mx-auto text-center">
         {/* New Enhanced Header */}
         <div className="mb-12 animate-fade-in">
-          <div className="inline-flex items-center justify-center mb-6 p-6 bg-gradient-to-r from-blue-500 via-purple-500 to-orange-500 rounded-2xl shadow-2xl transform hover:scale-105 transition-all duration-300">
+          <div className="w-full mb-6 p-8 bg-gradient-to-r from-blue-500 via-purple-500 to-orange-500 rounded-2xl shadow-2xl transform hover:scale-105 transition-all duration-300">
             <div className="text-center">
-              <div className="flex items-center justify-center space-x-3 mb-2">
-                <span className="text-4xl animate-bounce">🐕</span>
-                <span className="text-4xl animate-bounce delay-100">🎯</span>
-                <span className="text-4xl animate-bounce delay-200">🏆</span>
-              </div>
-              <h1 className="text-2xl md:text-4xl font-bold text-white drop-shadow-lg">
+              <h1 className="text-3xl md:text-5xl font-bold text-white drop-shadow-lg">
                 Beyond Busy Dog
               </h1>
-              <h2 className="text-xl md:text-3xl font-semibold text-yellow-200 drop-shadow-md">
+              <h2 className="text-2xl md:text-4xl font-semibold text-yellow-200 drop-shadow-md">
                 Enrichment Planner
               </h2>
-              <div className="mt-3 flex justify-center">
-                <div className="h-1 w-24 bg-gradient-to-r from-yellow-300 to-orange-300 rounded-full"></div>
+              <div className="mt-4 flex justify-center">
+                <div className="h-1 w-32 bg-gradient-to-r from-yellow-300 to-orange-300 rounded-full"></div>
               </div>
             </div>
           </div>
