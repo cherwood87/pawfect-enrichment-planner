@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,6 +9,7 @@ import { X } from 'lucide-react';
 import { useDog } from '@/contexts/DogContext';
 import { MOBILITY_ISSUES, POPULAR_BREEDS } from '@/types/dog';
 import ImageUpload from './ImageUpload';
+import { useNavigate } from 'react-router-dom';
 
 interface AddDogFormProps {
   onClose: () => void;
@@ -17,6 +17,7 @@ interface AddDogFormProps {
 
 const AddDogForm: React.FC<AddDogFormProps> = ({ onClose }) => {
   const { addDog } = useDog();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
     age: '',
@@ -44,6 +45,8 @@ const AddDogForm: React.FC<AddDogFormProps> = ({ onClose }) => {
     });
     
     onClose();
+    // Redirect to the Dog Profile Quiz page after successful submission
+    navigate('/dog-profile-quiz');
   };
 
   const handleMobilityIssueChange = (issue: string, checked: boolean) => {

@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { DogProvider } from "@/contexts/DogContext";
 import Index from "./pages/Index";
 import Landing from "./pages/Landing";
+import DogProfileQuizPage from "./pages/DogProfileQuiz";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -20,6 +21,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/app" element={<Index />} />
+            <Route path="/dog-profile-quiz" element={<DogProfileQuizPage />} />
             <Route path="/" element={<Landing />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
