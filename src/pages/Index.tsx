@@ -23,13 +23,14 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-orange-50">
       {/* Header */}
       <div className="bg-white shadow-sm border-b border-blue-100">
-        <div className="max-w-md mx-auto px-4 py-3">
+        <div className="max-w-screen-lg mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-orange-500 rounded-full flex items-center justify-center">
                 <span className="text-white font-bold text-sm">🐕</span>
               </div>
-              <h1 className="text-xl font-bold text-gray-800">Beyond Busy Dog Enrichment Planner</h1>
+              <h1 className="text-xl font-bold text-gray-800 hidden sm:block">Beyond Busy Dog Enrichment Planner</h1>
+              <h1 className="text-lg font-bold text-gray-800 sm:hidden">Dog Enrichment</h1>
             </div>
             <div className="flex items-center space-x-2">
               <DogSelector />
@@ -41,7 +42,7 @@ const Index = () => {
         </div>
       </div>
 
-      <div className="max-w-md mx-auto px-4 py-6 space-y-6">
+      <div className="max-w-screen-lg mx-auto px-4 py-6 space-y-6">
         {/* Show dog profile only if there's a current dog */}
         {currentDog && (
           <>

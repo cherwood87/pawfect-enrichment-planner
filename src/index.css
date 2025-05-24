@@ -54,8 +54,13 @@
     @apply border-border;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     @apply bg-gradient-to-br from-blue-50 to-orange-50 text-foreground min-h-screen;
+    overflow-y: auto;
   }
 }
 
@@ -78,5 +83,27 @@
   
   .pillar-instinctual {
     @apply bg-gradient-to-br from-orange-100 to-orange-200 border-orange-300;
+  }
+
+  .horizontal-scroll {
+    @apply overflow-x-auto;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .horizontal-scroll::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  .horizontal-scroll::-webkit-scrollbar-track {
+    @apply bg-gray-100 rounded-full;
+  }
+
+  .horizontal-scroll::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 rounded-full;
+  }
+
+  .horizontal-scroll::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-400;
   }
 }

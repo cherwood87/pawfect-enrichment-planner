@@ -54,7 +54,7 @@ const PillarPreview_Grid: React.FC = () => {
 
   return (
     <section className="py-20 px-6 bg-gray-50">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-screen-lg mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold text-gray-800 mb-4">
             The Five Pillars of Dog Enrichment
@@ -65,7 +65,43 @@ const PillarPreview_Grid: React.FC = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Mobile: Horizontal scroll, Desktop: Grid */}
+        <div className="block md:hidden">
+          <div className="horizontal-scroll flex space-x-4 pb-4">
+            {pillars.map((pillar) => {
+              const IconComponent = pillar.icon;
+              return (
+                <Card key={pillar.id} className={`${pillar.bgClass} border-2 hover:shadow-xl transition-all duration-300 min-w-[280px] flex-shrink-0`}>
+                  <CardHeader>
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm`}>
+                        <IconComponent className={`w-6 h-6 text-${pillar.color}-600`} />
+                      </div>
+                      <CardTitle className="text-lg text-gray-800">{pillar.title}</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-700 mb-4">{pillar.description}</p>
+                    <div className="space-y-2">
+                      <h4 className="font-semibold text-gray-800 text-sm">Examples:</h4>
+                      <ul className="space-y-1">
+                        {pillar.examples.map((example, idx) => (
+                          <li key={idx} className="text-sm text-gray-600 flex items-center">
+                            <div className={`w-1.5 h-1.5 bg-${pillar.color}-500 rounded-full mr-2`}></div>
+                            {example}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Desktop: Grid layout */}
+        <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {pillars.map((pillar, index) => {
             const IconComponent = pillar.icon;
             return (
@@ -98,7 +134,7 @@ const PillarPreview_Grid: React.FC = () => {
         </div>
 
         <div className="mt-16 text-center">
-          <div className="bg-white rounded-2xl p-8 shadow-lg">
+          <div className="bg-white rounded-2xl p-8 shadow-lg max-w-4xl mx-auto">
             <h3 className="text-2xl font-bold text-gray-800 mb-4">
               Personalized Just for Your Dog
             </h3>
