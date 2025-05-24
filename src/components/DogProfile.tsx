@@ -1,31 +1,20 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Heart, Edit, Brain, Trophy } from 'lucide-react';
+import { QuizResults } from '@/types/quiz';
 import DogProfileQuiz from './DogProfileQuiz';
 import QuizResults from './QuizResults';
-
-interface QuizResultsData {
-  ranking: Array<{
-    pillar: string;
-    rank: number;
-    reason: string;
-    score: number;
-  }>;
-  personality: string;
-  recommendations: string[];
-}
 
 const DogProfile = () => {
   const [showQuiz, setShowQuiz] = useState(false);
   const [showResults, setShowResults] = useState(false);
-  const [quizResults, setQuizResults] = useState<QuizResultsData | null>(null);
+  const [quizResults, setQuizResults] = useState<QuizResults | null>(null);
   const [hasCompletedQuiz, setHasCompletedQuiz] = useState(false);
 
-  const handleQuizComplete = (results: QuizResultsData) => {
+  const handleQuizComplete = (results: QuizResults) => {
     setQuizResults(results);
     setShowQuiz(false);
     setShowResults(true);

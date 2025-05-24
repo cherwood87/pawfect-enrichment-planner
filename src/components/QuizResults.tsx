@@ -1,20 +1,9 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Brain, Zap, Users, TreePine, Target, Trophy, RefreshCw } from 'lucide-react';
-
-interface QuizResults {
-  ranking: Array<{
-    pillar: string;
-    rank: number;
-    reason: string;
-    score: number;
-  }>;
-  personality: string;
-  recommendations: string[];
-}
+import { QuizResults } from '@/types/quiz';
 
 interface QuizResultsProps {
   results: QuizResults;
@@ -22,7 +11,7 @@ interface QuizResultsProps {
   onClose: () => void;
 }
 
-const QuizResults: React.FC<QuizResultsProps> = ({ results, onRetakeQuiz, onClose }) => {
+const QuizResultsComponent: React.FC<QuizResultsProps> = ({ results, onRetakeQuiz, onClose }) => {
   const pillarIcons = {
     mental: Brain,
     physical: Zap,
@@ -136,4 +125,4 @@ const QuizResults: React.FC<QuizResultsProps> = ({ results, onRetakeQuiz, onClos
   );
 };
 
-export default QuizResults;
+export default QuizResultsComponent;
