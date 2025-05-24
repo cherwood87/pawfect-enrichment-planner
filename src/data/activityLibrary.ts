@@ -1,5 +1,5 @@
-
 import { ActivityLibraryItem } from '@/types/activity';
+import { DiscoveredActivity } from '@/types/discovery';
 
 export const activityLibrary: ActivityLibraryItem[] = [
   // Mental Activities
@@ -288,6 +288,37 @@ export const getActivitiesByDifficulty = (difficulty: string) => {
 export const searchActivities = (query: string) => {
   const lowercaseQuery = query.toLowerCase();
   return activityLibrary.filter(activity => 
+    activity.title.toLowerCase().includes(lowercaseQuery) ||
+    activity.tags.some(tag => tag.toLowerCase().includes(lowercaseQuery)) ||
+    activity.benefits.toLowerCase().includes(lowercaseQuery)
+  );
+};
+
+export const getCombinedActivities = (
+  discoveredActivities: DiscoveredActivity[] = []
+): (ActivityLibraryItem | DiscoveredActivity)[] => {
+  return [...activityLibrary, ...discoveredActivities];
+};
+
+export const getDiscoveredActivities = (dogId?: string): DiscoveredActivity[] => {
+  if (!dogId) return [];
+  
+  const saved = localStorage.getItem(`discoveredActivities-${dogId}`);
+  return saved ? JSON.parse(saved) : [];
+};
+
+export const saveDiscoveredActivities = (dogId: string, activities: DiscoveredActivity[]) => {
+  localStorage.setItem(`discoveredActivities-${dogId}`, JSON.stringify(activities));
+};
+
+export const searchCombinedActivities = (
+  query: string,
+  discoveredActivities: DiscoveredActivity[] = []
+): (ActivityLibraryItem | DiscoveredActivity)[] => {
+  const combined = getCombinedActivities(discoveredActivities);
+  const lowercaseQuery = query.toLowerCase();
+  
+  return combined.filter(activity => 
     activity.title.toLowerCase().includes(lowercaseQuery) ||
     activity.tags.some(tag => tag.toLowerCase().includes(lowercaseQuery)) ||
     activity.benefits.toLowerCase().includes(lowercaseQuery)

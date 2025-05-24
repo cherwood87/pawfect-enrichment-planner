@@ -5,16 +5,20 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Brain, Zap, Users, TreePine, Target, Clock, Star, Search } from 'lucide-react';
-import { activityLibrary, searchActivities } from '@/data/activityLibrary';
+import { Brain, Zap, Users, TreePine, Target, Clock, Star, Search, Plus, Loader2, Sparkles } from 'lucide-react';
+import { searchCombinedActivities } from '@/data/activityLibrary';
 import { ActivityLibraryItem } from '@/types/activity';
+import { DiscoveredActivity } from '@/types/discovery';
+import { useActivity } from '@/contexts/ActivityContext';
 import ActivityCard from '@/components/ActivityCard';
+import DiscoveryReview from '@/components/DiscoveryReview';
 
 const ActivityLibrary = () => {
+  const { getCombinedActivityLibrary, discoveredActivities, discoverNewActivities, isDiscovering } = useActivity();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPillar, setSelectedPillar] = useState<string>('all');
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all');
-  const [selectedActivity, setSelectedActivity] = useState<ActivityLibraryItem | null>(null);
+  const [selectedActivity, setSelectedActivity] = useState<ActivityLibraryItem | DiscoveredActivity | null>(null);
 
   const pillars = [
     { id: 'all', name: 'All Pillars', icon: Search, color: 'gray' },
@@ -32,8 +36,10 @@ const ActivityLibrary = () => {
     { value: 'Hard', label: 'Hard' }
   ];
 
+  const combinedActivities = getCombinedActivityLibrary();
+
   const filteredActivities = React.useMemo(() => {
-    let activities = searchQuery ? searchActivities(searchQuery) : activityLibrary;
+    let activities = searchQuery ? searchCombinedActivities(searchQuery, discoveredActivities) : combinedActivities;
     
     if (selectedPillar !== 'all') {
       activities = activities.filter(activity => activity.pillar === selectedPillar);
@@ -44,7 +50,7 @@ const ActivityLibrary = () => {
     }
     
     return activities;
-  }, [searchQuery, selectedPillar, selectedDifficulty]);
+  }, [searchQuery, selectedPillar, selectedDifficulty, combinedActivities, discoveredActivities]);
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
@@ -66,12 +72,44 @@ const ActivityLibrary = () => {
     return colors[pillar as keyof typeof colors] || 'gray';
   };
 
+  const isDiscoveredActivity = (activity: ActivityLibraryItem | DiscoveredActivity): activity is DiscoveredActivity => {
+    return 'source' in activity && activity.source === 'discovered';
+  };
+
+  const handleDiscoverMore = async () => {
+    await discoverNewActivities();
+  };
+
   return (
     <div className="space-y-6">
+      {/* Discovery Review Section */}
+      <DiscoveryReview activities={discoveredActivities} />
+
       <Card>
         <CardHeader>
-          <CardTitle className="text-xl font-bold text-gray-800">Activity Library</CardTitle>
-          <p className="text-gray-600">Discover enriching activities for your dog across all five pillars of wellness</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-xl font-bold text-gray-800">Activity Library</CardTitle>
+              <p className="text-gray-600">Discover enriching activities for your dog across all five pillars of wellness</p>
+            </div>
+            <Button 
+              onClick={handleDiscoverMore}
+              disabled={isDiscovering}
+              className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+            >
+              {isDiscovering ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Discovering...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Discover More
+                </>
+              )}
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Search and Filters */}
@@ -117,8 +155,20 @@ const ActivityLibrary = () => {
           </div>
 
           {/* Results count */}
-          <div className="text-sm text-gray-600">
-            {filteredActivities.length} activit{filteredActivities.length === 1 ? 'y' : 'ies'} found
+          <div className="flex items-center justify-between text-sm text-gray-600">
+            <span>
+              {filteredActivities.length} activit{filteredActivities.length === 1 ? 'y' : 'ies'} found
+            </span>
+            <div className="flex items-center space-x-4">
+              <span className="flex items-center space-x-1">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <span>Curated ({combinedActivities.filter(a => !isDiscoveredActivity(a)).length})</span>
+              </span>
+              <span className="flex items-center space-x-1">
+                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                <span>Discovered ({combinedActivities.filter(a => isDiscoveredActivity(a)).length})</span>
+              </span>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -128,6 +178,7 @@ const ActivityLibrary = () => {
         {filteredActivities.map((activity) => {
           const pillarColor = getPillarColor(activity.pillar);
           const PillarIcon = pillars.find(p => p.id === activity.pillar)?.icon || Brain;
+          const isDiscovered = isDiscoveredActivity(activity);
           
           return (
             <Card key={activity.id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => setSelectedActivity(activity)}>
@@ -140,6 +191,12 @@ const ActivityLibrary = () => {
                     <Badge variant="secondary" className={`text-xs ${getDifficultyColor(activity.difficulty)}`}>
                       {activity.difficulty}
                     </Badge>
+                    {isDiscovered && (
+                      <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700">
+                        <Sparkles className="w-3 h-3 mr-1" />
+                        Discovered
+                      </Badge>
+                    )}
                   </div>
                   <Badge variant="secondary" className="text-xs">
                     {activity.ageGroup}
@@ -157,6 +214,13 @@ const ActivityLibrary = () => {
                     <Star className="w-4 h-4" />
                     <span>{activity.energyLevel}</span>
                   </div>
+                  {isDiscovered && activity.qualityScore && (
+                    <div className="flex items-center space-x-1">
+                      <span className="text-xs text-purple-600">
+                        {Math.round(activity.qualityScore * 100)}% quality
+                      </span>
+                    </div>
+                  )}
                 </div>
                 
                 <p className="text-sm text-gray-600 line-clamp-2">{activity.benefits}</p>

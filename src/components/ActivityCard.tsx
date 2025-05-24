@@ -1,15 +1,15 @@
-
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { Clock, Star, Calendar, CheckCircle, Target } from 'lucide-react';
+import { Clock, Star, Calendar, CheckCircle, Target, ExternalLink, Sparkles } from 'lucide-react';
 import { ActivityLibraryItem } from '@/types/activity';
+import { DiscoveredActivity } from '@/types/discovery';
 import { useActivity } from '@/contexts/ActivityContext';
 
 interface ActivityCardProps {
-  activity: ActivityLibraryItem;
+  activity: ActivityLibraryItem | DiscoveredActivity;
   isOpen: boolean;
   onClose: () => void;
 }
@@ -26,6 +26,10 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, isOpen, onClose }
     }
   };
 
+  const isDiscoveredActivity = (activity: ActivityLibraryItem | DiscoveredActivity): activity is DiscoveredActivity => {
+    return 'source' in activity && activity.source === 'discovered';
+  };
+
   const handleScheduleActivity = () => {
     const now = new Date();
     const scheduledTime = `${now.getHours() + 1}:00 ${now.getHours() + 1 >= 12 ? 'PM' : 'AM'}`;
@@ -40,6 +44,8 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, isOpen, onClose }
 
     onClose();
   };
+
+  const isDiscovered = isDiscoveredActivity(activity);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -60,7 +66,26 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, isOpen, onClose }
                 <Badge variant="secondary" className="text-xs">
                   {activity.ageGroup}
                 </Badge>
+                {isDiscovered && (
+                  <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700">
+                    <Sparkles className="w-3 h-3 mr-1" />
+                    Discovered
+                  </Badge>
+                )}
               </div>
+              {isDiscovered && activity.sourceUrl && (
+                <div className="mb-3">
+                  <a 
+                    href={activity.sourceUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-sm text-blue-600 hover:text-blue-800 flex items-center space-x-1"
+                  >
+                    <ExternalLink className="w-3 h-3" />
+                    <span>View original source</span>
+                  </a>
+                </div>
+              )}
             </div>
           </div>
         </DialogHeader>
@@ -87,6 +112,11 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, isOpen, onClose }
                 <Target className="w-5 h-5 text-green-500 mx-auto mb-1" />
                 <p className="text-sm font-medium">{activity.difficulty}</p>
                 <p className="text-xs text-gray-600">Difficulty</p>
+                {isDiscovered && activity.qualityScore && (
+                  <p className="text-xs text-purple-600 mt-1">
+                    {Math.round(activity.qualityScore * 100)}% quality
+                  </p>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -148,6 +178,20 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, isOpen, onClose }
               ))}
             </div>
           </div>
+
+          {/* Discovery Info */}
+          {isDiscovered && (
+            <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+              <h3 className="font-semibold text-purple-800 mb-2 flex items-center">
+                <Sparkles className="w-4 h-4 mr-2" />
+                Auto-Discovered Activity
+              </h3>
+              <p className="text-sm text-purple-600">
+                This activity was automatically discovered from trusted dog training sources and verified for quality.
+                Discovered on {new Date(activity.discoveredAt).toLocaleDateString()}.
+              </p>
+            </div>
+          )}
 
           {/* Action Buttons */}
           <div className="flex space-x-3 pt-4 border-t">
