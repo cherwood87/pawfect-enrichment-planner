@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { DogProvider } from "@/contexts/DogContext";
 import { ActivityProvider } from "@/contexts/ActivityContext";
+import { ChatProvider } from "@/contexts/ChatContext";
 import Index from "./pages/Index";
 import Landing from "./pages/Landing";
 import DogProfileQuizPage from "./pages/DogProfileQuiz";
@@ -19,18 +20,20 @@ const App = () => (
     <TooltipProvider>
       <DogProvider>
         <ActivityProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/app" element={<Index />} />
-              <Route path="/activity-library" element={<ActivityLibraryPage />} />
-              <Route path="/dog-profile-quiz" element={<DogProfileQuizPage />} />
-              <Route path="/" element={<Landing />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
+          <ChatProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/app" element={<Index />} />
+                <Route path="/activity-library" element={<ActivityLibraryPage />} />
+                <Route path="/dog-profile-quiz" element={<DogProfileQuizPage />} />
+                <Route path="/" element={<Landing />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </ChatProvider>
         </ActivityProvider>
       </DogProvider>
     </TooltipProvider>

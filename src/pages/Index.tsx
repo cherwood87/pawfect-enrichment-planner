@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Plus, Calendar, Target, Trophy, Settings, Home, Library } from 'lucide-react';
+import { Plus, Calendar, Target, Trophy, Settings, Home, Library, MessageCircle } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useDog } from '@/contexts/DogContext';
 import { useActivity } from '@/contexts/ActivityContext';
@@ -18,11 +19,14 @@ import EnrichmentPillars from '@/components/EnrichmentPillars';
 import TodaySchedule from '@/components/TodaySchedule';
 import StreakTracker from '@/components/StreakTracker';
 import ActivityModal from '@/components/ActivityModal';
+import ChatModal from '@/components/chat/ChatModal';
+import CoachButton from '@/components/chat/CoachButton';
 
 const Index = () => {
   const { currentDog } = useDog();
   const { getStreakData, getPillarBalance } = useActivity();
   const [isActivityModalOpen, setIsActivityModalOpen] = useState(false);
+  const [isChatModalOpen, setIsChatModalOpen] = useState(false);
   const [selectedPillar, setSelectedPillar] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
@@ -79,6 +83,11 @@ const Index = () => {
                   >
                     <Library className="mr-2 h-4 w-4" />
                     <span>Activity Library</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => setIsChatModalOpen(true)}>
+                    <MessageCircle className="mr-2 h-4 w-4" />
+                    <span>Enrichment Coach</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem disabled>
@@ -148,8 +157,9 @@ const Index = () => {
             {/* Streak Tracker */}
             <StreakTracker />
 
-            {/* Quick Add Button */}
-            <div className="fixed bottom-6 right-6">
+            {/* Floating Buttons */}
+            <div className="fixed bottom-6 right-6 flex flex-col space-y-3">
+              <CoachButton onClick={() => setIsChatModalOpen(true)} />
               <Button 
                 onClick={() => setIsActivityModalOpen(true)}
                 className="w-14 h-14 rounded-full bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600 shadow-lg"
@@ -158,7 +168,7 @@ const Index = () => {
               </Button>
             </div>
 
-            {/* Activity Modal */}
+            {/* Modals */}
             <ActivityModal 
               isOpen={isActivityModalOpen}
               onClose={() => {
@@ -166,6 +176,11 @@ const Index = () => {
                 setSelectedPillar(null);
               }}
               selectedPillar={selectedPillar}
+            />
+
+            <ChatModal 
+              isOpen={isChatModalOpen}
+              onClose={() => setIsChatModalOpen(false)}
             />
           </>
         )}
