@@ -6,7 +6,6 @@ import { useToast } from '@/hooks/use-toast';
 
 export const useResourceHub = () => {
   const [resources, setResources] = useState<EducationalArticle[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<ResourceCategory | 'all'>('all');
   const [isDiscovering, setIsDiscovering] = useState(false);
   const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(new Set());
@@ -52,7 +51,7 @@ export const useResourceHub = () => {
     setIsDiscovering(true);
     try {
       const newResources = await ResourceDiscoveryService.discoverNewResources(resources);
-      const updatedResources = [...resources, ...newResources];
+      const updatedResources = [...newResources, ...resources]; // Put new content first
       setResources(updatedResources);
       saveResources(updatedResources);
       
@@ -72,29 +71,21 @@ export const useResourceHub = () => {
   };
 
   const searchResources = async () => {
-    if (!searchQuery.trim()) return;
-    
+    // For now, just trigger discovery for the selected category
     setIsDiscovering(true);
     try {
-      const searchResults = await ResourceDiscoveryService.searchResourcesWithFilters(
-        searchQuery,
-        selectedCategory === 'all' ? undefined : selectedCategory
+      const searchResults = await ResourceDiscoveryService.discoverNewResources(
+        resources,
+        { dailyLimit: 5 } // Smaller limit for search
       );
       
-      // Add search results to existing resources
-      const updatedResources = [...resources];
-      searchResults.forEach(result => {
-        if (!updatedResources.some(r => r.id === result.id)) {
-          updatedResources.push(result);
-        }
-      });
-      
+      const updatedResources = [...searchResults, ...resources];
       setResources(updatedResources);
       saveResources(updatedResources);
       
       toast({
         title: "Search Complete",
-        description: `Found ${searchResults.length} resources for "${searchQuery}".`,
+        description: `Found ${searchResults.length} new resources.`,
       });
     } catch (error) {
       toast({
@@ -129,18 +120,11 @@ export const useResourceHub = () => {
 
   const filteredResources = resources.filter(resource => {
     const categoryMatch = selectedCategory === 'all' || resource.category === selectedCategory;
-    const searchMatch = !searchQuery || 
-      resource.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      resource.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      resource.topics.some(topic => topic.toLowerCase().includes(searchQuery.toLowerCase()));
-    
-    return categoryMatch && searchMatch;
+    return categoryMatch;
   });
 
   return {
     resources: filteredResources,
-    searchQuery,
-    setSearchQuery,
     selectedCategory,
     setSelectedCategory,
     isDiscovering,

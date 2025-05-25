@@ -1,6 +1,6 @@
 
 import { EducationalArticle, ResourceCategory, ResourceDiscoveryConfig } from '@/types/resource';
-import { ResourceScrapingService } from './ResourceScrapingService';
+import { RealWebScrapingService } from './RealWebScrapingService';
 
 export class ResourceDiscoveryService {
   private static readonly DEFAULT_CONFIG: ResourceDiscoveryConfig = {
@@ -17,7 +17,7 @@ export class ResourceDiscoveryService {
   ): Promise<EducationalArticle[]> {
     const fullConfig = { ...this.DEFAULT_CONFIG, ...config };
     
-    console.log('Starting resource discovery with config:', fullConfig);
+    console.log('Starting real content discovery...');
     
     const categories: ResourceCategory[] = ['science', 'diy-projects', 'breed-specific', 'product-reviews', 'training-tips'];
     const newResources: EducationalArticle[] = [];
@@ -26,13 +26,14 @@ export class ResourceDiscoveryService {
       if (newResources.length >= fullConfig.dailyLimit) break;
       
       try {
-        const categoryResources = await ResourceScrapingService.discoverResourcesByCategory(category);
+        console.log(`Scraping real content for category: ${category}`);
+        const categoryResources = await RealWebScrapingService.scrapeRealContent(category);
         
-        // Filter out duplicates and low-quality content
+        // Filter out duplicates based on URL and title
         const filteredResources = categoryResources.filter(resource => {
           const isDuplicate = existingResources.some(existing => 
-            existing.title.toLowerCase() === resource.title.toLowerCase() ||
-            existing.sourceUrl === resource.sourceUrl
+            existing.sourceUrl === resource.sourceUrl ||
+            existing.title.toLowerCase() === resource.title.toLowerCase()
           );
           
           const meetsQualityThreshold = resource.credibilityScore >= fullConfig.minCredibilityScore;
@@ -40,14 +41,14 @@ export class ResourceDiscoveryService {
           return !isDuplicate && meetsQualityThreshold;
         });
         
-        newResources.push(...filteredResources.slice(0, 2)); // Limit per category
+        newResources.push(...filteredResources.slice(0, 2));
         
       } catch (error) {
         console.error(`Failed to discover resources for category ${category}:`, error);
       }
     }
     
-    console.log(`Discovered ${newResources.length} new resources`);
+    console.log(`Discovered ${newResources.length} real resources`);
     return newResources.slice(0, fullConfig.dailyLimit);
   }
 
@@ -56,12 +57,21 @@ export class ResourceDiscoveryService {
     category?: ResourceCategory,
     minCredibilityScore: number = 6
   ): Promise<EducationalArticle[]> {
-    const results = await ResourceScrapingService.searchResources(query);
+    console.log(`Searching for: ${query} in category: ${category || 'all'}`);
+    
+    // For search, we'll use the category-specific scraping
+    const targetCategory = category || 'science';
+    const results = await RealWebScrapingService.scrapeRealContent(targetCategory);
     
     return results.filter(resource => {
       const categoryMatch = !category || resource.category === category;
       const qualityMatch = resource.credibilityScore >= minCredibilityScore;
-      return categoryMatch && qualityMatch;
+      const queryMatch = !query || 
+        resource.title.toLowerCase().includes(query.toLowerCase()) ||
+        resource.excerpt.toLowerCase().includes(query.toLowerCase()) ||
+        resource.topics.some(topic => topic.toLowerCase().includes(query.toLowerCase()));
+      
+      return categoryMatch && qualityMatch && queryMatch;
     });
   }
 
