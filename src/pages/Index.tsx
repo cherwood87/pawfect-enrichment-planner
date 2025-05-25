@@ -8,7 +8,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Plus, Calendar, Target, Trophy, Settings, Home, Library, BookOpen } from 'lucide-react';
+import { Plus, Calendar, Target, Trophy, Settings, Home, Library } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useDog } from '@/contexts/DogContext';
 import { useActivity } from '@/contexts/ActivityContext';
@@ -79,13 +79,6 @@ const Index = () => {
                   >
                     <Library className="mr-2 h-4 w-4" />
                     <span>Activity Library</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem 
-                    onClick={() => handleNavigation('/resource-hub')}
-                    className={isCurrentPage('/resource-hub') ? 'bg-blue-50 text-blue-700' : ''}
-                  >
-                    <BookOpen className="mr-2 h-4 w-4" />
-                    <span>Resource Hub</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem disabled>

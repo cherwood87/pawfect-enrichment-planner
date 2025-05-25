@@ -10,7 +10,6 @@ import Index from "./pages/Index";
 import Landing from "./pages/Landing";
 import DogProfileQuizPage from "./pages/DogProfileQuiz";
 import ActivityLibraryPage from "./pages/ActivityLibraryPage";
-import ResourceHubPage from "./pages/ResourceHubPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,7 +25,6 @@ const App = () => (
             <Routes>
               <Route path="/app" element={<Index />} />
               <Route path="/activity-library" element={<ActivityLibraryPage />} />
-              <Route path="/resource-hub" element={<ResourceHubPage />} />
               <Route path="/dog-profile-quiz" element={<DogProfileQuizPage />} />
               <Route path="/" element={<Landing />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
