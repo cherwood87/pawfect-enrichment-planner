@@ -1,4 +1,3 @@
-
 import FirecrawlApp from '@mendable/firecrawl-js';
 import { EducationalArticle, ResourceCategory } from '@/types/resource';
 
@@ -64,8 +63,8 @@ export class RealWebScrapingService {
             excludeTags: ['nav', 'footer', 'aside', 'script']
           });
 
-          if (result.success && result.data) {
-            const article = this.parseScrapedContent(result.data, category, url);
+          if (result.success && result.markdown) {
+            const article = this.parseScrapedContent(result, category, url);
             if (article) {
               articles.push(article);
             }
@@ -82,11 +81,11 @@ export class RealWebScrapingService {
     }
   }
 
-  private static parseScrapedContent(data: any, category: ResourceCategory, sourceUrl: string): EducationalArticle | null {
+  private static parseScrapedContent(result: any, category: ResourceCategory, sourceUrl: string): EducationalArticle | null {
     try {
-      const title = data.metadata?.title || data.title || 'Untitled Article';
-      const description = data.metadata?.description || data.description || '';
-      const content = data.markdown || data.content || '';
+      const title = result.metadata?.title || 'Untitled Article';
+      const description = result.metadata?.description || '';
+      const content = result.markdown || '';
       
       if (!title || content.length < 100) {
         return null;
@@ -99,12 +98,12 @@ export class RealWebScrapingService {
         content: content.substring(0, 2000),
         source: this.extractDomain(sourceUrl),
         sourceUrl,
-        author: data.metadata?.author || 'Unknown',
-        publishDate: data.metadata?.publishedTime || new Date().toISOString(),
+        author: result.metadata?.author || 'Unknown',
+        publishDate: result.metadata?.publishedTime || new Date().toISOString(),
         category,
         topics: this.extractTopics(title + ' ' + description),
         credibilityScore: this.calculateCredibilityScore(sourceUrl),
-        imageUrl: data.metadata?.ogImage || this.getPlaceholderImage(category),
+        imageUrl: result.metadata?.ogImage || this.getPlaceholderImage(category),
         estimatedReadTime: Math.ceil(content.length / 200),
         scrapedAt: new Date().toISOString()
       };
