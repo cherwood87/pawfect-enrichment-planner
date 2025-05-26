@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { ScheduledActivity, UserActivity } from '@/types/activity';
 import { DiscoveredActivity, ContentDiscoveryConfig } from '@/types/discovery';
@@ -196,6 +197,16 @@ export const ActivityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     );
   };
 
+  const updateScheduledActivity = (activityId: string, updates: Partial<ScheduledActivity>) => {
+    setScheduledActivities(prev =>
+      prev.map(activity =>
+        activity.id === activityId
+          ? { ...activity, ...updates }
+          : activity
+      )
+    );
+  };
+
   const addUserActivity = (activity: Omit<UserActivity, 'id' | 'createdAt' | 'dogId'>) => {
     if (!currentDog) return;
     
@@ -218,6 +229,7 @@ export const ActivityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         isDiscovering: discoveryOps.isDiscovering,
         addScheduledActivity,
         toggleActivityCompletion,
+        updateScheduledActivity,
         addUserActivity,
         getTodaysActivities: activityOps.getTodaysActivities,
         getActivityDetails: activityOps.getActivityDetails,
