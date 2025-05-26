@@ -2,7 +2,6 @@
 import React from 'react';
 import { useDog } from '@/contexts/DogContext';
 import DogProfile from '@/components/DogProfile';
-import EnrichmentPillars from '@/components/EnrichmentPillars';
 import WeeklyPlannerCard from '@/components/WeeklyPlannerCard';
 import DailyPlannerCard from '@/components/DailyPlannerCard';
 import { Dog } from '@/types/dog';
@@ -24,9 +23,6 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
     return null;
   }
 
-  // Get user preferences from current dog's quiz results
-  const userPreferences = currentDog?.quizResults?.ranking;
-
   return (
     <div className="max-w-screen-lg mx-auto mobile-container mobile-space-y pb-20 sm:pb-6">
       {/* Dog Profile Section */}
@@ -37,12 +33,6 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
 
       {/* Today's Schedule - Replaced with DailyPlannerCard */}
       <DailyPlannerCard />
-
-      {/* Enrichment Pillars */}
-      <EnrichmentPillars 
-        onPillarSelect={onPillarSelect}
-        userPreferences={userPreferences}
-      />
     </div>
   );
 };
