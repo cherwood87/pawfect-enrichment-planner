@@ -15,15 +15,18 @@ const Index = () => {
   const [isEditDogModalOpen, setIsEditDogModalOpen] = useState(false);
   const [selectedPillar, setSelectedPillar] = useState<string | null>(null);
   const [selectedDog, setSelectedDog] = useState<Dog | null>(null);
+  const [schedulingMode, setSchedulingMode] = useState<'daily' | 'weekly'>('daily');
 
-  const handlePillarSelect = (pillar: string) => {
+  const handlePillarSelect = (pillar: string, mode: 'daily' | 'weekly' = 'daily') => {
     setSelectedPillar(pillar);
+    setSchedulingMode(mode);
     setIsActivityModalOpen(true);
   };
 
   const handleActivityModalClose = () => {
     setIsActivityModalOpen(false);
     setSelectedPillar(null);
+    setSchedulingMode('daily');
   };
 
   const handleChatModalClose = () => {
@@ -78,6 +81,7 @@ const Index = () => {
         isEditDogModalOpen={isEditDogModalOpen}
         selectedPillar={selectedPillar}
         selectedDog={selectedDog}
+        schedulingMode={schedulingMode}
         onActivityModalClose={handleActivityModalClose}
         onChatModalClose={handleChatModalClose}
         onAddDogModalClose={handleAddDogModalClose}

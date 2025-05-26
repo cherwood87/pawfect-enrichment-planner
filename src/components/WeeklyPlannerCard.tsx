@@ -8,7 +8,11 @@ import WeeklyGrid from './weekly-planner/WeeklyGrid';
 import WeeklySummary from './weekly-planner/WeeklySummary';
 import EmptyWeeklyPlanner from './weekly-planner/EmptyWeeklyPlanner';
 
-const WeeklyPlannerCard = () => {
+interface WeeklyPlannerCardProps {
+  onPillarSelect?: (pillar: string) => void;
+}
+
+const WeeklyPlannerCard: React.FC<WeeklyPlannerCardProps> = ({ onPillarSelect }) => {
   const { scheduledActivities, toggleActivityCompletion } = useActivity();
   const { currentDog } = useDog();
   
@@ -56,7 +60,7 @@ const WeeklyPlannerCard = () => {
   const completedActivities = weekActivities.filter(a => a.completed).length;
 
   if (totalActivities === 0) {
-    return <EmptyWeeklyPlanner />;
+    return <EmptyWeeklyPlanner onPillarSelect={onPillarSelect} />;
   }
 
   return (

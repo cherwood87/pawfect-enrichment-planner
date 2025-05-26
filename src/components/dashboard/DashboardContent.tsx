@@ -11,7 +11,7 @@ import EmptyDashboard from '@/components/EmptyDashboard';
 interface DashboardContentProps {
   onAddDogOpen?: () => void;
   onEditDogOpen?: (dog: any) => void;
-  onPillarSelect?: (pillar: string) => void;
+  onPillarSelect?: (pillar: string, mode?: 'daily' | 'weekly') => void;
 }
 
 const DashboardContent: React.FC<DashboardContentProps> = ({ 
@@ -40,8 +40,8 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
       
       {/* Planning Cards - Side by Side on Desktop */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <DailyPlannerCard />
-        <WeeklyPlannerCard />
+        <DailyPlannerCard onPillarSelect={(pillar) => onPillarSelect?.(pillar, 'daily')} />
+        <WeeklyPlannerCard onPillarSelect={(pillar) => onPillarSelect?.(pillar, 'weekly')} />
       </div>
 
       {/* Reflection Journal */}
