@@ -20,14 +20,20 @@ const EmptyWeeklyPlanner: React.FC<EmptyWeeklyPlannerProps> = ({ onPillarSelect 
             <Calendar className="w-5 h-5 text-green-600" />
             <CardTitle className="font-bold text-gray-800">Weekly Enrichment Plan</CardTitle>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
+          {/* Upgraded Add Button */}
+          <button
             onClick={() => navigate('/activity-library')}
-            className="text-green-600 hover:text-green-700"
+            aria-label="Add activity"
+            className="
+              ml-2 w-8 h-8 flex items-center justify-center
+              rounded-full bg-blue-500 text-white shadow-lg
+              hover:bg-blue-600 active:scale-95 transition
+              border-2 border-white
+              focus:outline-none focus:ring-2 focus:ring-blue-300
+            "
           >
-            <Plus className="w-4 h-4" />
-          </Button>
+            <Plus className="w-5 h-5" />
+          </button>
         </div>
       </CardHeader>
       
