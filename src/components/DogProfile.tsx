@@ -3,11 +3,12 @@ import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Brain, Trophy } from 'lucide-react';
+import { Brain, Trophy, Plus } from 'lucide-react';
 import { QuizResults } from '@/types/quiz';
 import { useDog } from '@/contexts/DogContext';
 import { useActivity } from '@/contexts/ActivityContext';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useNavigate } from 'react-router-dom';
 import DogProfileQuiz from './DogProfileQuiz';
 import QuizResultsComponent from './QuizResults';
 import DogAvatarBlock from './DogAvatarBlock';
@@ -20,6 +21,7 @@ interface DogProfileProps {
 const DogProfile: React.FC<DogProfileProps> = ({ onEditDogOpen }) => {
   const { currentDog, updateDog } = useDog();
   const { getPillarBalance, getDailyGoals } = useActivity();
+  const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [showQuiz, setShowQuiz] = useState(false);
   const [showResults, setShowResults] = useState(false);
@@ -50,6 +52,10 @@ const DogProfile: React.FC<DogProfileProps> = ({ onEditDogOpen }) => {
     onEditDogOpen(currentDog);
   };
 
+  const handleAddActivities = () => {
+    navigate('/activity-library');
+  };
+
   const topPillars = currentDog.quizResults?.ranking.slice(0, 2);
   const hasCompletedQuiz = !!currentDog.quizResults;
   const pillarBalance = getPillarBalance();
@@ -71,21 +77,21 @@ const DogProfile: React.FC<DogProfileProps> = ({ onEditDogOpen }) => {
       {/* Quiz and Goals Section */}
       <Card className="overflow-hidden">
         <CardContent className="mobile-card">
-          {/* Quiz Section */}
+          {/* Add Activities Section - Replaces Quiz Section */}
           {!hasCompletedQuiz ? (
-            <div className="mobile-card bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-100">
+            <div className="mobile-card bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border border-green-100">
               <div className={`flex items-center ${isMobile ? 'flex-col space-y-3 text-center' : 'space-x-3'}`}>
-                <Brain className={`${isMobile ? 'w-6 h-6' : 'w-5 h-5'} text-purple-600 flex-shrink-0`} />
+                <Plus className={`${isMobile ? 'w-6 h-6' : 'w-5 h-5'} text-green-600 flex-shrink-0`} />
                 <div className={`${isMobile ? 'text-center' : 'flex-1'}`}>
-                  <p className="text-sm font-medium text-gray-800">Discover {currentDog.name}'s Personality</p>
-                  <p className="text-xs text-gray-600">Take our quiz for personalized recommendations</p>
+                  <p className="text-sm font-medium text-gray-800">Start Enriching {currentDog.name}'s Life</p>
+                  <p className="text-xs text-gray-600">Browse our activity library to get started</p>
                 </div>
                 <Button 
                   size="sm" 
-                  onClick={() => setShowQuiz(true)}
-                  className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 touch-target flex-shrink-0"
+                  onClick={handleAddActivities}
+                  className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 touch-target flex-shrink-0"
                 >
-                  Take Quiz
+                  Add Activities
                 </Button>
               </div>
             </div>
