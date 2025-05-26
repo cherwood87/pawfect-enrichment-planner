@@ -16,7 +16,7 @@ const DogAvatarBlock: React.FC<DogAvatarBlockProps> = ({
   const isMobile = useIsMobile();
   return <Card className="overflow-hidden bg-gradient-to-br from-blue-50 to-orange-50 border-blue-100">
       <CardContent className="mobile-card">
-        <div className="flex flex-col items-center mobile-space-y bg-cyan-600">
+        <div className="flex flex-col items-center mobile-space-y bg-slate-100">
           {/* Enhanced Dog Avatar */}
           <div className="relative">
             <div className={`${isMobile ? 'w-20 h-20' : 'w-24 h-24'} bg-gradient-to-br from-orange-200 to-orange-300 rounded-full flex items-center justify-center shadow-lg ring-4 ring-white`}>
