@@ -4,6 +4,8 @@ export interface Dog {
   name: string;
   age: number;
   breed: string;
+  gender?: 'Male' | 'Female' | 'Unknown';
+  breedGroup?: string;
   mobilityIssues: string[];
   image?: string; // base64 encoded image or URL
   dateAdded: string;
@@ -22,6 +24,25 @@ export interface QuizResults {
   personality: string;
   recommendations: string[];
 }
+
+export const GENDER_OPTIONS = [
+  'Male',
+  'Female',
+  'Unknown'
+] as const;
+
+export const BREED_GROUPS = [
+  'Sporting',
+  'Hound',
+  'Working',
+  'Terrier',
+  'Toy',
+  'Non-Sporting',
+  'Herding',
+  'Miscellaneous',
+  'Mixed Breed',
+  'Unknown'
+] as const;
 
 export const MOBILITY_ISSUES = [
   'Arthritis',
