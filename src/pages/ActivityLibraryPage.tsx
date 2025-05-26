@@ -1,13 +1,24 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import ActivityLibrary from '@/components/ActivityLibrary';
 import EducationalContent from '@/components/EducationalContent';
+import FloatingChatButton from '@/components/dashboard/FloatingChatButton';
+import ChatModal from '@/components/chat/ChatModal';
 
 const ActivityLibraryPage = () => {
   const navigate = useNavigate();
+  const [isChatModalOpen, setIsChatModalOpen] = useState(false);
+
+  const handleChatModalOpen = () => {
+    setIsChatModalOpen(true);
+  };
+
+  const handleChatModalClose = () => {
+    setIsChatModalOpen(false);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-orange-50">
@@ -34,13 +45,22 @@ const ActivityLibraryPage = () => {
         </div>
       </div>
 
-      <div className="max-w-screen-lg mx-auto px-4 py-6 space-y-6">
+      <div className="max-w-screen-lg mx-auto px-4 py-6 space-y-6 pb-20 sm:pb-6">
         {/* Educational Content */}
         <EducationalContent />
         
         {/* Activity Library */}
         <ActivityLibrary />
       </div>
+
+      {/* Floating Chat Button */}
+      <FloatingChatButton onChatOpen={handleChatModalOpen} />
+
+      {/* Chat Modal */}
+      <ChatModal 
+        isOpen={isChatModalOpen}
+        onClose={handleChatModalClose}
+      />
     </div>
   );
 };
