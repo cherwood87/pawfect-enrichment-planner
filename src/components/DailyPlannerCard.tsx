@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -10,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDog } from '@/contexts/DogContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import ActivityCompletionModal from '@/components/ActivityCompletionModal';
+import { convertTo24Hour, convertTo12Hour, validateTimeFormat } from '@/utils/timeUtils';
 
 const DailyPlannerCard = () => {
   const { getTodaysActivities, toggleActivityCompletion, getActivityDetails, updateScheduledActivity } = useActivity();
@@ -19,6 +19,7 @@ const DailyPlannerCard = () => {
   const [expandedActivity, setExpandedActivity] = useState<string | null>(null);
   const [editingTime, setEditingTime] = useState<string | null>(null);
   const [tempTime, setTempTime] = useState<string>('');
+  const [timeError, setTimeError] = useState<string>('');
   const [completionModal, setCompletionModal] = useState<{
     isOpen: boolean;
     activityId: string;
@@ -47,24 +48,56 @@ const DailyPlannerCard = () => {
   const toggleActivityExpansion = (activityId: string) => {
     setExpandedActivity(expandedActivity === activityId ? null : activityId);
     setEditingTime(null); // Close any time editing when collapsing
+    setTimeError(''); // Clear any time errors
   };
 
   const startTimeEdit = (activityId: string, currentTime: string) => {
+    console.log('Starting time edit for activity:', activityId, 'Current time:', currentTime);
     setEditingTime(activityId);
-    setTempTime(currentTime);
+    setTimeError('');
+    
+    // Convert display time (12-hour) to 24-hour format for the input
+    const time24h = convertTo24Hour(currentTime);
+    setTempTime(time24h);
+    console.log('Set temp time to:', time24h);
   };
 
   const cancelTimeEdit = () => {
+    console.log('Canceling time edit');
     setEditingTime(null);
     setTempTime('');
+    setTimeError('');
   };
 
   const saveTimeEdit = (activityId: string) => {
-    if (tempTime && updateScheduledActivity) {
-      updateScheduledActivity(activityId, { userSelectedTime: tempTime });
+    console.log('Saving time edit for activity:', activityId, 'Temp time:', tempTime);
+    
+    if (!tempTime.trim()) {
+      setTimeError('Please enter a valid time');
+      return;
     }
+
+    if (!validateTimeFormat(tempTime)) {
+      setTimeError('Invalid time format');
+      return;
+    }
+
+    if (updateScheduledActivity) {
+      // Convert 24-hour input back to 12-hour format for storage and display
+      const time12h = convertTo12Hour(tempTime);
+      console.log('Updating scheduled activity with time:', time12h);
+      
+      updateScheduledActivity(activityId, { userSelectedTime: time12h });
+      console.log('Time update completed successfully');
+    } else {
+      console.error('updateScheduledActivity function not available');
+      setTimeError('Unable to save time changes');
+      return;
+    }
+
     setEditingTime(null);
     setTempTime('');
+    setTimeError('');
   };
 
   const handleActivityToggle = (activityId: string) => {
@@ -256,29 +289,37 @@ const DailyPlannerCard = () => {
                       <div>
                         <p className="text-xs font-medium text-gray-700 mb-2">Scheduled Time:</p>
                         {isEditingThisTime ? (
-                          <div className="flex items-center space-x-2">
-                            <Input
-                              type="time"
-                              value={tempTime}
-                              onChange={(e) => setTempTime(e.target.value)}
-                              className="w-32 h-7 text-xs"
-                            />
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="p-1 h-7 w-7"
-                              onClick={() => saveTimeEdit(scheduledActivity.id)}
-                            >
-                              <Save className="w-3 h-3 text-green-600" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="p-1 h-7 w-7"
-                              onClick={cancelTimeEdit}
-                            >
-                              <X className="w-3 h-3 text-red-600" />
-                            </Button>
+                          <div className="space-y-2">
+                            <div className="flex items-center space-x-2">
+                              <Input
+                                type="time"
+                                value={tempTime}
+                                onChange={(e) => {
+                                  setTempTime(e.target.value);
+                                  setTimeError(''); // Clear error on change
+                                }}
+                                className="w-32 h-7 text-xs"
+                              />
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="p-1 h-7 w-7"
+                                onClick={() => saveTimeEdit(scheduledActivity.id)}
+                              >
+                                <Save className="w-3 h-3 text-green-600" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="p-1 h-7 w-7"
+                                onClick={cancelTimeEdit}
+                              >
+                                <X className="w-3 h-3 text-red-600" />
+                              </Button>
+                            </div>
+                            {timeError && (
+                              <p className="text-xs text-red-600">{timeError}</p>
+                            )}
                           </div>
                         ) : (
                           <div className="flex items-center space-x-2">
