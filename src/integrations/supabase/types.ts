@@ -9,6 +9,199 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      activity_completions: {
+        Row: {
+          activity_id: string
+          activity_type: string
+          completed_date: string
+          completion_time: string
+          created_at: string
+          dog_id: string
+          duration_minutes: number | null
+          id: string
+          notes: string | null
+          pillar: Database["public"]["Enums"]["pillar_type"] | null
+          rating: number | null
+          updated_at: string
+        }
+        Insert: {
+          activity_id: string
+          activity_type?: string
+          completed_date: string
+          completion_time?: string
+          created_at?: string
+          dog_id: string
+          duration_minutes?: number | null
+          id?: string
+          notes?: string | null
+          pillar?: Database["public"]["Enums"]["pillar_type"] | null
+          rating?: number | null
+          updated_at?: string
+        }
+        Update: {
+          activity_id?: string
+          activity_type?: string
+          completed_date?: string
+          completion_time?: string
+          created_at?: string
+          dog_id?: string
+          duration_minutes?: number | null
+          id?: string
+          notes?: string | null
+          pillar?: Database["public"]["Enums"]["pillar_type"] | null
+          rating?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_completions_dog_id_fkey"
+            columns: ["dog_id"]
+            isOneToOne: false
+            referencedRelation: "dogs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      discovered_activities: {
+        Row: {
+          age_group: Database["public"]["Enums"]["age_group"] | null
+          benefits: string | null
+          confidence_score: number | null
+          created_at: string
+          difficulty: Database["public"]["Enums"]["difficulty_level"]
+          discovered_at: string
+          discovery_method: string | null
+          dog_id: string
+          duration: number
+          emotional_goals: string[] | null
+          energy_level: Database["public"]["Enums"]["energy_level"] | null
+          id: string
+          instructions: string[] | null
+          is_approved: boolean | null
+          is_rejected: boolean | null
+          materials: string[] | null
+          pillar: Database["public"]["Enums"]["pillar_type"]
+          source_url: string | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          age_group?: Database["public"]["Enums"]["age_group"] | null
+          benefits?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          difficulty?: Database["public"]["Enums"]["difficulty_level"]
+          discovered_at?: string
+          discovery_method?: string | null
+          dog_id: string
+          duration?: number
+          emotional_goals?: string[] | null
+          energy_level?: Database["public"]["Enums"]["energy_level"] | null
+          id?: string
+          instructions?: string[] | null
+          is_approved?: boolean | null
+          is_rejected?: boolean | null
+          materials?: string[] | null
+          pillar: Database["public"]["Enums"]["pillar_type"]
+          source_url?: string | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          age_group?: Database["public"]["Enums"]["age_group"] | null
+          benefits?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          difficulty?: Database["public"]["Enums"]["difficulty_level"]
+          discovered_at?: string
+          discovery_method?: string | null
+          dog_id?: string
+          duration?: number
+          emotional_goals?: string[] | null
+          energy_level?: Database["public"]["Enums"]["energy_level"] | null
+          id?: string
+          instructions?: string[] | null
+          is_approved?: boolean | null
+          is_rejected?: boolean | null
+          materials?: string[] | null
+          pillar?: Database["public"]["Enums"]["pillar_type"]
+          source_url?: string | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discovered_activities_dog_id_fkey"
+            columns: ["dog_id"]
+            isOneToOne: false
+            referencedRelation: "dogs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dogs: {
+        Row: {
+          activity_level: Database["public"]["Enums"]["activity_level"]
+          age: number
+          breed: string
+          breed_group: string | null
+          created_at: string
+          date_added: string
+          gender: Database["public"]["Enums"]["gender"] | null
+          id: string
+          image: string | null
+          last_updated: string
+          mobility_issues: string[] | null
+          name: string
+          notes: string | null
+          quiz_results: Json | null
+          special_needs: string | null
+          updated_at: string
+          weight: number | null
+        }
+        Insert: {
+          activity_level?: Database["public"]["Enums"]["activity_level"]
+          age?: number
+          breed?: string
+          breed_group?: string | null
+          created_at?: string
+          date_added?: string
+          gender?: Database["public"]["Enums"]["gender"] | null
+          id?: string
+          image?: string | null
+          last_updated?: string
+          mobility_issues?: string[] | null
+          name: string
+          notes?: string | null
+          quiz_results?: Json | null
+          special_needs?: string | null
+          updated_at?: string
+          weight?: number | null
+        }
+        Update: {
+          activity_level?: Database["public"]["Enums"]["activity_level"]
+          age?: number
+          breed?: string
+          breed_group?: string | null
+          created_at?: string
+          date_added?: string
+          gender?: Database["public"]["Enums"]["gender"] | null
+          id?: string
+          image?: string | null
+          last_updated?: string
+          mobility_issues?: string[] | null
+          name?: string
+          notes?: string | null
+          quiz_results?: Json | null
+          special_needs?: string | null
+          updated_at?: string
+          weight?: number | null
+        }
+        Relationships: []
+      }
       journal_entries: {
         Row: {
           behaviors: string[]
@@ -48,6 +241,127 @@ export type Database = {
         }
         Relationships: []
       }
+      scheduled_activities: {
+        Row: {
+          activity_id: string
+          completed: boolean
+          completed_at: string | null
+          completion_notes: string | null
+          created_at: string
+          dog_id: string
+          id: string
+          notes: string | null
+          reminder_enabled: boolean | null
+          scheduled_date: string
+          scheduled_time: string
+          updated_at: string
+          user_selected_time: string | null
+        }
+        Insert: {
+          activity_id: string
+          completed?: boolean
+          completed_at?: string | null
+          completion_notes?: string | null
+          created_at?: string
+          dog_id: string
+          id?: string
+          notes?: string | null
+          reminder_enabled?: boolean | null
+          scheduled_date: string
+          scheduled_time: string
+          updated_at?: string
+          user_selected_time?: string | null
+        }
+        Update: {
+          activity_id?: string
+          completed?: boolean
+          completed_at?: string | null
+          completion_notes?: string | null
+          created_at?: string
+          dog_id?: string
+          id?: string
+          notes?: string | null
+          reminder_enabled?: boolean | null
+          scheduled_date?: string
+          scheduled_time?: string
+          updated_at?: string
+          user_selected_time?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scheduled_activities_dog_id_fkey"
+            columns: ["dog_id"]
+            isOneToOne: false
+            referencedRelation: "dogs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_activities: {
+        Row: {
+          age_group: Database["public"]["Enums"]["age_group"] | null
+          benefits: string | null
+          created_at: string
+          difficulty: Database["public"]["Enums"]["difficulty_level"]
+          dog_id: string
+          duration: number
+          emotional_goals: string[] | null
+          energy_level: Database["public"]["Enums"]["energy_level"] | null
+          id: string
+          instructions: string[] | null
+          is_custom: boolean
+          materials: string[] | null
+          pillar: Database["public"]["Enums"]["pillar_type"]
+          tags: string[] | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          age_group?: Database["public"]["Enums"]["age_group"] | null
+          benefits?: string | null
+          created_at?: string
+          difficulty?: Database["public"]["Enums"]["difficulty_level"]
+          dog_id: string
+          duration?: number
+          emotional_goals?: string[] | null
+          energy_level?: Database["public"]["Enums"]["energy_level"] | null
+          id?: string
+          instructions?: string[] | null
+          is_custom?: boolean
+          materials?: string[] | null
+          pillar: Database["public"]["Enums"]["pillar_type"]
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          age_group?: Database["public"]["Enums"]["age_group"] | null
+          benefits?: string | null
+          created_at?: string
+          difficulty?: Database["public"]["Enums"]["difficulty_level"]
+          dog_id?: string
+          duration?: number
+          emotional_goals?: string[] | null
+          energy_level?: Database["public"]["Enums"]["energy_level"] | null
+          id?: string
+          instructions?: string[] | null
+          is_custom?: boolean
+          materials?: string[] | null
+          pillar?: Database["public"]["Enums"]["pillar_type"]
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_activities_dog_id_fkey"
+            columns: ["dog_id"]
+            isOneToOne: false
+            referencedRelation: "dogs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -56,7 +370,17 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      activity_level: "low" | "moderate" | "high"
+      age_group: "Puppy" | "Adult" | "Senior" | "All Ages"
+      difficulty_level: "Easy" | "Medium" | "Hard"
+      energy_level: "Low" | "Medium" | "High"
+      gender: "Male" | "Female" | "Unknown"
+      pillar_type:
+        | "mental"
+        | "physical"
+        | "social"
+        | "environmental"
+        | "instinctual"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -171,6 +495,19 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      activity_level: ["low", "moderate", "high"],
+      age_group: ["Puppy", "Adult", "Senior", "All Ages"],
+      difficulty_level: ["Easy", "Medium", "Hard"],
+      energy_level: ["Low", "Medium", "High"],
+      gender: ["Male", "Female", "Unknown"],
+      pillar_type: [
+        "mental",
+        "physical",
+        "social",
+        "environmental",
+        "instinctual",
+      ],
+    },
   },
 } as const
