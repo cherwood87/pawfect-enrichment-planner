@@ -13,7 +13,7 @@ export interface Dog {
   lastUpdated: string;
   photo?: string;
   quizResults?: QuizResults;
-  journalEntries?: JournalEntry[];
+  journalEntries?: JournalEntry[]; // Kept for backward compatibility and local backup
   // New properties that were missing
   gender?: 'Male' | 'Female' | 'Unknown';
   image?: string;
