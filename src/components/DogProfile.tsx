@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Brain, Trophy } from 'lucide-react';
 import { QuizResults } from '@/types/quiz';
 import { useDog } from '@/contexts/DogContext';
@@ -117,6 +117,10 @@ const DogProfile = () => {
       {/* Quiz Dialog */}
       <Dialog open={showQuiz} onOpenChange={setShowQuiz}>
         <DialogContent className="p-0 max-w-lg">
+          <DialogTitle className="sr-only">Dog Personality Quiz</DialogTitle>
+          <DialogDescription className="sr-only">
+            Take a quiz to discover your dog's personality and get personalized enrichment recommendations.
+          </DialogDescription>
           <DogProfileQuiz 
             dogName={currentDog.name}
             onComplete={handleQuizComplete}
@@ -128,6 +132,10 @@ const DogProfile = () => {
       {/* Results Dialog */}
       <Dialog open={showResults} onOpenChange={setShowResults}>
         <DialogContent className="p-0 max-w-lg">
+          <DialogTitle className="sr-only">Quiz Results</DialogTitle>
+          <DialogDescription className="sr-only">
+            View your dog's personality quiz results and enrichment recommendations.
+          </DialogDescription>
           {currentDog.quizResults && (
             <QuizResultsComponent 
               results={currentDog.quizResults}
@@ -141,6 +149,10 @@ const DogProfile = () => {
       {/* Edit Dog Dialog */}
       <Dialog open={showEditForm} onOpenChange={setShowEditForm}>
         <DialogContent className="p-0 max-w-lg">
+          <DialogTitle className="sr-only">Edit Dog Profile</DialogTitle>
+          <DialogDescription className="sr-only">
+            Edit your dog's profile information including name, age, breed, and photo.
+          </DialogDescription>
           <EditDogForm 
             dog={currentDog}
             onClose={() => setShowEditForm(false)}

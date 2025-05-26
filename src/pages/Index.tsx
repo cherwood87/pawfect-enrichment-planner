@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -169,19 +170,35 @@ const Index = () => {
             </div>
 
             {/* Modals */}
-            <ActivityModal 
-              isOpen={isActivityModalOpen}
-              onClose={() => {
-                setIsActivityModalOpen(false);
-                setSelectedPillar(null);
-              }}
-              selectedPillar={selectedPillar}
-            />
+            <Dialog open={isActivityModalOpen} onOpenChange={setIsActivityModalOpen}>
+              <DialogContent className="p-0 max-w-4xl max-h-[90vh]">
+                <DialogTitle className="sr-only">Add Activity</DialogTitle>
+                <DialogDescription className="sr-only">
+                  Browse and add enrichment activities for your dog.
+                </DialogDescription>
+                <ActivityModal 
+                  isOpen={isActivityModalOpen}
+                  onClose={() => {
+                    setIsActivityModalOpen(false);
+                    setSelectedPillar(null);
+                  }}
+                  selectedPillar={selectedPillar}
+                />
+              </DialogContent>
+            </Dialog>
 
-            <ChatModal 
-              isOpen={isChatModalOpen}
-              onClose={() => setIsChatModalOpen(false)}
-            />
+            <Dialog open={isChatModalOpen} onOpenChange={setIsChatModalOpen}>
+              <DialogContent className="p-0 max-w-4xl max-h-[90vh]">
+                <DialogTitle className="sr-only">Enrichment Coach</DialogTitle>
+                <DialogDescription className="sr-only">
+                  Chat with your AI enrichment coach for personalized advice and recommendations.
+                </DialogDescription>
+                <ChatModal 
+                  isOpen={isChatModalOpen}
+                  onClose={() => setIsChatModalOpen(false)}
+                />
+              </DialogContent>
+            </Dialog>
           </>
         )}
       </div>
