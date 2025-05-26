@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -10,6 +11,7 @@ import { useDog } from '@/contexts/DogContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import ActivityCompletionModal from '@/components/ActivityCompletionModal';
 import { convertTo24Hour, convertTo12Hour, validateTimeFormat } from '@/utils/timeUtils';
+import { toast } from '@/components/ui/use-toast';
 
 const DailyPlannerCard = () => {
   const { getTodaysActivities, toggleActivityCompletion, getActivityDetails, updateScheduledActivity } = useActivity();
@@ -56,10 +58,16 @@ const DailyPlannerCard = () => {
     setEditingTime(activityId);
     setTimeError('');
     
-    // Convert display time (12-hour) to 24-hour format for the input
-    const time24h = convertTo24Hour(currentTime);
-    setTempTime(time24h);
-    console.log('Set temp time to:', time24h);
+    try {
+      // Convert display time (12-hour) to 24-hour format for the input
+      const time24h = convertTo24Hour(currentTime);
+      setTempTime(time24h);
+      console.log('Set temp time to:', time24h);
+    } catch (error) {
+      console.error('Error converting time to 24-hour format:', error);
+      setTimeError('Failed to parse current time');
+      setTempTime('12:00'); // fallback
+    }
   };
 
   const cancelTimeEdit = () => {
@@ -77,27 +85,42 @@ const DailyPlannerCard = () => {
       return;
     }
 
+    // Validate the 24-hour format from the input
     if (!validateTimeFormat(tempTime)) {
-      setTimeError('Invalid time format');
+      console.warn('Invalid time format detected:', tempTime);
+      setTimeError('Invalid time format. Please use HH:MM format.');
       return;
     }
 
-    if (updateScheduledActivity) {
-      // Convert 24-hour input back to 12-hour format for storage and display
-      const time12h = convertTo12Hour(tempTime);
-      console.log('Updating scheduled activity with time:', time12h);
-      
-      updateScheduledActivity(activityId, { userSelectedTime: time12h });
-      console.log('Time update completed successfully');
-    } else {
+    if (!updateScheduledActivity) {
       console.error('updateScheduledActivity function not available');
       setTimeError('Unable to save time changes');
       return;
     }
 
-    setEditingTime(null);
-    setTempTime('');
-    setTimeError('');
+    try {
+      // Convert 24-hour input back to 12-hour format for storage and display
+      const time12h = convertTo12Hour(tempTime);
+      console.log('Converting 24-hour time to 12-hour for storage:', tempTime, '->', time12h);
+      
+      updateScheduledActivity(activityId, { userSelectedTime: time12h });
+      console.log('Time update completed successfully');
+      
+      // Show success feedback
+      toast({
+        title: "Time Updated",
+        description: `Activity time changed to ${time12h}`,
+      });
+      
+      // Clear editing state
+      setEditingTime(null);
+      setTempTime('');
+      setTimeError('');
+      
+    } catch (error) {
+      console.error('Error during time conversion or update:', error);
+      setTimeError('Failed to save time. Please try again.');
+    }
   };
 
   const handleActivityToggle = (activityId: string) => {
@@ -295,16 +318,25 @@ const DailyPlannerCard = () => {
                                 type="time"
                                 value={tempTime}
                                 onChange={(e) => {
+                                  console.log('Time input changed:', e.target.value);
                                   setTempTime(e.target.value);
                                   setTimeError(''); // Clear error on change
                                 }}
                                 className="w-32 h-7 text-xs"
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    saveTimeEdit(scheduledActivity.id);
+                                  } else if (e.key === 'Escape') {
+                                    cancelTimeEdit();
+                                  }
+                                }}
                               />
                               <Button
                                 variant="ghost"
                                 size="sm"
                                 className="p-1 h-7 w-7"
                                 onClick={() => saveTimeEdit(scheduledActivity.id)}
+                                title="Save time"
                               >
                                 <Save className="w-3 h-3 text-green-600" />
                               </Button>
@@ -313,6 +345,7 @@ const DailyPlannerCard = () => {
                                 size="sm"
                                 className="p-1 h-7 w-7"
                                 onClick={cancelTimeEdit}
+                                title="Cancel edit"
                               >
                                 <X className="w-3 h-3 text-red-600" />
                               </Button>
@@ -332,6 +365,7 @@ const DailyPlannerCard = () => {
                               size="sm"
                               className="p-1 h-7 w-7"
                               onClick={() => startTimeEdit(scheduledActivity.id, displayTime)}
+                              title="Edit time"
                             >
                               <Edit3 className="w-3 h-3 text-blue-600" />
                             </Button>
