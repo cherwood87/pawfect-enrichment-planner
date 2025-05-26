@@ -204,7 +204,7 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, isOpen, onClose }
               className="flex-1 bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600"
             >
               <Calendar className="w-4 h-4 mr-2" />
-              Schedule for Today
+              Add to Weekly Enrichment Plan
             </Button>
           </div>
         </div>
