@@ -18,7 +18,7 @@ interface ActivityModalProps {
 
 const ActivityModal: React.FC<ActivityModalProps> = ({ isOpen, onClose, selectedPillar }) => {
   const [activeTab, setActiveTab] = useState('browse');
-  const { discoveredActivities, scheduleActivity, addUserActivity } = useActivity();
+  const { discoveredActivities, addScheduledActivity, addUserActivity } = useActivity();
   
   // State for CreateCustomTab
   const [activityName, setActivityName] = useState('');
@@ -33,17 +33,26 @@ const ActivityModal: React.FC<ActivityModalProps> = ({ isOpen, onClose, selected
   );
   
   // Get filtered library activities based on selected pillar
-  const allLibraryActivities = getPillarActivities();
+  const allLibraryActivities = getPillarActivities(selectedPillar || '');
   const filteredLibraryActivities = selectedPillar 
     ? allLibraryActivities.filter(activity => activity.pillar === selectedPillar)
     : allLibraryActivities;
 
   const handleActivitySelect = (activity: any) => {
-    // For now, we'll schedule the activity for the current day at a default time
+    // Schedule the activity for the current day at a default time
     const scheduledDate = new Date().toISOString().split('T')[0];
     const scheduledTime = '12:00 PM';
     
-    scheduleActivity(activity.id, scheduledTime, scheduledDate, '');
+    addScheduledActivity({
+      activityId: activity.id,
+      scheduledTime: scheduledTime,
+      userSelectedTime: scheduledTime,
+      scheduledDate: scheduledDate,
+      completed: false,
+      notes: '',
+      completionNotes: '',
+      reminderEnabled: false
+    });
     onClose();
   };
 
@@ -51,14 +60,17 @@ const ActivityModal: React.FC<ActivityModalProps> = ({ isOpen, onClose, selected
     if (!activityName || !pillar || !duration) return;
 
     const newActivity = {
-      id: `custom-${Date.now()}`,
-      name: activityName,
-      pillar,
+      title: activityName,
+      pillar: pillar as 'mental' | 'physical' | 'social' | 'environmental' | 'instinctual',
+      difficulty: 'Medium' as const,
       duration: parseInt(duration),
-      description,
       materials: materials.split(',').map(m => m.trim()).filter(Boolean),
+      emotionalGoals: [],
       instructions: instructions.split('\n').filter(Boolean),
-      difficulty: 'medium' as const,
+      benefits: description,
+      tags: [],
+      ageGroup: 'All Ages' as const,
+      energyLevel: 'Medium' as const,
       isCustom: true
     };
 
