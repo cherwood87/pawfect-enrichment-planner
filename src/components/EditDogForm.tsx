@@ -23,7 +23,7 @@ const EditDogForm: React.FC<EditDogFormProps> = ({ dog, onClose }) => {
     breed: dog.breed,
     gender: (dog.gender || 'Unknown') as 'Male' | 'Female' | 'Unknown',
     breedGroup: dog.breedGroup || 'Unknown',
-    mobilityIssues: dog.mobilityIssues,
+    mobilityIssues: dog.mobilityIssues || [],
     image: dog.image,
     notes: dog.notes || ''
   });

@@ -39,6 +39,9 @@ const AddDogForm: React.FC<AddDogFormProps> = ({ onClose }) => {
         name: formData.name.trim(),
         age: parseInt(formData.age) || 0,
         breed: formData.breed.trim() || 'Unknown',
+        weight: 0, // Default weight
+        activityLevel: 'moderate', // Default activity level
+        specialNeeds: '', // Default special needs
         gender: formData.gender as 'Male' | 'Female' | 'Unknown',
         breedGroup: formData.breedGroup,
         mobilityIssues: formData.mobilityIssues,
