@@ -3,13 +3,17 @@ import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { MOBILITY_ISSUES } from '@/types/dog';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { MOBILITY_ISSUES, GENDER_OPTIONS, BREED_GROUPS } from '@/types/dog';
 import ImageUpload from './ImageUpload';
 
 interface DogFormData {
   name: string;
   age: string;
   breed: string;
+  gender: string;
+  breedGroup: string;
   mobilityIssues: string[];
   image: string | undefined;
   notes: string;
@@ -92,6 +96,42 @@ const DogFormFields: React.FC<DogFormFieldsProps> = ({
           onChange={(e) => updateFormData('breed', e.target.value)}
           placeholder="Enter dog's breed"
         />
+      </div>
+
+      {/* Gender and Breed Group */}
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label>Gender</Label>
+          <RadioGroup 
+            value={formData.gender} 
+            onValueChange={(value) => updateFormData('gender', value)}
+            className="mt-2"
+          >
+            {GENDER_OPTIONS.map((gender) => (
+              <div key={gender} className="flex items-center space-x-2">
+                <RadioGroupItem value={gender} id={gender} />
+                <Label htmlFor={gender} className="text-sm cursor-pointer">
+                  {gender}
+                </Label>
+              </div>
+            ))}
+          </RadioGroup>
+        </div>
+        <div>
+          <Label htmlFor="breedGroup">Breed Group</Label>
+          <Select value={formData.breedGroup} onValueChange={(value) => updateFormData('breedGroup', value)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select breed group" />
+            </SelectTrigger>
+            <SelectContent>
+              {BREED_GROUPS.map((group) => (
+                <SelectItem key={group} value={group}>
+                  {group}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Mobility Issues */}

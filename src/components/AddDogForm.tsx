@@ -1,13 +1,10 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
 import { X } from 'lucide-react';
 import { useDog } from '@/contexts/DogContext';
-import { MOBILITY_ISSUES } from '@/types/dog';
-import ImageUpload from './ImageUpload';
+import DogFormFields from './DogFormFields';
 import { useNavigate } from 'react-router-dom';
 
 interface AddDogFormProps {
@@ -21,6 +18,8 @@ const AddDogForm: React.FC<AddDogFormProps> = ({ onClose }) => {
     name: '',
     age: '',
     breed: '',
+    gender: 'Unknown',
+    breedGroup: 'Unknown',
     mobilityIssues: [] as string[],
     image: undefined as string | undefined,
     notes: ''
@@ -35,6 +34,8 @@ const AddDogForm: React.FC<AddDogFormProps> = ({ onClose }) => {
       name: formData.name.trim(),
       age: parseInt(formData.age) || 0,
       breed: formData.breed.trim() || 'Unknown',
+      gender: formData.gender as 'Male' | 'Female' | 'Unknown',
+      breedGroup: formData.breedGroup,
       mobilityIssues: formData.mobilityIssues,
       image: formData.image,
       notes: formData.notes.trim()
@@ -43,22 +44,6 @@ const AddDogForm: React.FC<AddDogFormProps> = ({ onClose }) => {
     onClose();
     // Redirect to the Dog Profile Quiz page after successful submission
     navigate('/dog-profile-quiz');
-  };
-
-  const handleMobilityIssueChange = (issue: string, checked: boolean) => {
-    if (issue === 'None') {
-      setFormData(prev => ({
-        ...prev,
-        mobilityIssues: checked ? ['None'] : []
-      }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        mobilityIssues: checked 
-          ? [...prev.mobilityIssues.filter(i => i !== 'None'), issue]
-          : prev.mobilityIssues.filter(i => i !== issue)
-      }));
-    }
   };
 
   return (
@@ -74,80 +59,10 @@ const AddDogForm: React.FC<AddDogFormProps> = ({ onClose }) => {
 
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Photo Upload */}
-          <div className="flex justify-center">
-            <ImageUpload
-              currentImage={formData.image}
-              onImageChange={(image) => setFormData(prev => ({ ...prev, image }))}
-            />
-          </div>
-
-          {/* Basic Info */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="name">Name *</Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                placeholder="Enter dog's name"
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="age">Age (years)</Label>
-              <Input
-                id="age"
-                type="number"
-                min="0"
-                max="30"
-                value={formData.age}
-                onChange={(e) => setFormData(prev => ({ ...prev, age: e.target.value }))}
-                placeholder="Age"
-              />
-            </div>
-          </div>
-
-          {/* Breed */}
-          <div>
-            <Label htmlFor="breed">Breed</Label>
-            <Input
-              id="breed"
-              value={formData.breed}
-              onChange={(e) => setFormData(prev => ({ ...prev, breed: e.target.value }))}
-              placeholder="Enter dog's breed"
-            />
-          </div>
-
-          {/* Mobility Issues */}
-          <div>
-            <Label>Mobility Considerations</Label>
-            <div className="grid grid-cols-2 gap-2 mt-2">
-              {MOBILITY_ISSUES.map((issue) => (
-                <div key={issue} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={issue}
-                    checked={formData.mobilityIssues.includes(issue)}
-                    onCheckedChange={(checked) => handleMobilityIssueChange(issue, !!checked)}
-                  />
-                  <Label htmlFor={issue} className="text-sm cursor-pointer">
-                    {issue}
-                  </Label>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Notes */}
-          <div>
-            <Label htmlFor="notes">Notes (Optional)</Label>
-            <Input
-              id="notes"
-              value={formData.notes}
-              onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-              placeholder="Special considerations or notes"
-            />
-          </div>
+          <DogFormFields
+            formData={formData}
+            onFormDataChange={setFormData}
+          />
 
           {/* Submit Button */}
           <Button 

@@ -19,6 +19,8 @@ const EditDogForm: React.FC<EditDogFormProps> = ({ dog, onClose }) => {
     name: dog.name,
     age: dog.age.toString(),
     breed: dog.breed,
+    gender: dog.gender || 'Unknown',
+    breedGroup: dog.breedGroup || 'Unknown',
     mobilityIssues: dog.mobilityIssues,
     image: dog.image,
     notes: dog.notes || ''
@@ -35,6 +37,8 @@ const EditDogForm: React.FC<EditDogFormProps> = ({ dog, onClose }) => {
       name: formData.name.trim(),
       age: parseInt(formData.age) || 0,
       breed: formData.breed.trim() || 'Unknown',
+      gender: formData.gender as 'Male' | 'Female' | 'Unknown',
+      breedGroup: formData.breedGroup,
       mobilityIssues: formData.mobilityIssues,
       image: formData.image,
       notes: formData.notes.trim()
