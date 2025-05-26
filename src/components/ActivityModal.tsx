@@ -6,6 +6,7 @@ import DaySelector from './DaySelector';
 import ActivityModalTabs from './ActivityModalTabs';
 import { useActivity } from '@/contexts/ActivityContext';
 import { getPillarActivities } from '@/data/activityLibrary';
+import { useNavigate } from 'react-router-dom'; // <-- Add this import
 
 interface ActivityModalProps {
   isOpen: boolean;
@@ -18,6 +19,7 @@ const ActivityModal: React.FC<ActivityModalProps> = ({
   onClose, 
   selectedPillar
 }) => {
+  const navigate = useNavigate(); // <-- Add this line
   const [activeTab, setActiveTab] = useState('browse');
   const { discoveredActivities, addScheduledActivity, addUserActivity } = useActivity();
   
@@ -82,6 +84,7 @@ const ActivityModal: React.FC<ActivityModalProps> = ({
     });
     
     onClose();
+    navigate('/dog-profile-dashboard/weekly-plan'); // <-- Add this line
   };
 
   const handleCreateCustomActivity = () => {
@@ -113,6 +116,7 @@ const ActivityModal: React.FC<ActivityModalProps> = ({
     setDescription('');
     
     onClose();
+    navigate('/dog-profile-dashboard/weekly-plan'); // <-- Add this line if you want navigation on custom activity creation too
   };
 
   const handleCancelCustomActivity = () => {
