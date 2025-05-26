@@ -12,7 +12,7 @@ interface DogFormData {
   name: string;
   age: string;
   breed: string;
-  gender: string;
+  gender: 'Male' | 'Female' | 'Unknown';
   breedGroup: string;
   mobilityIssues: string[];
   image: string | undefined;
