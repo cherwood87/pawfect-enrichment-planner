@@ -18,7 +18,7 @@ const AddDogForm: React.FC<AddDogFormProps> = ({ onClose }) => {
     name: '',
     age: '',
     breed: '',
-    gender: 'Unknown',
+    gender: 'Unknown' as 'Male' | 'Female' | 'Unknown',
     breedGroup: 'Unknown',
     mobilityIssues: [] as string[],
     image: undefined as string | undefined,
