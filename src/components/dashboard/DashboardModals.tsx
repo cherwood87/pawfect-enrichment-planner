@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import ActivityModal from '@/components/ActivityModal';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import ChatModal from '@/components/chat/ChatModal';
 import AddDogForm from '@/components/AddDogForm';
 import EditDogForm from '@/components/EditDogForm';
@@ -30,63 +30,39 @@ const DashboardModals: React.FC<DashboardModalsProps> = ({
   onActivityModalClose,
   onChatModalClose,
   onAddDogModalClose,
-  onEditDogModalClose
+  onEditDogModalClose,
 }) => {
   return (
     <>
-      <Dialog open={isActivityModalOpen} onOpenChange={onActivityModalClose}>
-        <DialogContent className="p-0 modal-standard">
-          <DialogTitle className="sr-only">Add Activity</DialogTitle>
-          <DialogDescription className="sr-only">
-            Browse and add enrichment activities for your dog.
-          </DialogDescription>
-          <ActivityModal 
-            isOpen={isActivityModalOpen}
-            onClose={onActivityModalClose}
-            selectedPillar={selectedPillar}
-          />
-        </DialogContent>
-      </Dialog>
+      {/* Activity Modal */}
+      <ActivityModal
+        isOpen={isActivityModalOpen}
+        onClose={onActivityModalClose}
+        selectedPillar={selectedPillar}
+      />
 
-      <Dialog open={isChatModalOpen} onOpenChange={onChatModalClose}>
-        <DialogContent className="p-0 modal-standard">
-          <DialogTitle className="sr-only">Enrichment Coach</DialogTitle>
-          <DialogDescription className="sr-only">
-            Chat with your AI enrichment coach for personalized advice and recommendations.
-          </DialogDescription>
-          <ChatModal 
-            isOpen={isChatModalOpen}
-            onClose={onChatModalClose}
-          />
-        </DialogContent>
-      </Dialog>
+      {/* Chat Modal */}
+      <ChatModal
+        isOpen={isChatModalOpen}
+        onClose={onChatModalClose}
+      />
 
+      {/* Add Dog Modal */}
       <Dialog open={isAddDogModalOpen} onOpenChange={onAddDogModalClose}>
-        <DialogContent className="p-0 modal-standard">
-          <DialogTitle className="sr-only">Add New Dog</DialogTitle>
-          <DialogDescription className="sr-only">
-            Add a new dog profile with name, breed, age, and other details.
-          </DialogDescription>
-          <div className="modal-scroll-container">
-            <AddDogForm onClose={onAddDogModalClose} />
-          </div>
+        <DialogContent className="max-w-2xl">
+          <AddDogForm onClose={onAddDogModalClose} />
         </DialogContent>
       </Dialog>
 
+      {/* Edit Dog Modal */}
       <Dialog open={isEditDogModalOpen} onOpenChange={onEditDogModalClose}>
-        <DialogContent className="p-0 modal-standard">
-          <DialogTitle className="sr-only">Edit Dog Profile</DialogTitle>
-          <DialogDescription className="sr-only">
-            Edit your dog's profile information including name, age, breed, and photo.
-          </DialogDescription>
-          <div className="modal-scroll-container">
-            {selectedDog && (
-              <EditDogForm 
-                dog={selectedDog}
-                onClose={onEditDogModalClose}
-              />
-            )}
-          </div>
+        <DialogContent className="max-w-2xl">
+          {selectedDog && (
+            <EditDogForm 
+              dog={selectedDog} 
+              onClose={onEditDogModalClose} 
+            />
+          )}
         </DialogContent>
       </Dialog>
     </>
