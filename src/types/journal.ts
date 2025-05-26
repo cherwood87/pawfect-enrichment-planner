@@ -9,10 +9,14 @@ export interface MoodRating {
 }
 
 export interface JournalEntry {
+  id?: string;
   date: string;
   prompt: string;
   response: string;
   mood: string;
   behaviors: string[];
   notes: string;
+  entryTimestamp?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }

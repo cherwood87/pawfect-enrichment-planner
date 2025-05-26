@@ -208,6 +208,7 @@ export type Database = {
           created_at: string
           date: string
           dog_id: string
+          entry_timestamp: string | null
           id: string
           mood: string
           notes: string
@@ -220,6 +221,7 @@ export type Database = {
           created_at?: string
           date: string
           dog_id: string
+          entry_timestamp?: string | null
           id?: string
           mood?: string
           notes?: string
@@ -232,6 +234,7 @@ export type Database = {
           created_at?: string
           date?: string
           dog_id?: string
+          entry_timestamp?: string | null
           id?: string
           mood?: string
           notes?: string
