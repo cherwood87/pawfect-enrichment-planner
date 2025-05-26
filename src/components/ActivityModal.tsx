@@ -8,6 +8,7 @@ import BrowseLibraryTab from './BrowseLibraryTab';
 import CreateCustomTab from './CreateCustomTab';
 import DiscoveryReview from './DiscoveryReview';
 import { useActivity } from '@/contexts/ActivityContext';
+import { getPillarActivities } from '@/data/activityLibrary';
 
 interface ActivityModalProps {
   isOpen: boolean;
@@ -17,12 +18,73 @@ interface ActivityModalProps {
 
 const ActivityModal: React.FC<ActivityModalProps> = ({ isOpen, onClose, selectedPillar }) => {
   const [activeTab, setActiveTab] = useState('browse');
-  const { discoveredActivities } = useActivity();
+  const { discoveredActivities, scheduleActivity, addUserActivity } = useActivity();
+  
+  // State for CreateCustomTab
+  const [activityName, setActivityName] = useState('');
+  const [pillar, setPillar] = useState(selectedPillar || '');
+  const [duration, setDuration] = useState('');
+  const [materials, setMaterials] = useState('');
+  const [instructions, setInstructions] = useState('');
+  const [description, setDescription] = useState('');
   
   const pendingActivities = discoveredActivities.filter(activity => 
     !activity.approved && !activity.rejected
   );
   
+  // Get filtered library activities based on selected pillar
+  const allLibraryActivities = getPillarActivities();
+  const filteredLibraryActivities = selectedPillar 
+    ? allLibraryActivities.filter(activity => activity.pillar === selectedPillar)
+    : allLibraryActivities;
+
+  const handleActivitySelect = (activity: any) => {
+    // For now, we'll schedule the activity for the current day at a default time
+    const scheduledDate = new Date().toISOString().split('T')[0];
+    const scheduledTime = '12:00 PM';
+    
+    scheduleActivity(activity.id, scheduledTime, scheduledDate, '');
+    onClose();
+  };
+
+  const handleCreateCustomActivity = () => {
+    if (!activityName || !pillar || !duration) return;
+
+    const newActivity = {
+      id: `custom-${Date.now()}`,
+      name: activityName,
+      pillar,
+      duration: parseInt(duration),
+      description,
+      materials: materials.split(',').map(m => m.trim()).filter(Boolean),
+      instructions: instructions.split('\n').filter(Boolean),
+      difficulty: 'medium' as const,
+      isCustom: true
+    };
+
+    addUserActivity(newActivity);
+    
+    // Reset form
+    setActivityName('');
+    setPillar(selectedPillar || '');
+    setDuration('');
+    setMaterials('');
+    setInstructions('');
+    setDescription('');
+    
+    onClose();
+  };
+
+  const handleCancelCustomActivity = () => {
+    // Reset form
+    setActivityName('');
+    setPillar(selectedPillar || '');
+    setDuration('');
+    setMaterials('');
+    setInstructions('');
+    setDescription('');
+  };
+
   const handleScheduleActivity = (activityId: string, scheduledTime: string, notes?: string) => {
     const scheduledDate = new Date().toISOString().split('T')[0];
     
@@ -67,11 +129,28 @@ const ActivityModal: React.FC<ActivityModalProps> = ({ isOpen, onClose, selected
           <TabsContent value="browse">
             <BrowseLibraryTab 
               selectedPillar={selectedPillar}
+              filteredLibraryActivities={filteredLibraryActivities}
+              onActivitySelect={handleActivitySelect}
             />
           </TabsContent>
           
           <TabsContent value="create">
-            <CreateCustomTab />
+            <CreateCustomTab 
+              activityName={activityName}
+              setActivityName={setActivityName}
+              pillar={pillar}
+              setPillar={setPillar}
+              duration={duration}
+              setDuration={setDuration}
+              materials={materials}
+              setMaterials={setMaterials}
+              instructions={instructions}
+              setInstructions={setInstructions}
+              description={description}
+              setDescription={setDescription}
+              onSubmit={handleCreateCustomActivity}
+              onCancel={handleCancelCustomActivity}
+            />
           </TabsContent>
           
           <TabsContent value="review">
