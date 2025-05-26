@@ -9,6 +9,7 @@ import { ActivityProvider } from "@/contexts/ActivityContext";
 import { ChatProvider } from "@/contexts/ChatContext";
 import Index from "./pages/Index";
 import Landing from "./pages/Landing";
+import Coach from "./pages/Coach";
 import DogProfileQuizPage from "./pages/DogProfileQuiz";
 import ActivityLibraryPage from "./pages/ActivityLibraryPage";
 import NotFound from "./pages/NotFound";
@@ -26,6 +27,7 @@ const App = () => (
             <BrowserRouter>
               <Routes>
                 <Route path="/app" element={<Index />} />
+                <Route path="/coach" element={<Coach />} />
                 <Route path="/activity-library" element={<ActivityLibraryPage />} />
                 <Route path="/dog-profile-quiz" element={<DogProfileQuizPage />} />
                 <Route path="/" element={<Landing />} />

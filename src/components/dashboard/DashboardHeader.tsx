@@ -70,7 +70,10 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onChatOpen, onAddDogO
                   <span>Activity Library</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={onChatOpen} className="touch-target">
+                <DropdownMenuItem 
+                  onClick={() => handleNavigation('/coach')}
+                  className={`touch-target ${isCurrentPage('/coach') ? 'bg-blue-50 text-blue-700' : ''}`}
+                >
                   <MessageCircle className="mr-2 h-4 w-4" />
                   <span>Enrichment Coach</span>
                 </DropdownMenuItem>
