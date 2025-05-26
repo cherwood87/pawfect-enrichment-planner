@@ -21,14 +21,14 @@ const ActivityLibraryHeader: React.FC<ActivityLibraryHeaderProps> = ({
         <div>
           <CardTitle className="text-xl font-bold text-gray-800 flex items-center space-x-2">
             <Brain className="w-6 h-6 text-purple-500" />
-            <span>AI-Curated Activity Library</span>
+            <span>Activity Library</span>
           </CardTitle>
           <p className="text-gray-600">
-            Discover AI-curated enriching activities personalized for your dog across all five pillars of wellness
+            Discover curated enriching activities personalized for your dog across all five pillars of wellness
             {autoApprovedCount > 0 && (
               <span className="ml-2 text-sm text-green-600">
                 <CheckCircle className="w-4 h-4 inline mr-1" />
-                {autoApprovedCount} AI-curated activities added
+                {autoApprovedCount} curated activities added
               </span>
             )}
           </p>
@@ -41,12 +41,12 @@ const ActivityLibraryHeader: React.FC<ActivityLibraryHeaderProps> = ({
           {isDiscovering ? (
             <>
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              AI Discovering...
+              Discovering...
             </>
           ) : (
             <>
               <Sparkles className="w-4 h-4 mr-2" />
-              Discover with AI
+              Discover Activities
             </>
           )}
         </Button>
@@ -55,7 +55,7 @@ const ActivityLibraryHeader: React.FC<ActivityLibraryHeaderProps> = ({
         <div className="mt-2 text-sm text-purple-600">
           <div className="flex items-center space-x-2">
             <div className="animate-pulse">🤖</div>
-            <span>AI is analyzing your dog's profile and discovering personalized activities...</span>
+            <span>Analyzing your dog's profile and discovering personalized activities...</span>
           </div>
         </div>
       )}
