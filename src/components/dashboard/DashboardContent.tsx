@@ -5,12 +5,19 @@ import DogProfile from '@/components/DogProfile';
 import EnrichmentPillars from '@/components/EnrichmentPillars';
 import WeeklyPlannerCard from '@/components/WeeklyPlannerCard';
 import DailyPlannerCard from '@/components/DailyPlannerCard';
+import { Dog } from '@/types/dog';
 
 interface DashboardContentProps {
   onPillarSelect: (pillar: string) => void;
+  onAddDogOpen: () => void;
+  onEditDogOpen: (dog: Dog) => void;
 }
 
-const DashboardContent: React.FC<DashboardContentProps> = ({ onPillarSelect }) => {
+const DashboardContent: React.FC<DashboardContentProps> = ({ 
+  onPillarSelect,
+  onAddDogOpen,
+  onEditDogOpen
+}) => {
   const { currentDog } = useDog();
 
   if (!currentDog) {
@@ -23,7 +30,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ onPillarSelect }) =
   return (
     <div className="max-w-screen-lg mx-auto mobile-container mobile-space-y pb-20 sm:pb-6">
       {/* Dog Profile Section */}
-      <DogProfile />
+      <DogProfile onEditDogOpen={onEditDogOpen} />
 
       {/* Weekly Planner - Now at the top */}
       <WeeklyPlannerCard />

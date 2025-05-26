@@ -5,30 +5,24 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { ChevronDown, Plus, Users } from 'lucide-react';
 import { useDog } from '@/contexts/DogContext';
-import AddDogForm from './AddDogForm';
 
-const DogSelector = () => {
+interface DogSelectorProps {
+  onAddDogOpen: () => void;
+}
+
+const DogSelector: React.FC<DogSelectorProps> = ({ onAddDogOpen }) => {
   const { state, currentDog, setCurrentDog } = useDog();
   const [showSelector, setShowSelector] = useState(false);
-  const [showAddForm, setShowAddForm] = useState(false);
 
   if (state.dogs.length === 0) {
     return (
-      <>
-        <Button 
-          onClick={() => setShowAddForm(true)}
-          className="bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Add Your First Dog
-        </Button>
-        
-        <Dialog open={showAddForm} onOpenChange={setShowAddForm}>
-          <DialogContent className="p-0 max-w-lg">
-            <AddDogForm onClose={() => setShowAddForm(false)} />
-          </DialogContent>
-        </Dialog>
-      </>
+      <Button 
+        onClick={onAddDogOpen}
+        className="bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600"
+      >
+        <Plus className="w-4 h-4 mr-2" />
+        Add Your First Dog
+      </Button>
     );
   }
 
@@ -106,7 +100,7 @@ const DogSelector = () => {
             <Button 
               onClick={() => {
                 setShowSelector(false);
-                setShowAddForm(true);
+                onAddDogOpen();
               }}
               className="w-full bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600"
             >
@@ -114,13 +108,6 @@ const DogSelector = () => {
               Add New Dog
             </Button>
           </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Add Dog Form Dialog */}
-      <Dialog open={showAddForm} onOpenChange={setShowAddForm}>
-        <DialogContent className="p-0 max-w-lg">
-          <AddDogForm onClose={() => setShowAddForm(false)} />
         </DialogContent>
       </Dialog>
     </>

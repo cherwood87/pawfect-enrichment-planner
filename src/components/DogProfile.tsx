@@ -10,16 +10,19 @@ import { useActivity } from '@/contexts/ActivityContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import DogProfileQuiz from './DogProfileQuiz';
 import QuizResultsComponent from './QuizResults';
-import EditDogForm from './EditDogForm';
 import DogAvatarBlock from './DogAvatarBlock';
+import { Dog } from '@/types/dog';
 
-const DogProfile = () => {
+interface DogProfileProps {
+  onEditDogOpen: (dog: Dog) => void;
+}
+
+const DogProfile: React.FC<DogProfileProps> = ({ onEditDogOpen }) => {
   const { currentDog, updateDog } = useDog();
   const { getPillarBalance, getDailyGoals } = useActivity();
   const isMobile = useIsMobile();
   const [showQuiz, setShowQuiz] = useState(false);
   const [showResults, setShowResults] = useState(false);
-  const [showEditForm, setShowEditForm] = useState(false);
 
   if (!currentDog) {
     return null;
@@ -43,6 +46,10 @@ const DogProfile = () => {
     setShowResults(false);
   };
 
+  const handleEditClick = () => {
+    onEditDogOpen(currentDog);
+  };
+
   const topPillars = currentDog.quizResults?.ranking.slice(0, 2);
   const hasCompletedQuiz = !!currentDog.quizResults;
   const pillarBalance = getPillarBalance();
@@ -58,7 +65,7 @@ const DogProfile = () => {
       {/* Enhanced Dog Avatar Block */}
       <DogAvatarBlock 
         dog={currentDog}
-        onEditClick={() => setShowEditForm(true)}
+        onEditClick={handleEditClick}
       />
 
       {/* Quiz and Goals Section */}
@@ -118,48 +125,36 @@ const DogProfile = () => {
 
       {/* Quiz Dialog */}
       <Dialog open={showQuiz} onOpenChange={setShowQuiz}>
-        <DialogContent className={`p-0 mobile-modal ${isMobile ? 'h-[90vh]' : 'max-w-lg'}`}>
+        <DialogContent className="p-0 modal-standard">
           <DialogTitle className="sr-only">Dog Personality Quiz</DialogTitle>
           <DialogDescription className="sr-only">
             Take a quiz to discover your dog's personality and get personalized enrichment recommendations.
           </DialogDescription>
-          <DogProfileQuiz 
-            dogName={currentDog.name}
-            onComplete={handleQuizComplete}
-            onClose={() => setShowQuiz(false)}
-          />
+          <div className="modal-scroll-container">
+            <DogProfileQuiz 
+              dogName={currentDog.name}
+              onComplete={handleQuizComplete}
+              onClose={() => setShowQuiz(false)}
+            />
+          </div>
         </DialogContent>
       </Dialog>
 
       {/* Results Dialog */}
       <Dialog open={showResults} onOpenChange={setShowResults}>
-        <DialogContent className={`p-0 mobile-modal ${isMobile ? 'h-[90vh]' : 'max-w-lg'}`}>
+        <DialogContent className="p-0 modal-standard">
           <DialogTitle className="sr-only">Quiz Results</DialogTitle>
           <DialogDescription className="sr-only">
             View your dog's personality quiz results and enrichment recommendations.
           </DialogDescription>
-          {currentDog.quizResults && (
-            <QuizResultsComponent 
-              results={currentDog.quizResults}
-              onRetakeQuiz={handleRetakeQuiz}
-              onClose={handleCloseResults}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit Dog Dialog - Fixed for mobile scrolling */}
-      <Dialog open={showEditForm} onOpenChange={setShowEditForm}>
-        <DialogContent className="p-0 w-full max-w-lg max-h-[90vh] flex flex-col">
-          <DialogTitle className="sr-only">Edit Dog Profile</DialogTitle>
-          <DialogDescription className="sr-only">
-            Edit your dog's profile information including name, age, breed, and photo.
-          </DialogDescription>
           <div className="modal-scroll-container">
-            <EditDogForm 
-              dog={currentDog}
-              onClose={() => setShowEditForm(false)}
-            />
+            {currentDog.quizResults && (
+              <QuizResultsComponent 
+                results={currentDog.quizResults}
+                onRetakeQuiz={handleRetakeQuiz}
+                onClose={handleCloseResults}
+              />
+            )}
           </div>
         </DialogContent>
       </Dialog>

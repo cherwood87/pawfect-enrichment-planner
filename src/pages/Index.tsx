@@ -6,12 +6,16 @@ import DashboardContent from '@/components/dashboard/DashboardContent';
 import FloatingChatButton from '@/components/dashboard/FloatingChatButton';
 import DashboardModals from '@/components/dashboard/DashboardModals';
 import EmptyDashboard from '@/components/EmptyDashboard';
+import { Dog } from '@/types/dog';
 
 const Index = () => {
   const { currentDog } = useDog();
   const [isActivityModalOpen, setIsActivityModalOpen] = useState(false);
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
+  const [isAddDogModalOpen, setIsAddDogModalOpen] = useState(false);
+  const [isEditDogModalOpen, setIsEditDogModalOpen] = useState(false);
   const [selectedPillar, setSelectedPillar] = useState<string | null>(null);
+  const [selectedDog, setSelectedDog] = useState<Dog | null>(null);
 
   const handlePillarSelect = (pillar: string) => {
     setSelectedPillar(pillar);
@@ -31,6 +35,24 @@ const Index = () => {
     setIsChatModalOpen(true);
   };
 
+  const handleAddDogModalOpen = () => {
+    setIsAddDogModalOpen(true);
+  };
+
+  const handleAddDogModalClose = () => {
+    setIsAddDogModalOpen(false);
+  };
+
+  const handleEditDogModalOpen = (dog: Dog) => {
+    setSelectedDog(dog);
+    setIsEditDogModalOpen(true);
+  };
+
+  const handleEditDogModalClose = () => {
+    setIsEditDogModalOpen(false);
+    setSelectedDog(null);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-orange-50 mobile-safe">
       {/* Header */}
@@ -40,7 +62,11 @@ const Index = () => {
       {currentDog ? (
         <>
           {/* Dashboard Content */}
-          <DashboardContent onPillarSelect={handlePillarSelect} />
+          <DashboardContent 
+            onPillarSelect={handlePillarSelect}
+            onAddDogOpen={handleAddDogModalOpen}
+            onEditDogOpen={handleEditDogModalOpen}
+          />
 
           {/* Floating Chat Button */}
           <FloatingChatButton onChatOpen={handleChatModalOpen} />
@@ -49,23 +75,33 @@ const Index = () => {
           <DashboardModals
             isActivityModalOpen={isActivityModalOpen}
             isChatModalOpen={isChatModalOpen}
+            isAddDogModalOpen={isAddDogModalOpen}
+            isEditDogModalOpen={isEditDogModalOpen}
             selectedPillar={selectedPillar}
+            selectedDog={selectedDog}
             onActivityModalClose={handleActivityModalClose}
             onChatModalClose={handleChatModalClose}
+            onAddDogModalClose={handleAddDogModalClose}
+            onEditDogModalClose={handleEditDogModalClose}
           />
         </>
       ) : (
         <>
           {/* Empty State Dashboard */}
-          <EmptyDashboard />
+          <EmptyDashboard onAddDogOpen={handleAddDogModalOpen} />
 
           {/* Chat Modal for empty state */}
           <DashboardModals
             isActivityModalOpen={false}
             isChatModalOpen={isChatModalOpen}
+            isAddDogModalOpen={isAddDogModalOpen}
+            isEditDogModalOpen={false}
             selectedPillar={null}
+            selectedDog={null}
             onActivityModalClose={() => {}}
             onChatModalClose={handleChatModalClose}
+            onAddDogModalClose={handleAddDogModalClose}
+            onEditDogModalClose={() => {}}
           />
         </>
       )}
