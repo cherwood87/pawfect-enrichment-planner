@@ -13,9 +13,15 @@ import { Dog } from '@/types/dog';
 
 interface DashboardContentProps {
   onEditDogOpen: (dog: Dog) => void;
+  onAddDogOpen: () => void;
+  onPillarSelect?: (pillar: string) => void;
 }
 
-const DashboardContent: React.FC<DashboardContentProps> = ({ onEditDogOpen }) => {
+const DashboardContent: React.FC<DashboardContentProps> = ({ 
+  onEditDogOpen, 
+  onAddDogOpen,
+  onPillarSelect 
+}) => {
   const { currentDog, state } = useDog();
   const { getStreakData } = useActivity();
 
@@ -31,7 +37,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ onEditDogOpen }) =>
   }
 
   if (!currentDog) {
-    return <EmptyDashboard />;
+    return <EmptyDashboard onAddDogOpen={onAddDogOpen} />;
   }
 
   const streakData = getStreakData();
@@ -49,7 +55,11 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ onEditDogOpen }) =>
 
         {/* Right Columns - Activities and Stats */}
         <div className="lg:col-span-2 space-y-6">
-          <QuickStats streakData={streakData} />
+          <QuickStats 
+            activeDays={streakData.activeDays} 
+            completionRate={streakData.completionRate} 
+            currentStreak={streakData.currentStreak} 
+          />
           <DailyPlannerCard />
           <WeeklyPlannerCard />
         </div>

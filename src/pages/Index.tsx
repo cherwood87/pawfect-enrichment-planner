@@ -66,9 +66,9 @@ const Index = () => {
         <>
           {/* Dashboard Content */}
           <DashboardContent 
-            onPillarSelect={handlePillarSelect}
             onAddDogOpen={handleAddDogModalOpen}
             onEditDogOpen={handleEditDogModalOpen}
+            onPillarSelect={handlePillarSelect}
           />
 
           {/* Floating Chat Button */}

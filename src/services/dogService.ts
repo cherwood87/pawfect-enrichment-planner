@@ -38,7 +38,7 @@ export class DogService {
         mobility_issues: dogData.mobilityIssues || [],
         image: dogData.image || dogData.photo || '',
         notes: dogData.notes || '',
-        quiz_results: dogData.quizResults || null
+        quiz_results: dogData.quizResults ? JSON.parse(JSON.stringify(dogData.quizResults)) : null
       })
       .select()
       .single();
@@ -80,7 +80,7 @@ export class DogService {
         mobility_issues: dog.mobilityIssues || [],
         image: dog.image || dog.photo || '',
         notes: dog.notes || '',
-        quiz_results: dog.quizResults || null
+        quiz_results: dog.quizResults ? JSON.parse(JSON.stringify(dog.quizResults)) : null
       })
       .eq('id', dog.id)
       .select()
