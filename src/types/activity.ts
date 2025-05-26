@@ -45,6 +45,7 @@ export interface StreakData {
   currentStreak: number;
   bestStreak: number;
   completionRate: number;
+  activeDays: number;
   weeklyProgress: WeeklyProgress[];
 }
 

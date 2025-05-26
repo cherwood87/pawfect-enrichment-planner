@@ -1,4 +1,3 @@
-
 import { ScheduledActivity, UserActivity, ActivityLibraryItem, StreakData, WeeklyProgress, PillarGoals } from '@/types/activity';
 import { DiscoveredActivity } from '@/types/discovery';
 import { getActivityById } from '@/data/activityLibrary';
@@ -39,6 +38,7 @@ export const useActivityOperations = (
         currentStreak: 0,
         bestStreak: 0,
         completionRate: 0,
+        activeDays: 0,
         weeklyProgress: []
       };
     }
@@ -59,10 +59,14 @@ export const useActivityOperations = (
     const completedDays = weeklyProgress.filter(day => day.completed).length;
     const completionRate = weeklyProgress.length > 0 ? (completedDays / weeklyProgress.length) * 100 : 0;
     
+    // Calculate active days - days with at least one completed activity
+    const activeDays = completedDays;
+    
     return {
       currentStreak,
       bestStreak,
       completionRate: Math.round(completionRate),
+      activeDays,
       weeklyProgress
     };
   };
