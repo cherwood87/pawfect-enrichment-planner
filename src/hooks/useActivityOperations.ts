@@ -1,3 +1,4 @@
+
 import { ScheduledActivity, UserActivity, ActivityLibraryItem, StreakData, WeeklyProgress, PillarGoals } from '@/types/activity';
 import { DiscoveredActivity } from '@/types/discovery';
 import { getActivityById } from '@/data/activityLibrary';
@@ -9,11 +10,30 @@ export const useActivityOperations = (
   discoveredActivities: DiscoveredActivity[],
   currentDog: Dog | null
 ) => {
+  // Get ISO week number
+  function getISOWeek(date: Date): number {
+    const target = new Date(date.valueOf());
+    const dayNr = (date.getDay() + 6) % 7;
+    target.setDate(target.getDate() - dayNr + 3);
+    const firstThursday = target.valueOf();
+    target.setMonth(0, 1);
+    if (target.getDay() !== 4) {
+      target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
+    }
+    return 1 + Math.ceil((firstThursday - target.valueOf()) / 604800000);
+  }
+
   const getTodaysActivities = (): ScheduledActivity[] => {
     if (!currentDog) return [];
-    const today = new Date().toISOString().split('T')[0];
+    
+    const today = new Date();
+    const currentDayOfWeek = today.getDay();
+    const currentWeek = getISOWeek(today);
+    
     return scheduledActivities.filter(activity => 
-      activity.scheduledDate === today && activity.dogId === currentDog.id
+      activity.dogId === currentDog.id &&
+      activity.dayOfWeek === currentDayOfWeek &&
+      activity.weekNumber === currentWeek
     );
   };
 
