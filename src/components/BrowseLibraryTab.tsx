@@ -15,17 +15,14 @@ const BrowseLibraryTab: React.FC<BrowseLibraryTabProps> = ({
   onActivitySelect,
   schedulingMode = 'daily'
 }) => {
-  const scheduleButtonText = schedulingMode === 'daily' ? 'Schedule for Today' : 'Schedule for This Week';
+  const scheduleButtonText = 'Add to Weekly Plan';
 
   return (
     <div className="space-y-4">
       <div className="text-center mb-4">
         <p className="text-gray-600">Choose from our curated collection of enrichment activities</p>
         <p className="text-sm text-blue-600 mt-1">
-          {schedulingMode === 'daily' 
-            ? 'Activities will be added to today\'s plan' 
-            : 'Activities will be added to this week\'s plan'
-          }
+          Activities will be added to your weekly enrichment plan
         </p>
       </div>
       

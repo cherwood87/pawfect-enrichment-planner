@@ -18,7 +18,7 @@ const EmptyWeeklyPlanner: React.FC<EmptyWeeklyPlannerProps> = ({ onPillarSelect 
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Calendar className="w-5 h-5 text-green-600" />
-            <CardTitle className="font-bold text-gray-800">Weekly Plan</CardTitle>
+            <CardTitle className="font-bold text-gray-800">Weekly Enrichment Plan</CardTitle>
           </div>
           <Button
             variant="ghost"

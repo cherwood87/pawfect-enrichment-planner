@@ -164,21 +164,21 @@ const DailyPlannerCard = () => {
         <CardHeader className="mobile-card bg-gradient-to-r from-blue-50 to-purple-50">
           <CardTitle className="font-bold text-gray-800 flex items-center space-x-2">
             <Calendar className={`${isMobile ? 'w-4 h-4' : 'w-5 h-5'} text-blue-600`} />
-            <span>Today's Plan</span>
+            <span>Today's Activities</span>
           </CardTitle>
         </CardHeader>
         <CardContent className="text-center mobile-card">
           <div className="text-gray-500 mb-4">
             <Calendar className="w-12 h-12 mx-auto mb-2 opacity-50" />
-            <p className="text-lg font-medium">No activities planned for today</p>
-            <p className="text-sm">Let's create a perfect day for {currentDog?.name}!</p>
+            <p className="text-lg font-medium">No activities scheduled for today</p>
+            <p className="text-sm">Add activities to your weekly plan to get started!</p>
           </div>
           <Button 
             onClick={() => navigate('/activity-library')}
             className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
           >
             <Plus className="w-4 h-4 mr-2" />
-            Plan Activities
+            Browse Weekly Activities
           </Button>
         </CardContent>
       </Card>
@@ -192,7 +192,7 @@ const DailyPlannerCard = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Calendar className={`${isMobile ? 'w-4 h-4' : 'w-5 h-5'} text-blue-600`} />
-              <CardTitle className="font-bold text-gray-800">Today's Plan</CardTitle>
+              <CardTitle className="font-bold text-gray-800">Today's Activities</CardTitle>
             </div>
             <div className="flex items-center space-x-3">
               <Badge 

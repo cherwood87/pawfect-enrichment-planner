@@ -20,7 +20,7 @@ const EmptyDashboard: React.FC<EmptyDashboardProps> = ({ onAddDogOpen, onPillarS
               Welcome to Your Dog's Enrichment Journey!
             </h2>
             <p className="text-gray-600">
-              Let's start by adding your furry friend's profile to create a personalized enrichment plan.
+              Let's start by adding your furry friend's profile to create a personalized weekly enrichment plan.
             </p>
           </div>
           
@@ -35,7 +35,7 @@ const EmptyDashboard: React.FC<EmptyDashboardProps> = ({ onAddDogOpen, onPillarS
           <div className="mt-6 text-sm text-gray-500">
             <p>Once you add your dog, you'll be able to:</p>
             <ul className="mt-2 space-y-1">
-              <li>• Create personalized daily and weekly plans</li>
+              <li>• Create personalized weekly enrichment plans</li>
               <li>• Track enrichment activities across 5 key pillars</li>
               <li>• Monitor your dog's progress and streaks</li>
               <li>• Access our curated activity library</li>
