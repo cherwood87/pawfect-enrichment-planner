@@ -1,12 +1,10 @@
 
 import React from 'react';
 import { useDog } from '@/contexts/DogContext';
-import { useActivity } from '@/contexts/ActivityContext';
 import DogProfile from '@/components/DogProfile';
 import EnrichmentPillars from '@/components/EnrichmentPillars';
-import TodaySchedule from '@/components/TodaySchedule';
-import StreakTracker from '@/components/StreakTracker';
 import WeeklyPlannerCard from '@/components/WeeklyPlannerCard';
+import DailyPlannerCard from '@/components/DailyPlannerCard';
 
 interface DashboardContentProps {
   onPillarSelect: (pillar: string) => void;
@@ -14,7 +12,6 @@ interface DashboardContentProps {
 
 const DashboardContent: React.FC<DashboardContentProps> = ({ onPillarSelect }) => {
   const { currentDog } = useDog();
-  const { getStreakData, getPillarBalance } = useActivity();
 
   if (!currentDog) {
     return null;
@@ -31,17 +28,14 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ onPillarSelect }) =
       {/* Weekly Planner - Now at the top */}
       <WeeklyPlannerCard />
 
-      {/* Today's Schedule */}
-      <TodaySchedule />
+      {/* Today's Schedule - Replaced with DailyPlannerCard */}
+      <DailyPlannerCard />
 
       {/* Enrichment Pillars */}
       <EnrichmentPillars 
         onPillarSelect={onPillarSelect}
         userPreferences={userPreferences}
       />
-
-      {/* Streak Tracker */}
-      <StreakTracker />
     </div>
   );
 };
