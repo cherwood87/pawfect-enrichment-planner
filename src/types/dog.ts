@@ -18,7 +18,7 @@ export interface Dog {
   gender?: 'Male' | 'Female' | 'Unknown';
   image?: string;
   breedGroup?: string;
-  mobilityIssues: string[];
+  mobilityIssues?: string[];
   notes?: string;
 }
 
