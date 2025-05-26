@@ -4,6 +4,7 @@ import { useDog } from '@/contexts/DogContext';
 import DogProfile from '@/components/DogProfile';
 import WeeklyPlannerCard from '@/components/WeeklyPlannerCard';
 import DailyPlannerCard from '@/components/DailyPlannerCard';
+import ReflectionJournal from '@/components/ReflectionJournal';
 import { Dog } from '@/types/dog';
 
 interface DashboardContentProps {
@@ -33,6 +34,9 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
 
       {/* Today's Schedule - Replaced with DailyPlannerCard */}
       <DailyPlannerCard />
+
+      {/* Reflection Journal - New section */}
+      <ReflectionJournal />
     </div>
   );
 };
