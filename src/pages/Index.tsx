@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Plus, Calendar, Target, Trophy, Settings, Home, Library, MessageCircle, Menu } from 'lucide-react';
+import { Calendar, Target, Trophy, Settings, Home, Library, MessageCircle, Menu } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useDog } from '@/contexts/DogContext';
 import { useActivity } from '@/contexts/ActivityContext';
@@ -164,15 +163,9 @@ const Index = () => {
             {/* Streak Tracker */}
             <StreakTracker />
 
-            {/* Floating Buttons */}
-            <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 flex flex-col space-y-2 sm:space-y-3 z-30">
+            {/* Floating Chat Button */}
+            <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-30">
               <CoachButton onClick={() => setIsChatModalOpen(true)} />
-              <Button 
-                onClick={() => setIsActivityModalOpen(true)}
-                className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600 shadow-lg touch-target"
-              >
-                <Plus className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-              </Button>
             </div>
 
             {/* Modals */}
