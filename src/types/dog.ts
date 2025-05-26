@@ -14,6 +14,12 @@ export interface Dog {
   photo?: string;
   quizResults?: QuizResults;
   journalEntries?: JournalEntry[];
+  // New properties that were missing
+  gender?: 'Male' | 'Female' | 'Unknown';
+  image?: string;
+  breedGroup?: string;
+  mobilityIssues: string[];
+  notes?: string;
 }
 
 export interface JournalEntry {
@@ -24,3 +30,29 @@ export interface JournalEntry {
   behaviors: string[];
   notes: string;
 }
+
+// Constants for form components
+export const GENDER_OPTIONS = ['Male', 'Female', 'Unknown'] as const;
+
+export const BREED_GROUPS = [
+  'Unknown',
+  'Sporting',
+  'Hound',
+  'Working',
+  'Terrier',
+  'Toy',
+  'Non-Sporting',
+  'Herding',
+  'Mixed Breed'
+] as const;
+
+export const MOBILITY_ISSUES = [
+  'None',
+  'Hip dysplasia',
+  'Arthritis',
+  'Joint issues',
+  'Mobility aids needed',
+  'Limited exercise tolerance',
+  'Senior dog considerations',
+  'Recent surgery recovery'
+] as const;
