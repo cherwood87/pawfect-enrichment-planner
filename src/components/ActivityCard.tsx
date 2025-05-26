@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -15,8 +15,19 @@ interface ActivityCardProps {
   onClose: () => void;
 }
 
+const daysOfWeek = [
+  { label: 'Sunday', value: 0 },
+  { label: 'Monday', value: 1 },
+  { label: 'Tuesday', value: 2 },
+  { label: 'Wednesday', value: 3 },
+  { label: 'Thursday', value: 4 },
+  { label: 'Friday', value: 5 },
+  { label: 'Saturday', value: 6 },
+];
+
 const ActivityCard: React.FC<ActivityCardProps> = ({ activity, isOpen, onClose }) => {
   const { addScheduledActivity } = useActivity();
+  const [selectedDayOfWeek, setSelectedDayOfWeek] = useState<number>(1); // Default to Monday
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
@@ -31,16 +42,42 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, isOpen, onClose }
     return 'source' in activity && activity.source === 'discovered';
   };
 
+  const getISOWeek = (date: Date): number => {
+    const target = new Date(date.valueOf());
+    const dayNr = (date.getDay() + 6) % 7;
+    target.setDate(target.getDate() - dayNr + 3);
+    const firstThursday = target.valueOf();
+    target.setMonth(0, 1);
+    if (target.getDay() !== 4) {
+      target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
+    }
+    return 1 + Math.ceil((firstThursday - target.valueOf()) / 604800000);
+  };
+
+  // Calculate the date for the selected day in the current week
+  const getDateForDayOfWeek = (dayOfWeek: number) => {
+    const today = new Date();
+    const currentDay = today.getDay();
+    const diff = dayOfWeek - currentDay;
+    const targetDate = new Date(today);
+    targetDate.setDate(today.getDate() + diff);
+    return targetDate;
+  };
+
   const handleScheduleActivity = () => {
-    const now = new Date();
-    const scheduledTime = `${now.getHours() + 1}:00 ${now.getHours() + 1 >= 12 ? 'PM' : 'AM'}`;
-    const scheduledDate = now.toISOString().split('T')[0];
+    const targetDate = getDateForDayOfWeek(selectedDayOfWeek);
+    const weekNumber = getISOWeek(targetDate);
+    const scheduledDate = targetDate.toISOString().split('T')[0];
 
     addScheduledActivity({
       activityId: activity.id,
-      scheduledTime,
       scheduledDate,
-      completed: false
+      weekNumber,
+      dayOfWeek: selectedDayOfWeek,
+      completed: false,
+      notes: '',
+      completionNotes: '',
+      reminderEnabled: false,
     });
 
     onClose();
@@ -92,6 +129,23 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, isOpen, onClose }
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto space-y-6">
+
+          {/* Day of Week Picker */}
+          <div className="mb-4">
+            <label className="block mb-1 font-medium">Choose a day:</label>
+            <select
+              className="border rounded px-3 py-2 w-full"
+              value={selectedDayOfWeek}
+              onChange={e => setSelectedDayOfWeek(Number(e.target.value))}
+            >
+              {daysOfWeek.map(day => (
+                <option key={day.value} value={day.value}>
+                  {day.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
           {/* Quick Stats */}
           <div className="grid grid-cols-3 gap-4">
             <Card>
