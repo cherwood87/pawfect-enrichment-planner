@@ -83,6 +83,7 @@
 }
 
 @layer components {
+  /* Pillar styling */
   .pillar-mental {
     @apply bg-gradient-to-br from-purple-100 to-purple-200 border-purple-300;
   }
@@ -103,6 +104,7 @@
     @apply bg-gradient-to-br from-orange-100 to-orange-200 border-orange-300;
   }
 
+  /* Scroll utilities */
   .horizontal-scroll {
     @apply overflow-x-auto;
     scroll-behavior: smooth;
@@ -125,12 +127,16 @@
     @apply bg-gray-400;
   }
 
-  /* Mobile-optimized touch targets */
+  .smooth-scroll {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Mobile-optimized utilities */
   .touch-target {
     @apply min-h-[44px] min-w-[44px];
   }
 
-  /* Mobile-safe containers */
   .mobile-container {
     @apply px-3 sm:px-4 md:px-6;
   }
@@ -139,7 +145,6 @@
     @apply max-w-full overflow-hidden;
   }
 
-  /* Mobile-optimized spacing */
   .mobile-space-y {
     @apply space-y-3 sm:space-y-4 md:space-y-6;
   }
@@ -148,7 +153,6 @@
     @apply gap-2 sm:gap-3 md:gap-4;
   }
 
-  /* Mobile-friendly cards */
   .mobile-card {
     @apply p-3 sm:p-4 md:p-6 rounded-lg;
   }
@@ -162,33 +166,26 @@
     @apply grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4;
   }
 
-  /* Standardized Modal Sizing - Simple and Consistent */
+  /* Modal System - Standardized and Simplified */
   .modal-standard {
-    @apply w-full max-w-4xl h-[85vh] max-h-[600px];
+    @apply w-full max-w-4xl h-[85vh] max-h-[600px] z-50;
   }
   
-  /* Mobile modal adjustments */
   @media (max-width: 767px) {
     .modal-standard {
       @apply w-[calc(100vw-1rem)] h-[90vh] max-h-none m-2;
     }
   }
   
-  /* Touch-friendly scrolling optimizations */
-  .smooth-scroll {
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
-  }
-  
-  /* Modal content scroll container */
+  /* Modal content scroll container - high z-index for proper layering */
   .modal-scroll-container {
-    @apply flex-1 overflow-y-auto;
+    @apply flex-1 overflow-y-auto z-40;
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
   }
 }
 
-/* Ensure touch-friendly interactions */
+/* Touch-friendly interactions */
 @media (hover: none) and (pointer: coarse) {
   .hover\\:scale-105:hover {
     transform: none;
@@ -199,21 +196,15 @@
   }
 }
 
-/* Fix for iOS viewport height issues */
+/* iOS viewport height fix */
 @supports (-webkit-touch-callout: none) {
   .min-h-screen {
     min-height: -webkit-fill-available;
   }
 }
 
-/* Desktop scroll optimization */
+/* Desktop optimizations */
 @media (min-width: 768px) {
-  /* Ensure modals can scroll properly on desktop */
-  .modal-content {
-    max-height: 85vh;
-    overflow-y: auto;
-  }
-  
   /* Better scrollbar styling for desktop */
   .overflow-y-auto::-webkit-scrollbar {
     width: 6px;
@@ -232,7 +223,7 @@
   }
 }
 
-/* Prevent scroll lock on mobile devices */
+/* Mobile scroll optimization */
 @media (max-width: 767px) {
   .overflow-y-auto {
     -webkit-overflow-scrolling: touch;
