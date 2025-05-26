@@ -15,9 +15,10 @@ import DogSelector from '@/components/DogSelector';
 
 interface DashboardHeaderProps {
   onChatOpen: () => void;
+  onAddDogOpen: () => void;
 }
 
-const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onChatOpen }) => {
+const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onChatOpen, onAddDogOpen }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useIsMobile();
@@ -46,7 +47,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onChatOpen }) => {
             )}
           </div>
           <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
-            <DogSelector />
+            <DogSelector onAddDogOpen={onAddDogOpen} />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size={isMobile ? "sm" : "default"} className="touch-target">

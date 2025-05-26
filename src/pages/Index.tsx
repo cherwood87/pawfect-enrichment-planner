@@ -56,7 +56,10 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-orange-50 mobile-safe">
       {/* Header */}
-      <DashboardHeader onChatOpen={handleChatModalOpen} />
+      <DashboardHeader 
+        onChatOpen={handleChatModalOpen} 
+        onAddDogOpen={handleAddDogModalOpen}
+      />
 
       {/* Main Content - Show EmptyDashboard if no current dog, otherwise show regular dashboard */}
       {currentDog ? (
