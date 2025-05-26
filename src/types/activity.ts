@@ -16,12 +16,15 @@ export interface ActivityLibraryItem {
 
 export interface ScheduledActivity {
   id: string;
-  dogId: string; // NEW: Associate activities with specific dogs
+  dogId: string; // Associate activities with specific dogs
   activityId: string; // references ActivityLibraryItem
-  scheduledTime: string;
+  scheduledTime: string; // Keep for backward compatibility
+  userSelectedTime?: string; // NEW: User-customizable time (HH:MM format)
   scheduledDate: string;
   completed: boolean;
-  notes?: string;
+  notes?: string; // NEW: User notes for the activity
+  completionNotes?: string; // NEW: Notes added when completing activity
+  reminderEnabled?: boolean; // NEW: Whether reminders are enabled
   completedAt?: string;
 }
 

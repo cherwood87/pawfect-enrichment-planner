@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { ScheduledActivity, UserActivity } from '@/types/activity';
 import { DiscoveredActivity, ContentDiscoveryConfig } from '@/types/discovery';
@@ -28,7 +27,19 @@ export const ActivityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     ContentDiscoveryService.getDefaultConfig()
   );
 
-  // Load dog-specific data from localStorage
+  // Migration helper function to ensure backward compatibility
+  const migrateScheduledActivity = (activity: any): ScheduledActivity => {
+    return {
+      ...activity,
+      // Ensure new fields have default values if they don't exist
+      userSelectedTime: activity.userSelectedTime || activity.scheduledTime,
+      notes: activity.notes || '',
+      completionNotes: activity.completionNotes || '',
+      reminderEnabled: activity.reminderEnabled ?? false
+    };
+  };
+
+  // Load dog-specific data from localStorage with migration
   useEffect(() => {
     if (!currentDog) {
       setScheduledActivities([]);
@@ -42,7 +53,10 @@ export const ActivityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const savedDiscovered = getDiscoveredActivities(currentDog.id);
     
     if (savedScheduled) {
-      setScheduledActivities(JSON.parse(savedScheduled));
+      const parsedActivities = JSON.parse(savedScheduled);
+      // Migrate existing data to include new fields
+      const migratedActivities = parsedActivities.map(migrateScheduledActivity);
+      setScheduledActivities(migratedActivities);
     } else {
       // Initialize with some default activities for new dogs
       const defaultActivities: ScheduledActivity[] = [
@@ -51,24 +65,36 @@ export const ActivityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           dogId: currentDog.id,
           activityId: 'physical-morning-walk',
           scheduledTime: '8:00 AM',
+          userSelectedTime: '8:00 AM',
           scheduledDate: new Date().toISOString().split('T')[0],
-          completed: false
+          completed: false,
+          notes: '',
+          completionNotes: '',
+          reminderEnabled: false
         },
         {
           id: 'scheduled-2',
           dogId: currentDog.id,
           activityId: 'mental-puzzle-feeder',
           scheduledTime: '12:00 PM',
+          userSelectedTime: '12:00 PM',
           scheduledDate: new Date().toISOString().split('T')[0],
-          completed: false
+          completed: false,
+          notes: '',
+          completionNotes: '',
+          reminderEnabled: false
         },
         {
           id: 'scheduled-3',
           dogId: currentDog.id,
           activityId: 'environmental-new-route',
           scheduledTime: '3:00 PM',
+          userSelectedTime: '3:00 PM',
           scheduledDate: new Date().toISOString().split('T')[0],
-          completed: false
+          completed: false,
+          notes: '',
+          completionNotes: '',
+          reminderEnabled: false
         }
       ];
       setScheduledActivities(defaultActivities);
@@ -146,7 +172,12 @@ export const ActivityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const newActivity: ScheduledActivity = {
       ...activity,
       id: `scheduled-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      dogId: currentDog.id
+      dogId: currentDog.id,
+      // Ensure new fields have default values
+      userSelectedTime: activity.userSelectedTime || activity.scheduledTime,
+      notes: activity.notes || '',
+      completionNotes: activity.completionNotes || '',
+      reminderEnabled: activity.reminderEnabled ?? false
     };
     setScheduledActivities(prev => [...prev, newActivity]);
   };
