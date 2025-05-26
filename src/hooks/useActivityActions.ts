@@ -23,14 +23,15 @@ export const useActivityActions = (
     setScheduledActivities(prev => [...prev, newActivity]);
   };
 
-  const toggleActivityCompletion = (activityId: string) => {
+  const toggleActivityCompletion = (activityId: string, completionNotes?: string) => {
     setScheduledActivities(prev =>
       prev.map(activity =>
         activity.id === activityId
           ? { 
               ...activity, 
               completed: !activity.completed,
-              completedAt: !activity.completed ? new Date().toISOString() : undefined
+              completedAt: !activity.completed ? new Date().toISOString() : undefined,
+              completionNotes: !activity.completed ? (completionNotes || '') : activity.completionNotes
             }
           : activity
       )
