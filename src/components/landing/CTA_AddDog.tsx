@@ -20,7 +20,7 @@ const CTA_AddDog: React.FC = () => {
             </h2>
             
             <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-              Join thousands of dog parents who have discovered the joy of a truly enriched, 
+              Join thousands of dog owners who have discovered the joy of a truly enriched, 
               happy, and healthy dog. Start your journey in less than 2 minutes.
             </p>
 
@@ -53,7 +53,7 @@ const CTA_AddDog: React.FC = () => {
               size="lg" 
               className="bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600 text-xl px-12 py-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
             >
-              Start Your Dog's Journey - It's Free!
+              Start Your Dog's Journey!
             </Button>
             
             <p className="text-sm text-gray-500 mt-4">
