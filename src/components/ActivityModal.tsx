@@ -20,7 +20,7 @@ const ActivityModal: React.FC<ActivityModalProps> = ({ isOpen, onClose, selected
   const { discoveredActivities } = useActivity();
   
   const pendingActivities = discoveredActivities.filter(activity => 
-    !activity.isApproved && !activity.isRejected
+    !activity.approved && !activity.rejected
   );
   
   const handleScheduleActivity = (activityId: string, scheduledTime: string, notes?: string) => {
@@ -67,16 +67,17 @@ const ActivityModal: React.FC<ActivityModalProps> = ({ isOpen, onClose, selected
           <TabsContent value="browse">
             <BrowseLibraryTab 
               selectedPillar={selectedPillar}
-              onScheduleActivity={handleScheduleActivity}
             />
           </TabsContent>
           
           <TabsContent value="create">
-            <CreateCustomTab onClose={onClose} />
+            <CreateCustomTab />
           </TabsContent>
           
           <TabsContent value="review">
-            <DiscoveryReview />
+            <DiscoveryReview 
+              activities={discoveredActivities}
+            />
           </TabsContent>
         </Tabs>
       </DialogContent>
