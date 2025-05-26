@@ -67,18 +67,22 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   // Load dogs from localStorage on mount
   useEffect(() => {
-    const savedDogs = localStorage.getItem('dogs');
-    const savedCurrentDogId = localStorage.getItem('currentDogId');
-    
-    if (savedDogs) {
-      const dogs = JSON.parse(savedDogs);
-      dispatch({ type: 'SET_DOGS', payload: dogs });
+    try {
+      const savedDogs = localStorage.getItem('dogs');
+      const savedCurrentDogId = localStorage.getItem('currentDogId');
       
-      if (savedCurrentDogId && dogs.find((dog: Dog) => dog.id === savedCurrentDogId)) {
-        dispatch({ type: 'SET_CURRENT_DOG', payload: savedCurrentDogId });
-      } else if (dogs.length > 0) {
-        dispatch({ type: 'SET_CURRENT_DOG', payload: dogs[0].id });
+      if (savedDogs) {
+        const dogs = JSON.parse(savedDogs);
+        dispatch({ type: 'SET_DOGS', payload: dogs });
+        
+        if (savedCurrentDogId && dogs.find((dog: Dog) => dog.id === savedCurrentDogId)) {
+          dispatch({ type: 'SET_CURRENT_DOG', payload: savedCurrentDogId });
+        } else if (dogs.length > 0) {
+          dispatch({ type: 'SET_CURRENT_DOG', payload: dogs[0].id });
+        }
       }
+    } catch (error) {
+      console.error('Error loading dogs from localStorage:', error);
     }
     
     dispatch({ type: 'SET_LOADING', payload: false });
@@ -87,39 +91,63 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // Save to localStorage whenever dogs change
   useEffect(() => {
     if (!state.isLoading) {
-      localStorage.setItem('dogs', JSON.stringify(state.dogs));
-      if (state.currentDogId) {
-        localStorage.setItem('currentDogId', state.currentDogId);
+      try {
+        localStorage.setItem('dogs', JSON.stringify(state.dogs));
+        if (state.currentDogId) {
+          localStorage.setItem('currentDogId', state.currentDogId);
+        }
+      } catch (error) {
+        console.error('Error saving dogs to localStorage:', error);
       }
     }
   }, [state.dogs, state.currentDogId, state.isLoading]);
 
   const addDog = (dogData: Omit<Dog, 'id' | 'dateAdded' | 'lastUpdated'>) => {
-    const newDog: Dog = {
-      ...dogData,
-      id: generateId(),
-      dateAdded: new Date().toISOString(),
-      lastUpdated: new Date().toISOString()
-    };
-    
-    dispatch({ type: 'ADD_DOG', payload: newDog });
-    dispatch({ type: 'SET_CURRENT_DOG', payload: newDog.id });
+    try {
+      const newDog: Dog = {
+        ...dogData,
+        id: generateId(),
+        dateAdded: new Date().toISOString(),
+        lastUpdated: new Date().toISOString()
+      };
+      
+      console.log('Adding new dog:', newDog.name);
+      dispatch({ type: 'ADD_DOG', payload: newDog });
+      dispatch({ type: 'SET_CURRENT_DOG', payload: newDog.id });
+    } catch (error) {
+      console.error('Error adding dog:', error);
+    }
   };
 
   const updateDog = (dog: Dog) => {
-    const updatedDog = {
-      ...dog,
-      lastUpdated: new Date().toISOString()
-    };
-    dispatch({ type: 'UPDATE_DOG', payload: updatedDog });
+    try {
+      const updatedDog = {
+        ...dog,
+        lastUpdated: new Date().toISOString()
+      };
+      console.log('Updating dog:', updatedDog.name);
+      dispatch({ type: 'UPDATE_DOG', payload: updatedDog });
+    } catch (error) {
+      console.error('Error updating dog:', error);
+    }
   };
 
   const deleteDog = (id: string) => {
-    dispatch({ type: 'DELETE_DOG', payload: id });
+    try {
+      console.log('Deleting dog with id:', id);
+      dispatch({ type: 'DELETE_DOG', payload: id });
+    } catch (error) {
+      console.error('Error deleting dog:', error);
+    }
   };
 
   const setCurrentDog = (id: string) => {
-    dispatch({ type: 'SET_CURRENT_DOG', payload: id });
+    try {
+      console.log('Setting current dog to:', id);
+      dispatch({ type: 'SET_CURRENT_DOG', payload: id });
+    } catch (error) {
+      console.error('Error setting current dog:', error);
+    }
   };
 
   const currentDog = state.dogs.find(dog => dog.id === state.currentDogId) || null;

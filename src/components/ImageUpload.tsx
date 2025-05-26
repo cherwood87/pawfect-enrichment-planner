@@ -17,33 +17,52 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 }) => {
   const [dragOver, setDragOver] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isMobile = useIsMobile();
 
   const handleFileSelect = async (file: File) => {
-    if (file && file.type.startsWith('image/')) {
-      try {
-        setIsProcessing(true);
-        console.log('Processing image file:', file.name, file.size);
-        
-        const reader = new FileReader();
-        reader.onload = (e) => {
+    if (!file || !file.type.startsWith('image/')) {
+      console.warn('Invalid file type selected:', file?.type);
+      setError('Please select a valid image file');
+      return;
+    }
+
+    // Check file size (limit to 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      console.warn('File too large:', file.size);
+      setError('Image must be less than 5MB');
+      return;
+    }
+
+    try {
+      setIsProcessing(true);
+      setError(null);
+      console.log('Processing image file:', file.name, file.size);
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
           const result = e.target?.result as string;
           console.log('Image processed successfully');
           onImageChange(result);
           setIsProcessing(false);
-        };
-        reader.onerror = (error) => {
-          console.error('Error reading file:', error);
+        } catch (error) {
+          console.error('Error processing image result:', error);
+          setError('Failed to process image');
           setIsProcessing(false);
-        };
-        reader.readAsDataURL(file);
-      } catch (error) {
-        console.error('Error processing image:', error);
+        }
+      };
+      reader.onerror = (error) => {
+        console.error('Error reading file:', error);
+        setError('Failed to read image file');
         setIsProcessing(false);
-      }
-    } else {
-      console.warn('Invalid file type selected:', file?.type);
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('Error processing image:', error);
+      setError('Failed to process image');
+      setIsProcessing(false);
     }
   };
 
@@ -68,6 +87,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 
   const handleClick = () => {
     if (!isProcessing) {
+      setError(null);
       fileInputRef.current?.click();
     }
   };
@@ -75,6 +95,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   const handleRemove = (e: React.MouseEvent) => {
     e.stopPropagation();
     console.log('Removing image');
+    setError(null);
     onImageChange(undefined);
   };
 
@@ -95,6 +116,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
           ${dragOver ? 'border-blue-400 bg-blue-50' : 'border-gray-300 hover:border-gray-400'}
           ${currentImage ? 'border-solid' : ''}
           ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}
+          ${error ? 'border-red-400 bg-red-50' : ''}
         `}
       >
         {currentImage ? (
@@ -103,6 +125,11 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
               src={currentImage} 
               alt="Dog" 
               className={`${avatarSize} rounded-full object-cover`}
+              onError={(e) => {
+                console.error('Error loading image:', e);
+                setError('Failed to load image');
+                onImageChange(undefined);
+              }}
             />
             <Button
               size="sm"
@@ -118,11 +145,17 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
           <div className="text-center">
             <Camera className={`${iconSize} text-gray-400 mx-auto mb-1`} />
             <div className="text-xs text-gray-500">
-              {isProcessing ? 'Processing...' : 'Add Photo'}
+              {isProcessing ? 'Processing...' : error ? 'Try Again' : 'Add Photo'}
             </div>
           </div>
         )}
       </div>
+      
+      {error && (
+        <div className="absolute top-full left-0 mt-1 text-xs text-red-500 text-center w-full">
+          {error}
+        </div>
+      )}
       
       <input
         ref={fileInputRef}
