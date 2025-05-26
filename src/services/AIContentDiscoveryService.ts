@@ -13,6 +13,9 @@ export class AIContentDiscoveryService {
     qualityThreshold: 0.6,
   };
 
+  private static lastDiscoveryAttempt: string | null = null;
+  private static readonly MIN_DISCOVERY_INTERVAL_MS = 30000; // 30 seconds minimum between attempts
+
   static async discoverNewActivities(
     existingActivities: (ActivityLibraryItem | DiscoveredActivity)[],
     config?: Partial<ContentDiscoveryConfig>,
@@ -25,6 +28,17 @@ export class AIContentDiscoveryService {
       console.log('AI content discovery is disabled');
       return [];
     }
+
+    // Prevent too frequent discovery attempts
+    const now = new Date().toISOString();
+    if (this.lastDiscoveryAttempt) {
+      const timeSinceLastAttempt = Date.now() - new Date(this.lastDiscoveryAttempt).getTime();
+      if (timeSinceLastAttempt < this.MIN_DISCOVERY_INTERVAL_MS) {
+        console.log('Discovery attempted too recently, skipping to prevent loops');
+        return [];
+      }
+    }
+    this.lastDiscoveryAttempt = now;
 
     console.log('Starting AI-powered content discovery...');
     
@@ -45,11 +59,12 @@ export class AIContentDiscoveryService {
 
       if (error) {
         console.error('AI discovery function error:', error);
+        // Return empty array instead of throwing to prevent infinite loops
         return [];
       }
 
       if (!data?.activities || !Array.isArray(data.activities)) {
-        console.log('No activities returned from AI discovery');
+        console.log('No activities returned from AI discovery:', data);
         return [];
       }
 
@@ -66,6 +81,7 @@ export class AIContentDiscoveryService {
       
     } catch (error) {
       console.error('Error during AI content discovery:', error);
+      // Return empty array instead of throwing to prevent crashes
       return [];
     }
   }
@@ -102,7 +118,11 @@ export class AIContentDiscoveryService {
   }
 
   static shouldRunDiscovery(config: ContentDiscoveryConfig): boolean {
-    if (!config.enabled || !config.lastDiscoveryRun) {
+    if (!config.enabled) {
+      return false;
+    }
+    
+    if (!config.lastDiscoveryRun) {
       return true;
     }
     

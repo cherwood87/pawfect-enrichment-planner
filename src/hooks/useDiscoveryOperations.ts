@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { DiscoveredActivity, ContentDiscoveryConfig } from '@/types/discovery';
 import { AIContentDiscoveryService } from '@/services/AIContentDiscoveryService';
@@ -21,7 +22,10 @@ export const useDiscoveryOperations = (
   };
 
   const discoverNewActivities = async (): Promise<void> => {
-    if (!currentDog || isDiscovering) return;
+    if (!currentDog || isDiscovering) {
+      console.log('Discovery skipped: no dog or already discovering');
+      return;
+    }
     
     setIsDiscovering(true);
     console.log('Starting AI-powered content discovery for', currentDog.name);
@@ -50,21 +54,48 @@ export const useDiscoveryOperations = (
         console.log(`All ${newActivities.length} activities automatically added to library`);
       } else {
         console.log('No new unique activities found in this AI discovery session');
+        
+        // Still update the discovery config to prevent immediate re-runs
+        const updatedConfig = {
+          ...discoveryConfig,
+          lastDiscoveryRun: new Date().toISOString()
+        };
+        setDiscoveryConfig(updatedConfig);
+        localStorage.setItem(`discoveryConfig-${currentDog.id}`, JSON.stringify(updatedConfig));
       }
     } catch (error) {
       console.error('AI Discovery failed:', error);
+      
+      // Update config even on failure to prevent infinite retries
+      const updatedConfig = {
+        ...discoveryConfig,
+        lastDiscoveryRun: new Date().toISOString()
+      };
+      setDiscoveryConfig(updatedConfig);
+      localStorage.setItem(`discoveryConfig-${currentDog.id}`, JSON.stringify(updatedConfig));
     } finally {
       setIsDiscovering(false);
     }
   };
 
-  // Auto-discovery check on load
+  // Auto-discovery check on load with improved logic
   const checkAndRunAutoDiscovery = async () => {
-    if (!currentDog) return;
+    if (!currentDog) {
+      console.log('Auto-discovery skipped: no current dog');
+      return;
+    }
     
-    if (AIContentDiscoveryService.shouldRunDiscovery(discoveryConfig)) {
+    if (isDiscovering) {
+      console.log('Auto-discovery skipped: already discovering');
+      return;
+    }
+    
+    const shouldRun = AIContentDiscoveryService.shouldRunDiscovery(discoveryConfig);
+    if (shouldRun) {
       console.log('Running automatic weekly discovery...');
       await discoverNewActivities();
+    } else {
+      console.log('Auto-discovery not needed at this time');
     }
   };
 
