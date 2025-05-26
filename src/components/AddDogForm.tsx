@@ -24,26 +24,36 @@ const AddDogForm: React.FC<AddDogFormProps> = ({ onClose }) => {
     image: undefined as string | undefined,
     notes: ''
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name.trim()) return;
+    if (!formData.name.trim() || isSubmitting) return;
     
-    addDog({
-      name: formData.name.trim(),
-      age: parseInt(formData.age) || 0,
-      breed: formData.breed.trim() || 'Unknown',
-      gender: formData.gender as 'Male' | 'Female' | 'Unknown',
-      breedGroup: formData.breedGroup,
-      mobilityIssues: formData.mobilityIssues,
-      image: formData.image,
-      notes: formData.notes.trim()
-    });
-    
-    onClose();
-    // Redirect to the Dog Profile Quiz page after successful submission
-    navigate('/dog-profile-quiz');
+    try {
+      setIsSubmitting(true);
+      console.log('Adding dog with data:', formData);
+      
+      addDog({
+        name: formData.name.trim(),
+        age: parseInt(formData.age) || 0,
+        breed: formData.breed.trim() || 'Unknown',
+        gender: formData.gender as 'Male' | 'Female' | 'Unknown',
+        breedGroup: formData.breedGroup,
+        mobilityIssues: formData.mobilityIssues,
+        image: formData.image,
+        notes: formData.notes.trim()
+      });
+      
+      console.log('Dog added successfully');
+      onClose();
+      // Stay on the current dashboard instead of navigating away
+    } catch (error) {
+      console.error('Error adding dog:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -68,9 +78,9 @@ const AddDogForm: React.FC<AddDogFormProps> = ({ onClose }) => {
           <Button 
             type="submit" 
             className="w-full bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600"
-            disabled={!formData.name.trim()}
+            disabled={!formData.name.trim() || isSubmitting}
           >
-            Add Dog
+            {isSubmitting ? 'Adding Dog...' : 'Add Dog'}
           </Button>
         </form>
       </CardContent>

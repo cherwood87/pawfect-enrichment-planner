@@ -19,38 +19,54 @@ const EditDogForm: React.FC<EditDogFormProps> = ({ dog, onClose }) => {
     name: dog.name,
     age: dog.age.toString(),
     breed: dog.breed,
-    gender: dog.gender || 'Unknown',
+    gender: (dog.gender || 'Unknown') as 'Male' | 'Female' | 'Unknown',
     breedGroup: dog.breedGroup || 'Unknown',
     mobilityIssues: dog.mobilityIssues,
     image: dog.image,
     notes: dog.notes || ''
   });
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name.trim()) return;
+    if (!formData.name.trim() || isSubmitting) return;
     
-    updateDog({
-      ...dog,
-      name: formData.name.trim(),
-      age: parseInt(formData.age) || 0,
-      breed: formData.breed.trim() || 'Unknown',
-      gender: formData.gender as 'Male' | 'Female' | 'Unknown',
-      breedGroup: formData.breedGroup,
-      mobilityIssues: formData.mobilityIssues,
-      image: formData.image,
-      notes: formData.notes.trim()
-    });
-    
-    // Close the modal and stay on the current page (dogs dashboard)
-    onClose();
+    try {
+      setIsSubmitting(true);
+      console.log('Updating dog with data:', formData);
+      
+      updateDog({
+        ...dog,
+        name: formData.name.trim(),
+        age: parseInt(formData.age) || 0,
+        breed: formData.breed.trim() || 'Unknown',
+        gender: formData.gender as 'Male' | 'Female' | 'Unknown',
+        breedGroup: formData.breedGroup,
+        mobilityIssues: formData.mobilityIssues,
+        image: formData.image,
+        notes: formData.notes.trim()
+      });
+      
+      console.log('Dog updated successfully');
+      // Close the modal and stay on the current page (dogs dashboard)
+      onClose();
+    } catch (error) {
+      console.error('Error updating dog:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleDelete = () => {
-    deleteDog(dog.id);
-    onClose();
+    try {
+      console.log('Deleting dog:', dog.id);
+      deleteDog(dog.id);
+      onClose();
+    } catch (error) {
+      console.error('Error deleting dog:', error);
+    }
   };
 
   if (showDeleteConfirm) {
@@ -95,9 +111,9 @@ const EditDogForm: React.FC<EditDogFormProps> = ({ dog, onClose }) => {
           <Button 
             type="submit" 
             className="w-full bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600"
-            disabled={!formData.name.trim()}
+            disabled={!formData.name.trim() || isSubmitting}
           >
-            Save Changes
+            {isSubmitting ? 'Saving...' : 'Save Changes'}
           </Button>
         </form>
       </CardContent>
