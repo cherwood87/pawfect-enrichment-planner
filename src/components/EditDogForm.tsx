@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { X, Trash2 } from 'lucide-react';
 import { useDog } from '@/contexts/DogContext';
 import { Dog } from '@/types/dog';
+import { useIsMobile } from '@/hooks/use-mobile';
 import DeleteConfirmation from './DeleteConfirmation';
 import DogFormFields from './DogFormFields';
 
@@ -15,6 +16,7 @@ interface EditDogFormProps {
 
 const EditDogForm: React.FC<EditDogFormProps> = ({ dog, onClose }) => {
   const { updateDog, deleteDog } = useDog();
+  const isMobile = useIsMobile();
   const [formData, setFormData] = useState({
     name: dog.name,
     age: dog.age.toString(),
@@ -50,7 +52,6 @@ const EditDogForm: React.FC<EditDogFormProps> = ({ dog, onClose }) => {
       });
       
       console.log('Dog updated successfully');
-      // Close the modal and stay on the current page (dogs dashboard)
       onClose();
     } catch (error) {
       console.error('Error updating dog:', error);
@@ -80,28 +81,28 @@ const EditDogForm: React.FC<EditDogFormProps> = ({ dog, onClose }) => {
   }
 
   return (
-    <Card className="max-w-lg mx-auto">
-      <CardHeader className="pb-4">
+    <Card className={`${isMobile ? 'w-full h-full' : 'max-w-lg'} mx-auto`}>
+      <CardHeader className="mobile-card">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-bold text-gray-800">Edit {dog.name}</CardTitle>
-          <div className="flex items-center space-x-2">
+          <CardTitle className="font-bold text-gray-800 truncate">Edit {dog.name}</CardTitle>
+          <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
             <Button 
               variant="ghost" 
               size="sm" 
               onClick={() => setShowDeleteConfirm(true)}
-              className="text-red-500 hover:text-red-700"
+              className="text-red-500 hover:text-red-700 touch-target"
             >
               <Trash2 className="w-4 h-4" />
             </Button>
-            <Button variant="ghost" size="sm" onClick={onClose}>
+            <Button variant="ghost" size="sm" onClick={onClose} className="touch-target">
               <X className="w-4 h-4" />
             </Button>
           </div>
         </div>
       </CardHeader>
 
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+      <CardContent className={`${isMobile ? 'overflow-y-auto flex-1' : ''}`}>
+        <form onSubmit={handleSubmit} className="mobile-space-y">
           <DogFormFields
             formData={formData}
             onFormDataChange={setFormData}
@@ -110,7 +111,7 @@ const EditDogForm: React.FC<EditDogFormProps> = ({ dog, onClose }) => {
           {/* Submit Button */}
           <Button 
             type="submit" 
-            className="w-full bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600"
+            className="w-full bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600 touch-target"
             disabled={!formData.name.trim() || isSubmitting}
           >
             {isSubmitting ? 'Saving...' : 'Save Changes'}

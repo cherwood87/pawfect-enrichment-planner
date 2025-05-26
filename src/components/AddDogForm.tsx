@@ -4,8 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
 import { useDog } from '@/contexts/DogContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 import DogFormFields from './DogFormFields';
-import { useNavigate } from 'react-router-dom';
 
 interface AddDogFormProps {
   onClose: () => void;
@@ -13,7 +13,7 @@ interface AddDogFormProps {
 
 const AddDogForm: React.FC<AddDogFormProps> = ({ onClose }) => {
   const { addDog } = useDog();
-  const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [formData, setFormData] = useState({
     name: '',
     age: '',
@@ -48,7 +48,6 @@ const AddDogForm: React.FC<AddDogFormProps> = ({ onClose }) => {
       
       console.log('Dog added successfully');
       onClose();
-      // Stay on the current dashboard instead of navigating away
     } catch (error) {
       console.error('Error adding dog:', error);
     } finally {
@@ -57,18 +56,18 @@ const AddDogForm: React.FC<AddDogFormProps> = ({ onClose }) => {
   };
 
   return (
-    <Card className="max-w-lg mx-auto">
-      <CardHeader className="pb-4">
+    <Card className={`${isMobile ? 'w-full h-full' : 'max-w-lg'} mx-auto`}>
+      <CardHeader className="mobile-card">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-bold text-gray-800">Add New Dog</CardTitle>
-          <Button variant="ghost" size="sm" onClick={onClose}>
+          <CardTitle className="font-bold text-gray-800">Add New Dog</CardTitle>
+          <Button variant="ghost" size="sm" onClick={onClose} className="touch-target">
             <X className="w-4 h-4" />
           </Button>
         </div>
       </CardHeader>
 
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+      <CardContent className={`${isMobile ? 'overflow-y-auto flex-1' : ''}`}>
+        <form onSubmit={handleSubmit} className="mobile-space-y">
           <DogFormFields
             formData={formData}
             onFormDataChange={setFormData}
@@ -77,7 +76,7 @@ const AddDogForm: React.FC<AddDogFormProps> = ({ onClose }) => {
           {/* Submit Button */}
           <Button 
             type="submit" 
-            className="w-full bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600"
+            className="w-full bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600 touch-target"
             disabled={!formData.name.trim() || isSubmitting}
           >
             {isSubmitting ? 'Adding Dog...' : 'Add Dog'}

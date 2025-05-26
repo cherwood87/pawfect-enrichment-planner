@@ -2,6 +2,7 @@
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Camera, Upload, X } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface ImageUploadProps {
   currentImage?: string;
@@ -17,6 +18,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   const [dragOver, setDragOver] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const isMobile = useIsMobile();
 
   const handleFileSelect = async (file: File) => {
     if (file && file.type.startsWith('image/')) {
@@ -76,6 +78,10 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     onImageChange(undefined);
   };
 
+  const avatarSize = isMobile ? 'w-20 h-20' : 'w-24 h-24';
+  const removeButtonSize = isMobile ? 'w-5 h-5' : 'w-6 h-6';
+  const iconSize = isMobile ? 'w-5 h-5' : 'w-6 h-6';
+
   return (
     <div className={`relative ${className}`}>
       <div
@@ -84,8 +90,8 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         className={`
-          w-24 h-24 rounded-full border-2 border-dashed cursor-pointer
-          flex items-center justify-center transition-colors
+          ${avatarSize} rounded-full border-2 border-dashed cursor-pointer
+          flex items-center justify-center transition-colors touch-target
           ${dragOver ? 'border-blue-400 bg-blue-50' : 'border-gray-300 hover:border-gray-400'}
           ${currentImage ? 'border-solid' : ''}
           ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}
@@ -96,21 +102,21 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
             <img 
               src={currentImage} 
               alt="Dog" 
-              className="w-24 h-24 rounded-full object-cover"
+              className={`${avatarSize} rounded-full object-cover`}
             />
             <Button
               size="sm"
               variant="destructive"
               onClick={handleRemove}
-              className="absolute -top-2 -right-2 w-6 h-6 rounded-full p-0"
+              className={`absolute -top-2 -right-2 ${removeButtonSize} rounded-full p-0 touch-target`}
               disabled={isProcessing}
             >
-              <X className="w-3 h-3" />
+              <X className={`${isMobile ? 'w-2.5 h-2.5' : 'w-3 h-3'}`} />
             </Button>
           </>
         ) : (
           <div className="text-center">
-            <Camera className="w-6 h-6 text-gray-400 mx-auto mb-1" />
+            <Camera className={`${iconSize} text-gray-400 mx-auto mb-1`} />
             <div className="text-xs text-gray-500">
               {isProcessing ? 'Processing...' : 'Add Photo'}
             </div>

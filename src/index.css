@@ -61,6 +61,24 @@
   body {
     @apply bg-gradient-to-br from-blue-50 to-orange-50 text-foreground min-h-screen;
     overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  /* Mobile-first responsive typography */
+  h1 {
+    @apply text-lg sm:text-xl md:text-2xl font-bold;
+  }
+  
+  h2 {
+    @apply text-base sm:text-lg md:text-xl font-bold;
+  }
+  
+  h3 {
+    @apply text-sm sm:text-base md:text-lg font-medium;
+  }
+  
+  p, div {
+    @apply text-sm sm:text-base;
   }
 }
 
@@ -105,5 +123,65 @@
 
   .horizontal-scroll::-webkit-scrollbar-thumb:hover {
     @apply bg-gray-400;
+  }
+
+  /* Mobile-optimized touch targets */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+
+  /* Mobile-safe containers */
+  .mobile-container {
+    @apply px-3 sm:px-4 md:px-6;
+  }
+
+  .mobile-safe {
+    @apply max-w-full overflow-hidden;
+  }
+
+  /* Mobile-optimized spacing */
+  .mobile-space-y {
+    @apply space-y-3 sm:space-y-4 md:space-y-6;
+  }
+
+  .mobile-gap {
+    @apply gap-2 sm:gap-3 md:gap-4;
+  }
+
+  /* Mobile-friendly cards */
+  .mobile-card {
+    @apply p-3 sm:p-4 md:p-6 rounded-lg;
+  }
+
+  /* Responsive grid utilities */
+  .mobile-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3;
+  }
+
+  .mobile-grid-2 {
+    @apply grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4;
+  }
+
+  /* Modal mobile optimization */
+  .mobile-modal {
+    @apply w-full max-w-[calc(100vw-2rem)] max-h-[calc(100vh-2rem)] m-4;
+  }
+}
+
+/* Ensure touch-friendly interactions */
+@media (hover: none) and (pointer: coarse) {
+  .hover\\:scale-105:hover {
+    transform: none;
+  }
+  
+  .hover\\:bg-gray-50:hover {
+    background-color: inherit;
+  }
+}
+
+/* Fix for iOS viewport height issues */
+@supports (-webkit-touch-callout: none) {
+  .min-h-screen {
+    min-height: -webkit-fill-available;
   }
 }

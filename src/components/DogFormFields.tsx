@@ -6,6 +6,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { MOBILITY_ISSUES, GENDER_OPTIONS, BREED_GROUPS } from '@/types/dog';
+import { useIsMobile } from '@/hooks/use-mobile';
 import ImageUpload from './ImageUpload';
 
 interface DogFormData {
@@ -28,6 +29,8 @@ const DogFormFields: React.FC<DogFormFieldsProps> = ({
   formData, 
   onFormDataChange 
 }) => {
+  const isMobile = useIsMobile();
+
   const handleMobilityIssueChange = (issue: string, checked: boolean) => {
     if (issue === 'None') {
       onFormDataChange({
@@ -52,7 +55,7 @@ const DogFormFields: React.FC<DogFormFieldsProps> = ({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="mobile-space-y">
       {/* Photo Upload */}
       <div className="flex justify-center">
         <ImageUpload
@@ -62,7 +65,7 @@ const DogFormFields: React.FC<DogFormFieldsProps> = ({
       </div>
 
       {/* Basic Info */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className={`grid ${isMobile ? 'grid-cols-1 space-y-4' : 'grid-cols-2 gap-4'}`}>
         <div>
           <Label htmlFor="name">Name *</Label>
           <Input
@@ -71,6 +74,7 @@ const DogFormFields: React.FC<DogFormFieldsProps> = ({
             onChange={(e) => updateFormData('name', e.target.value)}
             placeholder="Enter dog's name"
             required
+            className="touch-target"
           />
         </div>
         <div>
@@ -83,6 +87,7 @@ const DogFormFields: React.FC<DogFormFieldsProps> = ({
             value={formData.age}
             onChange={(e) => updateFormData('age', e.target.value)}
             placeholder="Age"
+            className="touch-target"
           />
         </div>
       </div>
@@ -95,11 +100,12 @@ const DogFormFields: React.FC<DogFormFieldsProps> = ({
           value={formData.breed}
           onChange={(e) => updateFormData('breed', e.target.value)}
           placeholder="Enter dog's breed"
+          className="touch-target"
         />
       </div>
 
       {/* Gender and Breed Group */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className={`grid ${isMobile ? 'grid-cols-1 space-y-4' : 'grid-cols-2 gap-4'}`}>
         <div>
           <Label>Gender</Label>
           <RadioGroup 
@@ -108,7 +114,7 @@ const DogFormFields: React.FC<DogFormFieldsProps> = ({
             className="mt-2"
           >
             {GENDER_OPTIONS.map((gender) => (
-              <div key={gender} className="flex items-center space-x-2">
+              <div key={gender} className="flex items-center space-x-2 touch-target">
                 <RadioGroupItem value={gender} id={gender} />
                 <Label htmlFor={gender} className="text-sm cursor-pointer">
                   {gender}
@@ -120,12 +126,12 @@ const DogFormFields: React.FC<DogFormFieldsProps> = ({
         <div>
           <Label htmlFor="breedGroup">Breed Group</Label>
           <Select value={formData.breedGroup} onValueChange={(value) => updateFormData('breedGroup', value)}>
-            <SelectTrigger>
+            <SelectTrigger className="touch-target">
               <SelectValue placeholder="Select breed group" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white border shadow-lg z-50">
               {BREED_GROUPS.map((group) => (
-                <SelectItem key={group} value={group}>
+                <SelectItem key={group} value={group} className="touch-target">
                   {group}
                 </SelectItem>
               ))}
@@ -137,9 +143,9 @@ const DogFormFields: React.FC<DogFormFieldsProps> = ({
       {/* Mobility Issues */}
       <div>
         <Label>Mobility Considerations</Label>
-        <div className="grid grid-cols-2 gap-2 mt-2">
+        <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-2'} mobile-gap mt-2`}>
           {MOBILITY_ISSUES.map((issue) => (
-            <div key={issue} className="flex items-center space-x-2">
+            <div key={issue} className="flex items-center space-x-2 touch-target">
               <Checkbox
                 id={issue}
                 checked={formData.mobilityIssues.includes(issue)}
@@ -161,6 +167,7 @@ const DogFormFields: React.FC<DogFormFieldsProps> = ({
           value={formData.notes}
           onChange={(e) => updateFormData('notes', e.target.value)}
           placeholder="Special considerations or notes"
+          className="touch-target"
         />
       </div>
     </div>
