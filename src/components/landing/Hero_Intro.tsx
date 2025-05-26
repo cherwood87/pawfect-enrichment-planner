@@ -41,7 +41,7 @@ const Hero_Intro: React.FC = () => {
         
         <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
           Create personalized enrichment plans based on your dog's unique personality and needs. 
-          Track activities across five essential pillars of canine wellness.
+          Track activities across different enrichment pillars.
         </p>
 
         <div className="flex justify-center mb-12">
