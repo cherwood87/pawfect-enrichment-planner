@@ -14,7 +14,6 @@ interface DashboardModalsProps {
   isEditDogModalOpen: boolean;
   selectedPillar: string | null;
   selectedDog: Dog | null;
-  schedulingMode?: 'daily' | 'weekly';
   onActivityModalClose: () => void;
   onChatModalClose: () => void;
   onAddDogModalClose: () => void;
@@ -28,7 +27,6 @@ const DashboardModals: React.FC<DashboardModalsProps> = ({
   isEditDogModalOpen,
   selectedPillar,
   selectedDog,
-  schedulingMode = 'daily',
   onActivityModalClose,
   onChatModalClose,
   onAddDogModalClose,
@@ -41,7 +39,6 @@ const DashboardModals: React.FC<DashboardModalsProps> = ({
         isOpen={isActivityModalOpen}
         onClose={onActivityModalClose}
         selectedPillar={selectedPillar}
-        schedulingMode={schedulingMode}
       />
 
       {/* Chat Modal */}

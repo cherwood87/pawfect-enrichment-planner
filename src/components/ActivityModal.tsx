@@ -14,14 +14,12 @@ interface ActivityModalProps {
   isOpen: boolean;
   onClose: () => void;
   selectedPillar?: string | null;
-  schedulingMode?: 'daily' | 'weekly';
 }
 
 const ActivityModal: React.FC<ActivityModalProps> = ({ 
   isOpen, 
   onClose, 
-  selectedPillar, 
-  schedulingMode = 'daily' 
+  selectedPillar
 }) => {
   const [activeTab, setActiveTab] = useState('browse');
   const { discoveredActivities, addScheduledActivity, addUserActivity } = useActivity();
@@ -34,7 +32,7 @@ const ActivityModal: React.FC<ActivityModalProps> = ({
   const [instructions, setInstructions] = useState('');
   const [description, setDescription] = useState('');
   
-  // State for weekly scheduling
+  // State for weekly scheduling - always visible now
   const [selectedDayOfWeek, setSelectedDayOfWeek] = useState<number>(0);
   
   const pendingActivities = discoveredActivities.filter(activity => 
@@ -62,47 +60,30 @@ const ActivityModal: React.FC<ActivityModalProps> = ({
 
   const handleActivitySelect = (activity: any) => {
     const scheduledTime = '12:00 PM';
+    const currentWeek = getISOWeek(new Date());
     
-    if (schedulingMode === 'daily') {
-      // Schedule for today
-      const scheduledDate = new Date().toISOString().split('T')[0];
-      
-      addScheduledActivity({
-        activityId: activity.id,
-        scheduledTime: scheduledTime,
-        userSelectedTime: scheduledTime,
-        scheduledDate: scheduledDate,
-        completed: false,
-        notes: '',
-        completionNotes: '',
-        reminderEnabled: false
-      });
-    } else {
-      // Schedule for weekly plan
-      const currentWeek = getISOWeek(new Date());
-      
-      // Calculate the date for the selected day of the week
-      const today = new Date();
-      const currentDayOfWeek = today.getDay();
-      const daysUntilSelectedDay = selectedDayOfWeek - currentDayOfWeek;
-      const targetDate = new Date(today);
-      targetDate.setDate(today.getDate() + daysUntilSelectedDay);
-      
-      const scheduledDate = targetDate.toISOString().split('T')[0];
-      
-      addScheduledActivity({
-        activityId: activity.id,
-        scheduledTime: scheduledTime,
-        userSelectedTime: scheduledTime,
-        scheduledDate: scheduledDate,
-        completed: false,
-        notes: '',
-        completionNotes: '',
-        reminderEnabled: false,
-        weekNumber: currentWeek,
-        dayOfWeek: selectedDayOfWeek
-      });
-    }
+    // Calculate the date for the selected day of the week
+    const today = new Date();
+    const currentDayOfWeek = today.getDay();
+    const daysUntilSelectedDay = selectedDayOfWeek - currentDayOfWeek;
+    const targetDate = new Date(today);
+    targetDate.setDate(today.getDate() + daysUntilSelectedDay);
+    
+    const scheduledDate = targetDate.toISOString().split('T')[0];
+    
+    addScheduledActivity({
+      activityId: activity.id,
+      scheduledTime: scheduledTime,
+      userSelectedTime: scheduledTime,
+      scheduledDate: scheduledDate,
+      completed: false,
+      notes: '',
+      completionNotes: '',
+      reminderEnabled: false,
+      weekNumber: currentWeek,
+      dayOfWeek: selectedDayOfWeek
+    });
+    
     onClose();
   };
 
@@ -147,14 +128,6 @@ const ActivityModal: React.FC<ActivityModalProps> = ({
     setDescription('');
   };
 
-  const handleScheduleActivity = (activityId: string, scheduledTime: string, notes?: string) => {
-    const scheduledDate = new Date().toISOString().split('T')[0];
-    
-    // Handle scheduling logic here
-    console.log('Scheduling activity:', { activityId, scheduledTime, scheduledDate, notes });
-    onClose();
-  };
-
   const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
   return (
@@ -176,25 +149,23 @@ const ActivityModal: React.FC<ActivityModalProps> = ({
           </div>
         </DialogHeader>
 
-        {/* Weekly Day Selection */}
-        {schedulingMode === 'weekly' && (
-          <div className="mb-4 p-4 bg-blue-50 rounded-lg">
-            <h3 className="font-medium text-gray-800 mb-2">Select Day of Week</h3>
-            <div className="grid grid-cols-7 gap-2">
-              {dayNames.map((day, index) => (
-                <Button
-                  key={day}
-                  variant={selectedDayOfWeek === index ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedDayOfWeek(index)}
-                  className="text-xs"
-                >
-                  {day.slice(0, 3)}
-                </Button>
-              ))}
-            </div>
+        {/* Day Selection - Always Visible */}
+        <div className="mb-4 p-4 bg-blue-50 rounded-lg">
+          <h3 className="font-medium text-gray-800 mb-2">Select Day for Weekly Plan</h3>
+          <div className="grid grid-cols-7 gap-2">
+            {dayNames.map((day, index) => (
+              <Button
+                key={day}
+                variant={selectedDayOfWeek === index ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedDayOfWeek(index)}
+                className="text-xs"
+              >
+                {day.slice(0, 3)}
+              </Button>
+            ))}
           </div>
-        )}
+        </div>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3">
@@ -215,7 +186,7 @@ const ActivityModal: React.FC<ActivityModalProps> = ({
               selectedPillar={selectedPillar}
               filteredLibraryActivities={filteredLibraryActivities}
               onActivitySelect={handleActivitySelect}
-              schedulingMode={schedulingMode}
+              schedulingMode="weekly"
             />
           </TabsContent>
           
