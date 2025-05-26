@@ -4,35 +4,66 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { useDog } from '@/contexts/DogContext';
 
-const EmptyWeeklyPlanner: React.FC = () => {
+interface EmptyWeeklyPlannerProps {
+  onPillarSelect?: (pillar: string) => void;
+}
+
+const EmptyWeeklyPlanner: React.FC<EmptyWeeklyPlannerProps> = ({ onPillarSelect }) => {
   const navigate = useNavigate();
-  const isMobile = useIsMobile();
-  const { currentDog } = useDog();
 
   return (
     <Card className="overflow-hidden">
-      <CardHeader className="mobile-card bg-gradient-to-r from-green-50 to-blue-50">
-        <CardTitle className="font-bold text-gray-800 flex items-center space-x-2">
-          <Calendar className={`${isMobile ? 'w-4 h-4' : 'w-5 h-5'} text-green-600`} />
-          <span>Weekly Plan</span>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="text-center mobile-card">
-        <div className="text-gray-500 mb-4">
-          <Calendar className="w-12 h-12 mx-auto mb-2 opacity-50" />
-          <p className="text-lg font-medium">No weekly activities planned</p>
-          <p className="text-sm">Create a weekly routine for {currentDog?.name}!</p>
+      <CardHeader className="bg-gradient-to-r from-green-50 to-blue-50">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <Calendar className="w-5 h-5 text-green-600" />
+            <CardTitle className="font-bold text-gray-800">Weekly Plan</CardTitle>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate('/activity-library')}
+            className="text-green-600 hover:text-green-700"
+          >
+            <Plus className="w-4 h-4" />
+          </Button>
         </div>
-        <Button 
-          onClick={() => navigate('/activity-library')}
-          className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Plan Weekly Activities
-        </Button>
+      </CardHeader>
+      
+      <CardContent className="p-6">
+        <div className="text-center py-8">
+          <Calendar className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-gray-700 mb-2">No Activities Planned This Week</h3>
+          <p className="text-gray-500 mb-6">Start building your weekly enrichment plan!</p>
+          
+          <div className="space-y-2">
+            <Button 
+              onClick={() => navigate('/activity-library')}
+              className="w-full"
+            >
+              Browse Activity Library
+            </Button>
+            {onPillarSelect && (
+              <div className="grid grid-cols-2 gap-2 mt-4">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => onPillarSelect('mental')}
+                >
+                  Mental Activities
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => onPillarSelect('physical')}
+                >
+                  Physical Activities
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
