@@ -87,7 +87,7 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose }) => {
 
         <div className="flex-1 flex flex-col min-h-0">
           <ScrollArea ref={scrollAreaRef} className="flex-1 p-4">
-            {currentConversation?.messages.length === 0 ? (
+            {!currentConversation || currentConversation.messages.length === 0 ? (
               <div className="space-y-4">
                 <div className="text-center text-gray-500 mb-6">
                   <MessageCircle className="w-12 h-12 mx-auto mb-2 text-blue-500" />
