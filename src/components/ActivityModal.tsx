@@ -84,50 +84,52 @@ const ActivityModal: React.FC<ActivityModalProps> = ({ isOpen, onClose, selected
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
+        <DialogContent className="max-w-4xl w-full max-h-[90vh] flex flex-col">
+          <DialogHeader className="flex-shrink-0">
             <DialogTitle className="text-lg font-bold text-gray-800">Add Activity</DialogTitle>
           </DialogHeader>
           
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="browse" className="flex items-center space-x-2">
-                <BookOpen className="w-4 h-4" />
-                <span>Browse Library</span>
-              </TabsTrigger>
-              <TabsTrigger value="create" className="flex items-center space-x-2">
-                <Target className="w-4 h-4" />
-                <span>Create Custom</span>
-              </TabsTrigger>
-            </TabsList>
+          <div className="flex-1 overflow-y-auto">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-full">
+              <TabsList className="grid w-full grid-cols-2 flex-shrink-0 mb-4">
+                <TabsTrigger value="browse" className="flex items-center space-x-2">
+                  <BookOpen className="w-4 h-4" />
+                  <span>Browse Library</span>
+                </TabsTrigger>
+                <TabsTrigger value="create" className="flex items-center space-x-2">
+                  <Target className="w-4 h-4" />
+                  <span>Create Custom</span>
+                </TabsTrigger>
+              </TabsList>
 
-            <TabsContent value="browse">
-              <BrowseLibraryTab
-                selectedPillar={selectedPillar}
-                filteredLibraryActivities={filteredLibraryActivities}
-                onActivitySelect={setSelectedActivity}
-              />
-            </TabsContent>
+              <TabsContent value="browse" className="mt-0">
+                <BrowseLibraryTab
+                  selectedPillar={selectedPillar}
+                  filteredLibraryActivities={filteredLibraryActivities}
+                  onActivitySelect={setSelectedActivity}
+                />
+              </TabsContent>
 
-            <TabsContent value="create">
-              <CreateCustomTab
-                activityName={activityName}
-                setActivityName={setActivityName}
-                pillar={pillar}
-                setPillar={setPillar}
-                duration={duration}
-                setDuration={setDuration}
-                materials={materials}
-                setMaterials={setMaterials}
-                instructions={instructions}
-                setInstructions={setInstructions}
-                description={description}
-                setDescription={setDescription}
-                onSubmit={handleCustomSubmit}
-                onCancel={onClose}
-              />
-            </TabsContent>
-          </Tabs>
+              <TabsContent value="create" className="mt-0">
+                <CreateCustomTab
+                  activityName={activityName}
+                  setActivityName={setActivityName}
+                  pillar={pillar}
+                  setPillar={setPillar}
+                  duration={duration}
+                  setDuration={setDuration}
+                  materials={materials}
+                  setMaterials={setMaterials}
+                  instructions={instructions}
+                  setInstructions={setInstructions}
+                  description={description}
+                  setDescription={setDescription}
+                  onSubmit={handleCustomSubmit}
+                  onCancel={onClose}
+                />
+              </TabsContent>
+            </Tabs>
+          </div>
         </DialogContent>
       </Dialog>
 

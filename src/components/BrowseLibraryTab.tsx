@@ -19,7 +19,7 @@ const BrowseLibraryTab: React.FC<BrowseLibraryTabProps> = ({
         <p className="text-gray-600">Choose from our curated collection of enrichment activities</p>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {filteredLibraryActivities.map((activity) => (
           <ActivityListItem
             key={activity.id}

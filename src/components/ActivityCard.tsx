@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -49,8 +50,8 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, isOpen, onClose }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className="max-w-2xl w-full max-h-[90vh] flex flex-col">
+        <DialogHeader className="flex-shrink-0">
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <DialogTitle className="text-xl font-bold text-gray-800 mb-2">
@@ -90,7 +91,7 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, isOpen, onClose }
           </div>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <div className="flex-1 overflow-y-auto space-y-6">
           {/* Quick Stats */}
           <div className="grid grid-cols-3 gap-4">
             <Card>
