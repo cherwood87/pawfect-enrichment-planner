@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { ScheduledActivity, UserActivity } from '@/types/activity';
 
@@ -16,6 +15,8 @@ export interface DatabaseScheduledActivity {
   completed_at: string;
   created_at: string;
   updated_at: string;
+  week_number: number | null;
+  day_of_week: number | null;
 }
 
 export interface DatabaseUserActivity {
@@ -67,7 +68,9 @@ export class ActivityService {
         notes: activity.notes || '',
         completion_notes: activity.completionNotes || '',
         reminder_enabled: activity.reminderEnabled || false,
-        completed_at: activity.completedAt
+        completed_at: activity.completedAt,
+        week_number: activity.weekNumber || null,
+        day_of_week: activity.dayOfWeek !== undefined ? activity.dayOfWeek : null
       })
       .select()
       .single();
@@ -92,7 +95,9 @@ export class ActivityService {
         notes: activity.notes || '',
         completion_notes: activity.completionNotes || '',
         reminder_enabled: activity.reminderEnabled || false,
-        completed_at: activity.completedAt
+        completed_at: activity.completedAt,
+        week_number: activity.weekNumber || null,
+        day_of_week: activity.dayOfWeek !== undefined ? activity.dayOfWeek : null
       })
       .eq('id', activity.id)
       .select()
@@ -175,7 +180,9 @@ export class ActivityService {
       notes: dbActivity.notes,
       completionNotes: dbActivity.completion_notes,
       reminderEnabled: dbActivity.reminder_enabled,
-      completedAt: dbActivity.completed_at
+      completedAt: dbActivity.completed_at,
+      weekNumber: dbActivity.week_number,
+      dayOfWeek: dbActivity.day_of_week
     };
   }
 

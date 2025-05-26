@@ -251,6 +251,7 @@ export type Database = {
           completed_at: string | null
           completion_notes: string | null
           created_at: string
+          day_of_week: number | null
           dog_id: string
           id: string
           notes: string | null
@@ -259,6 +260,7 @@ export type Database = {
           scheduled_time: string
           updated_at: string
           user_selected_time: string | null
+          week_number: number | null
         }
         Insert: {
           activity_id: string
@@ -266,6 +268,7 @@ export type Database = {
           completed_at?: string | null
           completion_notes?: string | null
           created_at?: string
+          day_of_week?: number | null
           dog_id: string
           id?: string
           notes?: string | null
@@ -274,6 +277,7 @@ export type Database = {
           scheduled_time: string
           updated_at?: string
           user_selected_time?: string | null
+          week_number?: number | null
         }
         Update: {
           activity_id?: string
@@ -281,6 +285,7 @@ export type Database = {
           completed_at?: string | null
           completion_notes?: string | null
           created_at?: string
+          day_of_week?: number | null
           dog_id?: string
           id?: string
           notes?: string | null
@@ -289,6 +294,7 @@ export type Database = {
           scheduled_time?: string
           updated_at?: string
           user_selected_time?: string | null
+          week_number?: number | null
         }
         Relationships: [
           {

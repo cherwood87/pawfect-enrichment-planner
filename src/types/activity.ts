@@ -1,4 +1,3 @@
-
 export interface ActivityLibraryItem {
   id: string;
   title: string;
@@ -26,6 +25,8 @@ export interface ScheduledActivity {
   completionNotes?: string; // NEW: Notes added when completing activity
   reminderEnabled?: boolean; // NEW: Whether reminders are enabled
   completedAt?: string;
+  weekNumber?: number; // NEW: ISO week number for weekly planning
+  dayOfWeek?: number; // NEW: Day of week (0=Sunday, 6=Saturday)
 }
 
 export interface UserActivity extends ActivityLibraryItem {

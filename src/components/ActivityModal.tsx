@@ -1,147 +1,359 @@
 
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BookOpen, Target } from 'lucide-react';
-import { activityLibrary, getPillarActivities } from '@/data/activityLibrary';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Clock, Calendar, AlertCircle, Repeat } from 'lucide-react';
+import { ActivityLibraryItem, ScheduledActivity } from '@/types/activity';
+import { DiscoveredActivity } from '@/types/discovery';
 import { useActivity } from '@/contexts/ActivityContext';
-import ActivityCard from '@/components/ActivityCard';
-import BrowseLibraryTab from '@/components/BrowseLibraryTab';
-import CreateCustomTab from '@/components/CreateCustomTab';
+import { toast } from '@/hooks/use-toast';
 
 interface ActivityModalProps {
   isOpen: boolean;
   onClose: () => void;
-  selectedPillar?: string | null;
+  activity: ActivityLibraryItem | DiscoveredActivity;
 }
 
-const ActivityModal: React.FC<ActivityModalProps> = ({ isOpen, onClose, selectedPillar }) => {
-  const [activeTab, setActiveTab] = useState('browse');
-  const [selectedActivity, setSelectedActivity] = useState<any>(null);
-  const { addScheduledActivity, addUserActivity } = useActivity();
-  
-  // Custom activity form state
-  const [activityName, setActivityName] = useState('');
-  const [pillar, setPillar] = useState(selectedPillar || '');
-  const [duration, setDuration] = useState('');
-  const [description, setDescription] = useState('');
-  const [scheduledTime, setScheduledTime] = useState('');
-  const [materials, setMaterials] = useState('');
-  const [instructions, setInstructions] = useState('');
+const ActivityModal: React.FC<ActivityModalProps> = ({
+  isOpen,
+  onClose,
+  activity
+}) => {
+  const { addScheduledActivity } = useActivity();
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedTime, setSelectedTime] = useState('12:00');
+  const [notes, setNotes] = useState('');
+  const [reminderEnabled, setReminderEnabled] = useState(false);
+  const [isWeeklyPlanning, setIsWeeklyPlanning] = useState(false);
+  const [selectedDaysOfWeek, setSelectedDaysOfWeek] = useState<number[]>([]);
+  const [isScheduling, setIsScheduling] = useState(false);
 
-  const handleCustomSubmit = () => {
-    if (!activityName || !pillar || !duration) return;
+  const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-    // Create custom activity
-    const customActivity = {
-      title: activityName,
-      pillar: pillar as any,
-      difficulty: 'Medium' as const,
-      duration: parseInt(duration) || 15,
-      materials: materials.split(',').map(m => m.trim()).filter(Boolean),
-      emotionalGoals: ['Custom activity'],
-      instructions: instructions.split('\n').filter(Boolean),
-      benefits: description || 'Custom enrichment activity',
-      tags: ['custom'],
-      ageGroup: 'All Ages' as const,
-      energyLevel: 'Medium' as const,
-      isCustom: true
+  // Get ISO week number
+  function getISOWeek(date: Date): number {
+    const target = new Date(date.valueOf());
+    const dayNr = (date.getDay() + 6) % 7;
+    target.setDate(target.getDate() - dayNr + 3);
+    const firstThursday = target.valueOf();
+    target.setMonth(0, 1);
+    if (target.getDay() !== 4) {
+      target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
+    }
+    return 1 + Math.ceil((firstThursday - target.valueOf()) / 604800000);
+  }
+
+  const handleDayToggle = (dayIndex: number) => {
+    setSelectedDaysOfWeek(prev => 
+      prev.includes(dayIndex) 
+        ? prev.filter(d => d !== dayIndex)
+        : [...prev, dayIndex]
+    );
+  };
+
+  const handleSchedule = async () => {
+    if (isWeeklyPlanning && selectedDaysOfWeek.length === 0) {
+      toast({
+        title: "Select Days",
+        description: "Please select at least one day for weekly planning.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsScheduling(true);
+
+    try {
+      if (isWeeklyPlanning) {
+        // Schedule for selected days of the week
+        const currentWeek = getISOWeek(new Date());
+        
+        for (const dayOfWeek of selectedDaysOfWeek) {
+          const scheduledActivity: Omit<ScheduledActivity, 'id' | 'dogId'> = {
+            activityId: activity.id,
+            scheduledTime: selectedTime,
+            userSelectedTime: selectedTime,
+            scheduledDate: selectedDate, // This will be used as a reference date
+            completed: false,
+            notes,
+            reminderEnabled,
+            weekNumber: currentWeek,
+            dayOfWeek
+          };
+
+          await addScheduledActivity(scheduledActivity);
+        }
+
+        toast({
+          title: "Weekly Activities Scheduled",
+          description: `${activity.title} scheduled for ${selectedDaysOfWeek.length} day(s) this week.`
+        });
+      } else {
+        // Schedule for a specific date (existing functionality)
+        const scheduledActivity: Omit<ScheduledActivity, 'id' | 'dogId'> = {
+          activityId: activity.id,
+          scheduledTime: selectedTime,
+          userSelectedTime: selectedTime,
+          scheduledDate,
+          completed: false,
+          notes,
+          reminderEnabled
+        };
+
+        await addScheduledActivity(scheduledActivity);
+
+        toast({
+          title: "Activity Scheduled",
+          description: `${activity.title} scheduled for ${selectedDate} at ${selectedTime}.`
+        });
+      }
+
+      onClose();
+      // Reset form
+      setSelectedDate(new Date().toISOString().split('T')[0]);
+      setSelectedTime('12:00');
+      setNotes('');
+      setReminderEnabled(false);
+      setIsWeeklyPlanning(false);
+      setSelectedDaysOfWeek([]);
+    } catch (error) {
+      console.error('Error scheduling activity:', error);
+      toast({
+        title: "Error",
+        description: "Failed to schedule activity. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsScheduling(false);
+    }
+  };
+
+  const getPillarColor = (pillar: string) => {
+    const colors = {
+      mental: 'purple',
+      physical: 'green',
+      social: 'blue',
+      environmental: 'teal',
+      instinctual: 'orange'
     };
-
-    addUserActivity(customActivity);
-
-    // Reset form
-    setActivityName('');
-    setPillar('');
-    setDuration('');
-    setDescription('');
-    setScheduledTime('');
-    setMaterials('');
-    setInstructions('');
-    onClose();
+    return colors[pillar as keyof typeof colors] || 'gray';
   };
 
-  const handleLibraryActivitySelect = (activity: any) => {
-    const now = new Date();
-    const defaultTime = `${now.getHours() + 1}:00 ${now.getHours() + 1 >= 12 ? 'PM' : 'AM'}`;
-    const scheduleTime = scheduledTime || defaultTime;
-    const scheduleDate = now.toISOString().split('T')[0];
-
-    addScheduledActivity({
-      activityId: activity.id,
-      scheduledTime: scheduleTime,
-      scheduledDate: scheduleDate,
-      completed: false
-    });
-
-    onClose();
-  };
-
-  const filteredLibraryActivities = selectedPillar 
-    ? getPillarActivities(selectedPillar)
-    : activityLibrary;
+  const pillarColor = getPillarColor(activity.pillar);
 
   return (
-    <>
-      <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-4xl w-full max-h-[90vh] flex flex-col">
-          <DialogHeader className="flex-shrink-0">
-            <DialogTitle className="text-lg font-bold text-gray-800">Add Activity</DialogTitle>
-          </DialogHeader>
-          
-          <div className="flex-1 overflow-y-auto">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-full">
-              <TabsList className="grid w-full grid-cols-2 flex-shrink-0 mb-4">
-                <TabsTrigger value="browse" className="flex items-center space-x-2">
-                  <BookOpen className="w-4 h-4" />
-                  <span>Browse Library</span>
-                </TabsTrigger>
-                <TabsTrigger value="create" className="flex items-center space-x-2">
-                  <Target className="w-4 h-4" />
-                  <span>Create Custom</span>
-                </TabsTrigger>
-              </TabsList>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center space-x-2">
+            <span>{activity.title}</span>
+            <Badge className={`bg-${pillarColor}-100 text-${pillarColor}-700`}>
+              {activity.pillar}
+            </Badge>
+          </DialogTitle>
+        </DialogHeader>
 
-              <TabsContent value="browse" className="mt-0">
-                <BrowseLibraryTab
-                  selectedPillar={selectedPillar}
-                  filteredLibraryActivities={filteredLibraryActivities}
-                  onActivitySelect={setSelectedActivity}
-                />
-              </TabsContent>
-
-              <TabsContent value="create" className="mt-0">
-                <CreateCustomTab
-                  activityName={activityName}
-                  setActivityName={setActivityName}
-                  pillar={pillar}
-                  setPillar={setPillar}
-                  duration={duration}
-                  setDuration={setDuration}
-                  materials={materials}
-                  setMaterials={setMaterials}
-                  instructions={instructions}
-                  setInstructions={setInstructions}
-                  description={description}
-                  setDescription={setDescription}
-                  onSubmit={handleCustomSubmit}
-                  onCancel={onClose}
-                />
-              </TabsContent>
-            </Tabs>
+        <div className="space-y-6">
+          {/* Activity Details */}
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <span className="font-medium text-gray-600">Duration:</span>
+              <span className="ml-2">{activity.duration} minutes</span>
+            </div>
+            <div>
+              <span className="font-medium text-gray-600">Difficulty:</span>
+              <span className="ml-2">{activity.difficulty}</span>
+            </div>
+            <div>
+              <span className="font-medium text-gray-600">Energy Level:</span>
+              <span className="ml-2">{activity.energyLevel}</span>
+            </div>
+            <div>
+              <span className="font-medium text-gray-600">Age Group:</span>
+              <span className="ml-2">{activity.ageGroup}</span>
+            </div>
           </div>
-        </DialogContent>
-      </Dialog>
 
-      {/* Activity Detail Modal */}
-      {selectedActivity && (
-        <ActivityCard 
-          activity={selectedActivity}
-          isOpen={!!selectedActivity}
-          onClose={() => setSelectedActivity(null)}
-        />
-      )}
-    </>
+          {/* Benefits */}
+          <div>
+            <h4 className="font-medium text-gray-800 mb-2">Benefits</h4>
+            <p className="text-sm text-gray-600">{activity.benefits}</p>
+          </div>
+
+          {/* Materials */}
+          {activity.materials && activity.materials.length > 0 && (
+            <div>
+              <h4 className="font-medium text-gray-800 mb-2">Materials Needed</h4>
+              <div className="flex flex-wrap gap-2">
+                {activity.materials.map((material, index) => (
+                  <Badge key={index} variant="outline" className="text-xs">
+                    {material}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Instructions */}
+          {activity.instructions && activity.instructions.length > 0 && (
+            <div>
+              <h4 className="font-medium text-gray-800 mb-2">Instructions</h4>
+              <ol className="text-sm text-gray-600 space-y-1">
+                {activity.instructions.map((instruction, index) => (
+                  <li key={index} className="flex">
+                    <span className="font-medium text-gray-400 mr-2">{index + 1}.</span>
+                    <span>{instruction}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          )}
+
+          {/* Scheduling Options */}
+          <div className="border-t pt-6">
+            <h4 className="font-medium text-gray-800 mb-4">Schedule Activity</h4>
+            
+            {/* Weekly Planning Toggle */}
+            <div className="flex items-center space-x-3 mb-4">
+              <Switch
+                id="weekly-planning"
+                checked={isWeeklyPlanning}
+                onCheckedChange={setIsWeeklyPlanning}
+              />
+              <Label htmlFor="weekly-planning" className="flex items-center space-x-2">
+                <Repeat className="w-4 h-4" />
+                <span>Weekly Planning</span>
+              </Label>
+            </div>
+
+            {isWeeklyPlanning ? (
+              /* Weekly Planning Mode */
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                    Select Days of Week
+                  </Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {dayNames.map((dayName, dayIndex) => (
+                      <Button
+                        key={dayIndex}
+                        type="button"
+                        variant={selectedDaysOfWeek.includes(dayIndex) ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => handleDayToggle(dayIndex)}
+                        className="justify-start"
+                      >
+                        {dayName}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="weekly-time" className="text-sm font-medium text-gray-700">
+                    Time
+                  </Label>
+                  <div className="mt-1 relative">
+                    <Clock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="weekly-time"
+                      type="time"
+                      value={selectedTime}
+                      onChange={(e) => setSelectedTime(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+              </div>
+            ) : (
+              /* Single Date Planning Mode */
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="date" className="text-sm font-medium text-gray-700">
+                    Date
+                  </Label>
+                  <div className="mt-1 relative">
+                    <Calendar className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="date"
+                      type="date"
+                      value={selectedDate}
+                      onChange={(e) => setSelectedDate(e.target.value)}
+                      min={new Date().toISOString().split('T')[0]}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="time" className="text-sm font-medium text-gray-700">
+                    Time
+                  </Label>
+                  <div className="mt-1 relative">
+                    <Clock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="time"
+                      type="time"
+                      value={selectedTime}
+                      onChange={(e) => setSelectedTime(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Notes */}
+            <div className="mt-4">
+              <Label htmlFor="notes" className="text-sm font-medium text-gray-700">
+                Notes (Optional)
+              </Label>
+              <Textarea
+                id="notes"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Add any notes or reminders for this activity..."
+                className="mt-1"
+                rows={3}
+              />
+            </div>
+
+            {/* Reminder Toggle */}
+            <div className="flex items-center space-x-3 mt-4">
+              <Switch
+                id="reminder"
+                checked={reminderEnabled}
+                onCheckedChange={setReminderEnabled}
+              />
+              <Label htmlFor="reminder" className="flex items-center space-x-2">
+                <AlertCircle className="w-4 h-4" />
+                <span>Enable Reminders</span>
+              </Label>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex space-x-3 pt-4">
+            <Button
+              onClick={handleSchedule}
+              disabled={isScheduling}
+              className="flex-1"
+            >
+              {isScheduling ? 'Scheduling...' : `Schedule ${isWeeklyPlanning ? 'Weekly' : 'Activity'}`}
+            </Button>
+            <Button variant="outline" onClick={onClose} className="flex-1">
+              Cancel
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 
