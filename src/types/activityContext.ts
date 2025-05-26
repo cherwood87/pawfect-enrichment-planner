@@ -23,4 +23,5 @@ export interface ActivityContextType {
   approveDiscoveredActivity: (activityId: string) => void;
   rejectDiscoveredActivity: (activityId: string) => void;
   updateDiscoveryConfig: (config: Partial<ContentDiscoveryConfig>) => void;
+  checkAndRunAutoDiscovery?: () => Promise<void>;
 }

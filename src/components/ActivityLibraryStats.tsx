@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { DiscoveredActivity } from '@/types/discovery';
 
 interface ActivityLibraryStatsProps {
   filteredActivitiesCount: number;
@@ -26,15 +25,9 @@ const ActivityLibraryStats: React.FC<ActivityLibraryStatsProps> = ({
           <span>Curated ({curatedCount})</span>
         </span>
         <span className="flex items-center space-x-1">
-          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-          <span>Auto-Added ({autoApprovedCount})</span>
+          <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+          <span>AI-Discovered ({autoApprovedCount})</span>
         </span>
-        {pendingReviewCount > 0 && (
-          <span className="flex items-center space-x-1">
-            <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-            <span>Pending Review ({pendingReviewCount})</span>
-          </span>
-        )}
       </div>
     </div>
   );

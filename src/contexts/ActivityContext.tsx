@@ -79,7 +79,8 @@ export const ActivityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         discoverNewActivities: discoveryOps.discoverNewActivities,
         approveDiscoveredActivity: discoveryOps.approveDiscoveredActivity,
         rejectDiscoveredActivity: discoveryOps.rejectDiscoveredActivity,
-        updateDiscoveryConfig: discoveryOps.updateDiscoveryConfig
+        updateDiscoveryConfig: discoveryOps.updateDiscoveryConfig,
+        checkAndRunAutoDiscovery: discoveryOps.checkAndRunAutoDiscovery
       }}
     >
       {children}

@@ -1,7 +1,6 @@
-
 import { useState } from 'react';
 import { DiscoveredActivity, ContentDiscoveryConfig } from '@/types/discovery';
-import { ContentDiscoveryService } from '@/services/ContentDiscoveryService';
+import { AIContentDiscoveryService } from '@/services/AIContentDiscoveryService';
 import { activityLibrary, getDiscoveredActivities, saveDiscoveredActivities, getCombinedActivities } from '@/data/activityLibrary';
 import { ActivityLibraryItem } from '@/types/activity';
 import { Dog } from '@/types/dog';
@@ -16,6 +15,7 @@ export const useDiscoveryOperations = (
   const [isDiscovering, setIsDiscovering] = useState(false);
 
   const getCombinedActivityLibrary = (): (ActivityLibraryItem | DiscoveredActivity)[] => {
+    // Only include approved activities (all AI activities are auto-approved)
     const approvedDiscovered = discoveredActivities.filter(activity => activity.approved);
     return getCombinedActivities(approvedDiscovered);
   };
@@ -24,13 +24,14 @@ export const useDiscoveryOperations = (
     if (!currentDog || isDiscovering) return;
     
     setIsDiscovering(true);
-    console.log('Starting enhanced content discovery for', currentDog.name);
+    console.log('Starting AI-powered content discovery for', currentDog.name);
     
     try {
       const existingActivities = [...activityLibrary, ...discoveredActivities];
-      const newActivities = await ContentDiscoveryService.discoverNewActivities(
+      const newActivities = await AIContentDiscoveryService.discoverNewActivities(
         existingActivities,
-        { ...discoveryConfig, maxActivitiesPerDiscovery: 8 }
+        { ...discoveryConfig, maxActivitiesPerDiscovery: 8 },
+        currentDog
       );
       
       if (newActivities.length > 0) {
@@ -45,23 +46,31 @@ export const useDiscoveryOperations = (
         setDiscoveryConfig(updatedConfig);
         localStorage.setItem(`discoveryConfig-${currentDog.id}`, JSON.stringify(updatedConfig));
         
-        const autoApproved = newActivities.filter(a => a.approved).length;
-        const needsReview = newActivities.filter(a => !a.approved && !a.rejected).length;
-        
-        console.log(`Discovery complete! Found ${newActivities.length} new activities for ${currentDog.name}:`);
-        console.log(`- ${autoApproved} automatically added to library (high quality)`);
-        console.log(`- ${needsReview} pending your review`);
+        console.log(`AI Discovery complete! Found ${newActivities.length} new activities for ${currentDog.name}`);
+        console.log(`All ${newActivities.length} activities automatically added to library`);
       } else {
-        console.log('No new unique activities found in this discovery session');
+        console.log('No new unique activities found in this AI discovery session');
       }
     } catch (error) {
-      console.error('Discovery failed:', error);
+      console.error('AI Discovery failed:', error);
     } finally {
       setIsDiscovering(false);
     }
   };
 
+  // Auto-discovery check on load
+  const checkAndRunAutoDiscovery = async () => {
+    if (!currentDog) return;
+    
+    if (AIContentDiscoveryService.shouldRunDiscovery(discoveryConfig)) {
+      console.log('Running automatic weekly discovery...');
+      await discoverNewActivities();
+    }
+  };
+
+  // Legacy methods kept for compatibility but simplified
   const approveDiscoveredActivity = (activityId: string) => {
+    // All AI activities are already auto-approved, but keep for compatibility
     const updated = discoveredActivities.map(activity =>
       activity.id === activityId 
         ? { ...activity, approved: true, rejected: false, verified: true }
@@ -74,6 +83,7 @@ export const useDiscoveryOperations = (
   };
 
   const rejectDiscoveredActivity = (activityId: string) => {
+    // Keep for compatibility but unlikely to be used with auto-approval
     const updated = discoveredActivities.map(activity =>
       activity.id === activityId 
         ? { ...activity, approved: false, rejected: true }
@@ -99,6 +109,7 @@ export const useDiscoveryOperations = (
     discoverNewActivities,
     approveDiscoveredActivity,
     rejectDiscoveredActivity,
-    updateDiscoveryConfig
+    updateDiscoveryConfig,
+    checkAndRunAutoDiscovery
   };
 };

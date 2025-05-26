@@ -1,25 +1,31 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { searchCombinedActivities } from '@/data/activityLibrary';
 import { ActivityLibraryItem } from '@/types/activity';
 import { DiscoveredActivity } from '@/types/discovery';
 import { useActivity } from '@/contexts/ActivityContext';
 import ActivityCard from '@/components/ActivityCard';
-import DiscoveryReview from '@/components/DiscoveryReview';
 import ActivityLibraryHeader from '@/components/ActivityLibraryHeader';
 import ActivityLibraryFilters from '@/components/ActivityLibraryFilters';
 import ActivityLibraryStats from '@/components/ActivityLibraryStats';
 import ActivityLibraryGrid from '@/components/ActivityLibraryGrid';
 
 const ActivityLibrary = () => {
-  const { getCombinedActivityLibrary, discoveredActivities, discoverNewActivities, isDiscovering } = useActivity();
+  const { getCombinedActivityLibrary, discoveredActivities, discoverNewActivities, isDiscovering, checkAndRunAutoDiscovery } = useActivity();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPillar, setSelectedPillar] = useState<string>('all');
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all');
   const [selectedActivity, setSelectedActivity] = useState<ActivityLibraryItem | DiscoveredActivity | null>(null);
 
   const combinedActivities = getCombinedActivityLibrary();
+
+  // Check for auto-discovery on component mount
+  useEffect(() => {
+    if (checkAndRunAutoDiscovery) {
+      checkAndRunAutoDiscovery();
+    }
+  }, [checkAndRunAutoDiscovery]);
 
   const filteredActivities = React.useMemo(() => {
     let activities = searchQuery ? searchCombinedActivities(searchQuery, discoveredActivities) : combinedActivities;
@@ -43,15 +49,11 @@ const ActivityLibrary = () => {
     await discoverNewActivities();
   };
 
-  const pendingReviewCount = discoveredActivities.filter(a => !a.approved && !a.rejected).length;
   const autoApprovedCount = discoveredActivities.filter(a => a.approved).length;
   const curatedCount = combinedActivities.filter(a => !isDiscoveredActivity(a)).length;
 
   return (
     <div className="space-y-6">
-      {/* Discovery Review Section */}
-      <DiscoveryReview activities={discoveredActivities} />
-
       <Card>
         <ActivityLibraryHeader
           autoApprovedCount={autoApprovedCount}
@@ -72,7 +74,7 @@ const ActivityLibrary = () => {
             filteredActivitiesCount={filteredActivities.length}
             curatedCount={curatedCount}
             autoApprovedCount={autoApprovedCount}
-            pendingReviewCount={pendingReviewCount}
+            pendingReviewCount={0} // No manual review anymore
           />
         </CardContent>
       </Card>
