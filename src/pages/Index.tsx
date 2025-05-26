@@ -5,6 +5,7 @@ import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import DashboardContent from '@/components/dashboard/DashboardContent';
 import FloatingChatButton from '@/components/dashboard/FloatingChatButton';
 import DashboardModals from '@/components/dashboard/DashboardModals';
+import EmptyDashboard from '@/components/EmptyDashboard';
 
 const Index = () => {
   const { currentDog } = useDog();
@@ -35,10 +36,10 @@ const Index = () => {
       {/* Header */}
       <DashboardHeader onChatOpen={handleChatModalOpen} />
 
-      {/* Show dashboard content only if there's a current dog */}
-      {currentDog && (
+      {/* Main Content - Show EmptyDashboard if no current dog, otherwise show regular dashboard */}
+      {currentDog ? (
         <>
-          {/* Main Content */}
+          {/* Dashboard Content */}
           <DashboardContent onPillarSelect={handlePillarSelect} />
 
           {/* Floating Chat Button */}
@@ -50,6 +51,20 @@ const Index = () => {
             isChatModalOpen={isChatModalOpen}
             selectedPillar={selectedPillar}
             onActivityModalClose={handleActivityModalClose}
+            onChatModalClose={handleChatModalClose}
+          />
+        </>
+      ) : (
+        <>
+          {/* Empty State Dashboard */}
+          <EmptyDashboard />
+
+          {/* Chat Modal for empty state */}
+          <DashboardModals
+            isActivityModalOpen={false}
+            isChatModalOpen={isChatModalOpen}
+            selectedPillar={null}
+            onActivityModalClose={() => {}}
             onChatModalClose={handleChatModalClose}
           />
         </>
