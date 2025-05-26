@@ -1,16 +1,16 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { Heart, Edit, Brain, Trophy, Settings } from 'lucide-react';
+import { Brain, Trophy } from 'lucide-react';
 import { QuizResults } from '@/types/quiz';
 import { useDog } from '@/contexts/DogContext';
 import { useActivity } from '@/contexts/ActivityContext';
 import DogProfileQuiz from './DogProfileQuiz';
 import QuizResultsComponent from './QuizResults';
 import EditDogForm from './EditDogForm';
+import DogAvatarBlock from './DogAvatarBlock';
 
 const DogProfile = () => {
   const { currentDog, updateDog } = useDog();
@@ -53,58 +53,18 @@ const DogProfile = () => {
 
   return (
     <>
+      {/* Enhanced Dog Avatar Block */}
+      <DogAvatarBlock 
+        dog={currentDog}
+        onEditClick={() => setShowEditForm(true)}
+      />
+
+      {/* Quiz and Goals Section */}
       <Card className="overflow-hidden">
         <CardContent className="p-4">
-          <div className="flex items-center space-x-4">
-            <div className="relative">
-              <div className="w-16 h-16 bg-gradient-to-br from-orange-200 to-orange-300 rounded-full flex items-center justify-center">
-                {currentDog.image ? (
-                  <img 
-                    src={currentDog.image} 
-                    alt={currentDog.name} 
-                    className="w-16 h-16 rounded-full object-cover"
-                  />
-                ) : (
-                  <span className="text-2xl">🐕</span>
-                )}
-              </div>
-              <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                <Heart className="w-3 h-3 text-white fill-current" />
-              </div>
-            </div>
-            
-            <div className="flex-1">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-bold text-gray-800">{currentDog.name}</h2>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={() => setShowEditForm(true)}
-                >
-                  <Edit className="w-4 h-4 text-gray-400" />
-                </Button>
-              </div>
-              <p className="text-sm text-gray-600">{currentDog.breed} • {currentDog.age} years</p>
-              <div className="flex flex-wrap gap-1 mt-2">
-                <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700">Active</Badge>
-                <Badge variant="secondary" className="text-xs bg-green-100 text-green-700">Social</Badge>
-                {hasCompletedQuiz && currentDog.quizResults && (
-                  <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700">
-                    {currentDog.quizResults.personality}
-                  </Badge>
-                )}
-                {currentDog.mobilityIssues.length > 0 && !currentDog.mobilityIssues.includes('None') && (
-                  <Badge variant="secondary" className="text-xs bg-orange-100 text-orange-700">
-                    Special Needs
-                  </Badge>
-                )}
-              </div>
-            </div>
-          </div>
-          
           {/* Quiz Section */}
           {!hasCompletedQuiz ? (
-            <div className="mt-4 p-3 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-100">
+            <div className="p-3 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-100">
               <div className="flex items-center space-x-3">
                 <Brain className="w-5 h-5 text-purple-600" />
                 <div className="flex-1">
@@ -123,7 +83,7 @@ const DogProfile = () => {
           ) : (
             <>
               {/* Personalized Goals */}
-              <div className="mt-4 p-3 bg-gradient-to-r from-blue-50 to-orange-50 rounded-lg">
+              <div className="p-3 bg-gradient-to-r from-blue-50 to-orange-50 rounded-lg">
                 <div className="flex items-center space-x-2 mb-2">
                   <Trophy className="w-4 h-4 text-orange-500" />
                   <span className="text-sm font-medium text-gray-800">Today's Goals for {currentDog.name}</span>
