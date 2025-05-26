@@ -3,18 +3,21 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Clock, CheckCircle, Circle, Plus, Calendar, Edit3, StickyNote } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Clock, CheckCircle, Circle, Plus, Calendar, Edit3, StickyNote, Save, X } from 'lucide-react';
 import { useActivity } from '@/contexts/ActivityContext';
 import { useNavigate } from 'react-router-dom';
 import { useDog } from '@/contexts/DogContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const DailyPlannerCard = () => {
-  const { getTodaysActivities, toggleActivityCompletion, getActivityDetails } = useActivity();
+  const { getTodaysActivities, toggleActivityCompletion, getActivityDetails, updateScheduledActivity } = useActivity();
   const { currentDog } = useDog();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [expandedActivity, setExpandedActivity] = useState<string | null>(null);
+  const [editingTime, setEditingTime] = useState<string | null>(null);
+  const [tempTime, setTempTime] = useState<string>('');
   
   const todaysActivities = getTodaysActivities();
   const completedCount = todaysActivities.filter(a => a.completed).length;
@@ -33,6 +36,25 @@ const DailyPlannerCard = () => {
 
   const toggleActivityExpansion = (activityId: string) => {
     setExpandedActivity(expandedActivity === activityId ? null : activityId);
+    setEditingTime(null); // Close any time editing when collapsing
+  };
+
+  const startTimeEdit = (activityId: string, currentTime: string) => {
+    setEditingTime(activityId);
+    setTempTime(currentTime);
+  };
+
+  const cancelTimeEdit = () => {
+    setEditingTime(null);
+    setTempTime('');
+  };
+
+  const saveTimeEdit = (activityId: string) => {
+    if (tempTime && updateScheduledActivity) {
+      updateScheduledActivity(activityId, { userSelectedTime: tempTime });
+    }
+    setEditingTime(null);
+    setTempTime('');
   };
 
   if (todaysActivities.length === 0) {
@@ -110,6 +132,8 @@ const DailyPlannerCard = () => {
 
           const pillarColor = getPillarColor(activityDetails.pillar);
           const isExpanded = expandedActivity === scheduledActivity.id;
+          const displayTime = scheduledActivity.userSelectedTime || scheduledActivity.scheduledTime;
+          const isEditingThisTime = editingTime === scheduledActivity.id;
           
           return (
             <div 
@@ -147,7 +171,7 @@ const DailyPlannerCard = () => {
                     <div className="flex items-center space-x-1">
                       <div className="flex items-center space-x-1 text-xs text-gray-500">
                         <Clock className="w-3 h-3" />
-                        <span>{scheduledActivity.userSelectedTime || scheduledActivity.scheduledTime}</span>
+                        <span>{displayTime}</span>
                       </div>
                       <Button
                         variant="ghost"
@@ -181,7 +205,53 @@ const DailyPlannerCard = () => {
               {/* Expanded Details */}
               {isExpanded && (
                 <div className="border-t border-gray-100 mobile-card bg-gray-50">
-                  <div className="space-y-2">
+                  <div className="space-y-3">
+                    {/* Time Picker Section */}
+                    <div>
+                      <p className="text-xs font-medium text-gray-700 mb-2">Scheduled Time:</p>
+                      {isEditingThisTime ? (
+                        <div className="flex items-center space-x-2">
+                          <Input
+                            type="time"
+                            value={tempTime}
+                            onChange={(e) => setTempTime(e.target.value)}
+                            className="w-32 h-7 text-xs"
+                          />
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="p-1 h-7 w-7"
+                            onClick={() => saveTimeEdit(scheduledActivity.id)}
+                          >
+                            <Save className="w-3 h-3 text-green-600" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="p-1 h-7 w-7"
+                            onClick={cancelTimeEdit}
+                          >
+                            <X className="w-3 h-3 text-red-600" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center space-x-2">
+                          <div className="flex items-center space-x-1 text-xs bg-white px-2 py-1 rounded border">
+                            <Clock className="w-3 h-3 text-gray-500" />
+                            <span>{displayTime}</span>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="p-1 h-7 w-7"
+                            onClick={() => startTimeEdit(scheduledActivity.id, displayTime)}
+                          >
+                            <Edit3 className="w-3 h-3 text-blue-600" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                    
                     <div>
                       <p className="text-xs font-medium text-gray-700 mb-1">Benefits:</p>
                       <p className="text-xs text-gray-600">{activityDetails.benefits}</p>

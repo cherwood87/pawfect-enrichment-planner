@@ -10,6 +10,7 @@ export interface ActivityContextType {
   isDiscovering: boolean;
   addScheduledActivity: (activity: Omit<ScheduledActivity, 'id' | 'dogId'>) => void;
   toggleActivityCompletion: (activityId: string) => void;
+  updateScheduledActivity: (activityId: string, updates: Partial<ScheduledActivity>) => void;
   addUserActivity: (activity: Omit<UserActivity, 'id' | 'createdAt' | 'dogId'>) => void;
   getTodaysActivities: () => ScheduledActivity[];
   getActivityDetails: (activityId: string) => ActivityLibraryItem | UserActivity | DiscoveredActivity | undefined;
