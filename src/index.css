@@ -162,15 +162,15 @@
     @apply grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4;
   }
 
-  /* Modal desktop and mobile optimization */
-  .mobile-modal {
-    @apply w-full max-w-[calc(100vw-2rem)] max-h-[calc(100vh-2rem)] m-4;
+  /* Standardized Modal Sizing - Simple and Consistent */
+  .modal-standard {
+    @apply w-full max-w-4xl h-[85vh] max-h-[600px];
   }
   
-  /* Desktop modal optimization */
-  @media (min-width: 768px) {
-    .mobile-modal {
-      @apply max-w-lg max-h-[85vh] w-auto;
+  /* Mobile modal adjustments */
+  @media (max-width: 767px) {
+    .modal-standard {
+      @apply w-[calc(100vw-1rem)] h-[90vh] max-h-none m-2;
     }
   }
   
