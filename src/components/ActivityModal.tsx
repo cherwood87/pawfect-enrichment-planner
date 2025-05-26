@@ -1,12 +1,9 @@
 
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
-import { X } from 'lucide-react';
-import BrowseLibraryTab from './BrowseLibraryTab';
-import CreateCustomTab from './CreateCustomTab';
-import DiscoveryReview from './DiscoveryReview';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import ActivityModalHeader from './ActivityModalHeader';
+import DaySelector from './DaySelector';
+import ActivityModalTabs from './ActivityModalTabs';
 import { useActivity } from '@/contexts/ActivityContext';
 import { getPillarActivities } from '@/data/activityLibrary';
 
@@ -128,92 +125,39 @@ const ActivityModal: React.FC<ActivityModalProps> = ({
     setDescription('');
   };
 
-  const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <div className="flex items-center justify-between">
-            <DialogTitle className="text-2xl font-bold text-gray-800">
-              Activity Library
-            </DialogTitle>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onClose}
-              className="h-8 w-8 p-0"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-        </DialogHeader>
+        <ActivityModalHeader onClose={onClose} />
 
-        {/* Day Selection - Always Visible */}
-        <div className="mb-4 p-4 bg-blue-50 rounded-lg">
-          <h3 className="font-medium text-gray-800 mb-2">Select Day for Weekly Plan</h3>
-          <div className="grid grid-cols-7 gap-2">
-            {dayNames.map((day, index) => (
-              <Button
-                key={day}
-                variant={selectedDayOfWeek === index ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSelectedDayOfWeek(index)}
-                className="text-xs"
-              >
-                {day.slice(0, 3)}
-              </Button>
-            ))}
-          </div>
-        </div>
+        <DaySelector 
+          selectedDayOfWeek={selectedDayOfWeek}
+          onDaySelect={setSelectedDayOfWeek}
+        />
         
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="browse">Browse Library</TabsTrigger>
-            <TabsTrigger value="create">Create Custom</TabsTrigger>
-            <TabsTrigger value="review" className="relative">
-              Discovery Review
-              {pendingActivities.length > 0 && (
-                <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  {pendingActivities.length}
-                </span>
-              )}
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="browse">
-            <BrowseLibraryTab 
-              selectedPillar={selectedPillar}
-              filteredLibraryActivities={filteredLibraryActivities}
-              onActivitySelect={handleActivitySelect}
-            />
-          </TabsContent>
-          
-          <TabsContent value="create">
-            <CreateCustomTab 
-              activityName={activityName}
-              setActivityName={setActivityName}
-              pillar={pillar}
-              setPillar={setPillar}
-              duration={duration}
-              setDuration={setDuration}
-              materials={materials}
-              setMaterials={setMaterials}
-              instructions={instructions}
-              setInstructions={setInstructions}
-              description={description}
-              setDescription={setDescription}
-              onSubmit={handleCreateCustomActivity}
-              onCancel={handleCancelCustomActivity}
-            />
-          </TabsContent>
-          
-          <TabsContent value="review">
-            <DiscoveryReview 
-              activities={discoveredActivities}
-            />
-          </TabsContent>
-        </Tabs>
+        <ActivityModalTabs
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          selectedPillar={selectedPillar}
+          filteredLibraryActivities={filteredLibraryActivities}
+          onActivitySelect={handleActivitySelect}
+          pendingActivities={pendingActivities}
+          discoveredActivities={discoveredActivities}
+          activityName={activityName}
+          setActivityName={setActivityName}
+          pillar={pillar}
+          setPillar={setPillar}
+          duration={duration}
+          setDuration={setDuration}
+          materials={materials}
+          setMaterials={setMaterials}
+          instructions={instructions}
+          setInstructions={setInstructions}
+          description={description}
+          setDescription={setDescription}
+          onCreateCustomActivity={handleCreateCustomActivity}
+          onCancelCustomActivity={handleCancelCustomActivity}
+        />
       </DialogContent>
     </Dialog>
   );
