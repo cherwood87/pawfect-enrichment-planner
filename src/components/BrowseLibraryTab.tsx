@@ -7,16 +7,12 @@ interface BrowseLibraryTabProps {
   selectedPillar?: string | null;
   filteredLibraryActivities: any[];
   onActivitySelect: (activity: any) => void;
-  schedulingMode?: 'daily' | 'weekly';
 }
 
 const BrowseLibraryTab: React.FC<BrowseLibraryTabProps> = ({
   filteredLibraryActivities,
-  onActivitySelect,
-  schedulingMode = 'daily'
+  onActivitySelect
 }) => {
-  const scheduleButtonText = 'Add to Weekly Plan';
-
   return (
     <div className="space-y-4">
       <div className="text-center mb-4">
@@ -32,7 +28,7 @@ const BrowseLibraryTab: React.FC<BrowseLibraryTabProps> = ({
             key={activity.id}
             activity={activity}
             onSelect={onActivitySelect}
-            buttonText={scheduleButtonText}
+            buttonText="Add to Weekly Plan"
           />
         ))}
       </div>

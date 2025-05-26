@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -185,7 +186,6 @@ const ActivityModal: React.FC<ActivityModalProps> = ({
               selectedPillar={selectedPillar}
               filteredLibraryActivities={filteredLibraryActivities}
               onActivitySelect={handleActivitySelect}
-              schedulingMode="weekly"
             />
           </TabsContent>
           
