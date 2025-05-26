@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -32,7 +31,7 @@ const ActivityModal: React.FC<ActivityModalProps> = ({
   const [instructions, setInstructions] = useState('');
   const [description, setDescription] = useState('');
   
-  // State for weekly scheduling - always visible now
+  // State for weekly scheduling
   const [selectedDayOfWeek, setSelectedDayOfWeek] = useState<number>(0);
   
   const pendingActivities = discoveredActivities.filter(activity => 
