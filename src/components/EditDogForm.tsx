@@ -81,27 +81,27 @@ const EditDogForm: React.FC<EditDogFormProps> = ({ dog, onClose }) => {
   }
 
   return (
-    <Card className={`${isMobile ? 'w-full h-full flex flex-col' : 'max-w-lg w-full max-h-[85vh] flex flex-col'} mx-auto`}>
-      <CardHeader className="mobile-card flex-shrink-0">
-        <div className="flex items-center justify-between">
-          <CardTitle className="font-bold text-gray-800 truncate">Edit {dog.name}</CardTitle>
-          <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => setShowDeleteConfirm(true)}
-              className="text-red-500 hover:text-red-700 touch-target"
-            >
-              <Trash2 className="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="sm" onClick={onClose} className="touch-target">
-              <X className="w-4 h-4" />
-            </Button>
-          </div>
+    <div className="w-full h-full flex flex-col">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b flex-shrink-0">
+        <h2 className="font-bold text-gray-800 truncate">Edit {dog.name}</h2>
+        <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => setShowDeleteConfirm(true)}
+            className="text-red-500 hover:text-red-700 touch-target"
+          >
+            <Trash2 className="w-4 h-4" />
+          </Button>
+          <Button variant="ghost" size="sm" onClick={onClose} className="touch-target">
+            <X className="w-4 h-4" />
+          </Button>
         </div>
-      </CardHeader>
+      </div>
 
-      <CardContent className={`${isMobile ? 'overflow-y-auto flex-1' : 'overflow-y-auto'} flex-1`}>
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-y-auto p-4 smooth-scroll">
         <form onSubmit={handleSubmit} className="mobile-space-y">
           <DogFormFields
             formData={formData}
@@ -117,8 +117,8 @@ const EditDogForm: React.FC<EditDogFormProps> = ({ dog, onClose }) => {
             {isSubmitting ? 'Saving...' : 'Save Changes'}
           </Button>
         </form>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 

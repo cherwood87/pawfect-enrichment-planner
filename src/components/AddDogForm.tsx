@@ -56,17 +56,17 @@ const AddDogForm: React.FC<AddDogFormProps> = ({ onClose }) => {
   };
 
   return (
-    <Card className={`${isMobile ? 'w-full h-full flex flex-col' : 'max-w-lg w-full max-h-[85vh] flex flex-col'} mx-auto`}>
-      <CardHeader className="mobile-card flex-shrink-0">
-        <div className="flex items-center justify-between">
-          <CardTitle className="font-bold text-gray-800">Add New Dog</CardTitle>
-          <Button variant="ghost" size="sm" onClick={onClose} className="touch-target">
-            <X className="w-4 h-4" />
-          </Button>
-        </div>
-      </CardHeader>
+    <div className="w-full h-full flex flex-col">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b flex-shrink-0">
+        <h2 className="font-bold text-gray-800">Add New Dog</h2>
+        <Button variant="ghost" size="sm" onClick={onClose} className="touch-target">
+          <X className="w-4 h-4" />
+        </Button>
+      </div>
 
-      <CardContent className={`${isMobile ? 'overflow-y-auto flex-1' : 'overflow-y-auto'} flex-1`}>
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-y-auto p-4 smooth-scroll">
         <form onSubmit={handleSubmit} className="mobile-space-y">
           <DogFormFields
             formData={formData}
@@ -82,8 +82,8 @@ const AddDogForm: React.FC<AddDogFormProps> = ({ onClose }) => {
             {isSubmitting ? 'Adding Dog...' : 'Add Dog'}
           </Button>
         </form>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 

@@ -148,17 +148,19 @@ const DogProfile = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Edit Dog Dialog */}
+      {/* Edit Dog Dialog - Fixed for mobile scrolling */}
       <Dialog open={showEditForm} onOpenChange={setShowEditForm}>
-        <DialogContent className={`p-0 mobile-modal ${isMobile ? 'h-[90vh]' : 'max-w-lg'}`}>
+        <DialogContent className="p-0 w-full max-w-lg max-h-[90vh] flex flex-col">
           <DialogTitle className="sr-only">Edit Dog Profile</DialogTitle>
           <DialogDescription className="sr-only">
             Edit your dog's profile information including name, age, breed, and photo.
           </DialogDescription>
-          <EditDogForm 
-            dog={currentDog}
-            onClose={() => setShowEditForm(false)}
-          />
+          <div className="modal-scroll-container">
+            <EditDogForm 
+              dog={currentDog}
+              onClose={() => setShowEditForm(false)}
+            />
+          </div>
         </DialogContent>
       </Dialog>
     </>
