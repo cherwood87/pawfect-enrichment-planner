@@ -81,8 +81,8 @@ const EditDogForm: React.FC<EditDogFormProps> = ({ dog, onClose }) => {
   }
 
   return (
-    <Card className={`${isMobile ? 'w-full h-full' : 'max-w-lg'} mx-auto`}>
-      <CardHeader className="mobile-card">
+    <Card className={`${isMobile ? 'w-full h-full flex flex-col' : 'max-w-lg w-full max-h-[85vh] flex flex-col'} mx-auto`}>
+      <CardHeader className="mobile-card flex-shrink-0">
         <div className="flex items-center justify-between">
           <CardTitle className="font-bold text-gray-800 truncate">Edit {dog.name}</CardTitle>
           <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
@@ -101,7 +101,7 @@ const EditDogForm: React.FC<EditDogFormProps> = ({ dog, onClose }) => {
         </div>
       </CardHeader>
 
-      <CardContent className={`${isMobile ? 'overflow-y-auto flex-1' : ''}`}>
+      <CardContent className={`${isMobile ? 'overflow-y-auto flex-1' : 'overflow-y-auto'} flex-1`}>
         <form onSubmit={handleSubmit} className="mobile-space-y">
           <DogFormFields
             formData={formData}

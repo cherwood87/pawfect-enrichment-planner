@@ -162,9 +162,16 @@
     @apply grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4;
   }
 
-  /* Modal mobile optimization */
+  /* Modal desktop and mobile optimization */
   .mobile-modal {
     @apply w-full max-w-[calc(100vw-2rem)] max-h-[calc(100vh-2rem)] m-4;
+  }
+  
+  /* Desktop modal optimization */
+  @media (min-width: 768px) {
+    .mobile-modal {
+      @apply max-w-lg max-h-[85vh] w-auto;
+    }
   }
 }
 
@@ -183,5 +190,31 @@
 @supports (-webkit-touch-callout: none) {
   .min-h-screen {
     min-height: -webkit-fill-available;
+  }
+}
+
+/* Desktop scroll optimization */
+@media (min-width: 768px) {
+  /* Ensure modals can scroll properly on desktop */
+  .modal-content {
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+  
+  /* Better scrollbar styling for desktop */
+  .overflow-y-auto::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .overflow-y-auto::-webkit-scrollbar-track {
+    @apply bg-gray-100 rounded-full;
+  }
+  
+  .overflow-y-auto::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 rounded-full;
+  }
+  
+  .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-400;
   }
 }
