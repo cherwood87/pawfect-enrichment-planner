@@ -1,24 +1,40 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Plus, Heart, Brain, Users, Zap, TreePine } from 'lucide-react';
-
 interface EmptyDashboardProps {
   onAddDogOpen: () => void;
 }
-
-const EmptyDashboard: React.FC<EmptyDashboardProps> = ({ onAddDogOpen }) => {
-  const pillars = [
-    { name: 'Mental', icon: Brain, color: 'text-purple-600', bg: 'bg-purple-100' },
-    { name: 'Physical', icon: Zap, color: 'text-green-600', bg: 'bg-green-100' },
-    { name: 'Social', icon: Users, color: 'text-blue-600', bg: 'bg-blue-100' },
-    { name: 'Environmental', icon: TreePine, color: 'text-teal-600', bg: 'bg-teal-100' },
-    { name: 'Instinctual', icon: Heart, color: 'text-orange-600', bg: 'bg-orange-100' },
-  ];
-
-  return (
-    <div className="max-w-4xl mx-auto mobile-container mobile-space-y">
+const EmptyDashboard: React.FC<EmptyDashboardProps> = ({
+  onAddDogOpen
+}) => {
+  const pillars = [{
+    name: 'Mental',
+    icon: Brain,
+    color: 'text-purple-600',
+    bg: 'bg-purple-100'
+  }, {
+    name: 'Physical',
+    icon: Zap,
+    color: 'text-green-600',
+    bg: 'bg-green-100'
+  }, {
+    name: 'Social',
+    icon: Users,
+    color: 'text-blue-600',
+    bg: 'bg-blue-100'
+  }, {
+    name: 'Environmental',
+    icon: TreePine,
+    color: 'text-teal-600',
+    bg: 'bg-teal-100'
+  }, {
+    name: 'Instinctual',
+    icon: Heart,
+    color: 'text-orange-600',
+    bg: 'bg-orange-100'
+  }];
+  return <div className="max-w-4xl mx-auto mobile-container mobile-space-y">
       {/* Welcome Header */}
       <div className="text-center py-8">
         <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-blue-500 to-orange-500 rounded-full flex items-center justify-center">
@@ -27,14 +43,8 @@ const EmptyDashboard: React.FC<EmptyDashboardProps> = ({ onAddDogOpen }) => {
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-4">
           Welcome to Your Dog Enrichment Planner!
         </h1>
-        <p className="text-gray-600 max-w-2xl mx-auto mb-8">
-          Create personalized enrichment activities for your furry friend based on five key pillars: 
-          Mental, Physical, Social, Environmental, and Instinctual stimulation.
-        </p>
-        <Button 
-          onClick={onAddDogOpen}
-          className="bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600 text-lg px-8 py-3 h-auto"
-        >
+        <p className="text-gray-600 max-w-2xl mx-auto mb-8">Create personalized enrichment activities for your dog based on five key pillars: Mental, Physical, Social, Environmental, and Instinctual enrichment.</p>
+        <Button onClick={onAddDogOpen} className="bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600 text-lg px-8 py-3 h-auto">
           <Plus className="w-5 h-5 mr-2" />
           Add Your First Dog
         </Button>
@@ -47,8 +57,7 @@ const EmptyDashboard: React.FC<EmptyDashboardProps> = ({ onAddDogOpen }) => {
             The Five Pillars of Dog Enrichment
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-            {pillars.map((pillar) => (
-              <div key={pillar.name} className="text-center">
+            {pillars.map(pillar => <div key={pillar.name} className="text-center">
                 <div className={`w-16 h-16 mx-auto mb-3 ${pillar.bg} rounded-full flex items-center justify-center`}>
                   <pillar.icon className={`w-8 h-8 ${pillar.color}`} />
                 </div>
@@ -60,8 +69,7 @@ const EmptyDashboard: React.FC<EmptyDashboardProps> = ({ onAddDogOpen }) => {
                   {pillar.name === 'Environmental' && 'New places, sounds, and experiences'}
                   {pillar.name === 'Instinctual' && 'Natural behaviors like sniffing and foraging'}
                 </p>
-              </div>
-            ))}
+              </div>)}
           </div>
         </CardContent>
       </Card>
@@ -151,16 +159,11 @@ const EmptyDashboard: React.FC<EmptyDashboardProps> = ({ onAddDogOpen }) => {
 
       {/* Call to Action */}
       <div className="text-center py-8">
-        <Button 
-          onClick={onAddDogOpen}
-          className="bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600 text-lg px-8 py-3 h-auto"
-        >
+        <Button onClick={onAddDogOpen} className="bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600 text-lg px-8 py-3 h-auto">
           <Plus className="w-5 h-5 mr-2" />
           Get Started - Add Your Dog
         </Button>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default EmptyDashboard;
