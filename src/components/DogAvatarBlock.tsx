@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,34 +5,25 @@ import { Badge } from '@/components/ui/badge';
 import { Heart, Edit, Camera } from 'lucide-react';
 import { Dog } from '@/types/dog';
 import { useIsMobile } from '@/hooks/use-mobile';
-
 interface DogAvatarBlockProps {
   dog: Dog;
   onEditClick: () => void;
 }
-
-const DogAvatarBlock: React.FC<DogAvatarBlockProps> = ({ dog, onEditClick }) => {
+const DogAvatarBlock: React.FC<DogAvatarBlockProps> = ({
+  dog,
+  onEditClick
+}) => {
   const isMobile = useIsMobile();
-
-  return (
-    <Card className="overflow-hidden bg-gradient-to-br from-blue-50 to-orange-50 border-blue-100">
+  return <Card className="overflow-hidden bg-gradient-to-br from-blue-50 to-orange-50 border-blue-100">
       <CardContent className="mobile-card">
-        <div className="flex flex-col items-center mobile-space-y">
+        <div className="flex flex-col items-center mobile-space-y bg-cyan-600">
           {/* Enhanced Dog Avatar */}
           <div className="relative">
             <div className={`${isMobile ? 'w-20 h-20' : 'w-24 h-24'} bg-gradient-to-br from-orange-200 to-orange-300 rounded-full flex items-center justify-center shadow-lg ring-4 ring-white`}>
-              {dog.image ? (
-                <img 
-                  src={dog.image} 
-                  alt={dog.name} 
-                  className={`${isMobile ? 'w-20 h-20' : 'w-24 h-24'} rounded-full object-cover`}
-                />
-              ) : (
-                <div className="flex flex-col items-center text-orange-600">
+              {dog.image ? <img src={dog.image} alt={dog.name} className={`${isMobile ? 'w-20 h-20' : 'w-24 h-24'} rounded-full object-cover`} /> : <div className="flex flex-col items-center text-orange-600">
                   <Camera className={`${isMobile ? 'w-6 h-6' : 'w-8 h-8'} mb-1`} />
                   <span className="text-xs font-medium">Add Photo</span>
-                </div>
-              )}
+                </div>}
             </div>
             
             {/* Heart Status Indicator */}
@@ -42,12 +32,7 @@ const DogAvatarBlock: React.FC<DogAvatarBlockProps> = ({ dog, onEditClick }) => 
             </div>
             
             {/* Edit Button */}
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={onEditClick}
-              className={`absolute -top-2 -right-2 ${isMobile ? 'w-6 h-6' : 'w-8 h-8'} rounded-full bg-white shadow-md hover:bg-gray-50 touch-target`}
-            >
+            <Button variant="ghost" size="sm" onClick={onEditClick} className={`absolute -top-2 -right-2 ${isMobile ? 'w-6 h-6' : 'w-8 h-8'} rounded-full bg-white shadow-md hover:bg-gray-50 touch-target`}>
               <Edit className={`${isMobile ? 'w-2.5 h-2.5' : 'w-3 h-3'} text-gray-600`} />
             </Button>
           </div>
@@ -65,22 +50,16 @@ const DogAvatarBlock: React.FC<DogAvatarBlockProps> = ({ dog, onEditClick }) => 
               <Badge variant="secondary" className="text-xs bg-green-100 text-green-700">
                 Social
               </Badge>
-              {dog.quizResults && (
-                <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700">
+              {dog.quizResults && <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700">
                   {dog.quizResults.personality}
-                </Badge>
-              )}
-              {dog.mobilityIssues.length > 0 && !dog.mobilityIssues.includes('None') && (
-                <Badge variant="secondary" className="text-xs bg-orange-100 text-orange-700">
+                </Badge>}
+              {dog.mobilityIssues.length > 0 && !dog.mobilityIssues.includes('None') && <Badge variant="secondary" className="text-xs bg-orange-100 text-orange-700">
                   Special Needs
-                </Badge>
-              )}
+                </Badge>}
             </div>
           </div>
         </div>
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };
-
 export default DogAvatarBlock;
