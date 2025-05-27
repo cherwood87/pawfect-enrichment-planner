@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import ActivityModalHeader from './ActivityModalHeader';
@@ -6,7 +5,7 @@ import DaySelector from './DaySelector';
 import ActivityModalTabs from './ActivityModalTabs';
 import { useActivity } from '@/contexts/ActivityContext';
 import { getPillarActivities } from '@/data/activityLibrary';
-import { useNavigate } from 'react-router-dom'; // <-- Add this import
+import { useNavigate } from 'react-router-dom';
 
 interface ActivityModalProps {
   isOpen: boolean;
@@ -19,7 +18,7 @@ const ActivityModal: React.FC<ActivityModalProps> = ({
   onClose, 
   selectedPillar
 }) => {
-  const navigate = useNavigate(); // <-- Add this line
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('browse');
   const { discoveredActivities, addScheduledActivity, addUserActivity } = useActivity();
   
@@ -58,7 +57,6 @@ const ActivityModal: React.FC<ActivityModalProps> = ({
   }
 
   const handleActivitySelect = (activity: any) => {
-    const scheduledTime = '12:00 PM';
     const currentWeek = getISOWeek(new Date());
     
     // Calculate the date for the selected day of the week
@@ -72,8 +70,6 @@ const ActivityModal: React.FC<ActivityModalProps> = ({
     
     addScheduledActivity({
       activityId: activity.id,
-      scheduledTime: scheduledTime,
-      userSelectedTime: scheduledTime,
       scheduledDate: scheduledDate,
       completed: false,
       notes: '',
@@ -84,7 +80,7 @@ const ActivityModal: React.FC<ActivityModalProps> = ({
     });
     
     onClose();
-    navigate('/dog-profile-dashboard/weekly-plan'); // <-- Add this line
+    navigate('/dog-profile-dashboard/weekly-plan');
   };
 
   const handleCreateCustomActivity = () => {
@@ -116,7 +112,7 @@ const ActivityModal: React.FC<ActivityModalProps> = ({
     setDescription('');
     
     onClose();
-    navigate('/dog-profile-dashboard/weekly-plan'); // <-- Add this line if you want navigation on custom activity creation too
+    navigate('/dog-profile-dashboard/weekly-plan');
   };
 
   const handleCancelCustomActivity = () => {
