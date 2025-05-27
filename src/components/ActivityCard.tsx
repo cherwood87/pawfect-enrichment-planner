@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -7,6 +8,7 @@ import { Clock, Star, Calendar, CheckCircle, Target, ExternalLink, Sparkles, Hea
 import { ActivityLibraryItem } from '@/types/activity';
 import { DiscoveredActivity } from '@/types/discovery';
 import { useActivity } from '@/contexts/ActivityContext';
+import { useDog } from '@/contexts/DogContext';
 
 interface ActivityCardProps {
   activity: ActivityLibraryItem | DiscoveredActivity;
@@ -26,6 +28,7 @@ const daysOfWeek = [
 
 const ActivityCard: React.FC<ActivityCardProps> = ({ activity, isOpen, onClose }) => {
   const { addScheduledActivity } = useActivity();
+  const { currentDog } = useDog();
   const [selectedDayOfWeek, setSelectedDayOfWeek] = useState<number>(1); // Default to Monday
 
   const getDifficultyColor = (difficulty: string) => {
@@ -64,11 +67,14 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, isOpen, onClose }
   };
 
   const handleScheduleActivity = () => {
+    if (!currentDog) return;
+    
     const targetDate = getDateForDayOfWeek(selectedDayOfWeek);
     const weekNumber = getISOWeek(targetDate);
     const scheduledDate = targetDate.toISOString().split('T')[0];
 
     addScheduledActivity({
+      dogId: currentDog.id,
       activityId: activity.id,
       scheduledDate,
       weekNumber,
@@ -275,6 +281,7 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, isOpen, onClose }
             <Button
               onClick={handleScheduleActivity}
               className="flex-1 bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600"
+              disabled={!currentDog}
             >
               <Calendar className="w-4 h-4 mr-2" />
               Add to Weekly Plan

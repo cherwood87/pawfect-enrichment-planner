@@ -1,9 +1,11 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import ActivityModalHeader from './ActivityModalHeader';
 import DaySelector from './DaySelector';
 import ActivityModalTabs from './ActivityModalTabs';
 import { useActivity } from '@/contexts/ActivityContext';
+import { useDog } from '@/contexts/DogContext';
 import { getPillarActivities } from '@/data/activityLibrary';
 import { useNavigate } from 'react-router-dom';
 
@@ -21,6 +23,7 @@ const ActivityModal: React.FC<ActivityModalProps> = ({
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('browse');
   const { discoveredActivities, addScheduledActivity, addUserActivity } = useActivity();
+  const { currentDog } = useDog();
   
   // State for CreateCustomTab
   const [activityName, setActivityName] = useState('');
@@ -57,6 +60,8 @@ const ActivityModal: React.FC<ActivityModalProps> = ({
   }
 
   const handleActivitySelect = (activity: any) => {
+    if (!currentDog) return;
+    
     const currentWeek = getISOWeek(new Date());
     
     // Calculate the date for the selected day of the week
@@ -69,6 +74,7 @@ const ActivityModal: React.FC<ActivityModalProps> = ({
     const scheduledDate = targetDate.toISOString().split('T')[0];
     
     addScheduledActivity({
+      dogId: currentDog.id,
       activityId: activity.id,
       scheduledDate: scheduledDate,
       completed: false,
