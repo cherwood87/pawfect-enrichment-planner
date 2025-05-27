@@ -7,6 +7,10 @@ import QuickStats from './QuickStats';
 import ReflectionJournal from '@/components/ReflectionJournal';
 import EmptyDashboard from '@/components/EmptyDashboard';
 
+const daysOfWeek = [
+  'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'
+];
+
 interface DashboardContentProps {
   onAddDogOpen?: () => void;
   onEditDogOpen?: (dog: any) => void;
@@ -23,8 +27,10 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
 
   // ----- FAVOURITES SECTION STATE -----
   const [favourites, setFavourites] = useState<any[]>([]);
+  const [showDayPickerFor, setShowDayPickerFor] = useState<string | null>(null);
+  const [selectedDay, setSelectedDay] = useState<number>(1); // Default Monday
+
   useEffect(() => {
-    // Load favourites from localStorage on mount
     const saved = JSON.parse(localStorage.getItem('favouriteActivities') || '[]');
     setFavourites(saved);
   }, []);
@@ -36,17 +42,34 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
     localStorage.setItem('favouriteActivities', JSON.stringify(updated));
   };
 
-  // Add to Weekly Plan
-  const handleAddToWeeklyPlan = (activity: any) => {
+  // Add to Weekly Plan with day selection
+  const handleAddToWeeklyPlan = (activity: any, dayOfWeek: number) => {
+    // Calculate the next date for the selected day
+    const today = new Date();
+    const currentDay = today.getDay();
+    const diff = dayOfWeek - currentDay >= 0
+      ? dayOfWeek - currentDay
+      : 7 - (currentDay - dayOfWeek);
+    const targetDate = new Date(today);
+    targetDate.setDate(today.getDate() + diff);
+
     const plan = JSON.parse(localStorage.getItem('weeklyPlan') || '[]');
-    // Prevent duplicate add
-    if (!plan.find((a: any) => a.title === activity.title)) {
-      plan.push(activity);
+    const alreadyPlanned = plan.find(
+      (a: any) => a.title === activity.title && a.scheduledDate === targetDate.toISOString().split('T')[0]
+    );
+    if (!alreadyPlanned) {
+      plan.push({
+        ...activity,
+        scheduledDate: targetDate.toISOString().split('T')[0],
+        dayOfWeek,
+      });
       localStorage.setItem('weeklyPlan', JSON.stringify(plan));
-      alert(`Added "${activity.title}" to Weekly Plan!`);
+      alert(`Added "${activity.title}" to Weekly Plan on ${daysOfWeek[dayOfWeek]}!`);
     } else {
-      alert(`"${activity.title}" is already in your Weekly Plan!`);
+      alert(`"${activity.title}" is already in your Weekly Plan for ${daysOfWeek[dayOfWeek]}!`);
     }
+    setShowDayPickerFor(null);
+    setSelectedDay(1);
   };
 
   const todaysActivities = getTodaysActivities();
@@ -89,13 +112,38 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
                     {activity.pillar} • {activity.difficulty} • {activity.duration} min
                   </div>
                 </div>
-                <div className="flex mt-2 md:mt-0 md:ml-4 space-x-2">
+                <div className="flex mt-2 md:mt-0 md:ml-4 space-x-2 items-center">
                   <button
                     className="px-3 py-1 rounded bg-blue-500 text-white text-xs hover:bg-blue-600"
-                    onClick={() => handleAddToWeeklyPlan(activity)}
+                    onClick={() => setShowDayPickerFor(activity.title)}
                   >
                     Add to Weekly Plan
                   </button>
+                  {showDayPickerFor === activity.title && (
+                    <div className="flex items-center space-x-1 ml-2">
+                      <select
+                        className="border rounded px-2 py-1 text-xs"
+                        value={selectedDay}
+                        onChange={e => setSelectedDay(Number(e.target.value))}
+                      >
+                        {daysOfWeek.map((day, idx) => (
+                          <option key={idx} value={idx}>{day}</option>
+                        ))}
+                      </select>
+                      <button
+                        className="px-2 py-1 bg-green-500 text-white rounded text-xs"
+                        onClick={() => handleAddToWeeklyPlan(activity, selectedDay)}
+                      >
+                        Confirm
+                      </button>
+                      <button
+                        className="px-2 py-1 bg-gray-200 text-gray-700 rounded text-xs"
+                        onClick={() => setShowDayPickerFor(null)}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  )}
                   <button
                     className="px-3 py-1 rounded bg-red-100 text-red-600 text-xs hover:bg-red-200"
                     onClick={() => handleRemoveFavourite(activity)}
