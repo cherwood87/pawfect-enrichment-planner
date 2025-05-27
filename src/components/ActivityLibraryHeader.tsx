@@ -54,7 +54,7 @@ const ActivityLibraryHeader: React.FC<ActivityLibraryHeaderProps> = ({
       {isDiscovering && (
         <div className="mt-2 text-sm text-purple-600">
           <div className="flex items-center space-x-2">
-            <div className="animate-pulse">🤖</div>
+            <div className="animate-pulse"></div>
             <span>Analyzing your dog's profile and discovering personalized activities...</span>
           </div>
         </div>
