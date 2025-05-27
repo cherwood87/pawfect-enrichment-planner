@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { JournalEntry } from '@/types/journal';
@@ -112,7 +111,8 @@ export const useJournalEntry = (currentDog: Dog | null) => {
         // Create new entry
         const newEntry = await JournalService.createEntry(currentDog.id, currentEntry);
         setTodaysEntries(prev => [newEntry, ...prev]);
-        setCurrentEntry(newEntry);
+        // Don't edit the just-saved entry, instead, clear the form for a new blank entry
+        createNewEntry();
       }
       
       console.log('Journal entry saved successfully');
