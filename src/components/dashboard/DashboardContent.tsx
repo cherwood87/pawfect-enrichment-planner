@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useActivity } from '@/contexts/ActivityContext';
 import { useDog } from '@/contexts/DogContext';
@@ -11,6 +10,15 @@ import EmptyDashboard from '@/components/EmptyDashboard';
 const daysOfWeek = [
   'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'
 ];
+
+interface FavouriteActivity {
+  id: string;
+  title: string;
+  pillar: string;
+  difficulty: string;
+  duration: number;
+  // Add more fields if used in UI
+}
 
 interface DashboardContentProps {
   onAddDogOpen?: () => void;
@@ -26,27 +34,23 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
   const { getTodaysActivities, getStreakData, addScheduledActivity } = useActivity();
   const { currentDog } = useDog();
 
-  // ----- FAVOURITES SECTION STATE -----
-  const [favourites, setFavourites] = useState<any[]>([]);
+  const [favourites, setFavourites] = useState<FavouriteActivity[]>([]);
   const [showDayPickerFor, setShowDayPickerFor] = useState<string | null>(null);
-  const [selectedDay, setSelectedDay] = useState<number>(1); // Default Monday
+  const [selectedDay, setSelectedDay] = useState<number>(1);
 
   useEffect(() => {
-    // Load favourites from localStorage on mount
     const saved = JSON.parse(localStorage.getItem('favouriteActivities') || '[]');
     setFavourites(saved);
   }, []);
 
-  // Remove a favourite
-  const handleRemoveFavourite = (activity: any) => {
-    const updated = favourites.filter((a) => a.title !== activity.title);
+  const handleRemoveFavourite = (activity: FavouriteActivity) => {
+    const updated = favourites.filter((a) => a.id !== activity.id);
     setFavourites(updated);
     localStorage.setItem('favouriteActivities', JSON.stringify(updated));
   };
 
-  // Add to Weekly Plan using context, with day selection
-  const handleAddToWeeklyPlan = (activity: any, dayOfWeek: number) => {
-    // Calculate the next date for the selected day
+  const handleAddToWeeklyPlan = async (activity: FavouriteActivity, dayOfWeek: number) => {
+    if (!currentDog?.id) return;
     const today = new Date();
     const currentDay = today.getDay();
     const diff = dayOfWeek - currentDay >= 0
@@ -55,7 +59,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
     const targetDate = new Date(today);
     targetDate.setDate(today.getDate() + diff);
 
-    // Calculate ISO week number
+    // ISO week calculation
     const getISOWeek = (date: Date): number => {
       const target = new Date(date.valueOf());
       const dayNr = (date.getDay() + 6) % 7;
@@ -67,21 +71,27 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
       }
       return 1 + Math.ceil((firstThursday - target.valueOf()) / 604800000);
     };
-
     const weekNumber = getISOWeek(targetDate);
 
-    addScheduledActivity({
-      activityId: activity.id,
-      scheduledDate: targetDate.toISOString().split('T')[0],
-      scheduledTime: '',
-      weekNumber,
-      dayOfWeek,
-      completed: false,
-      notes: '',
-      completionNotes: '',
-      reminderEnabled: false,
-    });
-
+    try {
+      await addScheduledActivity({
+        dogId: currentDog.id,
+        activityId: activity.id,
+        scheduledDate: targetDate.toISOString().split('T')[0],
+        scheduledTime: '',
+        weekNumber,
+        dayOfWeek,
+        completed: false,
+        notes: '',
+        completionNotes: '',
+        reminderEnabled: false,
+      });
+      // Optionally show a toast/notification here for user feedback
+    } catch (error) {
+      // Optionally show an error notification/toast
+      // eslint-disable-next-line no-console
+      console.error('Failed to add activity to Weekly Plan:', error);
+    }
     setShowDayPickerFor(null);
     setSelectedDay(1);
   };
@@ -95,14 +105,12 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      {/* Quick Stats */}
       <QuickStats
         activeDays={streakData.activeDays}
         completionRate={streakData.completionRate}
         currentStreak={streakData.currentStreak}
       />
 
-      {/* Planning Cards - Side by Side on Desktop */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <DailyPlannerCard />
         <WeeklyPlannerCard />
@@ -115,9 +123,9 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
           <div className="text-gray-400 text-center py-4">No favourites yet!</div>
         ) : (
           <ul className="space-y-3">
-            {favourites.map((activity, i) => (
+            {favourites.map((activity) => (
               <li
-                key={i}
+                key={activity.id}
                 className="border rounded p-3 bg-white flex flex-col md:flex-row md:items-center md:justify-between"
               >
                 <div>
@@ -129,11 +137,11 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
                 <div className="flex mt-2 md:mt-0 md:ml-4 space-x-2 items-center">
                   <button
                     className="px-3 py-1 rounded bg-blue-500 text-white text-xs hover:bg-blue-600"
-                    onClick={() => setShowDayPickerFor(activity.title)}
+                    onClick={() => setShowDayPickerFor(activity.id)}
                   >
                     Add to Weekly Plan
                   </button>
-                  {showDayPickerFor === activity.title && (
+                  {showDayPickerFor === activity.id && (
                     <div className="flex items-center space-x-1 ml-2">
                       <select
                         className="border rounded px-2 py-1 text-xs"
@@ -171,7 +179,6 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
         )}
       </div>
 
-      {/* Reflection Journal */}
       <ReflectionJournal />
     </div>
   );
