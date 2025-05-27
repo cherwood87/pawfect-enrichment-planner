@@ -1,5 +1,5 @@
-
 import { ActivityLibraryItem } from '@/types/activity';
+import { DiscoveredActivity } from '@/types/discovery';
 
 export const activityLibrary: ActivityLibraryItem[] = [
   // Mental Activities
@@ -729,6 +729,42 @@ export function getActivitiesByDuration(maxDuration: number): ActivityLibraryIte
 }
 
 // Helper function to get discovered activities (placeholder for now)
-export function getDiscoveredActivities(): any[] {
-  return [];
+export function getDiscoveredActivities(dogId?: string): any[] {
+  if (!dogId) return [];
+  const saved = localStorage.getItem(`discoveredActivities-${dogId}`);
+  return saved ? JSON.parse(saved) : [];
+}
+
+// NEW EXPORTS - Adding the missing functions that are being imported
+
+// Get activity by ID from library
+export function getActivityById(id: string): ActivityLibraryItem | undefined {
+  return activityLibrary.find(activity => activity.id === id);
+}
+
+// Get activities by pillar (alias for getActivitiesByPillar)
+export function getPillarActivities(pillar?: string | null): ActivityLibraryItem[] {
+  if (!pillar || pillar === 'all') {
+    return activityLibrary;
+  }
+  return getActivitiesByPillar(pillar);
+}
+
+// Search combined activities (library + discovered)
+export function searchCombinedActivities(query: string, discoveredActivities: DiscoveredActivity[]): (ActivityLibraryItem | DiscoveredActivity)[] {
+  const combinedActivities = getCombinedActivities(discoveredActivities);
+  const lowercaseQuery = query.toLowerCase();
+  
+  return combinedActivities.filter(activity => 
+    activity.title.toLowerCase().includes(lowercaseQuery) ||
+    activity.pillar.toLowerCase().includes(lowercaseQuery) ||
+    activity.tags?.some(tag => tag.toLowerCase().includes(lowercaseQuery)) ||
+    activity.benefits?.toLowerCase().includes(lowercaseQuery)
+  );
+}
+
+// Get combined activities (library + discovered)
+export function getCombinedActivities(discoveredActivities: DiscoveredActivity[]): (ActivityLibraryItem | DiscoveredActivity)[] {
+  const approvedDiscovered = discoveredActivities.filter(activity => activity.approved);
+  return [...activityLibrary, ...approvedDiscovered];
 }

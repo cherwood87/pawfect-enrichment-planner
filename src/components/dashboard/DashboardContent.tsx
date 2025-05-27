@@ -71,7 +71,6 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
     const weekNumber = getISOWeek(targetDate);
 
     addScheduledActivity({
-      dogId: currentDog?.id || '',
       activityId: activity.id,
       scheduledDate: targetDate.toISOString().split('T')[0],
       scheduledTime: '',
