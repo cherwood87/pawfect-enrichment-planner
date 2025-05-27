@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -7,6 +6,14 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Send, Loader2, MessageCircle, Lightbulb, Target, TrendingUp } from 'lucide-react';
 import { useChat } from '@/contexts/ChatContext';
 import { useDog } from '@/contexts/DogContext';
+
+interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: Date;
+  activities?: any[]; // <-- allows activities per message
+}
 
 interface ChatModalProps {
   isOpen: boolean;
@@ -36,10 +43,13 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose }) => {
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
-    
-    const message = input.trim();
+
+    const messageContent = input.trim();
     setInput('');
-    await sendMessage(message);
+
+    // Await the sendMessage function (update this if your sendMessage signature is different)
+    // Expecting sendMessage to handle backend, and update chat state/context with activities on assistant messages
+    await sendMessage(messageContent);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -47,6 +57,15 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose }) => {
       e.preventDefault();
       handleSend();
     }
+  };
+
+  // Add to Weekly Plan (localStorage example)
+  const handleAddToWeeklyPlan = (activity: any) => {
+    const plan = JSON.parse(localStorage.getItem('weeklyPlan') || '[]');
+    plan.push(activity);
+    localStorage.setItem('weeklyPlan', JSON.stringify(plan));
+    // Optional: Add your own toast/notification
+    alert(`Added "${activity.title}" to Weekly Plan!`);
   };
 
   const quickActions = [
@@ -127,6 +146,25 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose }) => {
                       }`}
                     >
                       <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                      {/* Activities block for assistant messages */}
+                      {message.role === 'assistant' && message.activities && message.activities.length > 0 && (
+                        <div className="mt-2 space-y-2">
+                          {message.activities.map((activity, i) => (
+                            <div key={i} className="flex items-center justify-between bg-white border rounded-md p-2 shadow-sm">
+                              <div>
+                                <div className="font-semibold text-gray-900">{activity.title}</div>
+                                <div className="text-xs text-gray-500 capitalize">{activity.pillar} • {activity.difficulty} • {activity.duration} min</div>
+                              </div>
+                              <Button
+                                size="sm"
+                                onClick={() => handleAddToWeeklyPlan(activity)}
+                              >
+                                Add to Weekly Plan
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                       <p className={`text-xs mt-1 ${
                         message.role === 'user' ? 'text-blue-100' : 'text-gray-500'
                       }`}>
