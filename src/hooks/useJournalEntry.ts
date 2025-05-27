@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { format } from 'date-fns';
 import { JournalEntry } from '@/types/journal';
 import { DAILY_PROMPTS } from '@/constants/journalConstants';
@@ -17,7 +17,9 @@ export const useJournalEntry = (currentDog: Dog | null) => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [justCreatedNew, setJustCreatedNew] = useState(false); // NEW
+
+  // Track if we just created a new blank entry (after save)
+  const justCreatedNewRef = useRef(false);
 
   // Get a random prompt for new entries
   const getRandomPrompt = () => {
@@ -42,7 +44,6 @@ export const useJournalEntry = (currentDog: Dog | null) => {
         const entries = await JournalService.getEntriesForDate(currentDog.id, todaysDate);
         setTodaysEntries(entries);
 
-        // If there are no entries for today, set up a new entry
         if (entries.length === 0) {
           const randomPrompt = getRandomPrompt();
           setCurrentEntry({
@@ -53,12 +54,11 @@ export const useJournalEntry = (currentDog: Dog | null) => {
             behaviors: [],
             notes: ''
           });
-        } else if (!justCreatedNew) {
-          // Only load latest entry for editing if NOT just created new
-          const latestEntry = entries[0];
-          setCurrentEntry(latestEntry);
+        } else if (!justCreatedNewRef.current) {
+          // Only set currentEntry to latest if not just created a new one
+          setCurrentEntry(entries[0]);
         }
-        // If justCreatedNew, do not override currentEntry (leave it blank as intended)
+        // If justCreatedNewRef.current, don't override currentEntry!
       } catch (error) {
         console.error('Error loading today\'s entries:', error);
         if (currentDog.journalEntries) {
@@ -69,13 +69,11 @@ export const useJournalEntry = (currentDog: Dog | null) => {
         }
       } finally {
         setIsLoading(false);
-        setJustCreatedNew(false); // Reset flag after effect runs
+        justCreatedNewRef.current = false; // Reset after entries load
       }
     };
 
     loadTodaysEntries();
-    // Only re-run when currentDog changes, not on every entry change
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentDog]);
 
   const updateResponse = (response: string) => {
@@ -115,12 +113,10 @@ export const useJournalEntry = (currentDog: Dog | null) => {
         // Create new entry
         const newEntry = await JournalService.createEntry(currentDog.id, currentEntry);
         setTodaysEntries(prev => [newEntry, ...prev]);
-        // Instead of editing the just-saved entry, show a blank form for a new entry
         createNewEntry();
-        setJustCreatedNew(true);
+        justCreatedNewRef.current = true; // Set flag to prevent effect from overwriting blank
       }
 
-      console.log('Journal entry saved successfully');
       return true;
     } catch (error) {
       console.error('Error saving journal entry:', error);
@@ -140,7 +136,7 @@ export const useJournalEntry = (currentDog: Dog | null) => {
       behaviors: [],
       notes: ''
     });
-    setJustCreatedNew(true); // Set flag so effect doesn't override this
+    justCreatedNewRef.current = true;
   };
 
   const loadEntry = (entry: JournalEntry) => {
@@ -153,12 +149,9 @@ export const useJournalEntry = (currentDog: Dog | null) => {
     try {
       await JournalService.deleteEntry(entryId);
       setTodaysEntries(prev => prev.filter(entry => entry.id !== entryId));
-
-      // If we deleted the current entry, create a new one
       if (currentEntry.id === entryId) {
         createNewEntry();
       }
-
       return true;
     } catch (error) {
       console.error('Error deleting journal entry:', error);
