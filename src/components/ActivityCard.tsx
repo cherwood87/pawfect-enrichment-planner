@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { Clock, Star, Calendar, CheckCircle, Target, ExternalLink, Sparkles } from 'lucide-react';
+import { Clock, Star, Calendar, CheckCircle, Target, ExternalLink, Sparkles, Heart } from 'lucide-react';
 import { ActivityLibraryItem } from '@/types/activity';
 import { DiscoveredActivity } from '@/types/discovery';
 import { useActivity } from '@/contexts/ActivityContext';
@@ -80,6 +80,27 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, isOpen, onClose }
     });
 
     onClose();
+  };
+
+  // ---- Add to Favourites handler ----
+  const handleAddToFavourites = () => {
+    const favourites = JSON.parse(localStorage.getItem('favouriteActivities') || '[]');
+    // Avoid duplicates by ID or title
+    if (!favourites.find((a: any) => a.id === activity.id || a.title === activity.title)) {
+      // Save a minimal object (customize as needed)
+      favourites.push({
+        id: activity.id,
+        title: activity.title,
+        pillar: activity.pillar,
+        difficulty: activity.difficulty,
+        duration: activity.duration,
+        // Add any other fields you want to show in Favourites!
+      });
+      localStorage.setItem('favouriteActivities', JSON.stringify(favourites));
+      alert(`Added "${activity.title}" to Favourites!`);
+    } else {
+      alert(`"${activity.title}" is already in your Favourites.`);
+    }
   };
 
   const isDiscovered = isDiscoveredActivity(activity);
@@ -247,16 +268,24 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, isOpen, onClose }
           </div>
 
           {/* Action Buttons */}
-          <div className="flex space-x-3 pt-4 border-t">
+          <div className="flex flex-col md:flex-row md:space-x-3 space-y-2 md:space-y-0 pt-4 border-t">
             <Button variant="outline" onClick={onClose} className="flex-1">
               Close
             </Button>
-            <Button 
+            <Button
               onClick={handleScheduleActivity}
               className="flex-1 bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600"
             >
               <Calendar className="w-4 h-4 mr-2" />
               Add to Weekly Plan
+            </Button>
+            <Button
+              onClick={handleAddToFavourites}
+              className="flex-1 bg-yellow-400 text-white hover:bg-yellow-500"
+              type="button"
+            >
+              <Heart className="w-4 h-4 mr-2" />
+              Add to Favourites
             </Button>
           </div>
         </div>
