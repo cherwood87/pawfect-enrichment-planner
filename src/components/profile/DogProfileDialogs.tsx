@@ -37,7 +37,7 @@ const DogProfileDialogs: React.FC<DogProfileDialogsProps> = ({
           <DialogDescription className="sr-only">
             Take a quiz to discover your dog's personality and get personalized enrichment recommendations.
           </DialogDescription>
-          <div className="modal-scroll-container">
+          <div className="overflow-y-auto max-h-[80vh] p-4">
             <DogProfileQuiz 
               dogName={currentDog.name}
               onComplete={onQuizComplete}
@@ -54,7 +54,7 @@ const DogProfileDialogs: React.FC<DogProfileDialogsProps> = ({
           <DialogDescription className="sr-only">
             View your dog's personality quiz results and enrichment recommendations.
           </DialogDescription>
-          <div className="modal-scroll-container">
+          <div className="overflow-y-auto max-h-[80vh] p-4">
             {currentDog.quizResults && (
               <QuizResultsComponent 
                 results={currentDog.quizResults}
