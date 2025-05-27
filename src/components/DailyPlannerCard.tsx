@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -152,66 +151,17 @@ const ActivityRow = ({
         <div className="border-t border-gray-100 mobile-card bg-gray-50">
           <div className="space-y-3">
             {/* Time Picker Section */}
+            {/* The below section is removed, as time editing is no longer supported */}
+            {/* Remove scheduledTime/userSelectedTime editing */}
+            {/* You can re-add a new time scheduling feature here if you wish in the future */}
             <div>
               <p className="text-xs font-medium text-gray-700 mb-2">Scheduled Time:</p>
-              {isEditingThisTime ? (
-                <div className="space-y-2">
-                  <div className="flex items-center space-x-2">
-                    <Input
-                      type="time"
-                      value={tempTime}
-                      onChange={(e) => {
-                        setTempTime(e.target.value);
-                      }}
-                      className="w-32 h-7 text-xs"
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          onSaveTimeEdit(scheduledActivity.id);
-                        } else if (e.key === 'Escape') {
-                          onCancelTimeEdit();
-                        }
-                      }}
-                    />
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="p-1 h-7 w-7"
-                      onClick={() => onSaveTimeEdit(scheduledActivity.id)}
-                      title="Save time"
-                    >
-                      <Save className="w-3 h-3 text-green-600" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="p-1 h-7 w-7"
-                      onClick={onCancelTimeEdit}
-                      title="Cancel edit"
-                    >
-                      <X className="w-3 h-3 text-red-600" />
-                    </Button>
-                  </div>
-                  {timeError && (
-                    <p className="text-xs text-red-600">{timeError}</p>
-                  )}
+              <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-1 text-xs bg-white px-2 py-1 rounded border">
+                  <Clock className="w-3 h-3 text-gray-500" />
+                  <span>Day-based scheduling only</span>
                 </div>
-              ) : (
-                <div className="flex items-center space-x-2">
-                  <div className="flex items-center space-x-1 text-xs bg-white px-2 py-1 rounded border">
-                    <Clock className="w-3 h-3 text-gray-500" />
-                    <span>{displayTime}</span>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="p-1 h-7 w-7"
-                    onClick={() => onStartTimeEdit(scheduledActivity.id, displayTime)}
-                    title="Edit time"
-                  >
-                    <Edit3 className="w-3 h-3 text-blue-600" />
-                  </Button>
-                </div>
-              )}
+              </div>
             </div>
             <div>
               <p className="text-xs font-medium text-gray-700 mb-1">Benefits:</p>
@@ -314,16 +264,13 @@ const EnhancedHeader = ({
 // --- Main Component ---
 const DailyPlannerCard = () => {
   const { 
-    getTodaysActivities, toggleActivityCompletion, getActivityDetails, updateScheduledActivity 
+    getTodaysActivities, toggleActivityCompletion, getActivityDetails
   } = useActivity();
   const { currentDog } = useDog();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
 
   const [expandedActivity, setExpandedActivity] = useState<string | null>(null);
-  const [editingTime, setEditingTime] = useState<string | null>(null);
-  const [tempTime, setTempTime] = useState<string>('');
-  const [timeError, setTimeError] = useState<string>('');
   const [completionModal, setCompletionModal] = useState<{
     isOpen: boolean;
     activityId: string;
@@ -341,58 +288,16 @@ const DailyPlannerCard = () => {
   // --- Handlers ---
   const toggleActivityExpansion = (activityId: string) => {
     setExpandedActivity(expandedActivity === activityId ? null : activityId);
-    setEditingTime(null);
-    setTimeError('');
   };
-  const startTimeEdit = (activityId: string, currentTime: string) => {
-    setEditingTime(activityId);
-    setTimeError('');
-    try {
-      const time24h = convertTo24Hour(currentTime);
-      setTempTime(time24h);
-    } catch {
-      setTimeError('Failed to parse current time');
-      setTempTime('12:00');
-    }
-  };
-  const cancelTimeEdit = () => {
-    setEditingTime(null);
-    setTempTime('');
-    setTimeError('');
-  };
-  const saveTimeEdit = (activityId: string) => {
-    if (!tempTime.trim()) {
-      setTimeError('Please enter a valid time');
-      return;
-    }
-    if (!validateTimeFormat(tempTime)) {
-      setTimeError('Invalid time format. Please use HH:MM format.');
-      return;
-    }
-    if (!updateScheduledActivity) {
-      setTimeError('Unable to save time changes');
-      return;
-    }
-    try {
-      const time12h = convertTo12Hour(tempTime);
-      updateScheduledActivity(activityId, { userSelectedTime: time12h });
-      toast({
-        title: "Time Updated",
-        description: `Activity time changed to ${time12h}`,
-      });
-      setEditingTime(null);
-      setTempTime('');
-      setTimeError('');
-    } catch {
-      setTimeError('Failed to save time. Please try again.');
-    }
-  };
+
   const handleActivityToggle = (activityId: string) => {
     const activity = todaysActivities.find(a => a.id === activityId);
     if (!activity) return;
     if (activity.completed) {
+      // Un-complete
       toggleActivityCompletion(activityId);
     } else {
+      // Complete with modal
       const activityDetails = getActivityDetails(activity.activityId);
       setCompletionModal({
         isOpen: true,
@@ -401,6 +306,7 @@ const DailyPlannerCard = () => {
       });
     }
   };
+
   const handleCompleteActivity = (notes: string) => {
     toggleActivityCompletion(completionModal.activityId, notes);
     setCompletionModal({
@@ -437,8 +343,8 @@ const DailyPlannerCard = () => {
             const activityDetails = getActivityDetails(scheduledActivity.activityId);
             if (!activityDetails) return null;
             const isExpanded = expandedActivity === scheduledActivity.id;
-            const displayTime = scheduledActivity.userSelectedTime || scheduledActivity.scheduledTime;
-            const isEditingThisTime = editingTime === scheduledActivity.id;
+            // Use a placeholder or blank for displayTime since scheduling by time is no longer supported
+            const displayTime = "—";
             return (
               <ActivityRow
                 key={scheduledActivity.id}
@@ -446,16 +352,16 @@ const DailyPlannerCard = () => {
                 activityDetails={activityDetails}
                 isExpanded={isExpanded}
                 onToggle={toggleActivityExpansion}
-                onStartTimeEdit={startTimeEdit}
+                onStartTimeEdit={() => {}}
                 onToggleActivity={handleActivityToggle}
                 displayTime={displayTime}
-                isEditingThisTime={isEditingThisTime}
-                tempTime={tempTime}
-                setTempTime={setTempTime}
-                timeError={isEditingThisTime ? timeError : ''}
-                onSaveTimeEdit={saveTimeEdit}
-                onCancelTimeEdit={cancelTimeEdit}
-                editingTimeId={editingTime}
+                isEditingThisTime={false}
+                tempTime={""}
+                setTempTime={() => {}}
+                timeError={""}
+                onSaveTimeEdit={() => {}}
+                onCancelTimeEdit={() => {}}
+                editingTimeId={""}
               />
             );
           })}
