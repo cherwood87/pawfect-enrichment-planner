@@ -20,6 +20,11 @@ interface ChatModalProps {
   onClose: () => void;
 }
 
+// Utility to strip JSON blocks from LLM reply
+function stripJsonBlocks(text: string): string {
+  return text.replace(/(\{[\s\S]*?"title":\s*".+?[\s\S]*?"energyLevel":\s*".+?"[\s\S]*?\})/g, '').trim();
+}
+
 const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose }) => {
   const [input, setInput] = useState('');
   const { currentConversation, isLoading, sendMessage } = useChat();
@@ -47,8 +52,6 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose }) => {
     const messageContent = input.trim();
     setInput('');
 
-    // Await the sendMessage function (update this if your sendMessage signature is different)
-    // Expecting sendMessage to handle backend, and update chat state/context with activities on assistant messages
     await sendMessage(messageContent);
   };
 
@@ -59,13 +62,16 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose }) => {
     }
   };
 
-  // Add to Weekly Plan (localStorage example)
-  const handleAddToWeeklyPlan = (activity: any) => {
-    const plan = JSON.parse(localStorage.getItem('weeklyPlan') || '[]');
-    plan.push(activity);
-    localStorage.setItem('weeklyPlan', JSON.stringify(plan));
-    // Optional: Add your own toast/notification
-    alert(`Added "${activity.title}" to Weekly Plan!`);
+  // Add to Favourites (localStorage example)
+  const handleAddToFavourites = (activity: any) => {
+    const favourites = JSON.parse(localStorage.getItem('favouriteActivities') || '[]');
+    if (!favourites.find((a: any) => a.title === activity.title)) {
+      favourites.push(activity);
+      localStorage.setItem('favouriteActivities', JSON.stringify(favourites));
+      alert(`Added "${activity.title}" to Favourites!`);
+    } else {
+      alert(`"${activity.title}" is already in your Favourites.`);
+    }
   };
 
   const quickActions = [
@@ -145,7 +151,11 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose }) => {
                           : 'bg-gray-100 text-gray-800 rounded-bl-sm'
                       }`}
                     >
-                      <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                      <p className="text-sm whitespace-pre-wrap">
+                        {message.role === 'assistant'
+                          ? stripJsonBlocks(message.content)
+                          : message.content}
+                      </p>
                       {/* Activities block for assistant messages */}
                       {message.role === 'assistant' && message.activities && message.activities.length > 0 && (
                         <div className="mt-2 space-y-2">
@@ -157,9 +167,9 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose }) => {
                               </div>
                               <Button
                                 size="sm"
-                                onClick={() => handleAddToWeeklyPlan(activity)}
+                                onClick={() => handleAddToFavourites(activity)}
                               >
-                                Add to Weekly Plan
+                                Add to Favourites
                               </Button>
                             </div>
                           ))}
