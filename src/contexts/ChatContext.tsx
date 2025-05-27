@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { ChatMessage, ChatConversation } from '@/types/chat';
 import { useDog } from '@/contexts/DogContext';
@@ -126,12 +125,13 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       if (error) throw error;
 
-      // Add AI response
+      // Add AI response (now supporting activities!)
       const assistantMessage: ChatMessage = {
         id: generateId(),
         role: 'assistant',
         content: data.reply,
-        timestamp: new Date()
+        timestamp: new Date(),
+        activities: Array.isArray(data.activities) ? data.activities : undefined // <-- add activities!
       };
 
       const finalMessages = [...updatedMessages, assistantMessage];
