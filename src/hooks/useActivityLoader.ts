@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { ScheduledActivity, UserActivity } from '@/types/activity';
 import { DiscoveredActivity, ContentDiscoveryConfig } from '@/types/discovery';
 import { getDiscoveredActivities } from '@/data/activityLibrary';
@@ -9,6 +8,33 @@ import { Dog } from '@/types/dog';
 
 export const useActivityLoader = (currentDog: Dog | null) => {
   const [isLoading, setIsLoading] = useState(false);
+
+  // Helper for migration: save discovered activities and config to Supabase
+  const migrateDiscoveredActivitiesToSupabase = async (
+    discoveredActivities: DiscoveredActivity[],
+    dogId: string
+  ) => {
+    if (!discoveredActivities?.length) return;
+    // Assumes ContentDiscoveryService.createDiscoveredActivities supports bulk insert
+    try {
+      await ContentDiscoveryService.createDiscoveredActivities(discoveredActivities, dogId);
+    } catch (error) {
+      console.error('Failed to migrate discovered activities to Supabase:', error);
+    }
+  };
+
+  // Helper for migration: save config to Supabase
+  const migrateDiscoveryConfigToSupabase = async (
+    config: ContentDiscoveryConfig,
+    dogId: string
+  ) => {
+    if (!config) return;
+    try {
+      await ContentDiscoveryService.saveDiscoveryConfig(config, dogId);
+    } catch (error) {
+      console.error('Failed to migrate discovery config to Supabase:', error);
+    }
+  };
 
   const loadActivitiesFromSupabase = async (
     setScheduledActivities: (activities: ScheduledActivity[]) => void,
@@ -22,37 +48,51 @@ export const useActivityLoader = (currentDog: Dog | null) => {
 
     try {
       setIsLoading(true);
-      
-      // Load scheduled activities from Supabase
-      const supabaseScheduledActivities = await ActivityService.getScheduledActivities(currentDog.id);
+
+      const dogId = currentDog.id;
+
+      // Scheduled Activities
+      const supabaseScheduledActivities = await ActivityService.getScheduledActivities(dogId);
       if (supabaseScheduledActivities.length > 0) {
         setScheduledActivities(supabaseScheduledActivities);
       } else {
-        // Fallback to localStorage and migrate if needed
         await loadAndMigrateScheduledActivities();
       }
 
-      // Load user activities from Supabase
-      const supabaseUserActivities = await ActivityService.getUserActivities(currentDog.id);
+      // User Activities
+      const supabaseUserActivities = await ActivityService.getUserActivities(dogId);
       if (supabaseUserActivities.length > 0) {
         setUserActivities(supabaseUserActivities);
       } else {
-        // Fallback to localStorage and migrate if needed
         await loadAndMigrateUserActivities();
       }
 
-      // Load discovered activities (still from localStorage for now)
-      const savedDiscovered = getDiscoveredActivities(currentDog.id);
-      setDiscoveredActivities(savedDiscovered || []);
+      // Discovered Activities (MIGRATION: localStorage to Supabase)
+      const savedDiscovered = getDiscoveredActivities(dogId);
+      if (savedDiscovered && savedDiscovered.length > 0) {
+        // Save to Supabase if not already there
+        // For simplicity, always try migrate (idempotent)
+        await migrateDiscoveredActivitiesToSupabase(savedDiscovered, dogId);
+        setDiscoveredActivities(savedDiscovered);
+      } else {
+        // Try to load from Supabase
+        const supabaseDiscovered = await ContentDiscoveryService.getDiscoveredActivities(dogId);
+        setDiscoveredActivities(supabaseDiscovered ?? []);
+      }
 
-      // Load discovery config
-      const savedConfig = localStorage.getItem(`discoveryConfig-${currentDog.id}`);
+      // Discovery Config (MIGRATION: localStorage to Supabase)
+      const savedConfig = localStorage.getItem(`discoveryConfig-${dogId}`);
       if (savedConfig) {
-        setDiscoveryConfig(JSON.parse(savedConfig));
+        const config = JSON.parse(savedConfig);
+        await migrateDiscoveryConfigToSupabase(config, dogId);
+        setDiscoveryConfig(config);
+      } else {
+        const supabaseConfig = await ContentDiscoveryService.getDiscoveryConfig(dogId);
+        if (supabaseConfig) setDiscoveryConfig(supabaseConfig);
       }
 
     } catch (error) {
-      console.error('Error loading activities from Supabase:', error);
+      console.error('Error loading activities/discovery from Supabase:', error);
       // Fallback to localStorage
       loadActivitiesFromLocalStorage(
         setScheduledActivities,
@@ -74,7 +114,7 @@ export const useActivityLoader = (currentDog: Dog | null) => {
     const savedScheduled = localStorage.getItem(`scheduledActivities-${dog.id}`);
     const savedUser = localStorage.getItem(`userActivities-${dog.id}`);
     const savedDiscovered = getDiscoveredActivities(dog.id);
-    
+
     if (savedScheduled) {
       const parsedActivities = JSON.parse(savedScheduled);
       const migratedActivities = parsedActivities.map(migrateScheduledActivity);
@@ -82,13 +122,13 @@ export const useActivityLoader = (currentDog: Dog | null) => {
     } else {
       setScheduledActivities([]);
     }
-    
+
     if (savedUser) {
       setUserActivities(JSON.parse(savedUser));
     } else {
       setUserActivities([]);
     }
-    
+
     setDiscoveredActivities(savedDiscovered || []);
   };
 
@@ -99,7 +139,7 @@ export const useActivityLoader = (currentDog: Dog | null) => {
       userSelectedTime: activity.userSelectedTime || activity.scheduledTime,
       notes: activity.notes || '',
       completionNotes: activity.completionNotes || '',
-      reminderEnabled: activity.reminderEnabled ?? false
+      reminderEnabled: activity.reminderEnabled ?? false,
     };
   };
 
@@ -108,6 +148,6 @@ export const useActivityLoader = (currentDog: Dog | null) => {
     setIsLoading,
     loadActivitiesFromSupabase,
     loadActivitiesFromLocalStorage,
-    migrateScheduledActivity
+    migrateScheduledActivity,
   };
 };
