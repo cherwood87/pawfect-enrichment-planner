@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useActivity } from '@/contexts/ActivityContext';
 import { useDog } from '@/contexts/DogContext';
@@ -79,7 +78,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
       notes: '',
       completionNotes: '',
       reminderEnabled: false,
-      // Remove dogId from here as it's handled by the context
+      dogId: currentDog?.id, // <-- Added back here!
     });
 
     setShowDayPickerFor(null);
