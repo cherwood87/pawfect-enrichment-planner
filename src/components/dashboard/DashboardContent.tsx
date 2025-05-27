@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useActivity } from '@/contexts/ActivityContext';
 import { useDog } from '@/contexts/DogContext';
@@ -70,15 +71,16 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
     const weekNumber = getISOWeek(targetDate);
 
     addScheduledActivity({
+      dogId: currentDog?.id || '',
       activityId: activity.id,
       scheduledDate: targetDate.toISOString().split('T')[0],
+      scheduledTime: '',
       weekNumber,
       dayOfWeek,
       completed: false,
       notes: '',
       completionNotes: '',
       reminderEnabled: false,
-      dogId: currentDog?.id, // <-- Added back here!
     });
 
     setShowDayPickerFor(null);
