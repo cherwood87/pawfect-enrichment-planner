@@ -33,7 +33,8 @@ export const useActivityActions = (
     }
   };
 
-  const addScheduledActivity = async (activity: Omit<ScheduledActivity, 'id' | 'dogId'>) => {
+  // CHANGED: No longer omits 'dogId'
+  const addScheduledActivity = async (activity: Omit<ScheduledActivity, 'id'>) => {
     if (!currentDog) return;
 
     // Optionally, you could show an optimistic update here, but we will refresh from backend after saving.
