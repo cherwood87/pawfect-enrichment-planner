@@ -42,6 +42,23 @@ Guidelines:
 - Keep responses concise but helpful
 - Suggest specific activities when appropriate
 - Consider the dog's living situation and any mobility issues
+- When you recommend a specific enrichment activity, always include a JSON object for the activity immediately following your suggestion, using this format:
+
+{
+  "title": "Activity Name",
+  "pillar": "mental|physical|social|environmental|instinctual",
+  "difficulty": "Easy|Medium|Hard",
+  "duration": 15,
+  "materials": ["item1", "item2"],
+  "instructions": ["step1", "step2"],
+  "benefits": "Brief description",
+  "emotionalGoals": ["goal1", "goal2"],
+  "tags": ["tag1", "tag2"],
+  "ageGroup": "Puppy|Adult|Senior|All Ages",
+  "energyLevel": "Low|Medium|High"
+}
+
+Always write the JSON exactly as shown, and do not include any markdown or commentary inside the JSON. Only suggest activities that are not already in the provided activityHistory.
 
 Respond in a friendly, expert tone as a professional dog enrichment specialist.`;
 
@@ -58,7 +75,7 @@ Respond in a friendly, expert tone as a professional dog enrichment specialist.`
           ...messages
         ],
         temperature: 0.7,
-        max_tokens: 500,
+        max_tokens: 1000,
       }),
     });
 
@@ -69,7 +86,25 @@ Respond in a friendly, expert tone as a professional dog enrichment specialist.`
     const data = await response.json();
     const reply = data.choices[0].message.content;
 
-    return new Response(JSON.stringify({ reply }), {
+    // Extract any JSON objects matching the activity schema from the reply
+    const activityMatches = [];
+    const activityRegex = /{[\s\S]*?"title":\s*".+?[\s\S]*?"energyLevel":\s*".+?"[\s\S]*?}/g;
+    let match;
+    while ((match = activityRegex.exec(reply)) !== null) {
+      try {
+        // Try to parse the JSON object
+        const activityObj = JSON.parse(match[0]);
+        activityMatches.push(activityObj);
+      } catch (err) {
+        // If parsing fails, skip this one
+        continue;
+      }
+    }
+
+    return new Response(JSON.stringify({
+      reply,
+      activities: activityMatches
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
