@@ -53,7 +53,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
 
       {/* Favourites Section */}
       <div className="mb-8">
-        <h2 className="text-xl font-bold text-gray-800 mb-4">⭐ Favourite Activities</h2>
+        <h2 className="text-xl font-bold text-gray-800 mb-4">Favourite Activities</h2>
         {favourites.length === 0 ? (
           <div className="text-gray-400 text-center py-4">No favourites yet!</div>
         ) : (
