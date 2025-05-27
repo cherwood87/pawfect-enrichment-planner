@@ -302,7 +302,7 @@ const DailyPlannerCard = () => {
     }
   };
 
-  const handleModalSave = (completionNotes: string) => {
+  const handleModalComplete = (completionNotes: string) => {
     if (selectedActivity) {
       toggleActivityCompletion(selectedActivity.id, completionNotes);
       setIsModalOpen(false);
@@ -373,7 +373,7 @@ const DailyPlannerCard = () => {
         <ActivityCompletionModal
           isOpen={isModalOpen}
           onClose={handleModalCancel}
-          onSave={handleModalSave}
+          onComplete={handleModalComplete}
           activityTitle={selectedActivity.activityDetails?.title || ''}
         />
       )}
