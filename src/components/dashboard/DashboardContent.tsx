@@ -1,5 +1,17 @@
 import React, { useEffect, useState } from 'react';
-// ... other imports
+import { useActivity } from '@/contexts/ActivityContext';
+import { useDog } from '@/contexts/DogContext';
+import DailyPlannerCard from '@/components/DailyPlannerCard';
+import WeeklyPlannerCard from '@/components/WeeklyPlannerCard';
+import QuickStats from './QuickStats';
+import ReflectionJournal from '@/components/ReflectionJournal';
+import EmptyDashboard from '@/components/EmptyDashboard';
+
+interface DashboardContentProps {
+  onAddDogOpen?: () => void;
+  onEditDogOpen?: (dog: any) => void;
+  onPillarSelect?: (pillar: string, mode?: 'daily' | 'weekly') => void;
+}
 
 const DashboardContent: React.FC<DashboardContentProps> = ({
   onAddDogOpen,
@@ -12,6 +24,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
   // ----- FAVOURITES SECTION STATE -----
   const [favourites, setFavourites] = useState<any[]>([]);
   useEffect(() => {
+    // Load favourites from localStorage on mount
     const saved = JSON.parse(localStorage.getItem('favouriteActivities') || '[]');
     setFavourites(saved);
   }, []);
@@ -36,7 +49,8 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
     }
   };
 
-  // ... rest of your code
+  const todaysActivities = getTodaysActivities();
+  const streakData = getStreakData();
 
   if (!currentDog) {
     return <EmptyDashboard onAddDogOpen={onAddDogOpen} />;
@@ -51,7 +65,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
         currentStreak={streakData.currentStreak}
       />
 
-      {/* Planning Cards */}
+      {/* Planning Cards - Side by Side on Desktop */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <DailyPlannerCard />
         <WeeklyPlannerCard />
@@ -65,7 +79,10 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
         ) : (
           <ul className="space-y-3">
             {favourites.map((activity, i) => (
-              <li key={i} className="border rounded p-3 bg-white flex flex-col md:flex-row md:items-center md:justify-between">
+              <li
+                key={i}
+                className="border rounded p-3 bg-white flex flex-col md:flex-row md:items-center md:justify-between"
+              >
                 <div>
                   <div className="font-semibold">{activity.title}</div>
                   <div className="text-xs text-gray-500 capitalize">
