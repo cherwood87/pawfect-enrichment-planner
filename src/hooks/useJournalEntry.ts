@@ -17,6 +17,7 @@ export const useJournalEntry = (currentDog: Dog | null) => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [justCreatedNew, setJustCreatedNew] = useState(false); // NEW
 
   // Get a random prompt for new entries
   const getRandomPrompt = () => {
@@ -40,7 +41,7 @@ export const useJournalEntry = (currentDog: Dog | null) => {
         const todaysDate = format(new Date(), 'yyyy-MM-dd');
         const entries = await JournalService.getEntriesForDate(currentDog.id, todaysDate);
         setTodaysEntries(entries);
-        
+
         // If there are no entries for today, set up a new entry
         if (entries.length === 0) {
           const randomPrompt = getRandomPrompt();
@@ -52,14 +53,14 @@ export const useJournalEntry = (currentDog: Dog | null) => {
             behaviors: [],
             notes: ''
           });
-        } else {
-          // Load the most recent entry for editing
+        } else if (!justCreatedNew) {
+          // Only load latest entry for editing if NOT just created new
           const latestEntry = entries[0];
           setCurrentEntry(latestEntry);
         }
+        // If justCreatedNew, do not override currentEntry (leave it blank as intended)
       } catch (error) {
         console.error('Error loading today\'s entries:', error);
-        // Fall back to local behavior if Supabase fails
         if (currentDog.journalEntries) {
           const todaysEntries = currentDog.journalEntries.filter(
             entry => entry.date === format(new Date(), 'yyyy-MM-dd')
@@ -68,10 +69,13 @@ export const useJournalEntry = (currentDog: Dog | null) => {
         }
       } finally {
         setIsLoading(false);
+        setJustCreatedNew(false); // Reset flag after effect runs
       }
     };
 
     loadTodaysEntries();
+    // Only re-run when currentDog changes, not on every entry change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentDog]);
 
   const updateResponse = (response: string) => {
@@ -100,21 +104,22 @@ export const useJournalEntry = (currentDog: Dog | null) => {
 
     try {
       setIsSaving(true);
-      
+
       if (currentEntry.id) {
         // Update existing entry
         const updatedEntry = await JournalService.updateEntry(currentEntry.id, currentEntry);
-        setTodaysEntries(prev => 
+        setTodaysEntries(prev =>
           prev.map(entry => entry.id === updatedEntry.id ? updatedEntry : entry)
         );
       } else {
         // Create new entry
         const newEntry = await JournalService.createEntry(currentDog.id, currentEntry);
         setTodaysEntries(prev => [newEntry, ...prev]);
-        // Don't edit the just-saved entry, instead, clear the form for a new blank entry
+        // Instead of editing the just-saved entry, show a blank form for a new entry
         createNewEntry();
+        setJustCreatedNew(true);
       }
-      
+
       console.log('Journal entry saved successfully');
       return true;
     } catch (error) {
@@ -135,6 +140,7 @@ export const useJournalEntry = (currentDog: Dog | null) => {
       behaviors: [],
       notes: ''
     });
+    setJustCreatedNew(true); // Set flag so effect doesn't override this
   };
 
   const loadEntry = (entry: JournalEntry) => {
@@ -147,12 +153,12 @@ export const useJournalEntry = (currentDog: Dog | null) => {
     try {
       await JournalService.deleteEntry(entryId);
       setTodaysEntries(prev => prev.filter(entry => entry.id !== entryId));
-      
+
       // If we deleted the current entry, create a new one
       if (currentEntry.id === entryId) {
         createNewEntry();
       }
-      
+
       return true;
     } catch (error) {
       console.error('Error deleting journal entry:', error);
