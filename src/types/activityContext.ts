@@ -1,4 +1,3 @@
-
 import { ScheduledActivity, UserActivity, ActivityLibraryItem, StreakData, WeeklyProgress, PillarGoals } from '@/types/activity';
 import { DiscoveredActivity, ContentDiscoveryConfig } from '@/types/discovery';
 
@@ -8,7 +7,7 @@ export interface ActivityContextType {
   discoveredActivities: DiscoveredActivity[];
   discoveryConfig: ContentDiscoveryConfig;
   isDiscovering: boolean;
-  addScheduledActivity: (activity: Omit<ScheduledActivity, 'id' | 'dogId'>) => void;
+  addScheduledActivity: (activity: Omit<ScheduledActivity, 'id'>) => void;
   toggleActivityCompletion: (activityId: string, completionNotes?: string) => void;
   updateScheduledActivity: (activityId: string, updates: Partial<ScheduledActivity>) => void;
   addUserActivity: (activity: Omit<UserActivity, 'id' | 'createdAt' | 'dogId'>) => void;
