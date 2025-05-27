@@ -41,7 +41,6 @@ export const useActivityActions = (
       ...activity,
       id: `scheduled-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       dogId: currentDog.id,
-      userSelectedTime: activity.userSelectedTime || activity.scheduledTime,
       notes: activity.notes || '',
       completionNotes: activity.completionNotes || '',
       reminderEnabled: activity.reminderEnabled ?? false,
