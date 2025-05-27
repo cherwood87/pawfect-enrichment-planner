@@ -22,7 +22,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
   onEditDogOpen,
   onPillarSelect
 }) => {
-  const { getTodaysActivities, getStreakData } = useActivity();
+  const { getTodaysActivities, getStreakData, addScheduledActivity } = useActivity();
   const { currentDog } = useDog();
 
   // ----- FAVOURITES SECTION STATE -----
@@ -31,6 +31,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
   const [selectedDay, setSelectedDay] = useState<number>(1); // Default Monday
 
   useEffect(() => {
+    // Load favourites from localStorage on mount
     const saved = JSON.parse(localStorage.getItem('favouriteActivities') || '[]');
     setFavourites(saved);
   }, []);
@@ -42,7 +43,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
     localStorage.setItem('favouriteActivities', JSON.stringify(updated));
   };
 
-  // Add to Weekly Plan with day selection
+  // Add to Weekly Plan using context, with day selection
   const handleAddToWeeklyPlan = (activity: any, dayOfWeek: number) => {
     // Calculate the next date for the selected day
     const today = new Date();
@@ -53,21 +54,34 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
     const targetDate = new Date(today);
     targetDate.setDate(today.getDate() + diff);
 
-    const plan = JSON.parse(localStorage.getItem('weeklyPlan') || '[]');
-    const alreadyPlanned = plan.find(
-      (a: any) => a.title === activity.title && a.scheduledDate === targetDate.toISOString().split('T')[0]
-    );
-    if (!alreadyPlanned) {
-      plan.push({
-        ...activity,
-        scheduledDate: targetDate.toISOString().split('T')[0],
-        dayOfWeek,
-      });
-      localStorage.setItem('weeklyPlan', JSON.stringify(plan));
-      alert(`Added "${activity.title}" to Weekly Plan on ${daysOfWeek[dayOfWeek]}!`);
-    } else {
-      alert(`"${activity.title}" is already in your Weekly Plan for ${daysOfWeek[dayOfWeek]}!`);
-    }
+    // Calculate ISO week number
+    const getISOWeek = (date: Date): number => {
+      const target = new Date(date.valueOf());
+      const dayNr = (date.getDay() + 6) % 7;
+      target.setDate(target.getDate() - dayNr + 3);
+      const firstThursday = target.valueOf();
+      target.setMonth(0, 1);
+      if (target.getDay() !== 4) {
+        target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
+      }
+      return 1 + Math.ceil((firstThursday - target.valueOf()) / 604800000);
+    };
+
+    const weekNumber = getISOWeek(targetDate);
+
+    addScheduledActivity({
+      activityId: activity.id,
+      scheduledDate: targetDate.toISOString().split('T')[0],
+      weekNumber,
+      dayOfWeek,
+      completed: false,
+      notes: '',
+      completionNotes: '',
+      reminderEnabled: false,
+      dogId: currentDog?.id,
+      // add other fields if needed
+    });
+
     setShowDayPickerFor(null);
     setSelectedDay(1);
   };
