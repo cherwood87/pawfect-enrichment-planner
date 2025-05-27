@@ -4,6 +4,7 @@ export interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+  activities?: any[]; // Optional activities array for assistant messages
 }
 
 export interface ChatConversation {
@@ -11,10 +12,4 @@ export interface ChatConversation {
   dogId: string;
   messages: ChatMessage[];
   lastUpdated: Date;
-}
-
-export interface CoachContext {
-  dogProfile: any;
-  activityHistory: any;
-  pillarBalance: Record<string, number>;
 }

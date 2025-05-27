@@ -76,6 +76,39 @@ export class ContentDiscoveryService {
     }
   }
 
+  // Add missing methods
+  static async createDiscoveredActivities(
+    activities: DiscoveredActivity[],
+    dogId: string
+  ): Promise<void> {
+    // Implementation for creating discovered activities in Supabase
+    console.log(`Saving ${activities.length} discovered activities for dog ${dogId}`);
+    // This would typically save to Supabase, but for now just log
+  }
+
+  static async getDiscoveredActivities(dogId: string): Promise<DiscoveredActivity[]> {
+    // Implementation for getting discovered activities from Supabase
+    console.log(`Loading discovered activities for dog ${dogId}`);
+    // This would typically load from Supabase, but for now return empty array
+    return [];
+  }
+
+  static async saveDiscoveryConfig(
+    config: ContentDiscoveryConfig,
+    dogId: string
+  ): Promise<void> {
+    // Implementation for saving discovery config to Supabase
+    console.log(`Saving discovery config for dog ${dogId}`, config);
+    // This would typically save to Supabase, but for now just log
+  }
+
+  static async getDiscoveryConfig(dogId: string): Promise<ContentDiscoveryConfig | null> {
+    // Implementation for getting discovery config from Supabase
+    console.log(`Loading discovery config for dog ${dogId}`);
+    // This would typically load from Supabase, but for now return null
+    return null;
+  }
+
   private static async parseScrapedContent(scrapedContent: ScrapedContent[]) {
     const parsedActivities = [];
     

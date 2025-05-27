@@ -1,3 +1,4 @@
+
 import { ScheduledActivity, UserActivity } from '@/types/activity';
 import { ActivityService } from '@/services/activityService';
 import { Dog } from '@/types/dog';
@@ -34,8 +35,6 @@ export const useActivityMigration = (
           id: `scheduled-default-1-${currentDog.id}`,
           dogId: currentDog.id,
           activityId: 'physical-morning-walk',
-          scheduledTime: '8:00 AM',
-          userSelectedTime: '8:00 AM',
           scheduledDate: today,
           completed: false,
           notes: '',
@@ -46,8 +45,6 @@ export const useActivityMigration = (
           id: `scheduled-default-2-${currentDog.id}`,
           dogId: currentDog.id,
           activityId: 'mental-puzzle-feeder',
-          scheduledTime: '12:00 PM',
-          userSelectedTime: '12:00 PM',
           scheduledDate: today,
           completed: false,
           notes: '',
@@ -58,8 +55,6 @@ export const useActivityMigration = (
           id: `scheduled-default-3-${currentDog.id}`,
           dogId: currentDog.id,
           activityId: 'environmental-new-route',
-          scheduledTime: '3:00 PM',
-          userSelectedTime: '3:00 PM',
           scheduledDate: today,
           completed: false,
           notes: '',

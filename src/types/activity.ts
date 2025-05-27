@@ -1,3 +1,4 @@
+
 export interface ActivityLibraryItem {
   id: string;
   title: string;
@@ -18,19 +19,21 @@ export interface ScheduledActivity {
   dogId: string; // Associate activities with specific dogs
   activityId: string; // references ActivityLibraryItem
   scheduledDate: string;
+  scheduledTime?: string; // Add missing scheduledTime property
+  userSelectedTime?: string; // Add missing userSelectedTime property
   completed: boolean;
-  notes?: string; // NEW: User notes for the activity
-  completionNotes?: string; // NEW: Notes added when completing activity
-  reminderEnabled?: boolean; // NEW: Whether reminders are enabled
+  notes?: string; // User notes for the activity
+  completionNotes?: string; // Notes added when completing activity
+  reminderEnabled?: boolean; // Whether reminders are enabled
   completedAt?: string;
-  weekNumber?: number; // NEW: ISO week number for weekly planning
-  dayOfWeek?: number; // NEW: Day of week (0=Sunday, 6=Saturday)
+  weekNumber?: number; // ISO week number for weekly planning
+  dayOfWeek?: number; // Day of week (0=Sunday, 6=Saturday)
 }
 
 export interface UserActivity extends ActivityLibraryItem {
   isCustom: boolean;
   createdAt: string;
-  dogId: string; // NEW: Custom activities also belong to specific dogs
+  dogId: string; // Custom activities also belong to specific dogs
 }
 
 export interface WeeklyProgress {
