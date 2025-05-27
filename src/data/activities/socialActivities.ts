@@ -1,0 +1,138 @@
+
+import { ActivityLibraryItem } from '@/types/activity';
+
+export const socialActivities: ActivityLibraryItem[] = [
+  {
+    id: 'social-dog-park',
+    title: 'Dog Park Visit',
+    pillar: 'social',
+    difficulty: 'Medium',
+    duration: 45,
+    materials: ['Leash', 'Water', 'Waste bags'],
+    emotionalGoals: ['Socialization', 'Excitement'],
+    instructions: [
+      'Observe other dogs before entering',
+      'Keep initial visit short',
+      'Watch your dog\'s body language',
+      'Intervene if play gets too rough'
+    ],
+    benefits: 'Socialization with other dogs and people',
+    tags: ['socialization', 'outdoor', 'dogs'],
+    ageGroup: 'All Ages',
+    energyLevel: 'Medium'
+  },
+  {
+    id: 'social-puppy-class',
+    title: 'Puppy Training Class',
+    pillar: 'social',
+    difficulty: 'Medium',
+    duration: 60,
+    materials: ['Treats', 'Leash', 'Enrollment fee'],
+    emotionalGoals: ['Confidence', 'Learning'],
+    instructions: [
+      'Research reputable training facilities',
+      'Bring high-value treats',
+      'Stay positive and patient',
+      'Practice lessons at home'
+    ],
+    benefits: 'Structured socialization and basic training',
+    tags: ['training', 'class', 'socialization'],
+    ageGroup: 'Puppy',
+    energyLevel: 'Medium'
+  },
+  {
+    id: 'social-neighborhood-walk',
+    title: 'Social Neighborhood Walk',
+    pillar: 'social',
+    difficulty: 'Easy',
+    duration: 30,
+    materials: ['Leash', 'Treats', 'Waste bags'],
+    emotionalGoals: ['Confidence', 'Curiosity'],
+    instructions: [
+      'Choose busy but safe neighborhood areas',
+      'Allow greetings with friendly people',
+      'Practice loose leash walking',
+      'Reward calm behavior around distractions'
+    ],
+    benefits: 'Real-world socialization practice',
+    tags: ['walking', 'socialization', 'training'],
+    ageGroup: 'All Ages',
+    energyLevel: 'Low'
+  },
+  {
+    id: 'social-playdate',
+    title: 'Dog Playdate',
+    pillar: 'social',
+    difficulty: 'Medium',
+    duration: 60,
+    materials: ['Toys', 'Water', 'Safe space'],
+    emotionalGoals: ['Joy', 'Friendship'],
+    instructions: [
+      'Choose compatible dogs of similar size/energy',
+      'Meet in neutral territory first',
+      'Supervise all interactions',
+      'Have backup plan if dogs don\'t get along'
+    ],
+    benefits: 'One-on-one socialization and play',
+    tags: ['playdate', 'socialization', 'friends'],
+    ageGroup: 'All Ages',
+    energyLevel: 'Medium'
+  },
+  {
+    id: 'social-pet-store',
+    title: 'Pet Store Visit',
+    pillar: 'social',
+    difficulty: 'Easy',
+    duration: 30,
+    materials: ['Leash', 'Treats', 'Shopping list'],
+    emotionalGoals: ['Confidence', 'Curiosity'],
+    instructions: [
+      'Choose dog-friendly pet stores',
+      'Keep visit short initially',
+      'Reward calm behavior',
+      'Allow positive interactions with staff'
+    ],
+    benefits: 'Exposure to new environments and people',
+    tags: ['outing', 'socialization', 'indoor'],
+    ageGroup: 'All Ages',
+    energyLevel: 'Low'
+  },
+  {
+    id: 'social-therapy-visit',
+    title: 'Therapy Dog Practice',
+    pillar: 'social',
+    difficulty: 'Hard',
+    duration: 45,
+    materials: ['Therapy dog vest', 'Grooming supplies'],
+    emotionalGoals: ['Calm confidence', 'Service'],
+    instructions: [
+      'Ensure dog is well-trained and calm',
+      'Practice gentle interactions',
+      'Visit nursing homes or hospitals',
+      'Follow facility guidelines'
+    ],
+    benefits: 'Provides service to community while socializing dog',
+    tags: ['therapy', 'service', 'advanced'],
+    ageGroup: 'Adult',
+    energyLevel: 'Low'
+  },
+  {
+    id: 'social-dog-cafe',
+    title: 'Dog-Friendly Cafe Visit',
+    pillar: 'social',
+    difficulty: 'Medium',
+    duration: 60,
+    materials: ['Leash', 'Water bowl', 'Mat for dog'],
+    emotionalGoals: ['Calm confidence', 'Socialization'],
+    instructions: [
+      'Choose dog-friendly establishments',
+      'Bring a mat for dog to lie on',
+      'Practice "stay" and "quiet" commands',
+      'Allow positive interactions with patrons'
+    ],
+    benefits: 'Real-world manners practice in busy environments',
+    tags: ['cafe', 'manners', 'socialization'],
+    ageGroup: 'Adult',
+    energyLevel: 'Low'
+  }
+];
