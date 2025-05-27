@@ -50,19 +50,23 @@ const DashboardModals: React.FC<DashboardModalsProps> = ({
       {/* Add Dog Modal */}
       <Dialog open={isAddDogModalOpen} onOpenChange={onAddDogModalClose}>
         <DialogContent className="max-w-2xl">
-          <AddDogForm onClose={onAddDogModalClose} />
+          <div className="overflow-y-auto max-h-[80vh] p-4">
+            <AddDogForm onClose={onAddDogModalClose} />
+          </div>
         </DialogContent>
       </Dialog>
 
       {/* Edit Dog Modal */}
       <Dialog open={isEditDogModalOpen} onOpenChange={onEditDogModalClose}>
         <DialogContent className="max-w-2xl">
-          {selectedDog && (
-            <EditDogForm 
-              dog={selectedDog} 
-              onClose={onEditDogModalClose} 
-            />
-          )}
+          <div className="overflow-y-auto max-h-[80vh] p-4">
+            {selectedDog && (
+              <EditDogForm 
+                dog={selectedDog} 
+                onClose={onEditDogModalClose} 
+              />
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </>
