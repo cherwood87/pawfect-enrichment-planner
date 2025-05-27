@@ -10,6 +10,19 @@ import ActivityLibraryFilters from '@/components/ActivityLibraryFilters';
 import ActivityLibraryStats from '@/components/ActivityLibraryStats';
 import ActivityLibraryGrid from '@/components/ActivityLibraryGrid';
 
+// Energy level normalization function
+const normalizeEnergyLevel = (level: string): "Low" | "Medium" | "High" => {
+  if (!level) return "Medium";
+  const l = level.toLowerCase();
+  if (l.includes("very low")) return "Low";
+  if (l.includes("low") && l.includes("moderate")) return "Medium";
+  if (l.includes("low")) return "Low";
+  if (l.includes("moderate") && l.includes("high")) return "High";
+  if (l.includes("moderate")) return "Medium";
+  if (l.includes("high")) return "High";
+  return "Medium";
+};
+
 const pillarOptions = [
   { id: 'mental', color: 'purple', title: 'Mental Enrichment', description: "For the thinkers and problem-solvers. Games and challenges that flex your dog’s brain." },
   { id: 'physical', color: 'green', title: 'Physical Enrichment', description: "For dogs who find peace in movement. Soft walks, play, strength-building." },
@@ -33,7 +46,12 @@ const ActivityLibrary = () => {
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all');
   const [selectedActivity, setSelectedActivity] = useState<ActivityLibraryItem | DiscoveredActivity | null>(null);
 
-  const combinedActivities = getCombinedActivityLibrary();
+  // Normalize energyLevel for all activities before using them
+  const combinedActivities = getCombinedActivityLibrary().map(activity =>
+    activity && typeof activity.energyLevel === 'string'
+      ? { ...activity, energyLevel: normalizeEnergyLevel(activity.energyLevel) }
+      : activity
+  );
 
   // Check for auto-discovery on component mount
   useEffect(() => {
