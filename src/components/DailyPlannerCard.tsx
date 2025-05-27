@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -236,5 +237,148 @@ const EnhancedHeader = ({
           className={`${
             completedCount === totalCount 
               ? 'bg-green-100 text-green-700' 
-              :*
-
+              : 'bg-blue-100 text-blue-700'
+          }`}
+        >
+          {completedCount}/{totalCount}
+        </Badge>
+        <Button
+          size="sm"
+          onClick={onAddActivity}
+          className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+        >
+          <Plus className="w-4 h-4 mr-1" />
+          {isMobile ? 'Add' : 'Add Activity'}
+        </Button>
+      </div>
+    </div>
+    <ProgressBar completed={completedCount} total={totalCount} />
+  </CardHeader>
+);
+
+// --- MAIN COMPONENT ---
+const DailyPlannerCard = () => {
+  const navigate = useNavigate();
+  const { currentDog } = useDog();
+  const { 
+    getTodaysActivities, 
+    getActivityDetails, 
+    toggleActivityCompletion,
+    updateScheduledActivity 
+  } = useActivity();
+  const isMobile = useIsMobile();
+  
+  const [expandedActivity, setExpandedActivity] = useState<string | null>(null);
+  const [editingTimeId, setEditingTimeId] = useState<string | null>(null);
+  const [tempTime, setTempTime] = useState('');
+  const [timeError, setTimeError] = useState('');
+  const [selectedActivity, setSelectedActivity] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const todaysActivities = getTodaysActivities();
+  const completedCount = todaysActivities.filter(activity => activity.completed).length;
+  const totalCount = todaysActivities.length;
+
+  const handleAddActivity = () => {
+    navigate('/dog-profile-dashboard/weekly-plan');
+  };
+
+  const handleToggleExpanded = (activityId: string) => {
+    setExpandedActivity(expandedActivity === activityId ? null : activityId);
+    setEditingTimeId(null);
+    setTimeError('');
+  };
+
+  const handleToggleActivity = (activityId: string) => {
+    const activity = todaysActivities.find(a => a.id === activityId);
+    if (!activity) return;
+
+    if (!activity.completed) {
+      const activityDetails = getActivityDetails(activity.activityId);
+      setSelectedActivity({ ...activity, activityDetails });
+      setIsModalOpen(true);
+    } else {
+      toggleActivityCompletion(activityId, '');
+    }
+  };
+
+  const handleModalSave = (completionNotes: string) => {
+    if (selectedActivity) {
+      toggleActivityCompletion(selectedActivity.id, completionNotes);
+      setIsModalOpen(false);
+      setSelectedActivity(null);
+    }
+  };
+
+  const handleModalCancel = () => {
+    setIsModalOpen(false);
+    setSelectedActivity(null);
+  };
+
+  // Empty state
+  if (totalCount === 0) {
+    return <EmptyState onAdd={handleAddActivity} isMobile={isMobile} />;
+  }
+
+  return (
+    <>
+      <Card className="overflow-hidden">
+        <EnhancedHeader 
+          completedCount={completedCount}
+          totalCount={totalCount}
+          isMobile={isMobile}
+          onAddActivity={handleAddActivity}
+        />
+        
+        <CardContent className="mobile-card">
+          {/* Success/Progress Banner */}
+          {completedCount === totalCount ? (
+            <Banner type="complete" dogName={currentDog?.name} />
+          ) : completedCount > 0 ? (
+            <Banner type="progress" count={totalCount - completedCount} />
+          ) : null}
+
+          {/* Activity List */}
+          <div className="space-y-3 mt-4">
+            {todaysActivities.map((scheduledActivity) => {
+              const activityDetails = getActivityDetails(scheduledActivity.activityId);
+              if (!activityDetails) return null;
+
+              const displayTime = "All day";
+              const isExpanded = expandedActivity === scheduledActivity.id;
+              const isEditingThisTime = editingTimeId === scheduledActivity.id;
+
+              return (
+                <ActivityRow
+                  key={scheduledActivity.id}
+                  scheduledActivity={scheduledActivity}
+                  activityDetails={activityDetails}
+                  isExpanded={isExpanded}
+                  onToggle={handleToggleExpanded}
+                  onToggleActivity={handleToggleActivity}
+                  displayTime={displayTime}
+                  isEditingThisTime={isEditingThisTime}
+                  tempTime={tempTime}
+                  setTempTime={setTempTime}
+                  timeError={timeError}
+                  editingTimeId={editingTimeId}
+                />
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
+      {selectedActivity && (
+        <ActivityCompletionModal
+          isOpen={isModalOpen}
+          onClose={handleModalCancel}
+          onSave={handleModalSave}
+          activityTitle={selectedActivity.activityDetails?.title || ''}
+        />
+      )}
+    </>
+  );
+};
+
+export default DailyPlannerCard;
