@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { searchCombinedActivities } from '@/data/activityLibrary';
@@ -10,6 +9,22 @@ import ActivityLibraryHeader from '@/components/ActivityLibraryHeader';
 import ActivityLibraryFilters from '@/components/ActivityLibraryFilters';
 import ActivityLibraryStats from '@/components/ActivityLibraryStats';
 import ActivityLibraryGrid from '@/components/ActivityLibraryGrid';
+
+const pillarOptions = [
+  { id: 'mental', color: 'purple', title: 'Mental Enrichment', description: "For the thinkers and problem-solvers. Games and challenges that flex your dog’s brain." },
+  { id: 'physical', color: 'green', title: 'Physical Enrichment', description: "For dogs who find peace in movement. Soft walks, play, strength-building." },
+  { id: 'social', color: 'blue', title: 'Social Enrichment', description: "For dogs who connect through presence. Calm co-walking, play with friends." },
+  { id: 'environmental', color: 'teal', title: 'Environmental Enrichment', description: "For the sensory seekers. Sniffing, grounding, discovering the world." },
+  { id: 'instinctual', color: 'orange', title: 'Instinctual Enrichment', description: "For dogs who need to shred, chew, stalk, or forage." }
+];
+
+const pillarColors: Record<string, string> = {
+  mental: "from-purple-100 to-purple-50 border-purple-300 focus:ring-purple-400",
+  physical: "from-green-100 to-green-50 border-green-300 focus:ring-green-400",
+  social: "from-blue-100 to-blue-50 border-blue-300 focus:ring-blue-400",
+  environmental: "from-teal-100 to-teal-50 border-teal-300 focus:ring-teal-400",
+  instinctual: "from-orange-100 to-orange-50 border-orange-300 focus:ring-orange-400",
+};
 
 const ActivityLibrary = () => {
   const { getCombinedActivityLibrary, discoveredActivities, discoverNewActivities, isDiscovering, checkAndRunAutoDiscovery } = useActivity();
@@ -54,6 +69,47 @@ const ActivityLibrary = () => {
 
   return (
     <div className="space-y-6">
+      {/* Pillar Selection Cards */}
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold mb-2">Choose Your Enrichment Pillar</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {pillarOptions.map(pillar => (
+            <button
+              key={pillar.id}
+              onClick={() => setSelectedPillar(pillar.id)}
+              className={`
+                border-2 rounded-xl text-left transition shadow-sm
+                bg-gradient-to-br ${pillarColors[pillar.id]}
+                p-6 cursor-pointer hover:shadow-lg hover:-translate-y-1
+                focus:outline-none focus:ring-2
+                ${selectedPillar === pillar.id ? "ring-4 ring-offset-2 scale-105 border-4" : "border-opacity-70"}
+              `}
+              tabIndex={0}
+              aria-label={`Show activities for ${pillar.title}`}
+            >
+              <div className="font-bold text-lg mb-2 text-gray-900">{pillar.title}</div>
+              <div className="text-gray-800 text-base">{pillar.description}</div>
+            </button>
+          ))}
+          {/* All Pillars button */}
+          <button
+            onClick={() => setSelectedPillar('all')}
+            className={`
+              border-2 rounded-xl text-left transition shadow-sm
+              bg-gradient-to-br from-gray-100 to-gray-50 border-gray-300 focus:ring-gray-400
+              p-6 cursor-pointer hover:shadow-lg hover:-translate-y-1
+              focus:outline-none focus:ring-2
+              ${selectedPillar === 'all' ? "ring-4 ring-offset-2 scale-105 border-4" : "border-opacity-70"}
+            `}
+            tabIndex={0}
+            aria-label="Show all activities"
+          >
+            <div className="font-bold text-lg mb-2 text-gray-900">All Pillars</div>
+            <div className="text-gray-800 text-base">Show every activity, regardless of pillar.</div>
+          </button>
+        </div>
+      </div>
+      
       <Card>
         <ActivityLibraryHeader
           autoApprovedCount={autoApprovedCount}
