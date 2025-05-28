@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { ActivityLibraryItem, UserActivity } from '@/types/activity';
 import { DiscoveredActivity } from '@/types/discovery';
@@ -27,6 +26,12 @@ interface SupabaseActivity {
   approved: boolean;
   created_at: string;
   updated_at: string;
+}
+
+interface SyncResult {
+  success: boolean;
+  error?: string;
+  synced: number;
 }
 
 export class ActivitySyncService {
@@ -79,7 +84,7 @@ export class ActivitySyncService {
     return baseActivity;
   }
 
-  static async syncCuratedActivities(): Promise<{ success: boolean; error?: string; synced: number }> {
+  static async syncCuratedActivities(): Promise<SyncResult> {
     try {
       console.log('Starting curated activities sync...');
       
@@ -114,7 +119,7 @@ export class ActivitySyncService {
   static async syncDiscoveredActivities(
     discoveredActivities: DiscoveredActivity[], 
     dogId: string
-  ): Promise<{ success: boolean; error?: string; synced: number }> {
+  ): Promise<SyncResult> {
     try {
       console.log(`Starting discovered activities sync for dog ${dogId}...`);
       
@@ -153,7 +158,7 @@ export class ActivitySyncService {
   static async syncUserActivities(
     userActivities: UserActivity[], 
     dogId: string
-  ): Promise<{ success: boolean; error?: string; synced: number }> {
+  ): Promise<SyncResult> {
     try {
       console.log(`Starting user activities sync for dog ${dogId}...`);
       
@@ -212,11 +217,13 @@ export class ActivitySyncService {
       const allSuccessful = curatedResult.success && discoveredResult.success && userResult.success;
       const totalSynced = curatedResult.synced + discoveredResult.synced + userResult.synced;
 
+      // Collect all error messages
+      const errors = [curatedResult.error, discoveredResult.error, userResult.error]
+        .filter(Boolean);
+
       const result = {
         success: allSuccessful,
-        error: !allSuccessful ? 
-          [curatedResult.error, discoveredResult.error, userResult.error]
-            .filter(Boolean).join('; ') : undefined,
+        error: !allSuccessful ? errors.join('; ') : undefined,
         totalSynced,
         details: {
           curated: curatedResult,
