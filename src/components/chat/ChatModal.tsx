@@ -1,9 +1,10 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Loader2, MessageCircle, Lightbulb, Target, TrendingUp } from 'lucide-react';
+import { Send, Loader2, MessageCircle, Lightbulb, Target, TrendingUp, HelpCircle } from 'lucide-react';
 import { useChat } from '@/contexts/ChatContext';
 import { useDog } from '@/contexts/DogContext';
 import { useFavourites } from '@/hooks/useFavourites';
@@ -13,12 +14,21 @@ interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
-  activities?: any[]; // <-- allows activities per message
+  activities?: any[];
+}
+
+interface ActivityHelpContext {
+  type: 'activity-help';
+  activityName: string;
+  activityPillar: string;
+  activityDifficulty: string;
+  activityDuration: number;
 }
 
 interface ChatModalProps {
   isOpen: boolean;
   onClose: () => void;
+  chatContext?: ActivityHelpContext;
 }
 
 // Utility to strip JSON blocks from LLM reply
@@ -26,7 +36,7 @@ function stripJsonBlocks(text: string): string {
   return text.replace(/(\{[\s\S]*?"title":\s*".+?[\s\S]*?"energyLevel":\s*".+?"[\s\S]*?\})/g, '').trim();
 }
 
-const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose }) => {
+const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, chatContext }) => {
   const [input, setInput] = useState('');
   const { currentConversation, isLoading, sendMessage } = useChat();
   const { currentDog } = useDog();
@@ -47,6 +57,14 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose }) => {
       setTimeout(() => inputRef.current?.focus(), 100);
     }
   }, [isOpen]);
+
+  // Send context message when activity help context is provided
+  useEffect(() => {
+    if (isOpen && chatContext?.type === 'activity-help' && (!currentConversation?.messages || currentConversation.messages.length === 0)) {
+      const contextMessage = `I need help with the "${chatContext.activityName}" activity (${chatContext.activityPillar} pillar, ${chatContext.activityDifficulty} difficulty, ${chatContext.activityDuration} minutes). Can you provide more detailed guidance?`;
+      sendMessage(contextMessage);
+    }
+  }, [isOpen, chatContext, currentConversation?.messages, sendMessage]);
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
@@ -87,6 +105,7 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose }) => {
     await addToFavourites(activityForFavourites, 'library');
   };
 
+  // Quick actions for general chat
   const quickActions = [
     {
       icon: Lightbulb,
@@ -105,10 +124,31 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose }) => {
     }
   ];
 
+  // Quick actions for activity help
+  const activityHelpActions = [
+    {
+      icon: Target,
+      text: "Break down the steps",
+      message: `Can you break down the "${chatContext?.activityName}" activity into simple, easy-to-follow steps?`
+    },
+    {
+      icon: Lightbulb,
+      text: "Troubleshooting tips",
+      message: `What are common issues dogs have with "${chatContext?.activityName}" and how can I solve them?`
+    },
+    {
+      icon: HelpCircle,
+      text: "Modifications for my dog",
+      message: `How can I modify "${chatContext?.activityName}" to better suit ${currentDog?.name}'s specific needs and personality?`
+    }
+  ];
+
   const handleQuickAction = (message: string) => {
     setInput(message);
     handleSend();
   };
+
+  const isActivityHelp = chatContext?.type === 'activity-help';
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -116,7 +156,7 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose }) => {
         <DialogHeader className="p-4 pb-0">
           <DialogTitle className="flex items-center space-x-2">
             <MessageCircle className="w-5 h-5 text-blue-500" />
-            <span>Enrichment Coach</span>
+            <span>{isActivityHelp ? 'Activity Help' : 'Enrichment Coach'}</span>
             {currentDog && (
               <span className="text-sm text-gray-500">• {currentDog.name}</span>
             )}
@@ -129,14 +169,25 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose }) => {
               <div className="space-y-4">
                 <div className="text-center text-gray-500 mb-6">
                   <MessageCircle className="w-12 h-12 mx-auto mb-2 text-blue-500" />
-                  <p className="text-sm">
-                    Hi! I'm your enrichment coach. I know all about {currentDog?.name || 'your dog'} and can help with personalized enrichment activities.
-                  </p>
+                  {isActivityHelp ? (
+                    <div>
+                      <p className="text-sm font-medium mb-2">
+                        Get help with: {chatContext?.activityName}
+                      </p>
+                      <p className="text-sm">
+                        I'm here to help you make this activity successful for {currentDog?.name || 'your dog'}!
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-sm">
+                      Hi! I'm your enrichment coach. I know all about {currentDog?.name || 'your dog'} and can help with personalized enrichment activities.
+                    </p>
+                  )}
                 </div>
                 
                 <div className="space-y-2">
                   <p className="text-sm font-medium text-gray-700">Quick actions:</p>
-                  {quickActions.map((action, index) => (
+                  {(isActivityHelp ? activityHelpActions : quickActions).map((action, index) => (
                     <Button
                       key={index}
                       variant="outline"
@@ -221,7 +272,7 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose }) => {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="Ask about enrichment activities..."
+                placeholder={isActivityHelp ? "Ask about this activity..." : "Ask about enrichment activities..."}
                 disabled={isLoading}
                 className="flex-1"
               />

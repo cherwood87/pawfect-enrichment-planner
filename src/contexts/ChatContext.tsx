@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { ChatMessage, ChatConversation } from '@/types/chat';
 import { useDog } from '@/contexts/DogContext';
@@ -7,7 +8,7 @@ interface ChatContextType {
   conversations: ChatConversation[];
   currentConversation: ChatConversation | null;
   isLoading: boolean;
-  sendMessage: (content: string) => Promise<void>;
+  sendMessage: (content: string, activityContext?: any) => Promise<void>;
   startNewConversation: () => void;
   loadConversation: (dogId: string) => void;
 }
@@ -74,7 +75,7 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setConversations(prev => [...prev.filter(conv => conv.dogId !== currentDog.id), newConversation]);
   };
 
-  const sendMessage = async (content: string) => {
+  const sendMessage = async (content: string, activityContext?: any) => {
     if (!currentConversation || !currentDog || isLoading) return;
 
     setIsLoading(true);
@@ -119,7 +120,8 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             todaysActivities,
             totalActivitiesCompleted: todaysActivities.filter(a => a.completed).length
           },
-          pillarBalance
+          pillarBalance,
+          activityContext // Pass activity context if provided
         }
       });
 
@@ -131,7 +133,7 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         role: 'assistant',
         content: data.reply,
         timestamp: new Date(),
-        activities: Array.isArray(data.activities) ? data.activities : undefined // <-- add activities!
+        activities: Array.isArray(data.activities) ? data.activities : undefined
       };
 
       const finalMessages = [...updatedMessages, assistantMessage];

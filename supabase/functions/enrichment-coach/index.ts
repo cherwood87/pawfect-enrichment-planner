@@ -1,3 +1,4 @@
+
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
@@ -14,10 +15,10 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, dogProfile, activityHistory, pillarBalance } = await req.json();
+    const { messages, dogProfile, activityHistory, pillarBalance, activityContext } = await req.json();
 
     // Build context-aware system prompt
-    const systemPrompt = `You are an expert dog enrichment coach specializing in the 5 pillars of enrichment: Mental, Physical, Social, Environmental, and Instinctual.
+    let systemPrompt = `You are an expert dog enrichment coach specializing in the 5 pillars of enrichment: Mental, Physical, Social, Environmental, and Instinctual.
 
 Current Dog Profile:
 - Name: ${dogProfile?.name || 'Unknown'}
@@ -31,7 +32,22 @@ Current Dog Profile:
 Recent Activity Balance:
 ${Object.entries(pillarBalance || {}).map(([pillar, count]) => `- ${pillar}: ${count} activities today`).join('\n')}
 
-Quiz Results: ${dogProfile?.quizResults ? `Top pillars: ${dogProfile.quizResults.ranking.slice(0, 2).map(r => r.pillar).join(', ')}` : 'Not completed'}
+Quiz Results: ${dogProfile?.quizResults ? `Top pillars: ${dogProfile.quizResults.ranking.slice(0, 2).map(r => r.pillar).join(', ')}` : 'Not completed'}`;
+
+    // Add activity-specific context if provided
+    if (activityContext) {
+      systemPrompt += `
+
+ACTIVITY HELP CONTEXT:
+You are specifically helping with the "${activityContext.activityName}" activity:
+- Pillar: ${activityContext.activityPillar}
+- Difficulty: ${activityContext.activityDifficulty}
+- Duration: ${activityContext.activityDuration} minutes
+
+Focus your responses on providing detailed, step-by-step guidance for this specific activity. Help troubleshoot common issues, suggest modifications based on the dog's profile, and provide encouragement. Be practical and actionable in your advice.`;
+    }
+
+    systemPrompt += `
 
 Guidelines:
 - Always consider the dog's specific profile, limitations, and preferences
