@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { QuizResults } from '@/types/quiz';
 import { useActivity } from '@/contexts/ActivityContext';
@@ -20,15 +20,28 @@ const QuizAndGoalsCard: React.FC<QuizAndGoalsCardProps> = ({
   const { getPillarBalance, getDailyGoals } = useActivity();
   
   const hasCompletedQuiz = !!currentDog.quizResults;
-  const pillarBalance = getPillarBalance();
-  const dailyGoals = getDailyGoals();
-
-  // Calculate goal progress
-  const totalGoalsToday = Object.values(dailyGoals).reduce((sum, goal) => sum + goal, 0);
-  const totalCompletedToday = Object.values(pillarBalance).reduce((sum, completed) => sum + completed, 0);
-  const goalProgress = totalGoalsToday > 0 ? (totalCompletedToday / totalGoalsToday) * 100 : 0;
-
-  const topPillars = currentDog.quizResults?.ranking.slice(0, 2);
+  
+  // Memoize expensive calculations
+  const { pillarBalance, dailyGoals, goalProgress, totalCompletedToday, totalGoalsToday, topPillars } = useMemo(() => {
+    const pillarBalance = getPillarBalance();
+    const dailyGoals = getDailyGoals();
+    
+    // Calculate goal progress
+    const totalGoalsToday = Object.values(dailyGoals).reduce((sum, goal) => sum + goal, 0);
+    const totalCompletedToday = Object.values(pillarBalance).reduce((sum, completed) => sum + completed, 0);
+    const goalProgress = totalGoalsToday > 0 ? (totalCompletedToday / totalGoalsToday) * 100 : 0;
+    
+    const topPillars = currentDog.quizResults?.ranking.slice(0, 2);
+    
+    return {
+      pillarBalance,
+      dailyGoals,
+      goalProgress,
+      totalCompletedToday,
+      totalGoalsToday,
+      topPillars
+    };
+  }, [getPillarBalance, getDailyGoals, currentDog.quizResults?.ranking]);
 
   return (
     <Card className="overflow-hidden">

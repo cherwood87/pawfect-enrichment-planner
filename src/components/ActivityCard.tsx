@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ActivityLibraryItem } from '@/types/activity';
 import { DiscoveredActivity } from '@/types/discovery';
@@ -24,11 +24,11 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, isOpen, onClose }
   const { addToFavourites } = useFavourites(currentDog?.id || null);
   const [selectedDayOfWeek, setSelectedDayOfWeek] = useState<number>(1);
 
-  const isDiscoveredActivity = (activity: ActivityLibraryItem | DiscoveredActivity): activity is DiscoveredActivity => {
+  const isDiscoveredActivity = useCallback((activity: ActivityLibraryItem | DiscoveredActivity): activity is DiscoveredActivity => {
     return 'source' in activity && activity.source === 'discovered';
-  };
+  }, []);
 
-  const getISOWeek = (date: Date): number => {
+  const getISOWeek = useCallback((date: Date): number => {
     const target = new Date(date.valueOf());
     const dayNr = (date.getDay() + 6) % 7;
     target.setDate(target.getDate() - dayNr + 3);
@@ -38,18 +38,18 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, isOpen, onClose }
       target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
     }
     return 1 + Math.ceil((firstThursday - target.valueOf()) / 604800000);
-  };
+  }, []);
 
-  const getDateForDayOfWeek = (dayOfWeek: number) => {
+  const getDateForDayOfWeek = useCallback((dayOfWeek: number) => {
     const today = new Date();
     const currentDay = today.getDay();
     const diff = dayOfWeek - currentDay;
     const targetDate = new Date(today);
     targetDate.setDate(today.getDate() + diff);
     return targetDate;
-  };
+  }, []);
 
-  const handleScheduleActivity = async () => {
+  const handleScheduleActivity = useCallback(async () => {
     if (!currentDog) {
       console.error('No current dog selected');
       return;
@@ -85,14 +85,18 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, isOpen, onClose }
     } catch (error) {
       console.error('Error scheduling activity:', error);
     }
-  };
+  }, [currentDog, selectedDayOfWeek, activity.id, getDateForDayOfWeek, getISOWeek, addScheduledActivity, onClose]);
 
-  const handleAddToFavourites = async () => {
+  const handleAddToFavourites = useCallback(async () => {
     if (!currentDog) return;
 
     const activityType = isDiscoveredActivity(activity) ? 'discovered' : 'library';
     await addToFavourites(activity, activityType);
-  };
+  }, [currentDog, activity, isDiscoveredActivity, addToFavourites]);
+
+  const handleDaySelect = useCallback((day: number) => {
+    setSelectedDayOfWeek(day);
+  }, []);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -108,7 +112,7 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, isOpen, onClose }
           
           <DaySelector 
             selectedDayOfWeek={selectedDayOfWeek}
-            onDaySelect={setSelectedDayOfWeek}
+            onDaySelect={handleDaySelect}
           />
 
           <ActivityCardActions

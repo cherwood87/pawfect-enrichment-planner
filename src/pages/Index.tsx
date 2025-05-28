@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useDog } from '@/contexts/DogContext';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import DashboardContent from '@/components/dashboard/DashboardContent';
@@ -16,41 +16,41 @@ const Index = () => {
   const [selectedPillar, setSelectedPillar] = useState<string | null>(null);
   const [selectedDog, setSelectedDog] = useState<Dog | null>(null);
 
-  const handlePillarSelect = (pillar: string) => {
+  const handlePillarSelect = useCallback((pillar: string) => {
     setSelectedPillar(pillar);
     setIsActivityModalOpen(true);
-  };
+  }, []);
 
-  const handleActivityModalClose = () => {
+  const handleActivityModalClose = useCallback(() => {
     setIsActivityModalOpen(false);
     setSelectedPillar(null);
-  };
+  }, []);
 
-  const handleChatModalClose = () => {
+  const handleChatModalClose = useCallback(() => {
     setIsChatModalOpen(false);
-  };
+  }, []);
 
-  const handleChatModalOpen = () => {
+  const handleChatModalOpen = useCallback(() => {
     setIsChatModalOpen(true);
-  };
+  }, []);
 
-  const handleAddDogModalOpen = () => {
+  const handleAddDogModalOpen = useCallback(() => {
     setIsAddDogModalOpen(true);
-  };
+  }, []);
 
-  const handleAddDogModalClose = () => {
+  const handleAddDogModalClose = useCallback(() => {
     setIsAddDogModalOpen(false);
-  };
+  }, []);
 
-  const handleEditDogModalOpen = (dog: Dog) => {
+  const handleEditDogModalOpen = useCallback((dog: Dog) => {
     setSelectedDog(dog);
     setIsEditDogModalOpen(true);
-  };
+  }, []);
 
-  const handleEditDogModalClose = () => {
+  const handleEditDogModalClose = useCallback(() => {
     setIsEditDogModalOpen(false);
     setSelectedDog(null);
-  };
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-orange-50 mobile-safe">

@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { ActivityLibraryItem } from '@/types/activity';
 import { DiscoveredActivity } from '@/types/discovery';
 import { useActivity } from '@/contexts/ActivityContext';
@@ -41,15 +41,19 @@ const ActivityLibrary = () => {
   const [selectedActivity, setSelectedActivity] = useState<ActivityLibraryItem | DiscoveredActivity | null>(null);
   const [currentActivities, setCurrentActivities] = useState<(ActivityLibraryItem | DiscoveredActivity)[]>([]);
 
-  // Initialize activities with weighted shuffling
-  useEffect(() => {
-    const combinedActivities = getCombinedActivityLibrary().map(activity =>
+  // Memoize normalized activities to prevent unnecessary recalculations
+  const normalizedActivities = useMemo(() => {
+    return getCombinedActivityLibrary().map(activity =>
       activity && typeof activity.energyLevel === 'string'
         ? { ...activity, energyLevel: normalizeEnergyLevel(activity.energyLevel) }
         : activity
     );
-    setCurrentActivities(combinedActivities);
   }, [getCombinedActivityLibrary]);
+
+  // Initialize activities with weighted shuffling
+  useEffect(() => {
+    setCurrentActivities(normalizedActivities);
+  }, [normalizedActivities]);
 
   // Check for auto-discovery on component mount
   useEffect(() => {
@@ -67,30 +71,48 @@ const ActivityLibrary = () => {
     discoveredActivities
   );
 
-  const handleActivitiesReorder = (reorderedActivities: (ActivityLibraryItem | DiscoveredActivity)[]) => {
+  // Memoize callback functions to prevent unnecessary re-renders
+  const handleActivitiesReorder = useCallback((reorderedActivities: (ActivityLibraryItem | DiscoveredActivity)[]) => {
     setCurrentActivities(reorderedActivities);
-  };
+  }, []);
 
-  const isDiscoveredActivity = (activity: ActivityLibraryItem | DiscoveredActivity): activity is DiscoveredActivity => {
-    return 'source' in activity && activity.source === 'discovered';
-  };
-
-  const handleDiscoverMore = async () => {
+  const handleDiscoverMore = useCallback(async () => {
     await discoverNewActivities();
-  };
+  }, [discoverNewActivities]);
 
-  const handleManualSync = async () => {
+  const handleManualSync = useCallback(async () => {
     await syncToSupabase();
-  };
+  }, [syncToSupabase]);
 
-  const autoApprovedCount = discoveredActivities.filter(a => a.approved).length;
-  const curatedCount = currentActivities.filter(a => !isDiscoveredActivity(a)).length;
+  const handleActivitySelect = useCallback((activity: ActivityLibraryItem | DiscoveredActivity) => {
+    setSelectedActivity(activity);
+  }, []);
+
+  const handleActivityModalClose = useCallback(() => {
+    setSelectedActivity(null);
+  }, []);
+
+  const handlePillarSelect = useCallback((pillar: string) => {
+    setSelectedPillar(pillar);
+  }, []);
+
+  // Memoize computed values
+  const { autoApprovedCount, curatedCount } = useMemo(() => {
+    const isDiscoveredActivity = (activity: ActivityLibraryItem | DiscoveredActivity): activity is DiscoveredActivity => {
+      return 'source' in activity && activity.source === 'discovered';
+    };
+
+    return {
+      autoApprovedCount: discoveredActivities.filter(a => a.approved).length,
+      curatedCount: currentActivities.filter(a => !isDiscoveredActivity(a)).length
+    };
+  }, [discoveredActivities, currentActivities]);
 
   return (
     <div className="mobile-space-y">
       <PillarSelectionCards
         selectedPillar={selectedPillar}
-        onPillarSelect={setSelectedPillar}
+        onPillarSelect={handlePillarSelect}
         onManualSync={handleManualSync}
         isSyncing={isSyncing}
         lastSyncTime={lastSyncTime}
@@ -119,7 +141,7 @@ const ActivityLibrary = () => {
       {/* Activity Grid */}
       <ActivityLibraryGrid
         activities={filteredActivities}
-        onActivitySelect={setSelectedActivity}
+        onActivitySelect={handleActivitySelect}
       />
 
       {/* Activity Detail Modal */}
@@ -127,7 +149,7 @@ const ActivityLibrary = () => {
         <ActivityCard 
           activity={selectedActivity}
           isOpen={!!selectedActivity}
-          onClose={() => setSelectedActivity(null)}
+          onClose={handleActivityModalClose}
         />
       )}
     </div>

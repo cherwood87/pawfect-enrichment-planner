@@ -1,24 +1,30 @@
 
-import React, { useState } from 'react';
+import React, { useState, useCallback, lazy, Suspense } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Brain, BookOpen, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import ActivityLibrary from '@/components/ActivityLibrary';
 import EducationalContent from '@/components/EducationalContent';
 import FloatingChatButton from '@/components/dashboard/FloatingChatButton';
 import ChatModal from '@/components/chat/ChatModal';
+
+// Lazy load the heavy ActivityLibrary component
+const ActivityLibrary = lazy(() => import('@/components/ActivityLibrary'));
 
 const ActivityLibraryPage = () => {
   const navigate = useNavigate();
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
 
-  const handleChatModalOpen = () => {
+  const handleChatModalOpen = useCallback(() => {
     setIsChatModalOpen(true);
-  };
+  }, []);
 
-  const handleChatModalClose = () => {
+  const handleChatModalClose = useCallback(() => {
     setIsChatModalOpen(false);
-  };
+  }, []);
+
+  const handleBackClick = useCallback(() => {
+    navigate('/app');
+  }, [navigate]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-cyan-50 to-amber-50">
@@ -30,7 +36,7 @@ const ActivityLibraryPage = () => {
               <Button 
                 variant="ghost" 
                 size="sm"
-                onClick={() => navigate('/app')}
+                onClick={handleBackClick}
                 className="modern-button-outline"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
@@ -63,8 +69,16 @@ const ActivityLibraryPage = () => {
           </div>
         </div>
         
-        {/* Activity Library */}
-        <ActivityLibrary />
+        {/* Activity Library with Suspense for lazy loading */}
+        <Suspense 
+          fallback={
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+            </div>
+          }
+        >
+          <ActivityLibrary />
+        </Suspense>
       </div>
 
       {/* Floating Chat Button */}

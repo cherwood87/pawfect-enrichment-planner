@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Trophy } from 'lucide-react';
@@ -15,7 +15,7 @@ interface PersonalizedGoalsSectionProps {
   onViewResults: () => void;
 }
 
-const PersonalizedGoalsSection: React.FC<PersonalizedGoalsSectionProps> = ({
+const PersonalizedGoalsSection: React.FC<PersonalizedGoalsSectionProps> = memo(({
   currentDog,
   goalProgress,
   totalCompletedToday,
@@ -53,6 +53,8 @@ const PersonalizedGoalsSection: React.FC<PersonalizedGoalsSectionProps> = ({
       </Button>
     </div>
   );
-};
+});
+
+PersonalizedGoalsSection.displayName = 'PersonalizedGoalsSection';
 
 export default PersonalizedGoalsSection;

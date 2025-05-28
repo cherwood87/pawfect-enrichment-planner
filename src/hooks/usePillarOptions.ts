@@ -1,6 +1,8 @@
 
+import { useMemo } from 'react';
+
 export const usePillarOptions = () => {
-  const pillarOptions = [
+  const pillarOptions = useMemo(() => [
     { 
       id: 'mental', 
       color: 'purple', 
@@ -41,7 +43,7 @@ export const usePillarOptions = () => {
       gradient: "from-amber-100 to-amber-50",
       borderColor: "border-amber-300"
     }
-  ];
+  ], []);
 
   return pillarOptions;
 };

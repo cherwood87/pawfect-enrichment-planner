@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { QuizResults } from '@/types/quiz';
 import { useDog } from '@/contexts/DogContext';
 import { useNavigate } from 'react-router-dom';
@@ -18,35 +18,47 @@ const DogProfile: React.FC<DogProfileProps> = ({ onEditDogOpen }) => {
   const [showQuiz, setShowQuiz] = useState(false);
   const [showResults, setShowResults] = useState(false);
 
+  const handleQuizComplete = useCallback((results: QuizResults) => {
+    if (currentDog) {
+      updateDog({
+        ...currentDog,
+        quizResults: results
+      });
+    }
+    setShowQuiz(false);
+    setShowResults(true);
+  }, [currentDog, updateDog]);
+
+  const handleRetakeQuiz = useCallback(() => {
+    setShowResults(false);
+    setShowQuiz(true);
+  }, []);
+
+  const handleCloseResults = useCallback(() => {
+    setShowResults(false);
+  }, []);
+
+  const handleEditClick = useCallback(() => {
+    if (currentDog) {
+      onEditDogOpen(currentDog);
+    }
+  }, [currentDog, onEditDogOpen]);
+
+  const handleAddActivities = useCallback(() => {
+    navigate('/activity-library');
+  }, [navigate]);
+
+  const handleViewResults = useCallback(() => {
+    setShowResults(true);
+  }, []);
+
+  const handleCloseQuiz = useCallback(() => {
+    setShowQuiz(false);
+  }, []);
+
   if (!currentDog) {
     return null;
   }
-
-  const handleQuizComplete = (results: QuizResults) => {
-    updateDog({
-      ...currentDog,
-      quizResults: results
-    });
-    setShowQuiz(false);
-    setShowResults(true);
-  };
-
-  const handleRetakeQuiz = () => {
-    setShowResults(false);
-    setShowQuiz(true);
-  };
-
-  const handleCloseResults = () => {
-    setShowResults(false);
-  };
-
-  const handleEditClick = () => {
-    onEditDogOpen(currentDog);
-  };
-
-  const handleAddActivities = () => {
-    navigate('/activity-library');
-  };
 
   return (
     <>
@@ -59,7 +71,7 @@ const DogProfile: React.FC<DogProfileProps> = ({ onEditDogOpen }) => {
       {/* Quiz and Goals Section */}
       <QuizAndGoalsCard
         currentDog={currentDog}
-        onViewResults={() => setShowResults(true)}
+        onViewResults={handleViewResults}
         onAddActivities={handleAddActivities}
       />
 
@@ -70,7 +82,7 @@ const DogProfile: React.FC<DogProfileProps> = ({ onEditDogOpen }) => {
         currentDog={currentDog}
         onQuizComplete={handleQuizComplete}
         onRetakeQuiz={handleRetakeQuiz}
-        onCloseQuiz={() => setShowQuiz(false)}
+        onCloseQuiz={handleCloseQuiz}
         onCloseResults={handleCloseResults}
         setShowQuiz={setShowQuiz}
         setShowResults={setShowResults}

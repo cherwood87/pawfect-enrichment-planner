@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo, useMemo, useCallback } from 'react';
 import { usePillarOptions } from '@/hooks/usePillarOptions';
 import SyncButton from '@/components/SyncButton';
 
@@ -11,7 +11,7 @@ interface PillarSelectionCardsProps {
   lastSyncTime: Date | null;
 }
 
-const PillarSelectionCards: React.FC<PillarSelectionCardsProps> = ({
+const PillarSelectionCards: React.FC<PillarSelectionCardsProps> = memo(({
   selectedPillar,
   onPillarSelect,
   onManualSync,
@@ -19,6 +19,39 @@ const PillarSelectionCards: React.FC<PillarSelectionCardsProps> = ({
   lastSyncTime
 }) => {
   const pillarOptions = usePillarOptions();
+
+  const handlePillarClick = useCallback((pillarId: string) => {
+    onPillarSelect(pillarId);
+  }, [onPillarSelect]);
+
+  const handleAllPillarsClick = useCallback(() => {
+    onPillarSelect('all');
+  }, [onPillarSelect]);
+
+  const pillarCards = useMemo(() => 
+    pillarOptions.map(pillar => (
+      <button
+        key={pillar.id}
+        onClick={() => handlePillarClick(pillar.id)}
+        className={`
+          border-2 rounded-3xl text-left transition-all duration-300 shadow-lg hover:shadow-xl
+          bg-gradient-to-br ${pillar.gradient} ${pillar.borderColor}
+          mobile-card cursor-pointer hover:-translate-y-2
+          focus:outline-none focus:ring-4 focus:ring-purple-200
+          ${selectedPillar === pillar.id ? "ring-4 ring-purple-400 ring-offset-2 scale-105 border-4" : ""}
+          group
+        `}
+        tabIndex={0}
+        aria-label={`Show activities for ${pillar.title}`}
+      >
+        <div className="font-bold text-lg mb-3 text-gray-900 group-hover:text-purple-800 transition-colors">
+          {pillar.title}
+        </div>
+        <div className="text-gray-700 text-sm leading-relaxed">
+          {pillar.description}
+        </div>
+      </button>
+    )), [pillarOptions, selectedPillar, handlePillarClick]);
 
   return (
     <div className="space-y-4">
@@ -32,33 +65,11 @@ const PillarSelectionCards: React.FC<PillarSelectionCardsProps> = ({
       </div>
       
       <div className="mobile-grid mobile-gap">
-        {pillarOptions.map(pillar => (
-          <button
-            key={pillar.id}
-            onClick={() => onPillarSelect(pillar.id)}
-            className={`
-              border-2 rounded-3xl text-left transition-all duration-300 shadow-lg hover:shadow-xl
-              bg-gradient-to-br ${pillar.gradient} ${pillar.borderColor}
-              mobile-card cursor-pointer hover:-translate-y-2
-              focus:outline-none focus:ring-4 focus:ring-purple-200
-              ${selectedPillar === pillar.id ? "ring-4 ring-purple-400 ring-offset-2 scale-105 border-4" : ""}
-              group
-            `}
-            tabIndex={0}
-            aria-label={`Show activities for ${pillar.title}`}
-          >
-            <div className="font-bold text-lg mb-3 text-gray-900 group-hover:text-purple-800 transition-colors">
-              {pillar.title}
-            </div>
-            <div className="text-gray-700 text-sm leading-relaxed">
-              {pillar.description}
-            </div>
-          </button>
-        ))}
+        {pillarCards}
         
         {/* All Pillars button */}
         <button
-          onClick={() => onPillarSelect('all')}
+          onClick={handleAllPillarsClick}
           className={`
             border-2 rounded-3xl text-left transition-all duration-300 shadow-lg hover:shadow-xl
             bg-gradient-to-br from-gray-100 to-gray-50 border-gray-300 focus:ring-gray-400
@@ -80,6 +91,8 @@ const PillarSelectionCards: React.FC<PillarSelectionCardsProps> = ({
       </div>
     </div>
   );
-};
+});
+
+PillarSelectionCards.displayName = 'PillarSelectionCards';
 
 export default PillarSelectionCards;

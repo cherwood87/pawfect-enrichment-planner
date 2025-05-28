@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { ActivityLibraryItem } from '@/types/activity';
 import { DiscoveredActivity } from '@/types/discovery';
@@ -21,7 +21,7 @@ interface ActivityLibraryContentProps {
   curatedCount: number;
 }
 
-const ActivityLibraryContent: React.FC<ActivityLibraryContentProps> = ({
+const ActivityLibraryContent: React.FC<ActivityLibraryContentProps> = memo(({
   autoApprovedCount,
   isDiscovering,
   onDiscoverMore,
@@ -60,6 +60,8 @@ const ActivityLibraryContent: React.FC<ActivityLibraryContentProps> = ({
       </CardContent>
     </Card>
   );
-};
+});
+
+ActivityLibraryContent.displayName = 'ActivityLibraryContent';
 
 export default ActivityLibraryContent;

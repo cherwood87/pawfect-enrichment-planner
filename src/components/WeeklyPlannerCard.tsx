@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useMemo, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useActivity } from '@/contexts/ActivityContext';
 import { useDog } from '@/contexts/DogContext';
@@ -9,10 +10,12 @@ import WeeklySummary from './weekly-planner/WeeklySummary';
 import EmptyWeeklyPlanner from './weekly-planner/EmptyWeeklyPlanner';
 import ActivityDetailModal from './weekly-planner/ActivityDetailModal';
 import { ScheduledActivity } from '@/types/activity';
+
 interface WeeklyPlannerCardProps {
   onPillarSelect?: (pillar: string) => void;
   onChatOpen?: () => void;
 }
+
 const WeeklyPlannerCard: React.FC<WeeklyPlannerCardProps> = ({
   onPillarSelect,
   onChatOpen
@@ -47,9 +50,19 @@ const WeeklyPlannerCard: React.FC<WeeklyPlannerCardProps> = ({
     return 1 + Math.ceil((firstThursday - target.valueOf()) / 604800000);
   }
 
-  // Get activities for the current week
-  const weekActivities = scheduledActivities.filter(activity => activity.weekNumber === currentWeek && activity.dogId === currentDog?.id);
-  const navigateWeek = (direction: 'prev' | 'next') => {
+  // Memoize week activities calculation
+  const weekActivities = useMemo(() => 
+    scheduledActivities.filter(activity => activity.weekNumber === currentWeek && activity.dogId === currentDog?.id),
+    [scheduledActivities, currentWeek, currentDog?.id]
+  );
+
+  // Memoize computed values
+  const { totalActivities, completedActivities } = useMemo(() => ({
+    totalActivities: weekActivities.length,
+    completedActivities: weekActivities.filter(a => a.completed).length
+  }), [weekActivities]);
+
+  const navigateWeek = useCallback((direction: 'prev' | 'next') => {
     if (direction === 'prev') {
       if (currentWeek === 1) {
         setCurrentYear(currentYear - 1);
@@ -65,16 +78,19 @@ const WeeklyPlannerCard: React.FC<WeeklyPlannerCardProps> = ({
         setCurrentWeek(currentWeek + 1);
       }
     }
-  };
-  const handleActivityClick = (activity: ScheduledActivity) => {
+  }, [currentWeek, currentYear]);
+
+  const handleActivityClick = useCallback((activity: ScheduledActivity) => {
     setSelectedActivity(activity);
     setIsModalOpen(true);
-  };
-  const handleModalClose = () => {
+  }, []);
+
+  const handleModalClose = useCallback(() => {
     setIsModalOpen(false);
     setSelectedActivity(null);
-  };
-  const handleNeedHelp = async () => {
+  }, []);
+
+  const handleNeedHelp = useCallback(async () => {
     if (!selectedActivity || !currentDog) return;
     const activityDetails = getActivityDetails(selectedActivity.activityId);
     if (!activityDetails) return;
@@ -103,24 +119,47 @@ const WeeklyPlannerCard: React.FC<WeeklyPlannerCardProps> = ({
     } catch (error) {
       console.error('Error starting help conversation:', error);
     }
-  };
-  const totalActivities = weekActivities.length;
-  const completedActivities = weekActivities.filter(a => a.completed).length;
+  }, [selectedActivity, currentDog, getActivityDetails, loadConversation, sendMessage, handleModalClose, onChatOpen]);
+
   if (totalActivities === 0) {
     return <EmptyWeeklyPlanner onPillarSelect={onPillarSelect} />;
   }
-  return <>
+
+  return (
+    <>
       <Card className="overflow-hidden">
-        <WeeklyPlannerHeader completedActivities={completedActivities} totalActivities={totalActivities} currentWeek={currentWeek} currentYear={currentYear} onNavigateWeek={navigateWeek} />
+        <WeeklyPlannerHeader 
+          completedActivities={completedActivities} 
+          totalActivities={totalActivities} 
+          currentWeek={currentWeek} 
+          currentYear={currentYear} 
+          onNavigateWeek={navigateWeek} 
+        />
         
         <CardContent className="text-purple-600 text-center py-8 bg-gradient-to-br from-purple-50 to-cyan-50 rounded-2xl border-2 border-purple-200">
-          <WeeklyGrid weekActivities={weekActivities} onToggleCompletion={toggleActivityCompletion} onActivityClick={handleActivityClick} />
+          <WeeklyGrid 
+            weekActivities={weekActivities} 
+            onToggleCompletion={toggleActivityCompletion} 
+            onActivityClick={handleActivityClick} 
+          />
 
-          <WeeklySummary completedActivities={completedActivities} totalActivities={totalActivities} />
+          <WeeklySummary 
+            completedActivities={completedActivities} 
+            totalActivities={totalActivities} 
+          />
         </CardContent>
       </Card>
 
-      <ActivityDetailModal isOpen={isModalOpen} onClose={handleModalClose} activity={selectedActivity} activityDetails={selectedActivity ? getActivityDetails(selectedActivity.activityId) : null} onToggleCompletion={toggleActivityCompletion} onNeedHelp={handleNeedHelp} />
-    </>;
+      <ActivityDetailModal 
+        isOpen={isModalOpen} 
+        onClose={handleModalClose} 
+        activity={selectedActivity} 
+        activityDetails={selectedActivity ? getActivityDetails(selectedActivity.activityId) : null} 
+        onToggleCompletion={toggleActivityCompletion} 
+        onNeedHelp={handleNeedHelp} 
+      />
+    </>
+  );
 };
+
 export default WeeklyPlannerCard;
