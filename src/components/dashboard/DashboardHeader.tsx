@@ -9,10 +9,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Settings, Home, Library, MessageCircle, Menu, User } from 'lucide-react';
+import { Settings, Home, Library, MessageCircle, Menu, User, LogOut } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useIsMobile, useIsSmallMobile } from '@/hooks/use-mobile';
 import { useDog } from '@/contexts/DogContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from '@/components/ui/use-toast';
 import DogSelector from '@/components/DogSelector';
 
 interface DashboardHeaderProps {
@@ -25,12 +27,31 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = React.memo(
     const navigate = useNavigate();
     const { pathname } = useLocation();
     const { currentDog } = useDog();
+    const { user, signOut } = useAuth();
     const isMobile = useIsMobile();
     const isSmallMobile = useIsSmallMobile();
 
     const handleNavigation = React.useCallback((path: string) => {
       navigate(path);
     }, [navigate]);
+
+    const handleSignOut = async () => {
+      console.log('🔐 Sign out button clicked');
+      try {
+        await signOut();
+        toast({
+          title: "Signed out",
+          description: "You have been successfully signed out."
+        });
+      } catch (error) {
+        console.error('❌ Sign out error:', error);
+        toast({
+          title: "Error",
+          description: "Failed to sign out",
+          variant: "destructive"
+        });
+      }
+    };
 
     const isCurrentPage = (path: string) => pathname === path;
 
@@ -187,6 +208,14 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = React.memo(
                   >
                     <User className="mr-2 h-4 w-4" />
                     <span>Account Settings</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={handleSignOut}
+                    className="touch-target rounded text-red-600 hover:text-red-700 hover:bg-red-50"
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Sign Out</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
