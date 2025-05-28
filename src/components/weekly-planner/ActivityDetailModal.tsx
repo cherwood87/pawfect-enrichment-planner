@@ -47,11 +47,6 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
     ));
   };
 
-  // Type guard to check if equipment exists
-  const hasEquipment = (details: ActivityLibraryItem | UserActivity | DiscoveredActivity): details is UserActivity | DiscoveredActivity => {
-    return 'equipment' in details;
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto bg-gradient-to-br from-purple-50 to-cyan-50 border-2 border-purple-200 rounded-3xl">
@@ -120,12 +115,12 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
             </div>
           </div>
 
-          {/* Equipment */}
-          {hasEquipment(activityDetails) && activityDetails.equipment && activityDetails.equipment.length > 0 && (
+          {/* Materials */}
+          {activityDetails.materials && activityDetails.materials.length > 0 && (
             <div className="bg-white/70 rounded-3xl p-6 border border-emerald-200">
-              <h3 className="text-lg font-semibold text-purple-800 mb-3">Equipment Needed</h3>
+              <h3 className="text-lg font-semibold text-purple-800 mb-3">Materials Needed</h3>
               <ul className="list-disc list-inside text-gray-700 space-y-1">
-                {activityDetails.equipment.map((item, index) => (
+                {activityDetails.materials.map((item, index) => (
                   <li key={index}>{item}</li>
                 ))}
               </ul>
