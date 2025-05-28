@@ -7,17 +7,21 @@ import WeeklyPlannerHeader from './weekly-planner/WeeklyPlannerHeader';
 import WeeklyGrid from './weekly-planner/WeeklyGrid';
 import WeeklySummary from './weekly-planner/WeeklySummary';
 import EmptyWeeklyPlanner from './weekly-planner/EmptyWeeklyPlanner';
+import ActivityDetailModal from './weekly-planner/ActivityDetailModal';
+import { ScheduledActivity } from '@/types/activity';
 
 interface WeeklyPlannerCardProps {
   onPillarSelect?: (pillar: string) => void;
 }
 
 const WeeklyPlannerCard: React.FC<WeeklyPlannerCardProps> = ({ onPillarSelect }) => {
-  const { scheduledActivities, toggleActivityCompletion } = useActivity();
+  const { scheduledActivities, toggleActivityCompletion, getActivityDetails } = useActivity();
   const { currentDog } = useDog();
   
   const [currentWeek, setCurrentWeek] = useState(getISOWeek(new Date()));
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+  const [selectedActivity, setSelectedActivity] = useState<ScheduledActivity | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Get ISO week number
   function getISOWeek(date: Date): number {
@@ -42,7 +46,7 @@ const WeeklyPlannerCard: React.FC<WeeklyPlannerCardProps> = ({ onPillarSelect })
     if (direction === 'prev') {
       if (currentWeek === 1) {
         setCurrentYear(currentYear - 1);
-        setCurrentWeek(52); // Assume 52 weeks per year
+        setCurrentWeek(52);
       } else {
         setCurrentWeek(currentWeek - 1);
       }
@@ -56,6 +60,16 @@ const WeeklyPlannerCard: React.FC<WeeklyPlannerCardProps> = ({ onPillarSelect })
     }
   };
 
+  const handleActivityClick = (activity: ScheduledActivity) => {
+    setSelectedActivity(activity);
+    setIsModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setSelectedActivity(null);
+  };
+
   const totalActivities = weekActivities.length;
   const completedActivities = weekActivities.filter(a => a.completed).length;
 
@@ -64,27 +78,38 @@ const WeeklyPlannerCard: React.FC<WeeklyPlannerCardProps> = ({ onPillarSelect })
   }
 
   return (
-    <Card className="overflow-hidden">
-      <WeeklyPlannerHeader
-        completedActivities={completedActivities}
-        totalActivities={totalActivities}
-        currentWeek={currentWeek}
-        currentYear={currentYear}
-        onNavigateWeek={navigateWeek}
-      />
-      
-      <CardContent className="mobile-space-y mobile-card">
-        <WeeklyGrid
-          weekActivities={weekActivities}
-          onToggleCompletion={toggleActivityCompletion}
-        />
-
-        <WeeklySummary
+    <>
+      <Card className="overflow-hidden">
+        <WeeklyPlannerHeader
           completedActivities={completedActivities}
           totalActivities={totalActivities}
+          currentWeek={currentWeek}
+          currentYear={currentYear}
+          onNavigateWeek={navigateWeek}
         />
-      </CardContent>
-    </Card>
+        
+        <CardContent className="mobile-space-y mobile-card">
+          <WeeklyGrid
+            weekActivities={weekActivities}
+            onToggleCompletion={toggleActivityCompletion}
+            onActivityClick={handleActivityClick}
+          />
+
+          <WeeklySummary
+            completedActivities={completedActivities}
+            totalActivities={totalActivities}
+          />
+        </CardContent>
+      </Card>
+
+      <ActivityDetailModal
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        activity={selectedActivity}
+        activityDetails={selectedActivity ? getActivityDetails(selectedActivity.activityId) : null}
+        onToggleCompletion={toggleActivityCompletion}
+      />
+    </>
   );
 };
 

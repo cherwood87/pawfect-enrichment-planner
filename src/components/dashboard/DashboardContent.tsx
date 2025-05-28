@@ -6,6 +6,7 @@ import { useFavourites } from '@/hooks/useFavourites';
 import { useAuth } from '@/contexts/AuthContext';
 import DailyPlannerCard from '@/components/DailyPlannerCard';
 import WeeklyPlannerCard from '@/components/WeeklyPlannerCard';
+import WeeklyProgressCard from '@/components/weekly-planner/WeeklyProgressCard';
 import QuickStats from './QuickStats';
 import ReflectionJournal from '@/components/ReflectionJournal';
 import EmptyDashboard from '@/components/EmptyDashboard';
@@ -96,18 +97,32 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
   return (
     <div>
       <AuthenticatedHeader />
-      <div className="container mx-auto p-6 space-y-6">
+      <div className="container mx-auto p-4 lg:p-6 space-y-6">
+        {/* Top Stats Section */}
         <QuickStats
           activeDays={streakData.activeDays}
           completionRate={streakData.completionRate}
           currentStreak={streakData.currentStreak}
         />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <DailyPlannerCard />
-          <WeeklyPlannerCard />
+        {/* Main Dashboard Grid - Responsive Layout */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          {/* Left Column - Daily Planner (Full width on mobile, 1/3 on desktop) */}
+          <div className="xl:col-span-1 space-y-6">
+            <DailyPlannerCard />
+          </div>
+
+          {/* Right Column - Weekly Content (Full width on mobile, 2/3 on desktop) */}
+          <div className="xl:col-span-2 space-y-6">
+            {/* Weekly Progress Card */}
+            <WeeklyProgressCard />
+            
+            {/* Weekly Planner */}
+            <WeeklyPlannerCard onPillarSelect={onPillarSelect} />
+          </div>
         </div>
 
+        {/* Favourites Section */}
         <div className="mb-8">
           <h2 className="text-xl font-bold text-gray-800 mb-4">Favourite Activities</h2>
           {favouritesLoading ? (
@@ -174,6 +189,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
           )}
         </div>
 
+        {/* Journal Section */}
         <ReflectionJournal />
       </div>
     </div>

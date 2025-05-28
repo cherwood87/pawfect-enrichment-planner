@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ScheduledActivity } from '@/types/activity';
 import DayActivityCard from './DayActivityCard';
@@ -6,11 +7,13 @@ import { useActivity } from '@/contexts/ActivityContext';
 interface WeeklyGridProps {
   weekActivities: ScheduledActivity[];
   onToggleCompletion: (activityId: string) => void;
+  onActivityClick?: (activity: ScheduledActivity) => void;
 }
 
 const WeeklyGrid: React.FC<WeeklyGridProps> = ({
   weekActivities,
-  onToggleCompletion
+  onToggleCompletion,
+  onActivityClick
 }) => {
   const { getActivityDetails } = useActivity();
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -23,73 +26,68 @@ const WeeklyGrid: React.FC<WeeklyGridProps> = ({
 
   return (
     <div className="overflow-x-auto py-2">
-      <div
-        className="
-          grid grid-cols-7 gap-4
-          min-w-[700px]    // wider for more breathing room
-        "
-      >
+      <div className="grid grid-cols-7 gap-3 min-w-[800px]">
         {dayNames.map((dayName, dayIndex) => {
           const dayActivities = activitiesByDay[dayIndex] || [];
           const dayCompleted = dayActivities.filter(a => a.completed).length;
           const dayTotal = dayActivities.length;
 
-          // Alternate backgrounds for days
-          const bgColor = dayIndex % 2 === 0 ? "bg-blue-50" : "bg-white";
-
           return (
             <div
               key={dayIndex}
-              className={`
-                relative
-                text-center
-                min-w-[110px] px-3 py-3
-                rounded-xl border border-gray-200 shadow-sm
-                flex flex-col items-center transition
-                ${bgColor}
-                hover:shadow-lg hover:-translate-y-1
-              `}
+              className="relative text-center min-w-[110px] px-3 py-4 rounded-xl border border-gray-200 shadow-sm bg-white hover:shadow-md transition-all"
             >
-              <div className="text-sm font-extrabold text-blue-700 mb-3 tracking-wide">
+              {/* Day Header */}
+              <div className="text-sm font-bold text-gray-700 mb-3 pb-2 border-b border-gray-100">
                 {dayName}
               </div>
 
-              <div className="space-y-2 w-full flex-1">
-                {dayActivities.map((activity) => {
+              {/* Activities Stack */}
+              <div className="space-y-2 min-h-[120px]">
+                {dayActivities.map((activity, index) => {
                   const activityDetails = getActivityDetails(activity.activityId);
                   if (!activityDetails) return null;
 
                   return (
                     <div
                       key={activity.id}
-                      className={`
-                        w-full px-2 py-2 rounded-lg shadow 
-                        bg-gradient-to-r from-blue-400 to-purple-400
-                        text-white font-semibold text-xs
-                        flex items-center justify-between gap-2
-                        hover:scale-105 transition
-                      `}
+                      className="relative transform transition-all duration-200 hover:scale-105"
+                      style={{
+                        zIndex: dayActivities.length - index,
+                        marginTop: index > 0 ? '-8px' : '0'
+                      }}
                     >
                       <DayActivityCard
                         activity={activity}
                         activityDetails={activityDetails}
                         onToggleCompletion={onToggleCompletion}
+                        onActivityClick={onActivityClick}
+                        isStacked={dayActivities.length > 1}
+                        stackIndex={index}
                       />
                     </div>
                   );
                 })}
+                
                 {dayActivities.length === 0 && (
-                  <div className="text-gray-300 text-xs py-7 font-medium">
+                  <div className="flex items-center justify-center h-24 text-gray-300 text-xs">
                     No activities
                   </div>
                 )}
               </div>
 
+              {/* Day Summary */}
               {dayTotal > 0 && (
-                <div className="mt-4 flex items-center gap-1 justify-center">
-                  <span className="inline-block bg-green-100 text-green-700 text-xs font-bold px-2 py-0.5 rounded-full">
+                <div className="mt-3 pt-2 border-t border-gray-100">
+                  <div className={`text-xs font-semibold px-2 py-1 rounded-full ${
+                    dayCompleted === dayTotal 
+                      ? 'bg-green-100 text-green-700' 
+                      : dayCompleted > 0 
+                      ? 'bg-blue-100 text-blue-700'
+                      : 'bg-gray-100 text-gray-600'
+                  }`}>
                     {dayCompleted}/{dayTotal} done
-                  </span>
+                  </div>
                 </div>
               )}
             </div>
