@@ -65,6 +65,14 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
     setIsChatOpen(true);
   };
 
+  const chatContext = {
+    type: 'activity-help' as const,
+    activityName: activityDetails.title,
+    activityPillar: activityDetails.pillar,
+    activityDifficulty: activityDetails.difficulty,
+    activityDuration: activityDetails.duration
+  };
+
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
@@ -202,13 +210,7 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
       <ChatModal 
         isOpen={isChatOpen} 
         onClose={() => setIsChatOpen(false)}
-        chatContext={{
-          type: 'activity-help',
-          activityName: activityDetails.title,
-          activityPillar: activityDetails.pillar,
-          activityDifficulty: activityDetails.difficulty,
-          activityDuration: activityDetails.duration
-        }}
+        chatContext={chatContext}
       />
     </>
   );

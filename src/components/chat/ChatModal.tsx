@@ -38,7 +38,7 @@ function stripJsonBlocks(text: string): string {
 
 const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, chatContext }) => {
   const [input, setInput] = useState('');
-  const { currentConversation, isLoading, sendMessage } = useChat();
+  const { currentConversation, isLoading, sendMessage, loadConversation } = useChat();
   const { currentDog } = useDog();
   const { addToFavourites } = useFavourites(currentDog?.id || null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -58,13 +58,35 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, chatContext }) =
     }
   }, [isOpen]);
 
+  // Initialize conversation when modal opens
+  useEffect(() => {
+    if (isOpen && currentDog) {
+      if (chatContext?.type === 'activity-help') {
+        // Load activity help conversation (always starts fresh)
+        loadConversation(currentDog.id, 'activity-help');
+      } else {
+        // Load general conversation
+        loadConversation(currentDog.id, 'general');
+      }
+    }
+  }, [isOpen, chatContext, currentDog, loadConversation]);
+
   // Send context message when activity help context is provided
   useEffect(() => {
-    if (isOpen && chatContext?.type === 'activity-help' && (!currentConversation?.messages || currentConversation.messages.length === 0)) {
+    if (isOpen && chatContext?.type === 'activity-help' && currentConversation && currentConversation.messages.length === 0) {
       const contextMessage = `I need help with the "${chatContext.activityName}" activity (${chatContext.activityPillar} pillar, ${chatContext.activityDifficulty} difficulty, ${chatContext.activityDuration} minutes). Can you provide more detailed guidance?`;
-      sendMessage(contextMessage);
+      
+      // Pass activity context to the sendMessage function
+      const activityContext = {
+        activityName: chatContext.activityName,
+        activityPillar: chatContext.activityPillar,
+        activityDifficulty: chatContext.activityDifficulty,
+        activityDuration: chatContext.activityDuration
+      };
+      
+      sendMessage(contextMessage, activityContext);
     }
-  }, [isOpen, chatContext, currentConversation?.messages, sendMessage]);
+  }, [isOpen, chatContext, currentConversation, sendMessage]);
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
@@ -72,7 +94,15 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, chatContext }) =
     const messageContent = input.trim();
     setInput('');
 
-    await sendMessage(messageContent);
+    // Pass activity context if we're in activity help mode
+    const activityContext = chatContext?.type === 'activity-help' ? {
+      activityName: chatContext.activityName,
+      activityPillar: chatContext.activityPillar,
+      activityDifficulty: chatContext.activityDifficulty,
+      activityDuration: chatContext.activityDuration
+    } : undefined;
+
+    await sendMessage(messageContent, activityContext);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -145,7 +175,7 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, chatContext }) =
 
   const handleQuickAction = (message: string) => {
     setInput(message);
-    handleSend();
+    setTimeout(() => handleSend(), 100);
   };
 
   const isActivityHelp = chatContext?.type === 'activity-help';

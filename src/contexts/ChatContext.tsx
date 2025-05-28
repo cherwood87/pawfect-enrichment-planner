@@ -1,16 +1,17 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { ChatMessage, ChatConversation } from '@/types/chat';
 import { useDog } from '@/contexts/DogContext';
 import { useActivity } from '@/contexts/ActivityContext';
+
+type ConversationType = 'general' | 'activity-help';
 
 interface ChatContextType {
   conversations: ChatConversation[];
   currentConversation: ChatConversation | null;
   isLoading: boolean;
   sendMessage: (content: string, activityContext?: any) => Promise<void>;
-  startNewConversation: () => void;
-  loadConversation: (dogId: string) => void;
+  startNewConversation: (type?: ConversationType) => void;
+  loadConversation: (dogId: string, type?: ConversationType) => void;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -40,10 +41,10 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }, []);
 
-  // Load conversation for current dog
+  // Load conversation for current dog (general conversation only)
   useEffect(() => {
     if (currentDog) {
-      loadConversation(currentDog.id);
+      loadConversation(currentDog.id, 'general');
     }
   }, [currentDog]);
 
@@ -52,27 +53,48 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     localStorage.setItem('enrichmentCoachConversations', JSON.stringify(conversations));
   }, [conversations]);
 
-  const loadConversation = (dogId: string) => {
-    const existing = conversations.find(conv => conv.dogId === dogId);
+  const getConversationKey = (dogId: string, type: ConversationType = 'general') => {
+    return type === 'general' ? dogId : `${dogId}-${type}`;
+  };
+
+  const loadConversation = (dogId: string, type: ConversationType = 'general') => {
+    // For activity help, always start fresh - don't load existing conversations
+    if (type === 'activity-help') {
+      startNewConversation(type);
+      return;
+    }
+
+    // For general conversations, load existing or create new
+    const conversationKey = getConversationKey(dogId, type);
+    const existing = conversations.find(conv => 
+      conv.dogId === conversationKey
+    );
+    
     if (existing) {
       setCurrentConversation(existing);
     } else {
-      startNewConversation();
+      startNewConversation(type);
     }
   };
 
-  const startNewConversation = () => {
+  const startNewConversation = (type: ConversationType = 'general') => {
     if (!currentDog) return;
 
+    const conversationKey = getConversationKey(currentDog.id, type);
+    
     const newConversation: ChatConversation = {
       id: generateId(),
-      dogId: currentDog.id,
+      dogId: conversationKey,
       messages: [],
       lastUpdated: new Date()
     };
 
     setCurrentConversation(newConversation);
-    setConversations(prev => [...prev.filter(conv => conv.dogId !== currentDog.id), newConversation]);
+    
+    // For activity help, don't save to persistent storage - keep it temporary
+    if (type === 'general') {
+      setConversations(prev => [...prev.filter(conv => conv.dogId !== conversationKey), newConversation]);
+    }
   };
 
   const sendMessage = async (content: string, activityContext?: any) => {
@@ -99,9 +121,14 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       };
 
       setCurrentConversation(updatedConversation);
-      setConversations(prev => 
-        prev.map(conv => conv.id === updatedConversation.id ? updatedConversation : conv)
-      );
+      
+      // Only update stored conversations for general chat
+      const isGeneralChat = !currentConversation.dogId.includes('-activity-help');
+      if (isGeneralChat) {
+        setConversations(prev => 
+          prev.map(conv => conv.id === updatedConversation.id ? updatedConversation : conv)
+        );
+      }
 
       // Prepare context for AI
       const pillarBalance = getPillarBalance();
@@ -144,9 +171,13 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       };
 
       setCurrentConversation(finalConversation);
-      setConversations(prev => 
-        prev.map(conv => conv.id === finalConversation.id ? finalConversation : conv)
-      );
+      
+      // Only update stored conversations for general chat
+      if (isGeneralChat) {
+        setConversations(prev => 
+          prev.map(conv => conv.id === finalConversation.id ? finalConversation : conv)
+        );
+      }
 
     } catch (error) {
       console.error('Error sending message:', error);
@@ -166,9 +197,14 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       };
 
       setCurrentConversation(errorConversation);
-      setConversations(prev => 
-        prev.map(conv => conv.id === errorConversation.id ? errorConversation : conv)
-      );
+      
+      // Only update stored conversations for general chat
+      const isGeneralChat = !currentConversation.dogId.includes('-activity-help');
+      if (isGeneralChat) {
+        setConversations(prev => 
+          prev.map(conv => conv.id === errorConversation.id ? errorConversation : conv)
+        );
+      }
     }
 
     setIsLoading(false);
