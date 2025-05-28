@@ -9,6 +9,7 @@ const AuthenticatedHeader: React.FC = () => {
   const { user, signOut } = useAuth();
 
   const handleSignOut = async () => {
+    console.log('🔐 Sign out button clicked');
     try {
       await signOut();
       toast({
@@ -16,6 +17,7 @@ const AuthenticatedHeader: React.FC = () => {
         description: "You have been successfully signed out."
       });
     } catch (error) {
+      console.error('❌ Sign out error:', error);
       toast({
         title: "Error",
         description: "Failed to sign out",

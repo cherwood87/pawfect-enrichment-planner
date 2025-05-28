@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -11,20 +11,36 @@ import CTA_AddDog from '@/components/landing/CTA_AddDog';
 import { LogIn } from 'lucide-react';
 
 const Landing: React.FC = () => {
-  const { user, loading } = useAuth();
+  const { user, loading, session } = useAuth();
 
-  // Redirect authenticated users to the app
+  // Debug logging for landing page behavior
+  useEffect(() => {
+    console.log('🏠 Landing page mounted');
+    console.log('👤 User:', user?.email || 'none');
+    console.log('📱 Session:', session ? 'exists' : 'none');
+    console.log('⏳ Loading:', loading);
+  }, [user, session, loading]);
+
+  // Show loading spinner while auth is initializing
   if (loading) {
+    console.log('⏳ Landing: Showing loading state');
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto mb-2"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
       </div>
     );
   }
 
-  if (user) {
+  // Redirect authenticated users to the app
+  if (user && session) {
+    console.log('🚀 Landing: Redirecting authenticated user to /app');
     return <Navigate to="/app" replace />;
   }
+
+  console.log('🏠 Landing: Showing landing page for unauthenticated user');
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-orange-50">
