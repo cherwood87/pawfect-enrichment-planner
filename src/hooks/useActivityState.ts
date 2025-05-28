@@ -9,7 +9,7 @@ import { useActivityLoader } from './useActivityLoader';
 import { useActivityMigration } from './useActivityMigration';
 import { useActivityPersistence } from './useActivityPersistence';
 
-export const useActivityState = (currentDog: Dog | null) => {
+export const useActivityStateHook = (currentDog: Dog | null) => {
   const [scheduledActivities, setScheduledActivities] = useState<ScheduledActivity[]>([]);
   const [userActivities, setUserActivities] = useState<UserActivity[]>([]);
   const [discoveredActivities, setDiscoveredActivities] = useState<DiscoveredActivity[]>([]);

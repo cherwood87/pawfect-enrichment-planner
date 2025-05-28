@@ -1,16 +1,14 @@
 
-import React, { createContext, useContext, useEffect } from 'react';
+import React, { createContext, useContext } from 'react';
 import { ActivityContextType } from '@/types/activityContext';
-import { useDog } from '@/contexts/DogContext';
-import { useActivityOperations } from '@/hooks/useActivityOperations';
-import { useDiscoveryOperations } from '@/hooks/useDiscoveryOperations';
-import { useActivityState } from '@/hooks/useActivityState';
-import { useActivityActions } from '@/hooks/useActivityActions';
-import { useActivitySync } from '@/hooks/useActivitySync';
-import { ActivitySyncService } from '@/services/ActivitySyncService';
+import { ActivityStateProvider, useActivityState } from './ActivityStateContext';
+import { ActivityOperationsProvider, useActivityOperations } from './ActivityOperationsContext';
+import { SyncProvider, useSync } from './SyncContext';
+import { DiscoveryProvider, useDiscovery } from './DiscoveryContext';
 
 const ActivityContext = createContext<ActivityContextType | undefined>(undefined);
 
+// Backward compatible hook that combines all contexts
 export const useActivity = () => {
   const context = useContext(ActivityContext);
   if (!context) {
@@ -19,106 +17,68 @@ export const useActivity = () => {
   return context;
 };
 
-export const ActivityProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { currentDog } = useDog();
-  
-  // State management
-  const {
-    scheduledActivities,
-    userActivities,
-    discoveredActivities,
-    discoveryConfig,
-    setScheduledActivities,
-    setUserActivities,
-    setDiscoveredActivities,
-    setDiscoveryConfig
-  } = useActivityState(currentDog);
+// Internal component that combines all context values
+const ActivityContextAggregator: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const stateContext = useActivityState();
+  const operationsContext = useActivityOperations();
+  const syncContext = useSync();
+  const discoveryContext = useDiscovery();
 
-  // Activity actions
-  const {
-    addScheduledActivity,
-    toggleActivityCompletion,
-    updateScheduledActivity,
-    addUserActivity
-  } = useActivityActions(setScheduledActivities, setUserActivities, currentDog);
-
-  // Activity operations hook
-  const activityOps = useActivityOperations(
-    scheduledActivities,
-    userActivities,
-    discoveredActivities,
-    currentDog
-  );
-
-  // Discovery operations hook
-  const discoveryOps = useDiscoveryOperations(
-    discoveredActivities,
-    setDiscoveredActivities,
-    discoveryConfig,
-    setDiscoveryConfig,
-    currentDog
-  );
-
-  // Sync functionality
-  const { isSyncing, lastSyncTime, performSync } = useActivitySync();
-
-  // Auto-sync on app load and when activities change
-  useEffect(() => {
-    const performAutoSync = async () => {
-      if (!currentDog) return;
-      
-      console.log('Performing auto-sync on app load...');
-      await performSync(discoveredActivities, userActivities, currentDog.id);
-    };
-
-    // Debounce the auto-sync to avoid excessive calls
-    const timeoutId = setTimeout(performAutoSync, 1000);
-    return () => clearTimeout(timeoutId);
-  }, [currentDog?.id]); // Only run when current dog changes
-
-  // Manual sync function
-  const manualSync = async () => {
-    if (!currentDog) return;
-    console.log('Performing manual sync...');
-    return await performSync(discoveredActivities, userActivities, currentDog.id);
-  };
-
-  // Enhanced context value with sync capabilities
-  const contextValue: ActivityContextType & {
-    isSyncing: boolean;
-    lastSyncTime: Date | null;
-    syncToSupabase: () => Promise<any>;
-  } = {
-    scheduledActivities,
-    userActivities,
-    discoveredActivities,
-    discoveryConfig,
-    isDiscovering: discoveryOps.isDiscovering,
-    addScheduledActivity,
-    toggleActivityCompletion,
-    updateScheduledActivity,
-    addUserActivity,
-    getTodaysActivities: activityOps.getTodaysActivities,
-    getActivityDetails: activityOps.getActivityDetails,
-    getStreakData: activityOps.getStreakData,
-    getWeeklyProgress: activityOps.getWeeklyProgress,
-    getPillarBalance: activityOps.getPillarBalance,
-    getDailyGoals: activityOps.getDailyGoals,
-    getCombinedActivityLibrary: discoveryOps.getCombinedActivityLibrary,
-    discoverNewActivities: discoveryOps.discoverNewActivities,
-    approveDiscoveredActivity: discoveryOps.approveDiscoveredActivity,
-    rejectDiscoveredActivity: discoveryOps.rejectDiscoveredActivity,
-    updateDiscoveryConfig: discoveryOps.updateDiscoveryConfig,
-    checkAndRunAutoDiscovery: discoveryOps.checkAndRunAutoDiscovery,
-    // Sync functionality
-    isSyncing,
-    lastSyncTime,
-    syncToSupabase: manualSync
+  // Combine all contexts into the original ActivityContextType interface
+  const contextValue: ActivityContextType = {
+    // State
+    scheduledActivities: stateContext.scheduledActivities,
+    userActivities: stateContext.userActivities,
+    discoveredActivities: stateContext.discoveredActivities,
+    discoveryConfig: stateContext.discoveryConfig,
+    
+    // Operations
+    addScheduledActivity: operationsContext.addScheduledActivity,
+    toggleActivityCompletion: operationsContext.toggleActivityCompletion,
+    updateScheduledActivity: operationsContext.updateScheduledActivity,
+    addUserActivity: operationsContext.addUserActivity,
+    getTodaysActivities: operationsContext.getTodaysActivities,
+    getActivityDetails: operationsContext.getActivityDetails,
+    getStreakData: operationsContext.getStreakData,
+    getWeeklyProgress: operationsContext.getWeeklyProgress,
+    getPillarBalance: operationsContext.getPillarBalance,
+    getDailyGoals: operationsContext.getDailyGoals,
+    
+    // Discovery
+    isDiscovering: discoveryContext.isDiscovering,
+    getCombinedActivityLibrary: discoveryContext.getCombinedActivityLibrary,
+    discoverNewActivities: discoveryContext.discoverNewActivities,
+    approveDiscoveredActivity: discoveryContext.approveDiscoveredActivity,
+    rejectDiscoveredActivity: discoveryContext.rejectDiscoveredActivity,
+    updateDiscoveryConfig: discoveryContext.updateDiscoveryConfig,
+    checkAndRunAutoDiscovery: discoveryContext.checkAndRunAutoDiscovery,
+    
+    // Sync
+    isSyncing: syncContext.isSyncing,
+    lastSyncTime: syncContext.lastSyncTime,
+    syncToSupabase: syncContext.syncToSupabase
   };
 
   return (
     <ActivityContext.Provider value={contextValue}>
       {children}
     </ActivityContext.Provider>
+  );
+};
+
+// Main provider that composes all sub-providers
+export const ActivityProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  return (
+    <ActivityStateProvider>
+      <ActivityOperationsProvider>
+        <SyncProvider>
+          <DiscoveryProvider>
+            <ActivityContextAggregator>
+              {children}
+            </ActivityContextAggregator>
+          </DiscoveryProvider>
+        </SyncProvider>
+      </ActivityOperationsProvider>
+    </ActivityStateProvider>
   );
 };
