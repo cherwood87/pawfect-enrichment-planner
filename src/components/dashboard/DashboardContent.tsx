@@ -6,7 +6,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import WeeklyPlannerCard from '@/components/WeeklyPlannerCard';
 import ReflectionJournal from '@/components/ReflectionJournal';
 import EmptyDashboard from '@/components/EmptyDashboard';
-import AuthenticatedHeader from './AuthenticatedHeader';
 
 const daysOfWeek = [
   'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'
@@ -82,16 +81,12 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
 
   if (!currentDog) {
     return (
-      <div>
-        <AuthenticatedHeader />
-        <EmptyDashboard onAddDogOpen={onAddDogOpen} />
-      </div>
+      <EmptyDashboard onAddDogOpen={onAddDogOpen} />
     );
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-cyan-50 to-amber-50">
-      <AuthenticatedHeader />
       <div className="container mx-auto mobile-container mobile-space-y">
         {/* Main Dashboard Content */}
         <div className="mobile-space-y">
