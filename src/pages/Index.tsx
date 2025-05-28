@@ -65,6 +65,7 @@ const Index = () => {
         onAddDogOpen={handleAddDogModalOpen}
         onEditDogOpen={handleEditDogModalOpen}
         onPillarSelect={handlePillarSelect}
+        onChatOpen={handleChatModalOpen}
       />
 
       {/* Floating Chat Button */}

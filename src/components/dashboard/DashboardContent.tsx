@@ -1,11 +1,9 @@
-
 import React, { useEffect, useState } from 'react';
 import { useActivity } from '@/contexts/ActivityContext';
 import { useDog } from '@/contexts/DogContext';
 import { useFavourites } from '@/hooks/useFavourites';
 import { useAuth } from '@/contexts/AuthContext';
 import WeeklyPlannerCard from '@/components/WeeklyPlannerCard';
-import WeeklyProgressCard from '@/components/weekly-planner/WeeklyProgressCard';
 import ReflectionJournal from '@/components/ReflectionJournal';
 import EmptyDashboard from '@/components/EmptyDashboard';
 import AuthenticatedHeader from './AuthenticatedHeader';
@@ -18,12 +16,14 @@ interface DashboardContentProps {
   onAddDogOpen?: () => void;
   onEditDogOpen?: (dog: any) => void;
   onPillarSelect?: (pillar: string, mode?: 'daily' | 'weekly') => void;
+  onChatOpen?: () => void;
 }
 
 const DashboardContent: React.FC<DashboardContentProps> = ({
   onAddDogOpen,
   onEditDogOpen,
-  onPillarSelect
+  onPillarSelect,
+  onChatOpen
 }) => {
   const { addScheduledActivity } = useActivity();
   const { currentDog } = useDog();
@@ -95,11 +95,8 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
       <div className="container mx-auto mobile-container mobile-space-y">
         {/* Main Dashboard Content */}
         <div className="mobile-space-y">
-          {/* Weekly Progress Card */}
-          <WeeklyProgressCard />
-          
           {/* Weekly Planner */}
-          <WeeklyPlannerCard onPillarSelect={onPillarSelect} />
+          <WeeklyPlannerCard onPillarSelect={onPillarSelect} onChatOpen={onChatOpen} />
         </div>
 
         {/* Enhanced Favourites Section */}
