@@ -42,7 +42,7 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
   const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
   // FIXED: Helper function to safely render instructions with proper typing
-  const renderInstructions = (): ReactNode => {
+  const renderInstructions = (): string | null => {
     if (!('instructions' in activityDetails) || !activityDetails.instructions) {
       return null;
     }
@@ -59,7 +59,7 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
     return String(activityDetails.instructions);
   };
 
-  const instructionsText: ReactNode = renderInstructions();
+  const instructionsText: string | null = renderInstructions();
 
   const handleNeedHelp = () => {
     console.log('Opening chat help for activity:', activityDetails.title);

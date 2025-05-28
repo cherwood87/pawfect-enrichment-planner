@@ -38,11 +38,14 @@ function stripJsonBlocks(text: string): string {
 
 const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, chatContext }) => {
   const [input, setInput] = useState('');
+  const [hasInitialized, setHasInitialized] = useState(false);
   const { currentConversation, isLoading, sendMessage, loadConversation } = useChat();
   const { currentDog } = useDog();
   const { addToFavourites } = useFavourites(currentDog?.id || null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  console.log('ChatModal rendered - isOpen:', isOpen, 'chatContext:', chatContext, 'hasInitialized:', hasInitialized);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -58,25 +61,55 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, chatContext }) =
     }
   }, [isOpen]);
 
-  // Initialize conversation when modal opens
+  // Initialize conversation when modal opens - FIXED: Remove sendMessage from dependency array
   useEffect(() => {
-    if (isOpen && currentDog) {
+    console.log('Initialize conversation effect triggered - isOpen:', isOpen, 'currentDog:', currentDog?.id, 'chatContext:', chatContext);
+    
+    if (isOpen && currentDog && !hasInitialized) {
+      console.log('Initializing conversation...');
+      setHasInitialized(true);
+      
       if (chatContext?.type === 'activity-help') {
-        // Load activity help conversation (always starts fresh)
+        console.log('Loading activity help conversation');
         loadConversation(currentDog.id, 'activity-help');
       } else {
-        // Load general conversation
+        console.log('Loading general conversation');
         loadConversation(currentDog.id, 'general');
       }
     }
-  }, [isOpen, chatContext, currentDog, loadConversation]);
+  }, [isOpen, currentDog, chatContext, hasInitialized, loadConversation]);
 
-  // Send context message when activity help context is provided
+  // Reset initialization when modal closes
   useEffect(() => {
-    if (isOpen && chatContext?.type === 'activity-help' && currentConversation && currentConversation.messages.length === 0) {
+    if (!isOpen) {
+      console.log('Modal closed, resetting initialization');
+      setHasInitialized(false);
+    }
+  }, [isOpen]);
+
+  // Send context message when activity help context is provided - FIXED: Better condition and error handling
+  useEffect(() => {
+    console.log('Context message effect triggered - conditions:', {
+      isOpen,
+      isActivityHelp: chatContext?.type === 'activity-help',
+      hasConversation: !!currentConversation,
+      messageCount: currentConversation?.messages.length,
+      isLoading,
+      hasInitialized
+    });
+
+    if (
+      isOpen && 
+      chatContext?.type === 'activity-help' && 
+      currentConversation && 
+      currentConversation.messages.length === 0 && 
+      !isLoading &&
+      hasInitialized
+    ) {
+      console.log('Sending activity help context message...');
+      
       const contextMessage = `I need help with the "${chatContext.activityName}" activity (${chatContext.activityPillar} pillar, ${chatContext.activityDifficulty} difficulty, ${chatContext.activityDuration} minutes). Can you provide more detailed guidance?`;
       
-      // Pass activity context to the sendMessage function
       const activityContext = {
         activityName: chatContext.activityName,
         activityPillar: chatContext.activityPillar,
@@ -84,13 +117,17 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, chatContext }) =
         activityDuration: chatContext.activityDuration
       };
       
-      sendMessage(contextMessage, activityContext);
+      // Add error handling to prevent infinite loops
+      sendMessage(contextMessage, activityContext).catch(error => {
+        console.error('Error sending context message:', error);
+      });
     }
-  }, [isOpen, chatContext, currentConversation, sendMessage]);
+  }, [isOpen, chatContext, currentConversation, isLoading, hasInitialized]); // FIXED: Removed sendMessage from deps
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
+    console.log('Sending user message:', input.trim());
     const messageContent = input.trim();
     setInput('');
 
@@ -102,7 +139,11 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, chatContext }) =
       activityDuration: chatContext.activityDuration
     } : undefined;
 
-    await sendMessage(messageContent, activityContext);
+    try {
+      await sendMessage(messageContent, activityContext);
+    } catch (error) {
+      console.error('Error in handleSend:', error);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -116,23 +157,27 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, chatContext }) =
   const handleAddToFavourites = async (activity: any) => {
     if (!currentDog) return;
     
-    // Convert chat activity to the expected format
-    const activityForFavourites = {
-      id: activity.id || `chat-${Date.now()}`,
-      title: activity.title,
-      pillar: activity.pillar,
-      difficulty: activity.difficulty,
-      duration: activity.duration,
-      materials: activity.materials || [],
-      emotionalGoals: activity.emotionalGoals || [],
-      instructions: activity.instructions || [],
-      benefits: activity.benefits || '',
-      tags: activity.tags || [],
-      ageGroup: activity.ageGroup || 'All Ages',
-      energyLevel: activity.energyLevel || 'Medium'
-    };
+    try {
+      // Convert chat activity to the expected format
+      const activityForFavourites = {
+        id: activity.id || `chat-${Date.now()}`,
+        title: activity.title,
+        pillar: activity.pillar,
+        difficulty: activity.difficulty,
+        duration: activity.duration,
+        materials: activity.materials || [],
+        emotionalGoals: activity.emotionalGoals || [],
+        instructions: activity.instructions || [],
+        benefits: activity.benefits || '',
+        tags: activity.tags || [],
+        ageGroup: activity.ageGroup || 'All Ages',
+        energyLevel: activity.energyLevel || 'Medium'
+      };
 
-    await addToFavourites(activityForFavourites, 'library');
+      await addToFavourites(activityForFavourites, 'library');
+    } catch (error) {
+      console.error('Error adding activity to favourites:', error);
+    }
   };
 
   // Quick actions for general chat
@@ -174,6 +219,7 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, chatContext }) =
   ];
 
   const handleQuickAction = (message: string) => {
+    console.log('Quick action selected:', message);
     setInput(message);
     setTimeout(() => handleSend(), 100);
   };
