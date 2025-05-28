@@ -46,7 +46,7 @@ const ActivityLibraryPage = () => {
             </div>
             <div className="hidden sm:flex items-center space-x-2 bg-white/60 backdrop-blur-sm rounded-2xl px-4 py-2 border border-purple-200">
               <Sparkles className="w-4 h-4 text-purple-500" />
-              <span className="text-sm font-medium text-purple-700">Powered by AI</span>
+              <span className="text-sm font-medium text-purple-700">Beyond Busy</span>
             </div>
           </div>
         </div>
