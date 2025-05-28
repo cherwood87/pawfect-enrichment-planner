@@ -32,7 +32,8 @@ export const favouritesService = {
       throw error;
     }
 
-    return data || [];
+    // Type assertion to ensure activity_type is properly typed
+    return (data || []) as FavouriteActivity[];
   },
 
   // Add activity to favourites
@@ -63,7 +64,8 @@ export const favouritesService = {
       throw error;
     }
 
-    return data;
+    // Type assertion to ensure activity_type is properly typed
+    return data as FavouriteActivity;
   },
 
   // Remove from favourites
