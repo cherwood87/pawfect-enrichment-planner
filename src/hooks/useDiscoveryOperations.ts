@@ -5,6 +5,7 @@ import { ContentDiscoveryService } from '@/services/ContentDiscoveryService';
 import { activityLibrary, getCombinedActivities } from '@/data/activityLibrary';
 import { ActivityLibraryItem } from '@/types/activity';
 import { Dog } from '@/types/dog';
+import { weightedShuffle } from '@/utils/weightedShuffle';
 
 export const useDiscoveryOperations = (
   discoveredActivities: DiscoveredActivity[],
@@ -18,7 +19,15 @@ export const useDiscoveryOperations = (
   const getCombinedActivityLibrary = (): (ActivityLibraryItem | DiscoveredActivity)[] => {
     // Only include approved activities (all AI activities are auto-approved)
     const approvedDiscovered = discoveredActivities.filter(activity => activity.approved);
-    return getCombinedActivities(approvedDiscovered);
+    const combined = getCombinedActivities(approvedDiscovered);
+    
+    // Apply weighted shuffling to promote discovered activities
+    return weightedShuffle(combined, {
+      discoveredActivity: 3.0,  // 3x weight for discovered activities
+      libraryActivity: 1.0,     // Base weight for library activities
+      qualityBonus: 2.0,        // Bonus for high-quality activities
+      recentDiscoveryBonus: 1.5 // Bonus for recently discovered
+    });
   };
 
   const discoverNewActivities = async (): Promise<void> => {

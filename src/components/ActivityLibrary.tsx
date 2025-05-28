@@ -10,6 +10,7 @@ import ActivityLibraryHeader from '@/components/ActivityLibraryHeader';
 import ActivityLibraryFilters from '@/components/ActivityLibraryFilters';
 import ActivityLibraryStats from '@/components/ActivityLibraryStats';
 import ActivityLibraryGrid from '@/components/ActivityLibraryGrid';
+import ActivityLibraryDebug from '@/components/ActivityLibraryDebug';
 import SyncButton from '@/components/SyncButton';
 
 // Energy level normalization function
@@ -84,13 +85,17 @@ const ActivityLibrary = () => {
   const [selectedPillar, setSelectedPillar] = useState<string>('all');
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all');
   const [selectedActivity, setSelectedActivity] = useState<ActivityLibraryItem | DiscoveredActivity | null>(null);
+  const [currentActivities, setCurrentActivities] = useState<(ActivityLibraryItem | DiscoveredActivity)[]>([]);
 
-  // Normalize energyLevel for all activities before using them
-  const combinedActivities = getCombinedActivityLibrary().map(activity =>
-    activity && typeof activity.energyLevel === 'string'
-      ? { ...activity, energyLevel: normalizeEnergyLevel(activity.energyLevel) }
-      : activity
-  );
+  // Initialize activities with weighted shuffling
+  useEffect(() => {
+    const combinedActivities = getCombinedActivityLibrary().map(activity =>
+      activity && typeof activity.energyLevel === 'string'
+        ? { ...activity, energyLevel: normalizeEnergyLevel(activity.energyLevel) }
+        : activity
+    );
+    setCurrentActivities(combinedActivities);
+  }, [getCombinedActivityLibrary]);
 
   // Check for auto-discovery on component mount
   useEffect(() => {
@@ -99,8 +104,12 @@ const ActivityLibrary = () => {
     }
   }, [checkAndRunAutoDiscovery]);
 
+  const handleActivitiesReorder = (reorderedActivities: (ActivityLibraryItem | DiscoveredActivity)[]) => {
+    setCurrentActivities(reorderedActivities);
+  };
+
   const filteredActivities = React.useMemo(() => {
-    let activities = searchQuery ? searchCombinedActivities(searchQuery, discoveredActivities) : combinedActivities;
+    let activities = searchQuery ? searchCombinedActivities(searchQuery, discoveredActivities) : currentActivities;
     
     if (selectedPillar !== 'all') {
       activities = activities.filter(activity => activity.pillar === selectedPillar);
@@ -111,7 +120,7 @@ const ActivityLibrary = () => {
     }
     
     return activities;
-  }, [searchQuery, selectedPillar, selectedDifficulty, combinedActivities, discoveredActivities]);
+  }, [searchQuery, selectedPillar, selectedDifficulty, currentActivities, discoveredActivities]);
 
   const isDiscoveredActivity = (activity: ActivityLibraryItem | DiscoveredActivity): activity is DiscoveredActivity => {
     return 'source' in activity && activity.source === 'discovered';
@@ -126,7 +135,7 @@ const ActivityLibrary = () => {
   };
 
   const autoApprovedCount = discoveredActivities.filter(a => a.approved).length;
-  const curatedCount = combinedActivities.filter(a => !isDiscoveredActivity(a)).length;
+  const curatedCount = currentActivities.filter(a => !isDiscoveredActivity(a)).length;
 
   return (
     <div className="mobile-space-y">
@@ -214,6 +223,12 @@ const ActivityLibrary = () => {
           />
         </CardContent>
       </Card>
+
+      {/* Weighted Shuffling Debug Component */}
+      <ActivityLibraryDebug 
+        activities={currentActivities}
+        onActivitiesReorder={handleActivitiesReorder}
+      />
 
       {/* Activity Grid */}
       <ActivityLibraryGrid
