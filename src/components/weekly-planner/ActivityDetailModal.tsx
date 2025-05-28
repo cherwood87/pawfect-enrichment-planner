@@ -1,3 +1,4 @@
+
 import React, { useState, ReactNode } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
@@ -40,7 +41,7 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
   const pillarColor = getPillarColor(activityDetails.pillar);
   const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-  // FIXED: Helper function to safely render instructions
+  // FIXED: Helper function to safely render instructions with proper typing
   const renderInstructions = (): ReactNode => {
     if (!('instructions' in activityDetails) || !activityDetails.instructions) {
       return null;
@@ -54,7 +55,8 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
       return activityDetails.instructions;
     }
 
-    return String(activityDetails.instructions);
+    // Ensure we return a string (ReactNode) instead of unknown
+    return activityDetails.instructions as string;
   };
 
   const instructionsText: ReactNode = renderInstructions();
