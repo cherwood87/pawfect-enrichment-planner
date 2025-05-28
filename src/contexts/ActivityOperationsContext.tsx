@@ -4,7 +4,7 @@ import { ScheduledActivity, UserActivity, ActivityLibraryItem, StreakData, Weekl
 import { DiscoveredActivity } from '@/types/discovery';
 import { useDog } from '@/contexts/DogContext';
 import { useActivityActions } from '@/hooks/useActivityActions';
-import { useActivityOperations } from '@/hooks/useActivityOperations';
+import { useActivityOperations as useActivityOperationsHook } from '@/hooks/useActivityOperations';
 import { useActivityState } from './ActivityStateContext';
 
 interface ActivityOperationsContextType {
@@ -49,7 +49,7 @@ export const ActivityOperationsProvider: React.FC<{ children: React.ReactNode }>
   } = useActivityActions(setScheduledActivities, setUserActivities, currentDog);
 
   // Activity operations hook
-  const activityOps = useActivityOperations(
+  const activityOps = useActivityOperationsHook(
     scheduledActivities,
     userActivities,
     discoveredActivities,
