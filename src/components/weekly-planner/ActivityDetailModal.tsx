@@ -39,6 +39,23 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
   const pillarColor = getPillarColor(activityDetails.pillar);
   const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
+  // Helper function to safely render instructions
+  const renderInstructions = () => {
+    if (!('instructions' in activityDetails) || !activityDetails.instructions) {
+      return null;
+    }
+    
+    if (Array.isArray(activityDetails.instructions)) {
+      return activityDetails.instructions.join(' ');
+    }
+    
+    if (typeof activityDetails.instructions === 'string') {
+      return activityDetails.instructions;
+    }
+    
+    return String(activityDetails.instructions);
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -109,7 +126,7 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
                 <span>Instructions</span>
               </h3>
               <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-gray-700 leading-relaxed">{Array.isArray(activityDetails.instructions) ? activityDetails.instructions.join(' ') : activityDetails.instructions}</p>
+                <p className="text-gray-700 leading-relaxed">{renderInstructions()}</p>
               </div>
             </div>
           )}
