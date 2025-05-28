@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { ChatMessage, ChatConversation } from '@/types/chat';
 import { useDog } from '@/contexts/DogContext';
@@ -58,6 +59,8 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const loadConversation = (dogId: string, type: ConversationType = 'general') => {
+    console.log('Loading conversation for dog:', dogId, 'type:', type);
+    
     // For activity help, always start fresh - don't load existing conversations
     if (type === 'activity-help') {
       startNewConversation(type);
@@ -80,6 +83,7 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const startNewConversation = (type: ConversationType = 'general') => {
     if (!currentDog) return;
 
+    console.log('Starting new conversation for dog:', currentDog.name, 'type:', type);
     const conversationKey = getConversationKey(currentDog.id, type);
     
     const newConversation: ChatConversation = {
@@ -98,8 +102,18 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const sendMessage = async (content: string, activityContext?: any) => {
-    if (!currentConversation || !currentDog || isLoading) return;
+    if (!currentConversation || !currentDog) {
+      console.error('Cannot send message: missing conversation or dog');
+      return;
+    }
 
+    if (isLoading) {
+      console.log('Already loading, skipping message send');
+      return;
+    }
+
+    console.log('Sending message:', content);
+    console.log('Activity context:', activityContext);
     setIsLoading(true);
 
     try {
@@ -134,6 +148,11 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const pillarBalance = getPillarBalance();
       const todaysActivities = getTodaysActivities();
 
+      console.log('Calling enrichment coach function...');
+      console.log('Dog profile:', currentDog);
+      console.log('Pillar balance:', pillarBalance);
+      console.log('Today\'s activities:', todaysActivities);
+
       // Call enrichment coach function
       const { supabase } = await import('@/integrations/supabase/client');
       const { data, error } = await supabase.functions.invoke('enrichment-coach', {
@@ -152,7 +171,16 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw error;
+      }
+
+      console.log('Enrichment coach response:', data);
+
+      if (!data || !data.reply) {
+        throw new Error('Invalid response from enrichment coach');
+      }
 
       // Add AI response (now supporting activities!)
       const assistantMessage: ChatMessage = {
@@ -179,6 +207,8 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         );
       }
 
+      console.log('Message sent successfully');
+
     } catch (error) {
       console.error('Error sending message:', error);
       
@@ -186,7 +216,7 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const errorMessage: ChatMessage = {
         id: generateId(),
         role: 'assistant',
-        content: 'Sorry, I encountered an error. Please try again.',
+        content: `Sorry, I encountered an error while processing your request: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`,
         timestamp: new Date()
       };
 
@@ -205,9 +235,9 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           prev.map(conv => conv.id === errorConversation.id ? errorConversation : conv)
         );
       }
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   const value: ChatContextType = {

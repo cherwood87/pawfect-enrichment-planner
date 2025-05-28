@@ -62,6 +62,7 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
   const instructionsText = renderInstructions();
 
   const handleNeedHelp = () => {
+    console.log('Opening chat help for activity:', activityDetails.title);
     setIsChatOpen(true);
   };
 
