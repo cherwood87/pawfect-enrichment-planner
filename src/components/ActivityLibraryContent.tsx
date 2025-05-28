@@ -1,0 +1,65 @@
+
+import React from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { ActivityLibraryItem } from '@/types/activity';
+import { DiscoveredActivity } from '@/types/discovery';
+import ActivityLibraryHeader from '@/components/ActivityLibraryHeader';
+import ActivityLibraryFilters from '@/components/ActivityLibraryFilters';
+import ActivityLibraryStats from '@/components/ActivityLibraryStats';
+
+interface ActivityLibraryContentProps {
+  autoApprovedCount: number;
+  isDiscovering: boolean;
+  onDiscoverMore: () => void;
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
+  selectedPillar: string;
+  setSelectedPillar: (pillar: string) => void;
+  selectedDifficulty: string;
+  setSelectedDifficulty: (difficulty: string) => void;
+  filteredActivitiesCount: number;
+  curatedCount: number;
+}
+
+const ActivityLibraryContent: React.FC<ActivityLibraryContentProps> = ({
+  autoApprovedCount,
+  isDiscovering,
+  onDiscoverMore,
+  searchQuery,
+  setSearchQuery,
+  selectedPillar,
+  setSelectedPillar,
+  selectedDifficulty,
+  setSelectedDifficulty,
+  filteredActivitiesCount,
+  curatedCount
+}) => {
+  return (
+    <Card className="modern-card">
+      <ActivityLibraryHeader
+        autoApprovedCount={autoApprovedCount}
+        isDiscovering={isDiscovering}
+        onDiscoverMore={onDiscoverMore}
+      />
+      <CardContent className="space-y-6">
+        <ActivityLibraryFilters
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          selectedPillar={selectedPillar}
+          setSelectedPillar={setSelectedPillar}
+          selectedDifficulty={selectedDifficulty}
+          setSelectedDifficulty={setSelectedDifficulty}
+        />
+
+        <ActivityLibraryStats
+          filteredActivitiesCount={filteredActivitiesCount}
+          curatedCount={curatedCount}
+          autoApprovedCount={autoApprovedCount}
+          pendingReviewCount={0} // No manual review anymore
+        />
+      </CardContent>
+    </Card>
+  );
+};
+
+export default ActivityLibraryContent;
