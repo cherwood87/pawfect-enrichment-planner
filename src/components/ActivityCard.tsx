@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -66,26 +67,42 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, isOpen, onClose }
     return targetDate;
   };
 
-  const handleScheduleActivity = () => {
-    if (!currentDog) return;
+  const handleScheduleActivity = async () => {
+    if (!currentDog) {
+      console.error('No current dog selected');
+      return;
+    }
     
-    const targetDate = getDateForDayOfWeek(selectedDayOfWeek);
-    const weekNumber = getISOWeek(targetDate);
-    const scheduledDate = targetDate.toISOString().split('T')[0];
+    try {
+      const targetDate = getDateForDayOfWeek(selectedDayOfWeek);
+      const weekNumber = getISOWeek(targetDate);
+      const scheduledDate = targetDate.toISOString().split('T')[0];
 
-    addScheduledActivity({
-      dogId: currentDog.id,
-      activityId: activity.id,
-      scheduledDate,
-      weekNumber,
-      dayOfWeek: selectedDayOfWeek,
-      completed: false,
-      notes: '',
-      completionNotes: '',
-      reminderEnabled: false,
-    });
+      console.log('Scheduling activity:', {
+        activityId: activity.id,
+        scheduledDate,
+        weekNumber,
+        dayOfWeek: selectedDayOfWeek
+      });
 
-    onClose();
+      await addScheduledActivity({
+        dogId: currentDog.id,
+        activityId: activity.id,
+        scheduledDate,
+        scheduledTime: '', // Provide empty string for scheduledTime
+        weekNumber,
+        dayOfWeek: selectedDayOfWeek,
+        completed: false,
+        notes: '',
+        completionNotes: '',
+        reminderEnabled: false,
+      });
+
+      console.log('Activity scheduled successfully');
+      onClose();
+    } catch (error) {
+      console.error('Error scheduling activity:', error);
+    }
   };
 
   const handleAddToFavourites = async () => {

@@ -385,7 +385,7 @@ export type Database = {
           notes: string | null
           reminder_enabled: boolean | null
           scheduled_date: string
-          scheduled_time: string
+          scheduled_time: string | null
           updated_at: string
           user_selected_time: string | null
           week_number: number | null
@@ -402,7 +402,7 @@ export type Database = {
           notes?: string | null
           reminder_enabled?: boolean | null
           scheduled_date: string
-          scheduled_time: string
+          scheduled_time?: string | null
           updated_at?: string
           user_selected_time?: string | null
           week_number?: number | null
@@ -419,7 +419,7 @@ export type Database = {
           notes?: string | null
           reminder_enabled?: boolean | null
           scheduled_date?: string
-          scheduled_time?: string
+          scheduled_time?: string | null
           updated_at?: string
           user_selected_time?: string | null
           week_number?: number | null

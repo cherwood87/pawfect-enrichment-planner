@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
@@ -48,11 +49,11 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
   const pillarColor = getPillarColor(activityDetails.pillar);
   const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-  // ✅ Safe instruction rendering
-  const renderInstructions = (): string | null => {
+  // ✅ Safe instruction rendering - fixed to return string for React rendering
+  const getInstructionsText = (): string => {
     const instructions = (activityDetails as any).instructions;
 
-    if (!instructions) return null;
+    if (!instructions) return '';
 
     if (Array.isArray(instructions) && instructions.every(item => typeof item === 'string')) {
       return instructions.join(' ');
@@ -62,10 +63,10 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
       return instructions;
     }
 
-    return null;
+    return '';
   };
 
-  const instructionsText = renderInstructions();
+  const instructionsText = getInstructionsText();
 
   const handleNeedHelp = () => {
     console.log('Opening chat help for activity:', activityDetails.title);
