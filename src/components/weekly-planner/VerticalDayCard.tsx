@@ -92,7 +92,7 @@ const VerticalDayCard: React.FC<VerticalDayCardProps> = ({
 
       {/* Activities */}
       <div className="p-4 bg-slate-50">
-        {totalCount === 0 ? <div className="text-center py-4 text-gray-400">
+        {totalCount === 0 ? <div className="text-center py-4 text-gray-400 rounded-none my-[3px]">
             <Calendar className="w-6 h-6 mx-auto mb-2 opacity-50" />
             <p className="text-sm">No activities</p>
           </div> : <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
