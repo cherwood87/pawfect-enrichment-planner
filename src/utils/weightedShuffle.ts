@@ -26,8 +26,8 @@ const isDiscoveredActivity = (activity: ActivityLibraryItem | DiscoveredActivity
 };
 
 const isRecentlyDiscovered = (activity: DiscoveredActivity): boolean => {
-  if (!activity.discovered_at) return false;
-  const discoveredDate = new Date(activity.discovered_at);
+  if (!activity.discoveredAt) return false;
+  const discoveredDate = new Date(activity.discoveredAt);
   const weekAgo = new Date();
   weekAgo.setDate(weekAgo.getDate() - 7);
   return discoveredDate > weekAgo;
