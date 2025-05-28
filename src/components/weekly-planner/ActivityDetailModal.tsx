@@ -40,7 +40,7 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
   const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
   // Helper function to safely render instructions
-  const renderInstructions = () => {
+  const renderInstructions = (): React.ReactNode => {
     if (!('instructions' in activityDetails) || !activityDetails.instructions) {
       return null;
     }
