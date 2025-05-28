@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -245,20 +244,6 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, isOpen, onClose }
               ))}
             </div>
           </div>
-
-          {/* Discovery Info */}
-          {isDiscovered && (
-            <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-              <h3 className="font-semibold text-purple-800 mb-2 flex items-center">
-                <Sparkles className="w-4 h-4 mr-2" />
-                Auto-Discovered Activity
-              </h3>
-              <p className="text-sm text-purple-600">
-                This activity was automatically discovered from trusted dog training sources and verified for quality.
-                Discovered on {new Date(activity.discoveredAt).toLocaleDateString()}.
-              </p>
-            </div>
-          )}
 
           {/* Day of Week Picker - placed just above the action buttons */}
           <div className="mb-4">
