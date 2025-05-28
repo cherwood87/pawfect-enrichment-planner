@@ -1,5 +1,7 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,6 +12,7 @@ import {
 import { Settings, Home, Library, MessageCircle, Menu } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useIsMobile, useIsSmallMobile } from '@/hooks/use-mobile';
+import { useDog } from '@/contexts/DogContext';
 import DogSelector from '@/components/DogSelector';
 
 interface DashboardHeaderProps {
@@ -21,6 +24,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = React.memo(
   ({ onChatOpen, onAddDogOpen }) => {
     const navigate = useNavigate();
     const { pathname } = useLocation();
+    const { currentDog } = useDog();
     const isMobile = useIsMobile();
     const isSmallMobile = useIsSmallMobile();
 
@@ -49,23 +53,60 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = React.memo(
         <div className="max-w-screen-lg mx-auto mobile-container py-2 sm:py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3 flex-1 min-w-0">
-              <button
-                className="w-9 h-9 sm:w-11 sm:h-11 bg-gradient-to-br from-blue-500 to-orange-500 rounded-full flex items-center justify-center shadow-lg flex-shrink-0 border-2 border-white"
-                aria-label="Go to Dashboard"
-                onClick={() => handleNavigation('/app')}
-                tabIndex={0}
-                type="button"
-              >
-                <span className="text-white font-bold text-lg sm:text-xl drop-shadow">
-                  🐕
-                </span>
-              </button>
+              {/* Dog Avatar or Default Button */}
+              {currentDog ? (
+                <button
+                  className="flex-shrink-0 transition-transform hover:scale-105 active:scale-95"
+                  aria-label={`${currentDog.name}'s profile`}
+                  onClick={() => handleNavigation('/app')}
+                  tabIndex={0}
+                  type="button"
+                >
+                  <Avatar className="w-12 h-12 sm:w-14 sm:h-14 border-2 border-white shadow-lg">
+                    <AvatarImage 
+                      src={currentDog.photo || currentDog.image} 
+                      alt={`${currentDog.name}'s photo`}
+                      className="object-cover"
+                    />
+                    <AvatarFallback className="bg-gradient-to-br from-blue-500 to-orange-500 text-white font-bold text-lg sm:text-xl">
+                      {currentDog.name.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                </button>
+              ) : (
+                <button
+                  className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-blue-500 to-orange-500 rounded-full flex items-center justify-center shadow-lg flex-shrink-0 border-2 border-white transition-transform hover:scale-105 active:scale-95"
+                  aria-label="Go to Dashboard"
+                  onClick={() => handleNavigation('/app')}
+                  tabIndex={0}
+                  type="button"
+                >
+                  <span className="text-white font-bold text-lg sm:text-xl drop-shadow">
+                    🐕
+                  </span>
+                </button>
+              )}
+
+              {/* Title or Dog Name */}
               {!isSmallMobile && (
-                <h1 className="font-extrabold text-gray-800 truncate text-base sm:text-lg md:text-xl tracking-tight drop-shadow" aria-label="App title">
-                  {isMobile
-                    ? 'Dog Enrichment'
-                    : 'Beyond Busy Dog Enrichment Planner'}
-                </h1>
+                <div className="min-w-0 flex-1">
+                  {currentDog ? (
+                    <div>
+                      <h1 className="font-extrabold text-gray-800 truncate text-base sm:text-lg md:text-xl tracking-tight drop-shadow">
+                        {currentDog.name}
+                      </h1>
+                      <p className="text-xs sm:text-sm text-gray-600 truncate">
+                        {currentDog.breed}
+                      </p>
+                    </div>
+                  ) : (
+                    <h1 className="font-extrabold text-gray-800 truncate text-base sm:text-lg md:text-xl tracking-tight drop-shadow">
+                      {isMobile
+                        ? 'Dog Enrichment'
+                        : 'Beyond Busy Dog Enrichment Planner'}
+                    </h1>
+                  )}
+                </div>
               )}
             </div>
             <div className="flex items-center space-x-2 flex-shrink-0">
