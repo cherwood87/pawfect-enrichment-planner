@@ -25,10 +25,10 @@ const Landing: React.FC = () => {
   if (loading) {
     console.log('⏳ Landing: Showing loading state');
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto mb-2"></div>
-          <p className="text-gray-600">Loading...</p>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-cyan-50 to-amber-50">
+        <div className="text-center modern-card p-8">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-purple-200 border-t-purple-500 mx-auto mb-4"></div>
+          <p className="text-purple-700 font-medium">Loading your enrichment journey...</p>
         </div>
       </div>
     );
@@ -43,11 +43,11 @@ const Landing: React.FC = () => {
   console.log('🏠 Landing: Showing landing page for unauthenticated user');
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-orange-50">
-      {/* Header with Sign In button */}
-      <header className="absolute top-0 right-0 p-4 z-10">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-cyan-50 to-amber-50">
+      {/* Enhanced Header with Sign In button */}
+      <header className="absolute top-0 right-0 p-6 z-10">
         <Link to="/auth">
-          <Button variant="outline" className="flex items-center space-x-2">
+          <Button className="modern-button-outline flex items-center space-x-2 shadow-lg hover:shadow-xl">
             <LogIn className="w-4 h-4" />
             <span>Sign In</span>
           </Button>

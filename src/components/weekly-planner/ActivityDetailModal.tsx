@@ -27,8 +27,8 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
   const getPillarColor = (pillar: string) => {
     const colors = {
       mental: 'bg-purple-100 text-purple-700',
-      physical: 'bg-green-100 text-green-700',
-      social: 'bg-blue-100 text-blue-700',
+      physical: 'bg-emerald-100 text-emerald-700',
+      social: 'bg-cyan-100 text-cyan-700',
       environmental: 'bg-teal-100 text-teal-700',
       instinctual: 'bg-orange-100 text-orange-700'
     };
@@ -47,25 +47,32 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
     ));
   };
 
+  // Type guard to check if equipment exists
+  const hasEquipment = (details: ActivityLibraryItem | UserActivity | DiscoveredActivity): details is UserActivity | DiscoveredActivity => {
+    return 'equipment' in details;
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto bg-gradient-to-br from-purple-50 to-cyan-50 border-2 border-purple-200 rounded-3xl">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
             <span className="flex items-center space-x-2">
-              <Target className="w-5 h-5 text-blue-500" />
-              <span>{activityDetails.title}</span>
+              <div className="bg-gradient-to-r from-purple-500 to-cyan-500 p-2 rounded-2xl">
+                <Target className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-purple-800">{activityDetails.title}</span>
             </span>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => onToggleCompletion(activity.id)}
-              className="flex items-center space-x-2"
+              className="flex items-center space-x-2 rounded-2xl hover:bg-purple-100"
             >
               {activity.completed ? (
                 <>
-                  <CheckCircle className="w-5 h-5 text-green-500" />
-                  <span className="text-green-600">Completed</span>
+                  <CheckCircle className="w-5 h-5 text-emerald-500" />
+                  <span className="text-emerald-600">Completed</span>
                 </>
               ) : (
                 <>
@@ -80,31 +87,31 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
         <div className="space-y-6">
           {/* Activity Meta Information */}
           <div className="flex flex-wrap items-center gap-3">
-            <Badge className={getPillarColor(activityDetails.pillar)}>
+            <Badge className={`${getPillarColor(activityDetails.pillar)} rounded-2xl px-4 py-2 font-semibold`}>
               {activityDetails.pillar.charAt(0).toUpperCase() + activityDetails.pillar.slice(1)}
             </Badge>
             
-            <div className="flex items-center space-x-1 text-sm text-gray-600">
+            <div className="flex items-center space-x-1 text-sm text-purple-700 bg-purple-100 rounded-2xl px-3 py-2">
               <Clock className="w-4 h-4" />
               <span>{activityDetails.duration} minutes</span>
             </div>
 
-            <div className="flex items-center space-x-1">
-              <span className="text-sm text-gray-600 mr-1">Difficulty:</span>
+            <div className="flex items-center space-x-1 bg-cyan-100 rounded-2xl px-3 py-2">
+              <span className="text-sm text-cyan-700 mr-1">Difficulty:</span>
               {getDifficultyStars(activityDetails.difficulty)}
             </div>
           </div>
 
           {/* Benefits */}
-          <div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">Benefits</h3>
-            <p className="text-gray-600 leading-relaxed">{activityDetails.benefits}</p>
+          <div className="bg-white/70 rounded-3xl p-6 border border-purple-200">
+            <h3 className="text-lg font-semibold text-purple-800 mb-3">Benefits</h3>
+            <p className="text-gray-700 leading-relaxed">{activityDetails.benefits}</p>
           </div>
 
           {/* Instructions */}
-          <div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">Instructions</h3>
-            <div className="text-gray-600 leading-relaxed">
+          <div className="bg-white/70 rounded-3xl p-6 border border-cyan-200">
+            <h3 className="text-lg font-semibold text-purple-800 mb-3">Instructions</h3>
+            <div className="text-gray-700 leading-relaxed">
               {typeof activityDetails.instructions === 'string' ? (
                 <p>{activityDetails.instructions}</p>
               ) : (
@@ -114,10 +121,10 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
           </div>
 
           {/* Equipment */}
-          {activityDetails.equipment && activityDetails.equipment.length > 0 && (
-            <div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">Equipment Needed</h3>
-              <ul className="list-disc list-inside text-gray-600 space-y-1">
+          {hasEquipment(activityDetails) && activityDetails.equipment && activityDetails.equipment.length > 0 && (
+            <div className="bg-white/70 rounded-3xl p-6 border border-emerald-200">
+              <h3 className="text-lg font-semibold text-purple-800 mb-3">Equipment Needed</h3>
+              <ul className="list-disc list-inside text-gray-700 space-y-1">
                 {activityDetails.equipment.map((item, index) => (
                   <li key={index}>{item}</li>
                 ))}
@@ -127,9 +134,9 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
 
           {/* Scheduled Notes */}
           {activity.notes && (
-            <div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">Notes</h3>
-              <p className="text-gray-600 bg-blue-50 p-3 rounded-lg border border-blue-200">
+            <div className="bg-white/70 rounded-3xl p-6 border border-cyan-200">
+              <h3 className="text-lg font-semibold text-purple-800 mb-3">Notes</h3>
+              <p className="text-gray-700 bg-cyan-50 p-4 rounded-2xl border border-cyan-200">
                 {activity.notes}
               </p>
             </div>
@@ -137,9 +144,9 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
 
           {/* Completion Notes */}
           {activity.completionNotes && activity.completed && (
-            <div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">Completion Notes</h3>
-              <p className="text-gray-600 bg-green-50 p-3 rounded-lg border border-green-200">
+            <div className="bg-white/70 rounded-3xl p-6 border border-emerald-200">
+              <h3 className="text-lg font-semibold text-purple-800 mb-3">Completion Notes</h3>
+              <p className="text-gray-700 bg-emerald-50 p-4 rounded-2xl border border-emerald-200">
                 {activity.completionNotes}
               </p>
             </div>
