@@ -55,8 +55,8 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
       return activityDetails.instructions;
     }
 
-    // Ensure we return a string (ReactNode) instead of unknown
-    return activityDetails.instructions as string;
+    // Handle unknown type by converting to string safely
+    return String(activityDetails.instructions);
   };
 
   const instructionsText: ReactNode = renderInstructions();
