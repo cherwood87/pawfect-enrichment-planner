@@ -1,9 +1,16 @@
-
-import React, { useState, ReactNode } from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Clock, CheckCircle, Circle, Award, Lightbulb, Target, HelpCircle } from 'lucide-react';
+import {
+  Clock,
+  CheckCircle,
+  Circle,
+  Award,
+  Lightbulb,
+  Target,
+  HelpCircle
+} from 'lucide-react';
 import { ScheduledActivity, ActivityLibraryItem, UserActivity } from '@/types/activity';
 import { DiscoveredActivity } from '@/types/discovery';
 import ChatModal from '@/components/chat/ChatModal';
@@ -41,25 +48,24 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
   const pillarColor = getPillarColor(activityDetails.pillar);
   const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-  // FIXED: Helper function to safely render instructions with proper typing
+  // ✅ Safe instruction rendering
   const renderInstructions = (): string | null => {
-    if (!('instructions' in activityDetails) || !activityDetails.instructions) {
-      return null;
+    const instructions = (activityDetails as any).instructions;
+
+    if (!instructions) return null;
+
+    if (Array.isArray(instructions) && instructions.every(item => typeof item === 'string')) {
+      return instructions.join(' ');
     }
 
-    if (Array.isArray(activityDetails.instructions)) {
-      return activityDetails.instructions.join(' ');
+    if (typeof instructions === 'string') {
+      return instructions;
     }
 
-    if (typeof activityDetails.instructions === 'string') {
-      return activityDetails.instructions;
-    }
-
-    // Handle unknown type by converting to string safely
-    return String(activityDetails.instructions);
+    return null;
   };
 
-  const instructionsText: string | null = renderInstructions();
+  const instructionsText = renderInstructions();
 
   const handleNeedHelp = () => {
     console.log('Opening chat help for activity:', activityDetails.title);
@@ -109,12 +115,8 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
                 <Clock className="w-3 h-3" />
                 <span>{activityDetails.duration} min</span>
               </Badge>
-              <Badge variant="outline">
-                {activityDetails.difficulty}
-              </Badge>
-              <Badge variant="outline">
-                {dayNames[activity.dayOfWeek || 0]}
-              </Badge>
+              <Badge variant="outline">{activityDetails.difficulty}</Badge>
+              <Badge variant="outline">{dayNames[activity.dayOfWeek || 0]}</Badge>
             </div>
 
             {/* Description */}
@@ -151,16 +153,20 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
             )}
 
             {/* Materials */}
-            {'materials' in activityDetails && activityDetails.materials && activityDetails.materials.length > 0 && (
-              <div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">Materials Needed</h3>
-                <ul className="list-disc list-inside space-y-1">
-                  {activityDetails.materials.map((material, index) => (
-                    <li key={index} className="text-gray-600">{material}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            {'materials' in activityDetails &&
+              activityDetails.materials &&
+              activityDetails.materials.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-2">Materials Needed</h3>
+                  <ul className="list-disc list-inside space-y-1">
+                    {activityDetails.materials.map((material, index) => (
+                      <li key={index} className="text-gray-600">
+                        {material}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
             {/* Notes */}
             {activity.notes && (
@@ -184,22 +190,24 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
           </div>
 
           <div className="flex justify-between items-center pt-4 border-t">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={handleNeedHelp}
               className="flex items-center space-x-2 text-blue-600 border-blue-200 hover:bg-blue-50"
             >
               <HelpCircle className="w-4 h-4" />
               <span>Need Extra Help?</span>
             </Button>
-            
+
             <div className="flex space-x-3">
               <Button variant="outline" onClick={onClose}>
                 Close
               </Button>
-              <Button 
+              <Button
                 onClick={() => onToggleCompletion(activity.id)}
-                className={activity.completed ? 'bg-gray-500 hover:bg-gray-600' : 'bg-blue-500 hover:bg-blue-600'}
+                className={
+                  activity.completed ? 'bg-gray-500 hover:bg-gray-600' : 'bg-blue-500 hover:bg-blue-600'
+                }
               >
                 {activity.completed ? 'Mark Incomplete' : 'Mark Complete'}
               </Button>
@@ -208,11 +216,7 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
         </DialogContent>
       </Dialog>
 
-      <ChatModal 
-        isOpen={isChatOpen} 
-        onClose={() => setIsChatOpen(false)}
-        chatContext={chatContext}
-      />
+      <ChatModal isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} chatContext={chatContext} />
     </>
   );
 };
