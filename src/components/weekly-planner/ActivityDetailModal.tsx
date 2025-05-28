@@ -1,11 +1,9 @@
-
-import React, { useState } from 'react';
+import React, { useState, ReactNode } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Clock, CheckCircle, Circle, Award, Lightbulb, Target, HelpCircle } from 'lucide-react';
-import { ScheduledActivity, ActivityLibraryItem } from '@/types/activity';
-import { UserActivity } from '@/types/activity';
+import { ScheduledActivity, ActivityLibraryItem, UserActivity } from '@/types/activity';
 import { DiscoveredActivity } from '@/types/discovery';
 import ChatModal from '@/components/chat/ChatModal';
 
@@ -42,24 +40,24 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
   const pillarColor = getPillarColor(activityDetails.pillar);
   const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-  // Helper function to safely render instructions
-  const renderInstructions = (): string => {
+  // FIXED: Helper function to safely render instructions
+  const renderInstructions = (): ReactNode => {
     if (!('instructions' in activityDetails) || !activityDetails.instructions) {
-      return '';
+      return null;
     }
-    
+
     if (Array.isArray(activityDetails.instructions)) {
       return activityDetails.instructions.join(' ');
     }
-    
+
     if (typeof activityDetails.instructions === 'string') {
       return activityDetails.instructions;
     }
-    
+
     return String(activityDetails.instructions);
   };
 
-  const instructionsText = renderInstructions();
+  const instructionsText: ReactNode = renderInstructions();
 
   const handleNeedHelp = () => {
     console.log('Opening chat help for activity:', activityDetails.title);
