@@ -2,7 +2,7 @@
 import React from 'react';
 import { CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Plus, Trophy } from 'lucide-react';
+import { Calendar, Plus, Trophy, Target } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import WeekNavigator from './WeekNavigator';
@@ -25,65 +25,90 @@ const WeeklyPlannerHeader: React.FC<WeeklyPlannerHeaderProps> = ({
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const progressPercentage = totalActivities > 0 ? (completedActivities / totalActivities) * 100 : 0;
+  const isComplete = completedActivities === totalActivities && totalActivities > 0;
 
   return (
-    <CardHeader className="mobile-card bg-gradient-to-br from-purple-50 via-cyan-50 to-amber-50 border-b-2 border-purple-200">
-      <div className="space-y-6">
-        {/* Enhanced Header Row */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <div className="bg-gradient-to-r from-purple-500 to-cyan-500 p-3 rounded-2xl shadow-lg">
-              <Calendar className={`${isMobile ? 'w-5 h-5' : 'w-6 h-6'} text-white`} />
-            </div>
-            <div>
-              <CardTitle className="font-bold text-purple-800 flex items-center space-x-2">
-                <span>Weekly Plan</span>
-                {progressPercentage === 100 && (
-                  <div className="bg-gradient-to-r from-amber-400 to-orange-400 p-1 rounded-lg">
-                    <Trophy className="w-4 h-4 text-white" />
-                  </div>
-                )}
-              </CardTitle>
-              <p className="text-purple-600 font-medium">
-                Your dog's enrichment journey
-              </p>
-            </div>
+    <CardHeader className="bg-gradient-to-br from-purple-50 via-cyan-50 to-amber-50 border-b border-purple-200">
+      {/* Main Header */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center space-x-3">
+          <div className={`
+            bg-gradient-to-r from-purple-500 to-cyan-500 p-2.5 rounded-xl shadow-lg
+            ${isComplete ? 'from-emerald-500 to-cyan-500' : ''}
+          `}>
+            {isComplete ? (
+              <Trophy className="w-5 h-5 text-white" />
+            ) : (
+              <Calendar className="w-5 h-5 text-white" />
+            )}
           </div>
-          
-          <div className="flex items-center space-x-3">
-            <Badge 
-              className={`font-bold px-4 py-2 rounded-2xl text-base ${
-                completedActivities === totalActivities 
-                  ? 'bg-gradient-to-r from-emerald-100 to-emerald-200 text-emerald-700 border-2 border-emerald-300' 
-                  : 'bg-gradient-to-r from-purple-100 to-cyan-100 text-purple-700 border-2 border-purple-300'
-              }`}
-            >
-              {completedActivities}/{totalActivities}
-            </Badge>
-            <button
-              onClick={() => navigate('/activity-library')}
-              aria-label="Add activity"
-              className="
-                w-12 h-12 flex items-center justify-center
-                rounded-2xl bg-gradient-to-r from-purple-500 to-cyan-500 text-white 
-                shadow-lg hover:shadow-xl hover:from-purple-600 hover:to-cyan-600
-                active:scale-95 transition-all duration-300
-                border-2 border-white
-                focus:outline-none focus:ring-4 focus:ring-purple-200
-              "
-            >
-              <Plus className="w-6 h-6" />
-            </button>
+          <div>
+            <CardTitle className="text-lg font-bold text-purple-800 flex items-center space-x-2">
+              <span>Weekly Plan</span>
+              {isComplete && (
+                <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full font-medium">
+                  Complete!
+                </span>
+              )}
+            </CardTitle>
+            <p className="text-sm text-purple-600">
+              {totalActivities > 0 ? `${completedActivities}/${totalActivities} activities completed` : 'No activities planned'}
+            </p>
           </div>
         </div>
-
-        {/* Enhanced Week Navigator */}
-        <WeekNavigator 
-          currentWeek={currentWeek}
-          currentYear={currentYear}
-          onNavigateWeek={onNavigateWeek}
-        />
+        
+        <div className="flex items-center space-x-3">
+          {/* Progress Badge */}
+          {totalActivities > 0 && (
+            <Badge 
+              className={`font-bold px-3 py-1.5 rounded-xl ${
+                isComplete 
+                  ? 'bg-emerald-100 text-emerald-700 border border-emerald-300' 
+                  : 'bg-purple-100 text-purple-700 border border-purple-300'
+              }`}
+            >
+              {Math.round(progressPercentage)}%
+            </Badge>
+          )}
+          
+          {/* Add Activity Button */}
+          <button
+            onClick={() => navigate('/activity-library')}
+            className="
+              flex items-center space-x-2 px-4 py-2 rounded-xl
+              bg-gradient-to-r from-purple-500 to-cyan-500 text-white 
+              shadow-lg hover:shadow-xl hover:from-purple-600 hover:to-cyan-600
+              transition-all duration-300 font-medium
+            "
+          >
+            <Plus className="w-4 h-4" />
+            <span className={isMobile ? 'hidden' : 'block'}>Add Activity</span>
+          </button>
+        </div>
       </div>
+
+      {/* Progress Bar */}
+      {totalActivities > 0 && (
+        <div className="mb-4">
+          <div className="w-full bg-white/60 rounded-full h-2 shadow-inner">
+            <div 
+              className={`h-2 rounded-full transition-all duration-700 ${
+                isComplete 
+                  ? 'bg-gradient-to-r from-emerald-400 to-cyan-400' 
+                  : 'bg-gradient-to-r from-purple-400 to-cyan-400'
+              }`}
+              style={{ width: `${progressPercentage}%` }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Week Navigator */}
+      <WeekNavigator 
+        currentWeek={currentWeek}
+        currentYear={currentYear}
+        onNavigateWeek={onNavigateWeek}
+      />
     </CardHeader>
   );
 };
