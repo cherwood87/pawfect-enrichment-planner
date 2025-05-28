@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, Circle, Clock, Star, Target } from 'lucide-react';
+import { CheckCircle, Circle, Clock, Star, Target, MessageCircle } from 'lucide-react';
 import { ScheduledActivity, ActivityLibraryItem, UserActivity } from '@/types/activity';
 import { DiscoveredActivity } from '@/types/discovery';
 
@@ -13,6 +12,7 @@ interface ActivityDetailModalProps {
   activity: ScheduledActivity | null;
   activityDetails: ActivityLibraryItem | UserActivity | DiscoveredActivity | null;
   onToggleCompletion: (activityId: string) => void;
+  onNeedHelp?: () => void;
 }
 
 const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
@@ -20,7 +20,8 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
   onClose,
   activity,
   activityDetails,
-  onToggleCompletion
+  onToggleCompletion,
+  onNeedHelp
 }) => {
   if (!activity || !activityDetails) return null;
 
@@ -58,24 +59,37 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
               </div>
               <span className="text-purple-800">{activityDetails.title}</span>
             </span>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onToggleCompletion(activity.id)}
-              className="flex items-center space-x-2 rounded-2xl hover:bg-purple-100"
-            >
-              {activity.completed ? (
-                <>
-                  <CheckCircle className="w-5 h-5 text-emerald-500" />
-                  <span className="text-emerald-600">Completed</span>
-                </>
-              ) : (
-                <>
-                  <Circle className="w-5 h-5 text-gray-400" />
-                  <span className="text-gray-600">Mark Complete</span>
-                </>
+            <div className="flex items-center space-x-2">
+              {onNeedHelp && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={onNeedHelp}
+                  className="flex items-center space-x-2 rounded-2xl border-2 border-purple-300 hover:bg-purple-100 bg-white/70 backdrop-blur-sm"
+                >
+                  <MessageCircle className="w-4 h-4 text-purple-600" />
+                  <span className="text-purple-700 font-medium">Need Help?</span>
+                </Button>
               )}
-            </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onToggleCompletion(activity.id)}
+                className="flex items-center space-x-2 rounded-2xl hover:bg-purple-100"
+              >
+                {activity.completed ? (
+                  <>
+                    <CheckCircle className="w-5 h-5 text-emerald-500" />
+                    <span className="text-emerald-600">Completed</span>
+                  </>
+                ) : (
+                  <>
+                    <Circle className="w-5 h-5 text-gray-400" />
+                    <span className="text-gray-600">Mark Complete</span>
+                  </>
+                )}
+              </Button>
+            </div>
           </DialogTitle>
         </DialogHeader>
 
