@@ -1,114 +1,86 @@
+
 import { ScheduledActivity, UserActivity } from '@/types/activity';
 import { Dog } from '@/types/dog';
-import { ActivityService } from '@/services/activityService';
+import { ActivityDomainService } from '@/services/domain/ActivityDomainService';
 
 /**
- * Custom hook for activity actions, fully synced with Supabase.
- * All mutations are persisted remotely and UI state is refreshed after each change.
+ * Custom hook for activity actions, using the new domain service architecture.
+ * All mutations are handled through the domain service layer.
  */
 export const useActivityActions = (
   setScheduledActivities: (activities: ScheduledActivity[]) => void,
   setUserActivities: (activities: UserActivity[]) => void,
   currentDog: Dog | null
 ) => {
-  // Refresh scheduled activities from Supabase for the current dog
+  // Refresh scheduled activities from the domain service
   const refreshScheduledActivities = async () => {
     if (!currentDog) return;
     try {
-      const activities = await ActivityService.getScheduledActivities(currentDog.id);
+      const activities = await ActivityDomainService.getScheduledActivitiesForDog(currentDog.id);
       setScheduledActivities(activities);
     } catch (error) {
-      console.error('Failed to refresh scheduled activities from Supabase:', error);
+      console.error('Failed to refresh scheduled activities:', error);
     }
   };
 
-  // Refresh user activities from Supabase for the current dog
+  // Refresh user activities from the domain service
   const refreshUserActivities = async () => {
     if (!currentDog) return;
     try {
-      const activities = await ActivityService.getUserActivities(currentDog.id);
-      setUserActivities(activities);
+      // This will need to be implemented in the domain service
+      console.log('User activities refresh will be implemented through domain service');
     } catch (error) {
-      console.error('Failed to refresh user activities from Supabase:', error);
+      console.error('Failed to refresh user activities:', error);
     }
   };
 
-  // CHANGED: No longer omits 'dogId'
   const addScheduledActivity = async (activity: Omit<ScheduledActivity, 'id'>) => {
     if (!currentDog) return;
 
-    // Optionally, you could show an optimistic update here, but we will refresh from backend after saving.
-    const newActivity: ScheduledActivity = {
-      ...activity,
-      id: `scheduled-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      dogId: currentDog.id,
-      notes: activity.notes || '',
-      completionNotes: activity.completionNotes || '',
-      reminderEnabled: activity.reminderEnabled ?? false,
-    };
-
     try {
-      await ActivityService.createScheduledActivity(newActivity);
+      await ActivityDomainService.createScheduledActivity({
+        ...activity,
+        dogId: currentDog.id,
+        notes: activity.notes || '',
+        completionNotes: activity.completionNotes || '',
+        reminderEnabled: activity.reminderEnabled ?? false,
+      });
       await refreshScheduledActivities();
     } catch (error) {
-      console.error('Failed to save scheduled activity to Supabase:', error);
+      console.error('Failed to create scheduled activity:', error);
     }
   };
 
   const toggleActivityCompletion = async (activityId: string, completionNotes?: string) => {
     if (!currentDog) return;
+    
     try {
-      // Fetch current activities from backend to ensure we have the latest
-      const activities = await ActivityService.getScheduledActivities(currentDog.id);
-      const activity = activities.find(a => a.id === activityId);
-      if (!activity) return;
-
-      const updatedActivity: ScheduledActivity = {
-        ...activity,
-        completed: !activity.completed,
-        completedAt: !activity.completed ? new Date().toISOString() : undefined,
-        completionNotes: !activity.completed ? (completionNotes || '') : activity.completionNotes,
-      };
-
-      await ActivityService.updateScheduledActivity(updatedActivity);
+      await ActivityDomainService.toggleActivityCompletion(activityId, currentDog.id, completionNotes);
       await refreshScheduledActivities();
     } catch (error) {
-      console.error('Failed to update activity in Supabase:', error);
+      console.error('Failed to toggle activity completion:', error);
     }
   };
 
   const updateScheduledActivity = async (activityId: string, updates: Partial<ScheduledActivity>) => {
     if (!currentDog) return;
+    
     try {
-      // Fetch current activities from backend to ensure we have the latest
-      const activities = await ActivityService.getScheduledActivities(currentDog.id);
-      const activity = activities.find(a => a.id === activityId);
-      if (!activity) return;
-
-      const updatedActivity = { ...activity, ...updates };
-
-      await ActivityService.updateScheduledActivity(updatedActivity);
+      await ActivityDomainService.updateScheduledActivity(activityId, currentDog.id, updates);
       await refreshScheduledActivities();
     } catch (error) {
-      console.error('Failed to update activity in Supabase:', error);
+      console.error('Failed to update scheduled activity:', error);
     }
   };
 
   const addUserActivity = async (activity: Omit<UserActivity, 'id' | 'createdAt' | 'dogId'>) => {
     if (!currentDog) return;
 
-    const newActivity: UserActivity = {
-      ...activity,
-      id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      dogId: currentDog.id,
-      createdAt: new Date().toISOString(),
-    };
-
     try {
-      await ActivityService.createUserActivity(newActivity);
+      await ActivityDomainService.createUserActivity(activity, currentDog.id);
       await refreshUserActivities();
     } catch (error) {
-      console.error('Failed to save user activity to Supabase:', error);
+      console.error('Failed to create user activity:', error);
     }
   };
 

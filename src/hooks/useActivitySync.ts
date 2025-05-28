@@ -1,9 +1,9 @@
 
 import { useState } from 'react';
-import { ActivitySyncService } from '@/services/ActivitySyncService';
 import { DiscoveredActivity } from '@/types/discovery';
 import { UserActivity } from '@/types/activity';
 import { useToast } from '@/components/ui/use-toast';
+import { SyncDomainService } from '@/services/domain/SyncDomainService';
 
 export const useActivitySync = () => {
   const [isSyncing, setIsSyncing] = useState(false);
@@ -18,7 +18,7 @@ export const useActivitySync = () => {
     setIsSyncing(true);
     
     try {
-      const result = await ActivitySyncService.fullSync(
+      const result = await SyncDomainService.performFullSync(
         discoveredActivities,
         userActivities,
         dogId

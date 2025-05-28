@@ -1,11 +1,9 @@
+
 import { useState } from 'react';
 import { DiscoveredActivity, ContentDiscoveryConfig } from '@/types/discovery';
-import { AIContentDiscoveryService } from '@/services/AIContentDiscoveryService';
-import { ContentDiscoveryService } from '@/services/ContentDiscoveryService';
-import { activityLibrary, getCombinedActivities } from '@/data/activityLibrary';
 import { ActivityLibraryItem } from '@/types/activity';
 import { Dog } from '@/types/dog';
-import { weightedShuffle } from '@/utils/weightedShuffle';
+import { DiscoveryDomainService } from '@/services/domain/DiscoveryDomainService';
 
 export const useDiscoveryOperations = (
   discoveredActivities: DiscoveredActivity[],
@@ -17,17 +15,7 @@ export const useDiscoveryOperations = (
   const [isDiscovering, setIsDiscovering] = useState(false);
 
   const getCombinedActivityLibrary = (): (ActivityLibraryItem | DiscoveredActivity)[] => {
-    // Only include approved activities (all AI activities are auto-approved)
-    const approvedDiscovered = discoveredActivities.filter(activity => activity.approved);
-    const combined = getCombinedActivities(approvedDiscovered);
-    
-    // Apply weighted shuffling to promote discovered activities
-    return weightedShuffle(combined, {
-      discoveredActivity: 3.0,  // 3x weight for discovered activities
-      libraryActivity: 1.0,     // Base weight for library activities
-      qualityBonus: 2.0,        // Bonus for high-quality activities
-      recentDiscoveryBonus: 1.5 // Bonus for recently discovered
-    });
+    return DiscoveryDomainService.getCombinedActivityLibrary(discoveredActivities);
   };
 
   const discoverNewActivities = async (): Promise<void> => {
@@ -37,13 +25,11 @@ export const useDiscoveryOperations = (
     }
 
     setIsDiscovering(true);
-    console.log('Starting AI-powered content discovery for', currentDog.name);
-
+    
     try {
-      const existingActivities = [...activityLibrary, ...discoveredActivities];
-      const newActivities = await AIContentDiscoveryService.discoverNewActivities(
-        existingActivities,
-        { ...discoveryConfig, maxActivitiesPerDiscovery: 8 },
+      const newActivities = await DiscoveryDomainService.discoverNewActivities(
+        discoveredActivities,
+        discoveryConfig,
         currentDog
       );
 
@@ -51,61 +37,28 @@ export const useDiscoveryOperations = (
         const updatedDiscovered = [...discoveredActivities, ...newActivities];
         setDiscoveredActivities(updatedDiscovered);
 
-        // Save discovered activities to Supabase
-        await ContentDiscoveryService.createDiscoveredActivities(updatedDiscovered, currentDog.id);
-
         const updatedConfig = {
           ...discoveryConfig,
           lastDiscoveryRun: new Date().toISOString()
         };
         setDiscoveryConfig(updatedConfig);
 
-        // Save config to Supabase
-        await ContentDiscoveryService.saveDiscoveryConfig(updatedConfig, currentDog.id);
-
-        console.log(`AI Discovery complete! Found ${newActivities.length} new activities for ${currentDog.name}`);
         console.log(`All ${newActivities.length} activities automatically added to library`);
-      } else {
-        console.log('No new unique activities found in this AI discovery session');
-
-        // Still update the discovery config to prevent immediate re-runs
-        const updatedConfig = {
-          ...discoveryConfig,
-          lastDiscoveryRun: new Date().toISOString()
-        };
-        setDiscoveryConfig(updatedConfig);
-        await ContentDiscoveryService.saveDiscoveryConfig(updatedConfig, currentDog.id);
       }
     } catch (error) {
-      console.error('AI Discovery failed:', error);
-
-      // Update config even on failure to prevent infinite retries
-      const updatedConfig = {
-        ...discoveryConfig,
-        lastDiscoveryRun: new Date().toISOString()
-      };
-      setDiscoveryConfig(updatedConfig);
-      if (currentDog) {
-        await ContentDiscoveryService.saveDiscoveryConfig(updatedConfig, currentDog.id);
-      }
+      console.error('Discovery failed:', error);
     } finally {
       setIsDiscovering(false);
     }
   };
 
-  // Auto-discovery check on load with improved logic
   const checkAndRunAutoDiscovery = async () => {
-    if (!currentDog) {
-      console.log('Auto-discovery skipped: no current dog');
+    if (!currentDog || isDiscovering) {
+      console.log('Auto-discovery skipped: no current dog or already discovering');
       return;
     }
 
-    if (isDiscovering) {
-      console.log('Auto-discovery skipped: already discovering');
-      return;
-    }
-
-    const shouldRun = AIContentDiscoveryService.shouldRunDiscovery(discoveryConfig);
+    const shouldRun = DiscoveryDomainService.shouldRunAutoDiscovery(discoveryConfig);
     if (shouldRun) {
       console.log('Running automatic weekly discovery...');
       await discoverNewActivities();
@@ -114,38 +67,48 @@ export const useDiscoveryOperations = (
     }
   };
 
-  // Approve discovered activity and sync with Supabase
   const approveDiscoveredActivity = async (activityId: string) => {
-    const updated = discoveredActivities.map(activity =>
-      activity.id === activityId
-        ? { ...activity, approved: true, rejected: false, verified: true }
-        : activity
-    );
-    setDiscoveredActivities(updated);
-    if (currentDog) {
-      await ContentDiscoveryService.createDiscoveredActivities(updated, currentDog.id);
+    if (!currentDog) return;
+    
+    try {
+      const updated = await DiscoveryDomainService.approveDiscoveredActivity(
+        activityId, 
+        discoveredActivities, 
+        currentDog.id
+      );
+      setDiscoveredActivities(updated);
+    } catch (error) {
+      console.error('Failed to approve activity:', error);
     }
   };
 
-  // Reject discovered activity and sync with Supabase
   const rejectDiscoveredActivity = async (activityId: string) => {
-    const updated = discoveredActivities.map(activity =>
-      activity.id === activityId
-        ? { ...activity, approved: false, rejected: true }
-        : activity
-    );
-    setDiscoveredActivities(updated);
-    if (currentDog) {
-      await ContentDiscoveryService.createDiscoveredActivities(updated, currentDog.id);
+    if (!currentDog) return;
+    
+    try {
+      const updated = await DiscoveryDomainService.rejectDiscoveredActivity(
+        activityId, 
+        discoveredActivities, 
+        currentDog.id
+      );
+      setDiscoveredActivities(updated);
+    } catch (error) {
+      console.error('Failed to reject activity:', error);
     }
   };
 
-  // Update discovery config in Supabase
   const updateDiscoveryConfig = async (config: Partial<ContentDiscoveryConfig>) => {
-    const updated = { ...discoveryConfig, ...config };
-    setDiscoveryConfig(updated);
-    if (currentDog) {
-      await ContentDiscoveryService.saveDiscoveryConfig(updated, currentDog.id);
+    if (!currentDog) return;
+    
+    try {
+      const updated = await DiscoveryDomainService.updateDiscoveryConfig(
+        currentDog.id,
+        discoveryConfig,
+        config
+      );
+      setDiscoveryConfig(updated);
+    } catch (error) {
+      console.error('Failed to update discovery config:', error);
     }
   };
 
