@@ -245,7 +245,7 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, isOpen, onClose }
             </div>
           </div>
 
-          {/* Day of Week Picker - placed just above the action buttons */}
+          {/* Day of Week Picker */}
           <div className="mb-4">
             <label className="block mb-1 font-medium">Choose a day:</label>
             <select
@@ -261,14 +261,14 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, isOpen, onClose }
             </select>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex flex-col md:flex-row md:space-x-3 space-y-2 md:space-y-0 pt-4 border-t">
-            <Button variant="outline" onClick={onClose} className="flex-1">
+          {/* Action Buttons - moved all buttons to bottom */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 pt-4 border-t">
+            <Button variant="outline" onClick={onClose} className="lg:col-span-1">
               Close
             </Button>
             <Button
               onClick={handleScheduleActivity}
-              className="flex-1 bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600"
+              className="lg:col-span-2 bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600"
               disabled={!currentDog}
             >
               <Calendar className="w-4 h-4 mr-2" />
@@ -276,11 +276,18 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, isOpen, onClose }
             </Button>
             <Button
               onClick={handleAddToFavourites}
-              className="flex-1 bg-yellow-400 text-white hover:bg-yellow-500"
+              className="lg:col-span-1 bg-yellow-400 text-white hover:bg-yellow-500"
               disabled={!currentDog}
             >
               <Heart className="w-4 h-4 mr-2" />
               Add to Favourites
+            </Button>
+            <Button
+              variant="outline"
+              className="lg:col-span-1 border-purple-300 text-purple-700 hover:bg-purple-50"
+              disabled={!currentDog}
+            >
+              Need Help?
             </Button>
           </div>
         </div>
