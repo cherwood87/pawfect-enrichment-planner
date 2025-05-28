@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -9,6 +8,7 @@ import { ActivityLibraryItem } from '@/types/activity';
 import { DiscoveredActivity } from '@/types/discovery';
 import { useActivity } from '@/contexts/ActivityContext';
 import { useDog } from '@/contexts/DogContext';
+import { useFavourites } from '@/hooks/useFavourites';
 
 interface ActivityCardProps {
   activity: ActivityLibraryItem | DiscoveredActivity;
@@ -29,7 +29,8 @@ const daysOfWeek = [
 const ActivityCard: React.FC<ActivityCardProps> = ({ activity, isOpen, onClose }) => {
   const { addScheduledActivity } = useActivity();
   const { currentDog } = useDog();
-  const [selectedDayOfWeek, setSelectedDayOfWeek] = useState<number>(1); // Default to Monday
+  const { addToFavourites } = useFavourites(currentDog?.id || null);
+  const [selectedDayOfWeek, setSelectedDayOfWeek] = useState<number>(1);
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
@@ -56,7 +57,6 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, isOpen, onClose }
     return 1 + Math.ceil((firstThursday - target.valueOf()) / 604800000);
   };
 
-  // Calculate the date for the selected day in the current week
   const getDateForDayOfWeek = (dayOfWeek: number) => {
     const today = new Date();
     const currentDay = today.getDay();
@@ -88,25 +88,11 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, isOpen, onClose }
     onClose();
   };
 
-  // ---- Add to Favourites handler ----
-  const handleAddToFavourites = () => {
-    const favourites = JSON.parse(localStorage.getItem('favouriteActivities') || '[]');
-    // Avoid duplicates by ID or title
-    if (!favourites.find((a: any) => a.id === activity.id || a.title === activity.title)) {
-      // Save a minimal object (customize as needed)
-      favourites.push({
-        id: activity.id,
-        title: activity.title,
-        pillar: activity.pillar,
-        difficulty: activity.difficulty,
-        duration: activity.duration,
-        // Add any other fields you want to show in Favourites!
-      });
-      localStorage.setItem('favouriteActivities', JSON.stringify(favourites));
-      alert(`Added "${activity.title}" to Favourites!`);
-    } else {
-      alert(`"${activity.title}" is already in your Favourites.`);
-    }
+  const handleAddToFavourites = async () => {
+    if (!currentDog) return;
+
+    const activityType = isDiscoveredActivity(activity) ? 'discovered' : 'library';
+    await addToFavourites(activity, activityType);
   };
 
   const isDiscovered = isDiscoveredActivity(activity);
@@ -289,7 +275,7 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, isOpen, onClose }
             <Button
               onClick={handleAddToFavourites}
               className="flex-1 bg-yellow-400 text-white hover:bg-yellow-500"
-              type="button"
+              disabled={!currentDog}
             >
               <Heart className="w-4 h-4 mr-2" />
               Add to Favourites

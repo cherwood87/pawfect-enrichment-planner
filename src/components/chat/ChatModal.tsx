@@ -6,6 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Send, Loader2, MessageCircle, Lightbulb, Target, TrendingUp } from 'lucide-react';
 import { useChat } from '@/contexts/ChatContext';
 import { useDog } from '@/contexts/DogContext';
+import { useFavourites } from '@/hooks/useFavourites';
 
 interface ChatMessage {
   id: string;
@@ -29,6 +30,7 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose }) => {
   const [input, setInput] = useState('');
   const { currentConversation, isLoading, sendMessage } = useChat();
   const { currentDog } = useDog();
+  const { addToFavourites } = useFavourites(currentDog?.id || null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -63,15 +65,26 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose }) => {
   };
 
   // Add to Favourites (localStorage example)
-  const handleAddToFavourites = (activity: any) => {
-    const favourites = JSON.parse(localStorage.getItem('favouriteActivities') || '[]');
-    if (!favourites.find((a: any) => a.title === activity.title)) {
-      favourites.push(activity);
-      localStorage.setItem('favouriteActivities', JSON.stringify(favourites));
-      alert(`Added "${activity.title}" to Favourites!`);
-    } else {
-      alert(`"${activity.title}" is already in your Favourites.`);
-    }
+  const handleAddToFavourites = async (activity: any) => {
+    if (!currentDog) return;
+    
+    // Convert chat activity to the expected format
+    const activityForFavourites = {
+      id: activity.id || `chat-${Date.now()}`,
+      title: activity.title,
+      pillar: activity.pillar,
+      difficulty: activity.difficulty,
+      duration: activity.duration,
+      materials: activity.materials || [],
+      emotionalGoals: activity.emotionalGoals || [],
+      instructions: activity.instructions || [],
+      benefits: activity.benefits || '',
+      tags: activity.tags || [],
+      ageGroup: activity.ageGroup || 'All Ages',
+      energyLevel: activity.energyLevel || 'Medium'
+    };
+
+    await addToFavourites(activityForFavourites, 'library');
   };
 
   const quickActions = [

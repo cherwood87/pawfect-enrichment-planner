@@ -202,6 +202,44 @@ export type Database = {
         }
         Relationships: []
       }
+      favourites: {
+        Row: {
+          activity_id: string
+          activity_type: string
+          created_at: string
+          dog_id: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          activity_id: string
+          activity_type?: string
+          created_at?: string
+          dog_id: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          activity_id?: string
+          activity_type?: string
+          created_at?: string
+          dog_id?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favourites_dog_id_fkey"
+            columns: ["dog_id"]
+            isOneToOne: false
+            referencedRelation: "dogs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       journal_entries: {
         Row: {
           behaviors: string[]

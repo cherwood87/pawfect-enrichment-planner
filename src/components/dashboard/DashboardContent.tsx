@@ -1,6 +1,8 @@
+
 import React, { useEffect, useState } from 'react';
 import { useActivity } from '@/contexts/ActivityContext';
 import { useDog } from '@/contexts/DogContext';
+import { useFavourites } from '@/hooks/useFavourites';
 import DailyPlannerCard from '@/components/DailyPlannerCard';
 import WeeklyPlannerCard from '@/components/WeeklyPlannerCard';
 import QuickStats from './QuickStats';
@@ -10,15 +12,6 @@ import EmptyDashboard from '@/components/EmptyDashboard';
 const daysOfWeek = [
   'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'
 ];
-
-interface FavouriteActivity {
-  id: string;
-  title: string;
-  pillar: string;
-  difficulty: string;
-  duration: number;
-  // Add more fields if used in UI
-}
 
 interface DashboardContentProps {
   onAddDogOpen?: () => void;
@@ -33,23 +26,16 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
 }) => {
   const { getTodaysActivities, getStreakData, addScheduledActivity } = useActivity();
   const { currentDog } = useDog();
+  const { favourites, isLoading: favouritesLoading, removeFromFavourites } = useFavourites(currentDog?.id || null);
 
-  const [favourites, setFavourites] = useState<FavouriteActivity[]>([]);
   const [showDayPickerFor, setShowDayPickerFor] = useState<string | null>(null);
   const [selectedDay, setSelectedDay] = useState<number>(1);
 
-  useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem('favouriteActivities') || '[]');
-    setFavourites(saved);
-  }, []);
-
-  const handleRemoveFavourite = (activity: FavouriteActivity) => {
-    const updated = favourites.filter((a) => a.id !== activity.id);
-    setFavourites(updated);
-    localStorage.setItem('favouriteActivities', JSON.stringify(updated));
+  const handleRemoveFavourite = async (favouriteId: string) => {
+    await removeFromFavourites(favouriteId);
   };
 
-  const handleAddToWeeklyPlan = async (activity: FavouriteActivity, dayOfWeek: number) => {
+  const handleAddToWeeklyPlan = async (activity: any, dayOfWeek: number) => {
     if (!currentDog?.id) return;
     const today = new Date();
     const currentDay = today.getDay();
@@ -59,7 +45,6 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
     const targetDate = new Date(today);
     targetDate.setDate(today.getDate() + diff);
 
-    // ISO week calculation
     const getISOWeek = (date: Date): number => {
       const target = new Date(date.valueOf());
       const dayNr = (date.getDay() + 6) % 7;
@@ -76,7 +61,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
     try {
       await addScheduledActivity({
         dogId: currentDog.id,
-        activityId: activity.id,
+        activityId: activity.activity_id,
         scheduledDate: targetDate.toISOString().split('T')[0],
         scheduledTime: '',
         weekNumber,
@@ -86,10 +71,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
         completionNotes: '',
         reminderEnabled: false,
       });
-      // Optionally show a toast/notification here for user feedback
     } catch (error) {
-      // Optionally show an error notification/toast
-      // eslint-disable-next-line no-console
       console.error('Failed to add activity to Weekly Plan:', error);
     }
     setShowDayPickerFor(null);
@@ -116,32 +98,33 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
         <WeeklyPlannerCard />
       </div>
 
-      {/* Favourites Section */}
       <div className="mb-8">
         <h2 className="text-xl font-bold text-gray-800 mb-4">Favourite Activities</h2>
-        {favourites.length === 0 ? (
+        {favouritesLoading ? (
+          <div className="text-gray-400 text-center py-4">Loading favourites...</div>
+        ) : favourites.length === 0 ? (
           <div className="text-gray-400 text-center py-4">No favourites yet!</div>
         ) : (
           <ul className="space-y-3">
-            {favourites.map((activity) => (
+            {favourites.map((favourite) => (
               <li
-                key={activity.id}
+                key={favourite.id}
                 className="border rounded p-3 bg-white flex flex-col md:flex-row md:items-center md:justify-between"
               >
                 <div>
-                  <div className="font-semibold">{activity.title}</div>
+                  <div className="font-semibold">{favourite.title}</div>
                   <div className="text-xs text-gray-500 capitalize">
-                    {activity.pillar} • {activity.difficulty} • {activity.duration} min
+                    {favourite.pillar} • {favourite.difficulty} • {favourite.duration} min
                   </div>
                 </div>
                 <div className="flex mt-2 md:mt-0 md:ml-4 space-x-2 items-center">
                   <button
                     className="px-3 py-1 rounded bg-blue-500 text-white text-xs hover:bg-blue-600"
-                    onClick={() => setShowDayPickerFor(activity.id)}
+                    onClick={() => setShowDayPickerFor(favourite.id)}
                   >
                     Add to Weekly Plan
                   </button>
-                  {showDayPickerFor === activity.id && (
+                  {showDayPickerFor === favourite.id && (
                     <div className="flex items-center space-x-1 ml-2">
                       <select
                         className="border rounded px-2 py-1 text-xs"
@@ -154,7 +137,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
                       </select>
                       <button
                         className="px-2 py-1 bg-green-500 text-white rounded text-xs"
-                        onClick={() => handleAddToWeeklyPlan(activity, selectedDay)}
+                        onClick={() => handleAddToWeeklyPlan(favourite, selectedDay)}
                       >
                         Confirm
                       </button>
@@ -168,7 +151,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
                   )}
                   <button
                     className="px-3 py-1 rounded bg-red-100 text-red-600 text-xs hover:bg-red-200"
-                    onClick={() => handleRemoveFavourite(activity)}
+                    onClick={() => handleRemoveFavourite(favourite.id)}
                   >
                     Remove
                   </button>
