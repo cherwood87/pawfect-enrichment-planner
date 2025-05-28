@@ -77,7 +77,7 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
               {activityDetails.difficulty}
             </Badge>
             <Badge variant="outline">
-              {dayNames[activity.dayOfWeek]}
+              {dayNames[activity.dayOfWeek || 0]}
             </Badge>
           </div>
 
@@ -109,7 +109,7 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
                 <span>Instructions</span>
               </h3>
               <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-gray-700 leading-relaxed">{activityDetails.instructions}</p>
+                <p className="text-gray-700 leading-relaxed">{Array.isArray(activityDetails.instructions) ? activityDetails.instructions.join(' ') : activityDetails.instructions}</p>
               </div>
             </div>
           )}

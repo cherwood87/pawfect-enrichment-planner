@@ -103,8 +103,8 @@ const DayActivityCard: React.FC<DayActivityCardProps> = ({
         {/* Difficulty indicator */}
         <div className="flex justify-center">
           <div className={`w-full h-1 rounded-full ${
-            activityDetails.difficulty === 'easy' ? 'bg-green-300' :
-            activityDetails.difficulty === 'medium' ? 'bg-yellow-300' :
+            activityDetails.difficulty === 'Easy' ? 'bg-green-300' :
+            activityDetails.difficulty === 'Medium' ? 'bg-yellow-300' :
             'bg-red-300'
           }`} />
         </div>
