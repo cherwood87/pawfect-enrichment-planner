@@ -9,6 +9,96 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      activities: {
+        Row: {
+          age_group: string | null
+          approved: boolean | null
+          benefits: string | null
+          created_at: string
+          difficulty: string
+          discovered_at: string | null
+          dog_id: string | null
+          duration: number
+          emotional_goals: string[] | null
+          energy_level: string | null
+          id: string
+          instructions: string[] | null
+          is_custom: boolean | null
+          materials: string[] | null
+          pillar: string
+          quality_score: number | null
+          source: string
+          source_url: string | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+          verified: boolean | null
+        }
+        Insert: {
+          age_group?: string | null
+          approved?: boolean | null
+          benefits?: string | null
+          created_at?: string
+          difficulty: string
+          discovered_at?: string | null
+          dog_id?: string | null
+          duration: number
+          emotional_goals?: string[] | null
+          energy_level?: string | null
+          id: string
+          instructions?: string[] | null
+          is_custom?: boolean | null
+          materials?: string[] | null
+          pillar: string
+          quality_score?: number | null
+          source: string
+          source_url?: string | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          verified?: boolean | null
+        }
+        Update: {
+          age_group?: string | null
+          approved?: boolean | null
+          benefits?: string | null
+          created_at?: string
+          difficulty?: string
+          discovered_at?: string | null
+          dog_id?: string | null
+          duration?: number
+          emotional_goals?: string[] | null
+          energy_level?: string | null
+          id?: string
+          instructions?: string[] | null
+          is_custom?: boolean | null
+          materials?: string[] | null
+          pillar?: string
+          quality_score?: number | null
+          source?: string
+          source_url?: string | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          verified?: boolean | null
+        }
+        Relationships: []
+      }
+      "Activities Library": {
+        Row: {
+          created_at: string
+          id: number
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+        }
+        Update: {
+          created_at?: string
+          id?: number
+        }
+        Relationships: []
+      }
       activity_completions: {
         Row: {
           activity_id: string

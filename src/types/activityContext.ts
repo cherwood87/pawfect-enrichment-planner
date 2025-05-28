@@ -1,3 +1,4 @@
+
 import { ScheduledActivity, UserActivity, ActivityLibraryItem, StreakData, WeeklyProgress, PillarGoals } from '@/types/activity';
 import { DiscoveredActivity, ContentDiscoveryConfig } from '@/types/discovery';
 
@@ -23,4 +24,8 @@ export interface ActivityContextType {
   rejectDiscoveredActivity: (activityId: string) => void;
   updateDiscoveryConfig: (config: Partial<ContentDiscoveryConfig>) => void;
   checkAndRunAutoDiscovery?: () => Promise<void>;
+  // Sync functionality
+  isSyncing: boolean;
+  lastSyncTime: Date | null;
+  syncToSupabase: () => Promise<any>;
 }

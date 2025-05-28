@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { searchCombinedActivities } from '@/data/activityLibrary';
@@ -9,6 +10,7 @@ import ActivityLibraryHeader from '@/components/ActivityLibraryHeader';
 import ActivityLibraryFilters from '@/components/ActivityLibraryFilters';
 import ActivityLibraryStats from '@/components/ActivityLibraryStats';
 import ActivityLibraryGrid from '@/components/ActivityLibraryGrid';
+import SyncButton from '@/components/SyncButton';
 
 // Energy level normalization function
 const normalizeEnergyLevel = (level: string): "Low" | "Medium" | "High" => {
@@ -24,7 +26,7 @@ const normalizeEnergyLevel = (level: string): "Low" | "Medium" | "High" => {
 };
 
 const pillarOptions = [
-  { id: 'mental', color: 'purple', title: 'Mental Enrichment', description: "For the thinkers and problem-solvers. Games and challenges that flex your dog’s brain." },
+  { id: 'mental', color: 'purple', title: 'Mental Enrichment', description: "For the thinkers and problem-solvers. Games and challenges that flex your dog's brain." },
   { id: 'physical', color: 'green', title: 'Physical Enrichment', description: "For dogs who find peace in movement. Soft walks, play, strength-building." },
   { id: 'social', color: 'blue', title: 'Social Enrichment', description: "For dogs who connect through presence. Calm co-walking, play with friends." },
   { id: 'environmental', color: 'teal', title: 'Environmental Enrichment', description: "For the sensory seekers. Sniffing, grounding, discovering the world." },
@@ -40,7 +42,17 @@ const pillarColors: Record<string, string> = {
 };
 
 const ActivityLibrary = () => {
-  const { getCombinedActivityLibrary, discoveredActivities, discoverNewActivities, isDiscovering, checkAndRunAutoDiscovery } = useActivity();
+  const { 
+    getCombinedActivityLibrary, 
+    discoveredActivities, 
+    discoverNewActivities, 
+    isDiscovering, 
+    checkAndRunAutoDiscovery,
+    isSyncing,
+    lastSyncTime,
+    syncToSupabase
+  } = useActivity();
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPillar, setSelectedPillar] = useState<string>('all');
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all');
@@ -82,6 +94,10 @@ const ActivityLibrary = () => {
     await discoverNewActivities();
   };
 
+  const handleManualSync = async () => {
+    await syncToSupabase();
+  };
+
   const autoApprovedCount = discoveredActivities.filter(a => a.approved).length;
   const curatedCount = combinedActivities.filter(a => !isDiscoveredActivity(a)).length;
 
@@ -89,7 +105,14 @@ const ActivityLibrary = () => {
     <div className="space-y-6">
       {/* Pillar Selection Cards */}
       <div className="mb-6">
-        <h2 className="text-2xl font-bold mb-2">Choose Your Enrichment Pillar</h2>
+        <div className="flex justify-between items-center mb-2">
+          <h2 className="text-2xl font-bold">Choose Your Enrichment Pillar</h2>
+          <SyncButton
+            onSync={handleManualSync}
+            isSyncing={isSyncing}
+            lastSyncTime={lastSyncTime}
+          />
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {pillarOptions.map(pillar => (
             <button
