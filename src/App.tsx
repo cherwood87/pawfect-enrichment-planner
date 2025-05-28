@@ -15,6 +15,7 @@ import Auth from "./pages/Auth";
 import Coach from "./pages/Coach";
 import DogProfileQuizPage from "./pages/DogProfileQuiz";
 import ActivityLibraryPage from "./pages/ActivityLibraryPage";
+import AccountSettings from "./pages/AccountSettings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -49,6 +50,11 @@ const App = () => (
                   <Route path="/dog-profile-quiz" element={
                     <ProtectedRoute>
                       <DogProfileQuizPage />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/settings" element={
+                    <ProtectedRoute>
+                      <AccountSettings />
                     </ProtectedRoute>
                   } />
                   <Route path="/" element={<Landing />} />

@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Settings, Home, Library, MessageCircle, Menu } from 'lucide-react';
+import { Settings, Home, Library, MessageCircle, Menu, User } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useIsMobile, useIsSmallMobile } from '@/hooks/use-mobile';
 import { useDog } from '@/contexts/DogContext';
@@ -176,12 +176,17 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = React.memo(
                     <span>Enrichment Coach</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem disabled className="touch-target">
-                    <Settings className="mr-2 h-4 w-4" />
+                  <DropdownMenuItem
+                    onClick={() => handleNavigation('/settings')}
+                    className={`touch-target rounded ${
+                      isCurrentPage('/settings')
+                        ? 'bg-blue-50 text-blue-700'
+                        : ''
+                    }`}
+                    aria-current={isCurrentPage('/settings') ? 'page' : undefined}
+                  >
+                    <User className="mr-2 h-4 w-4" />
                     <span>Account Settings</span>
-                    <span className="ml-auto text-xs text-gray-400">
-                      Coming Soon
-                    </span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
