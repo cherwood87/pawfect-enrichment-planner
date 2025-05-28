@@ -1,49 +1,58 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Dog } from '@/types/dog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface DeleteConfirmationProps {
-  dog: Dog;
+  isOpen: boolean;
+  onClose: () => void;
   onConfirm: () => void;
-  onCancel: () => void;
+  title: string;
+  message: string;
 }
 
 const DeleteConfirmation: React.FC<DeleteConfirmationProps> = ({ 
-  dog, 
-  onConfirm, 
-  onCancel 
+  isOpen,
+  onClose,
+  onConfirm,
+  title,
+  message
 }) => {
   return (
-    <Card className="max-w-lg mx-auto">
-      <CardHeader className="pb-4">
-        <CardTitle className="text-lg font-bold text-gray-800 text-center">
-          Delete {dog.name}?
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="text-center space-y-4">
-        <p className="text-gray-600">
-          This will permanently delete {dog.name}'s profile and all associated data. This action cannot be undone.
-        </p>
-        <div className="flex space-x-3">
-          <Button 
-            variant="outline" 
-            onClick={onCancel}
-            className="flex-1"
+    <AlertDialog open={isOpen} onOpenChange={onClose}>
+      <AlertDialogContent className="rounded-2xl">
+        <AlertDialogHeader>
+          <AlertDialogTitle className="text-lg font-bold text-gray-800">
+            {title}
+          </AlertDialogTitle>
+          <AlertDialogDescription className="text-gray-600">
+            {message}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel 
+            onClick={onClose}
+            className="rounded-xl"
           >
             Cancel
-          </Button>
-          <Button 
-            variant="destructive" 
+          </AlertDialogCancel>
+          <AlertDialogAction 
             onClick={onConfirm}
-            className="flex-1"
+            className="bg-red-600 hover:bg-red-700 rounded-xl"
           >
             Delete Profile
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 };
 

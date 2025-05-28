@@ -44,11 +44,28 @@ const DogsTab = () => {
     
     try {
       await deleteDog(selectedDog.id);
+      // Close modal and clear selected dog
       setIsDeleteModalOpen(false);
       setSelectedDog(null);
+      
+      // Show success message
+      toast({
+        title: "Dog profile deleted",
+        description: `${selectedDog.name}'s profile has been successfully removed.`,
+      });
     } catch (error) {
       console.error('Error deleting dog:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete dog profile. Please try again.",
+        variant: "destructive",
+      });
     }
+  };
+
+  const closeDeleteModal = () => {
+    setIsDeleteModalOpen(false);
+    setSelectedDog(null);
   };
 
   const getActivityLevelColor = (level: string) => {
@@ -207,15 +224,14 @@ const DogsTab = () => {
         </DialogContent>
       </Dialog>
 
-      {selectedDog && (
-        <DeleteConfirmation
-          isOpen={isDeleteModalOpen}
-          onClose={() => setIsDeleteModalOpen(false)}
-          onConfirm={confirmDelete}
-          title="Delete Dog Profile"
-          message={`Are you sure you want to delete ${selectedDog.name}'s profile? This action cannot be undone and will remove all associated data.`}
-        />
-      )}
+      {/* Delete Confirmation */}
+      <DeleteConfirmation
+        isOpen={isDeleteModalOpen}
+        onClose={closeDeleteModal}
+        onConfirm={confirmDelete}
+        title="Delete Dog Profile"
+        message={selectedDog ? `Are you sure you want to delete ${selectedDog.name}'s profile? This action cannot be undone and will remove all associated data.` : ''}
+      />
     </div>
   );
 };
