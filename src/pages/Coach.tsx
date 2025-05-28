@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -8,59 +7,46 @@ import { useNavigate } from 'react-router-dom';
 import { useDog } from '@/contexts/DogContext';
 import ChatModal from '@/components/chat/ChatModal';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
-
 const Coach = () => {
   const navigate = useNavigate();
-  const { currentDog } = useDog();
+  const {
+    currentDog
+  } = useDog();
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
-
   const handleStartChatting = () => {
     setIsChatModalOpen(true);
   };
-
   const handleChatModalClose = () => {
     setIsChatModalOpen(false);
   };
-
   const handleBackToDashboard = () => {
     navigate('/app');
   };
-
-  const benefits = [
-    {
-      icon: Brain,
-      title: "Personalized Advice",
-      description: "Get tailored enrichment recommendations based on your dog's personality and activity history.",
-      gradient: "from-purple-100 to-purple-50",
-      iconColor: "text-purple-600"
-    },
-    {
-      icon: Target,
-      title: "Goal-Oriented Support",
-      description: "Receive guidance on achieving daily enrichment goals and balancing the five pillars.",
-      gradient: "from-cyan-100 to-cyan-50",
-      iconColor: "text-cyan-600"
-    },
-    {
-      icon: Lightbulb,
-      title: "Expert Insights",
-      description: "Access professional enrichment knowledge and troubleshooting for behavioral challenges.",
-      gradient: "from-amber-100 to-amber-50",
-      iconColor: "text-amber-600"
-    }
-  ];
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-cyan-50 to-amber-50">
+  const benefits = [{
+    icon: Brain,
+    title: "Personalized Advice",
+    description: "Get tailored enrichment recommendations based on your dog's personality and activity history.",
+    gradient: "from-purple-100 to-purple-50",
+    iconColor: "text-purple-600"
+  }, {
+    icon: Target,
+    title: "Goal-Oriented Support",
+    description: "Receive guidance on achieving daily enrichment goals and balancing the five pillars.",
+    gradient: "from-cyan-100 to-cyan-50",
+    iconColor: "text-cyan-600"
+  }, {
+    icon: Lightbulb,
+    title: "Expert Insights",
+    description: "Access professional enrichment knowledge and troubleshooting for behavioral challenges.",
+    gradient: "from-amber-100 to-amber-50",
+    iconColor: "text-amber-600"
+  }];
+  return <div className="min-h-screen bg-gradient-to-br from-purple-50 via-cyan-50 to-amber-50">
       {/* Enhanced Header */}
       <div className="bg-white/80 backdrop-blur-lg shadow-lg border-b-2 border-purple-200">
         <div className="max-w-4xl mx-auto mobile-container py-4">
           <div className="flex items-center space-x-4">
-            <Button 
-              variant="ghost" 
-              onClick={handleBackToDashboard}
-              className="modern-button-outline"
-            >
+            <Button variant="ghost" onClick={handleBackToDashboard} className="modern-button-outline">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Dashboard
             </Button>
@@ -69,7 +55,7 @@ const Coach = () => {
             </div>
             <div>
               <h1 className="text-xl font-bold text-purple-800">Enrichment Coach</h1>
-              <p className="text-purple-600">Your AI-powered companion</p>
+              <p className="text-purple-600 text-center">Beyond Busy </p>
             </div>
           </div>
         </div>
@@ -95,11 +81,7 @@ const Coach = () => {
           </div>
 
           <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-6 border-2 border-purple-200 shadow-lg">
-            <Button 
-              onClick={handleStartChatting}
-              size="lg" 
-              className="modern-button-primary text-lg px-8 py-4 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300"
-            >
+            <Button onClick={handleStartChatting} size="lg" className="modern-button-primary text-lg px-8 py-4 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300">
               <MessageCircle className="w-6 h-6 mr-3" />
               Start Chatting with Your Coach
               <Sparkles className="w-5 h-5 ml-2" />
@@ -109,8 +91,7 @@ const Coach = () => {
 
         {/* Benefits Grid */}
         <div className="mobile-grid mobile-gap">
-          {benefits.map((benefit, index) => (
-            <Card key={index} className="modern-card hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group">
+          {benefits.map((benefit, index) => <Card key={index} className="modern-card hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group">
               <CardContent className="mobile-card space-y-4">
                 <div className={`w-16 h-16 bg-gradient-to-br ${benefit.gradient} rounded-2xl flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300 border-2 border-purple-200`}>
                   <benefit.icon className={`w-8 h-8 ${benefit.iconColor}`} />
@@ -124,8 +105,7 @@ const Coach = () => {
                   </p>
                 </div>
               </CardContent>
-            </Card>
-          ))}
+            </Card>)}
         </div>
 
         {/* What You Can Ask Section */}
@@ -199,11 +179,7 @@ const Coach = () => {
               </p>
             </div>
             <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 border border-purple-200">
-              <Button 
-                onClick={handleStartChatting}
-                size="lg" 
-                className="modern-button-primary shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300"
-              >
+              <Button onClick={handleStartChatting} size="lg" className="modern-button-primary shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300">
                 <MessageCircle className="w-5 h-5 mr-2" />
                 Start Your Conversation
                 <Sparkles className="w-4 h-4 ml-2" />
@@ -220,14 +196,9 @@ const Coach = () => {
           <DialogDescription className="sr-only">
             Chat with your AI enrichment coach for personalized advice and recommendations.
           </DialogDescription>
-          <ChatModal 
-            isOpen={isChatModalOpen}
-            onClose={handleChatModalClose}
-          />
+          <ChatModal isOpen={isChatModalOpen} onClose={handleChatModalClose} />
         </DialogContent>
       </Dialog>
-    </div>
-  );
+    </div>;
 };
-
 export default Coach;
