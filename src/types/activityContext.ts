@@ -2,6 +2,14 @@
 import { ScheduledActivity, UserActivity, ActivityLibraryItem, StreakData, WeeklyProgress, PillarGoals } from '@/types/activity';
 import { DiscoveredActivity, ContentDiscoveryConfig } from '@/types/discovery';
 
+export interface ActivityHelpContext {
+  type: 'activity-help';
+  activityName: string;
+  activityPillar: string;
+  activityDifficulty: string;
+  activityDuration: number;
+}
+
 export interface ActivityContextType {
   scheduledActivities: ScheduledActivity[];
   userActivities: UserActivity[];

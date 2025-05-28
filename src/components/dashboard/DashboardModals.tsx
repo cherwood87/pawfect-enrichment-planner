@@ -6,6 +6,7 @@ import ChatModal from '@/components/chat/ChatModal';
 import AddDogForm from '@/components/AddDogForm';
 import EditDogForm from '@/components/EditDogForm';
 import { Dog } from '@/types/dog';
+import { ActivityHelpContext } from '@/types/activityContext';
 
 interface DashboardModalsProps {
   isActivityModalOpen: boolean;
@@ -14,6 +15,7 @@ interface DashboardModalsProps {
   isEditDogModalOpen: boolean;
   selectedPillar: string | null;
   selectedDog: Dog | null;
+  chatContext?: ActivityHelpContext;
   onActivityModalClose: () => void;
   onChatModalClose: () => void;
   onAddDogModalClose: () => void;
@@ -27,6 +29,7 @@ const DashboardModals: React.FC<DashboardModalsProps> = ({
   isEditDogModalOpen,
   selectedPillar,
   selectedDog,
+  chatContext,
   onActivityModalClose,
   onChatModalClose,
   onAddDogModalClose,
@@ -34,20 +37,18 @@ const DashboardModals: React.FC<DashboardModalsProps> = ({
 }) => {
   return (
     <>
-      {/* Activity Modal */}
       <ActivityModal
         isOpen={isActivityModalOpen}
         onClose={onActivityModalClose}
         selectedPillar={selectedPillar}
       />
 
-      {/* Chat Modal */}
       <ChatModal
         isOpen={isChatModalOpen}
         onClose={onChatModalClose}
+        chatContext={chatContext}
       />
 
-      {/* Add Dog Modal */}
       <Dialog open={isAddDogModalOpen} onOpenChange={onAddDogModalClose}>
         <DialogContent className="max-w-2xl">
           <div className="overflow-y-auto max-h-[80vh] p-4">
@@ -56,7 +57,6 @@ const DashboardModals: React.FC<DashboardModalsProps> = ({
         </DialogContent>
       </Dialog>
 
-      {/* Edit Dog Modal */}
       <Dialog open={isEditDogModalOpen} onOpenChange={onEditDogModalClose}>
         <DialogContent className="max-w-2xl">
           <div className="overflow-y-auto max-h-[80vh] p-4">

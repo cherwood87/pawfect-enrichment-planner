@@ -1,13 +1,13 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Loader2, MessageCircle, Lightbulb, Target, TrendingUp, HelpCircle, Printer } from 'lucide-react';
+import { Send, Loader2, MessageCircle, Lightbulb, Target, TrendingUp, HelpCircle, Save } from 'lucide-react';
 import { useChat } from '@/contexts/ChatContext';
 import { useDog } from '@/contexts/DogContext';
 import { useFavourites } from '@/hooks/useFavourites';
+import { useToast } from '@/hooks/use-toast';
 
 interface ChatMessage {
   id: string;
@@ -42,6 +42,7 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, chatContext }) =
   const { currentConversation, isLoading, sendMessage, loadConversation } = useChat();
   const { currentDog } = useDog();
   const { addToFavourites } = useFavourites(currentDog?.id || null);
+  const { toast } = useToast();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -180,104 +181,45 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, chatContext }) =
     }
   };
 
-  // Print functionality for activity help
-  const handlePrintActivity = () => {
+  // Save functionality for activity help
+  const handleSaveActivity = () => {
     if (!chatContext || chatContext.type !== 'activity-help') return;
     
-    // Create a new window for printing
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
-    
-    // Get the conversation content
-    const conversationHtml = currentConversation?.messages
-      .filter(msg => msg.role === 'assistant')
-      .map(msg => `<div style="margin-bottom: 20px; padding: 15px; border: 1px solid #e0e0e0; border-radius: 8px;">
-        <p style="white-space: pre-wrap; line-height: 1.6; color: #333;">${stripJsonBlocks(msg.content)}</p>
-      </div>`)
-      .join('') || '';
+    try {
+      // Get the conversation content
+      const conversationContent = currentConversation?.messages
+        .filter(msg => msg.role === 'assistant')
+        .map(msg => stripJsonBlocks(msg.content))
+        .join('\n\n') || '';
 
-    const printContent = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Activity Guide: ${chatContext.activityName}</title>
-          <style>
-            body {
-              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-              line-height: 1.6;
-              color: #333;
-              max-width: 800px;
-              margin: 0 auto;
-              padding: 20px;
-            }
-            .header {
-              text-align: center;
-              margin-bottom: 30px;
-              padding-bottom: 20px;
-              border-bottom: 2px solid #e0e0e0;
-            }
-            .activity-title {
-              font-size: 28px;
-              font-weight: bold;
-              color: #2563eb;
-              margin-bottom: 10px;
-            }
-            .activity-details {
-              display: flex;
-              justify-content: center;
-              gap: 20px;
-              flex-wrap: wrap;
-              margin-bottom: 10px;
-            }
-            .detail-item {
-              background: #f3f4f6;
-              padding: 5px 12px;
-              border-radius: 20px;
-              font-size: 14px;
-              text-transform: capitalize;
-            }
-            .dog-name {
-              color: #7c3aed;
-              font-weight: 600;
-            }
-            .content {
-              margin-top: 20px;
-            }
-            .conversation-item {
-              margin-bottom: 20px;
-              padding: 15px;
-              border: 1px solid #e0e0e0;
-              border-radius: 8px;
-              background: #f8fafc;
-            }
-            @media print {
-              body { margin: 0; padding: 15px; }
-              .header { page-break-after: avoid; }
-            }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <div class="activity-title">${chatContext.activityName}</div>
-            <div class="activity-details">
-              <span class="detail-item">${chatContext.activityPillar} Pillar</span>
-              <span class="detail-item">${chatContext.activityDifficulty} Difficulty</span>
-              <span class="detail-item">${chatContext.activityDuration} Minutes</span>
-            </div>
-            <div>For <span class="dog-name">${currentDog?.name || 'Your Dog'}</span></div>
-          </div>
-          <div class="content">
-            ${conversationHtml}
-          </div>
-        </body>
-      </html>
-    `;
-    
-    printWindow.document.write(printContent);
-    printWindow.document.close();
-    printWindow.focus();
-    printWindow.print();
-    printWindow.close();
+      const activityGuide = {
+        activityName: chatContext.activityName,
+        activityPillar: chatContext.activityPillar,
+        activityDifficulty: chatContext.activityDifficulty,
+        activityDuration: chatContext.activityDuration,
+        dogName: currentDog?.name || 'Your Dog',
+        conversationContent,
+        savedAt: new Date().toISOString()
+      };
+
+      // Save to localStorage
+      const savedGuides = JSON.parse(localStorage.getItem('savedActivityGuides') || '[]');
+      savedGuides.push(activityGuide);
+      localStorage.setItem('savedActivityGuides', JSON.stringify(savedGuides));
+
+      toast({
+        title: "Activity Guide Saved!",
+        description: `The guide for "${chatContext.activityName}" has been saved to your local storage.`,
+      });
+
+    } catch (error) {
+      console.error('Error saving activity guide:', error);
+      toast({
+        title: "Save Failed",
+        description: "There was an error saving the activity guide. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   // Quick actions for general chat
@@ -408,11 +350,11 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, chatContext }) =
                               {isActivityHelp ? (
                                 <Button
                                   size="sm"
-                                  onClick={handlePrintActivity}
+                                  onClick={handleSaveActivity}
                                   className="flex items-center gap-1"
                                 >
-                                  <Printer className="w-3 h-3" />
-                                  Print
+                                  <Save className="w-3 h-3" />
+                                  Save
                                 </Button>
                               ) : (
                                 <Button

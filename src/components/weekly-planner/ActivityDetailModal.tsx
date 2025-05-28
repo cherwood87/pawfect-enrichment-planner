@@ -12,7 +12,13 @@ interface ActivityDetailModalProps {
   activity: ScheduledActivity | null;
   activityDetails: ActivityLibraryItem | UserActivity | DiscoveredActivity | null;
   onToggleCompletion: (activityId: string) => void;
-  onNeedHelp?: () => void;
+  onNeedHelp?: (activityContext: {
+    type: 'activity-help';
+    activityName: string;
+    activityPillar: string;
+    activityDifficulty: string;
+    activityDuration: number;
+  }) => void;
 }
 
 const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
@@ -24,6 +30,23 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
   onNeedHelp
 }) => {
   if (!activity || !activityDetails) return null;
+
+  const handleNeedHelp = () => {
+    if (!onNeedHelp || !activityDetails) return;
+    
+    console.log('Need Help clicked for activity:', activityDetails.title);
+    
+    const activityContext = {
+      type: 'activity-help' as const,
+      activityName: activityDetails.title,
+      activityPillar: activityDetails.pillar,
+      activityDifficulty: activityDetails.difficulty,
+      activityDuration: activityDetails.duration
+    };
+    
+    console.log('Passing activity context:', activityContext);
+    onNeedHelp(activityContext);
+  };
 
   const getPillarColor = (pillar: string) => {
     const colors = {
@@ -64,7 +87,7 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={onNeedHelp}
+                  onClick={handleNeedHelp}
                   className="flex items-center space-x-2 rounded-2xl border-2 border-purple-300 hover:bg-purple-100 bg-white/70 backdrop-blur-sm"
                 >
                   <MessageCircle className="w-4 h-4 text-purple-600" />
