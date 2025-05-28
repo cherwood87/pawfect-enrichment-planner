@@ -1,8 +1,10 @@
 
 import React from 'react';
 import { ScheduledActivity } from '@/types/activity';
-import DayActivityCard from './DayActivityCard';
 import { useActivity } from '@/contexts/ActivityContext';
+import { Calendar, CheckCircle2, Target } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import VerticalDayCard from './VerticalDayCard';
 
 interface WeeklyGridProps {
   weekActivities: ScheduledActivity[];
@@ -16,7 +18,16 @@ const WeeklyGrid: React.FC<WeeklyGridProps> = ({
   onActivityClick
 }) => {
   const { getActivityDetails } = useActivity();
-  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  
+  const dayNames = [
+    { short: 'Sun', full: 'Sunday' },
+    { short: 'Mon', full: 'Monday' }, 
+    { short: 'Tue', full: 'Tuesday' },
+    { short: 'Wed', full: 'Wednesday' },
+    { short: 'Thu', full: 'Thursday' },
+    { short: 'Fri', full: 'Friday' },
+    { short: 'Sat', full: 'Saturday' }
+  ];
 
   // Group activities by day of week
   const activitiesByDay = dayNames.reduce((acc, _, dayIndex) => {
@@ -24,73 +35,72 @@ const WeeklyGrid: React.FC<WeeklyGridProps> = ({
     return acc;
   }, {} as Record<number, ScheduledActivity[]>);
 
+  const totalActivities = weekActivities.length;
+  const completedActivities = weekActivities.filter(a => a.completed).length;
+
+  if (totalActivities === 0) {
+    return (
+      <div className="text-center py-12 bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl border border-blue-100">
+        <Calendar className="w-16 h-16 mx-auto mb-4 text-blue-300" />
+        <h3 className="text-lg font-semibold text-gray-700 mb-2">No Activities This Week</h3>
+        <p className="text-gray-500 mb-4">Start planning your dog's enrichment journey!</p>
+        <Badge variant="outline" className="bg-white">
+          <Target className="w-3 h-3 mr-1" />
+          Add activities to get started
+        </Badge>
+      </div>
+    );
+  }
+
   return (
-    <div className="overflow-x-auto py-2">
-      <div className="grid grid-cols-7 gap-3 min-w-[800px]">
-        {dayNames.map((dayName, dayIndex) => {
-          const dayActivities = activitiesByDay[dayIndex] || [];
-          const dayCompleted = dayActivities.filter(a => a.completed).length;
-          const dayTotal = dayActivities.length;
-
-          return (
-            <div
-              key={dayIndex}
-              className="relative text-center min-w-[110px] px-3 py-4 rounded-xl border border-gray-200 shadow-sm bg-white hover:shadow-md transition-all"
-            >
-              {/* Day Header */}
-              <div className="text-sm font-bold text-gray-700 mb-3 pb-2 border-b border-gray-100">
-                {dayName}
-              </div>
-
-              {/* Activities Stack */}
-              <div className="space-y-2 min-h-[120px]">
-                {dayActivities.map((activity, index) => {
-                  const activityDetails = getActivityDetails(activity.activityId);
-                  if (!activityDetails) return null;
-
-                  return (
-                    <div
-                      key={activity.id}
-                      className="relative transform transition-all duration-200 hover:scale-105"
-                      style={{
-                        zIndex: dayActivities.length - index,
-                        marginTop: index > 0 ? '-8px' : '0'
-                      }}
-                    >
-                      <DayActivityCard
-                        activity={activity}
-                        activityDetails={activityDetails}
-                        onToggleCompletion={onToggleCompletion}
-                        onActivityClick={onActivityClick}
-                        isStacked={dayActivities.length > 1}
-                        stackIndex={index}
-                      />
-                    </div>
-                  );
-                })}
-                
-                {dayActivities.length === 0 && (
-                  <div className="flex items-center justify-center h-24 text-gray-300 text-xs">
-                    No activities
-                  </div>
-                )}
-              </div>
-
-              {/* Day Summary */}
-              {dayTotal > 0 && (
-                <div className="mt-3 pt-2 border-t border-gray-100">
-                  <div className={`text-xs font-semibold px-2 py-1 rounded-full ${
-                    dayCompleted === dayTotal 
-                      ? 'bg-green-100 text-green-700' 
-                      : dayCompleted > 0 
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'bg-gray-100 text-gray-600'
-                  }`}>
-                    {dayCompleted}/{dayTotal} done
-                  </div>
-                </div>
-              )}
+    <div className="space-y-4">
+      {/* Week Overview */}
+      <div className="bg-gradient-to-r from-green-50 via-blue-50 to-purple-50 rounded-xl p-4 border border-green-100">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="bg-white p-2 rounded-lg shadow-sm">
+              <CheckCircle2 className="w-5 h-5 text-green-500" />
             </div>
+            <div>
+              <h3 className="font-semibold text-gray-800">Week Progress</h3>
+              <p className="text-sm text-gray-600">
+                {completedActivities} of {totalActivities} activities completed
+              </p>
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="text-2xl font-bold text-gray-800">
+              {totalActivities > 0 ? Math.round((completedActivities / totalActivities) * 100) : 0}%
+            </div>
+            <div className="text-xs text-gray-500">Complete</div>
+          </div>
+        </div>
+        
+        {/* Progress Bar */}
+        <div className="mt-3 w-full bg-white rounded-full h-2 shadow-inner">
+          <div 
+            className="bg-gradient-to-r from-green-400 to-blue-500 h-2 rounded-full transition-all duration-500 ease-out" 
+            style={{ width: `${totalActivities > 0 ? (completedActivities / totalActivities) * 100 : 0}%` }}
+          />
+        </div>
+      </div>
+
+      {/* Days List */}
+      <div className="space-y-3">
+        {dayNames.map((day, dayIndex) => {
+          const dayActivities = activitiesByDay[dayIndex] || [];
+          
+          return (
+            <VerticalDayCard
+              key={dayIndex}
+              dayName={day.full}
+              dayShort={day.short}
+              dayIndex={dayIndex}
+              activities={dayActivities}
+              getActivityDetails={getActivityDetails}
+              onToggleCompletion={onToggleCompletion}
+              onActivityClick={onActivityClick}
+            />
           );
         })}
       </div>

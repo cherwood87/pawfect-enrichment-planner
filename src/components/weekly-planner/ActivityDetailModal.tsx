@@ -160,7 +160,7 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
                 <div>
                   <h3 className="text-lg font-semibold text-gray-800 mb-2">Materials Needed</h3>
                   <ul className="list-disc list-inside space-y-1">
-                    {activityDetails.materials.map((material, index) => (
+                    {activityDetails.materials.map((material: string, index: number) => (
                       <li key={index} className="text-gray-600">
                         {material}
                       </li>
