@@ -205,8 +205,8 @@ export class ActivitySyncService {
       // Always sync curated activities
       const curatedResult = await this.syncCuratedActivities();
       
-      let discoveredResult = { success: true, synced: 0 };
-      let userResult = { success: true, synced: 0 };
+      let discoveredResult: SyncResult = { success: true, synced: 0 };
+      let userResult: SyncResult = { success: true, synced: 0 };
 
       // Only sync dog-specific activities if dogId is provided
       if (dogId) {
