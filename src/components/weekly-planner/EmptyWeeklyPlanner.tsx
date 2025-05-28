@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,62 +12,61 @@ const EmptyWeeklyPlanner: React.FC<EmptyWeeklyPlannerProps> = ({ onPillarSelect 
   const navigate = useNavigate();
 
   return (
-    <Card className="overflow-hidden">
-      <CardHeader className="bg-gradient-to-r from-green-50 to-blue-50">
+    <Card className="overflow-hidden rounded-2xl shadow-md">
+      <CardHeader className="bg-gradient-to-r from-green-100 to-blue-100 py-4 px-6">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Calendar className="w-5 h-5 text-green-600" />
-            <CardTitle className="font-bold text-gray-800">Weekly Enrichment Plan</CardTitle>
+          <div className="flex items-center gap-3">
+            <Calendar className="w-6 h-6 text-green-600" />
+            <CardTitle className="text-lg font-bold text-gray-800">
+              Weekly Enrichment Plan
+            </CardTitle>
           </div>
-          {/* Upgraded Add Button */}
+
           <button
             onClick={() => navigate('/activity-library')}
             aria-label="Add activity"
-            className="
-              ml-2 w-8 h-8 flex items-center justify-center
-              rounded-full bg-blue-500 text-white shadow-lg
-              hover:bg-blue-600 active:scale-95 transition
-              border-2 border-white
-              focus:outline-none focus:ring-2 focus:ring-blue-300
-            "
+            className="w-9 h-9 flex items-center justify-center rounded-full bg-blue-500 text-white hover:bg-blue-600 transition-all border-2 border-white shadow-lg"
           >
             <Plus className="w-5 h-5" />
           </button>
         </div>
       </CardHeader>
-      
-      <CardContent className="p-6">
-        <div className="text-center py-8">
-          <Calendar className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-gray-700 mb-2">No Activities Planned This Week</h3>
-          <p className="text-gray-500 mb-6">Start building your weekly enrichment plan!</p>
-          
-          <div className="space-y-2">
-            <Button 
-              onClick={() => navigate('/activity-library')}
-              className="w-full"
-            >
-              Browse Activity Library
-            </Button>
-            {onPillarSelect && (
-              <div className="grid grid-cols-2 gap-2 mt-4">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => onPillarSelect('mental')}
-                >
-                  Mental Activities
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => onPillarSelect('physical')}
-                >
-                  Physical Activities
-                </Button>
-              </div>
-            )}
-          </div>
+
+      <CardContent className="flex flex-col items-center justify-center text-center py-10 px-6">
+        <Calendar className="w-16 h-16 text-gray-300 mb-4" />
+        <h3 className="text-xl font-semibold text-gray-800 mb-2">
+          No Activities Planned This Week
+        </h3>
+        <p className="text-gray-500 max-w-xs">
+          Let's build your dog's perfect week with fun enrichment!
+        </p>
+
+        <div className="mt-6 w-full max-w-md space-y-3">
+          <Button 
+            onClick={() => navigate('/activity-library')} 
+            className="w-full text-sm font-medium"
+          >
+            Browse Activity Library
+          </Button>
+
+          {onPillarSelect && (
+            <div className="grid grid-cols-2 gap-3">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => onPillarSelect('mental')}
+              >
+                Mental
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => onPillarSelect('physical')}
+              >
+                Physical
+              </Button>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
