@@ -9,6 +9,8 @@ import { DogProvider } from "@/contexts/DogContext";
 import { ActivityProvider } from "@/contexts/ActivityContext";
 import { ChatProvider } from "@/contexts/ChatContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import ErrorBoundary from "@/components/error/ErrorBoundary";
+import NetworkErrorBoundary from "@/components/error/NetworkErrorBoundary";
 import Index from "./pages/Index";
 import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
@@ -18,55 +20,101 @@ import ActivityLibraryPage from "./pages/ActivityLibraryPage";
 import AccountSettings from "./pages/AccountSettings";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: (failureCount, error: any) => {
+        // Don't retry on auth errors
+        if (error?.message?.includes('auth') || error?.status === 401) {
+          return false;
+        }
+        // Retry up to 3 times for other errors
+        return failureCount < 3;
+      },
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes
+    },
+    mutations: {
+      retry: (failureCount, error: any) => {
+        // Don't retry mutations on client errors
+        if (error?.status >= 400 && error?.status < 500) {
+          return false;
+        }
+        return failureCount < 2;
+      },
+    },
+  },
+});
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <AuthProvider>
-        <DogProvider>
-          <ActivityProvider>
-            <ChatProvider>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
-                <Routes>
-                  <Route path="/auth" element={<Auth />} />
-                  <Route path="/app" element={
-                    <ProtectedRoute>
-                      <Index />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/coach" element={
-                    <ProtectedRoute>
-                      <Coach />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/activity-library" element={
-                    <ProtectedRoute>
-                      <ActivityLibraryPage />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/dog-profile-quiz" element={
-                    <ProtectedRoute>
-                      <DogProfileQuizPage />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/settings" element={
-                    <ProtectedRoute>
-                      <AccountSettings />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/" element={<Landing />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </BrowserRouter>
-            </ChatProvider>
-          </ActivityProvider>
-        </DogProvider>
-      </AuthProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <NetworkErrorBoundary>
+          <AuthProvider>
+            <DogProvider>
+              <ActivityProvider>
+                <ChatProvider>
+                  <Toaster />
+                  <Sonner />
+                  <BrowserRouter>
+                    <Routes>
+                      <Route path="/auth" element={<Auth />} />
+                      <Route path="/app" element={
+                        <ProtectedRoute>
+                          <ErrorBoundary>
+                            <Index />
+                          </ErrorBoundary>
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/coach" element={
+                        <ProtectedRoute>
+                          <ErrorBoundary>
+                            <Coach />
+                          </ErrorBoundary>
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/activity-library" element={
+                        <ProtectedRoute>
+                          <ErrorBoundary>
+                            <ActivityLibraryPage />
+                          </ErrorBoundary>
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/dog-profile-quiz" element={
+                        <ProtectedRoute>
+                          <ErrorBoundary>
+                            <DogProfileQuizPage />
+                          </ErrorBoundary>
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/settings" element={
+                        <ProtectedRoute>
+                          <ErrorBoundary>
+                            <AccountSettings />
+                          </ErrorBoundary>
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/" element={
+                        <ErrorBoundary>
+                          <Landing />
+                        </ErrorBoundary>
+                      } />
+                      <Route path="*" element={
+                        <ErrorBoundary>
+                          <NotFound />
+                        </ErrorBoundary>
+                      } />
+                    </Routes>
+                  </BrowserRouter>
+                </ChatProvider>
+              </ActivityProvider>
+            </DogProvider>
+          </AuthProvider>
+        </NetworkErrorBoundary>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;
