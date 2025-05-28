@@ -4,7 +4,6 @@ import { useActivity } from '@/contexts/ActivityContext';
 import { useDog } from '@/contexts/DogContext';
 import { useFavourites } from '@/hooks/useFavourites';
 import { useAuth } from '@/contexts/AuthContext';
-import DailyPlannerCard from '@/components/DailyPlannerCard';
 import WeeklyPlannerCard from '@/components/WeeklyPlannerCard';
 import WeeklyProgressCard from '@/components/weekly-planner/WeeklyProgressCard';
 import ReflectionJournal from '@/components/ReflectionJournal';
@@ -26,7 +25,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
   onEditDogOpen,
   onPillarSelect
 }) => {
-  const { getTodaysActivities, getStreakData, addScheduledActivity } = useActivity();
+  const { addScheduledActivity } = useActivity();
   const { currentDog } = useDog();
   const { user } = useAuth();
   const { favourites, isLoading: favouritesLoading, removeFromFavourites } = useFavourites(currentDog?.id || null);
@@ -81,9 +80,6 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
     setSelectedDay(1);
   };
 
-  const todaysActivities = getTodaysActivities();
-  const streakData = getStreakData();
-
   if (!currentDog) {
     return (
       <div>
@@ -97,21 +93,13 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
     <div>
       <AuthenticatedHeader />
       <div className="container mx-auto p-4 lg:p-6 space-y-6">
-        {/* Main Dashboard Grid - Responsive Layout */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          {/* Left Column - Daily Planner (Full width on mobile, 1/3 on desktop) */}
-          <div className="xl:col-span-1 space-y-6">
-            <DailyPlannerCard />
-          </div>
-
-          {/* Right Column - Weekly Content (Full width on mobile, 2/3 on desktop) */}
-          <div className="xl:col-span-2 space-y-6">
-            {/* Weekly Progress Card */}
-            <WeeklyProgressCard />
-            
-            {/* Weekly Planner */}
-            <WeeklyPlannerCard onPillarSelect={onPillarSelect} />
-          </div>
+        {/* Main Dashboard Content - Full Width */}
+        <div className="space-y-6">
+          {/* Weekly Progress Card */}
+          <WeeklyProgressCard />
+          
+          {/* Weekly Planner */}
+          <WeeklyPlannerCard onPillarSelect={onPillarSelect} />
         </div>
 
         {/* Favourites Section */}

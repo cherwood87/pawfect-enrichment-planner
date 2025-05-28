@@ -29,6 +29,21 @@ const WeeklyGrid: React.FC<WeeklyGridProps> = ({
     { short: 'Sat', full: 'Saturday' }
   ];
 
+  // Get current day and reorder starting from today
+  const getCurrentDayIndex = () => new Date().getDay();
+  const currentDayIndex = getCurrentDayIndex();
+  
+  // Create reordered days array starting from today
+  const reorderedDays = [
+    ...dayNames.slice(currentDayIndex),
+    ...dayNames.slice(0, currentDayIndex)
+  ];
+
+  // Map original day indices to reordered positions
+  const getOriginalDayIndex = (reorderedIndex: number) => {
+    return (currentDayIndex + reorderedIndex) % 7;
+  };
+
   // Group activities by day of week
   const activitiesByDay = dayNames.reduce((acc, _, dayIndex) => {
     acc[dayIndex] = weekActivities.filter(activity => activity.dayOfWeek === dayIndex);
@@ -85,17 +100,18 @@ const WeeklyGrid: React.FC<WeeklyGridProps> = ({
         </div>
       </div>
 
-      {/* Days List */}
+      {/* Days List - Reordered starting from today */}
       <div className="space-y-3">
-        {dayNames.map((day, dayIndex) => {
-          const dayActivities = activitiesByDay[dayIndex] || [];
+        {reorderedDays.map((day, reorderedIndex) => {
+          const originalDayIndex = getOriginalDayIndex(reorderedIndex);
+          const dayActivities = activitiesByDay[originalDayIndex] || [];
           
           return (
             <VerticalDayCard
-              key={dayIndex}
+              key={originalDayIndex}
               dayName={day.full}
               dayShort={day.short}
-              dayIndex={dayIndex}
+              dayIndex={originalDayIndex}
               activities={dayActivities}
               getActivityDetails={getActivityDetails}
               onToggleCompletion={onToggleCompletion}
