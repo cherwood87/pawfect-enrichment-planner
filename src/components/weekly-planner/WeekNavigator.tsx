@@ -1,14 +1,11 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
-
 interface WeekNavigatorProps {
   currentWeek: number;
   currentYear: number;
   onNavigateWeek: (direction: 'prev' | 'next') => void;
 }
-
 const WeekNavigator: React.FC<WeekNavigatorProps> = ({
   currentWeek,
   currentYear,
@@ -20,17 +17,9 @@ const WeekNavigator: React.FC<WeekNavigatorProps> = ({
     const days = Math.floor((now.getTime() - currentDate.getTime()) / (24 * 60 * 60 * 1000));
     return Math.ceil(days / 7);
   };
-
   const isCurrentWeek = currentWeek === getCurrentWeek() && currentYear === new Date().getFullYear();
-
-  return (
-    <div className="flex items-center justify-between bg-white/50 backdrop-blur-sm rounded-lg p-3 border border-white/60">
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => onNavigateWeek('prev')}
-        className="h-8 w-8 p-0 hover:bg-white/70 transition-colors"
-      >
+  return <div className="flex items-center justify-between backdrop-blur-sm rounded-lg p-3 border border-white/60 bg-purple-300">
+      <Button variant="ghost" size="sm" onClick={() => onNavigateWeek('prev')} className="h-8 w-8 p-0 hover:bg-white/70 transition-colors">
         <ChevronLeft className="w-4 h-4" />
       </Button>
       
@@ -39,23 +28,14 @@ const WeekNavigator: React.FC<WeekNavigatorProps> = ({
         <span className="text-sm font-semibold text-gray-800">
           Week {currentWeek}, {currentYear}
         </span>
-        {isCurrentWeek && (
-          <span className="text-xs bg-blue-500 text-white px-2 py-1 rounded-full">
+        {isCurrentWeek && <span className="text-xs bg-blue-500 text-white px-2 py-1 rounded-full">
             Current
-          </span>
-        )}
+          </span>}
       </div>
       
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => onNavigateWeek('next')}
-        className="h-8 w-8 p-0 hover:bg-white/70 transition-colors"
-      >
+      <Button variant="ghost" size="sm" onClick={() => onNavigateWeek('next')} className="h-8 w-8 p-0 hover:bg-white/70 transition-colors">
         <ChevronRight className="w-4 h-4" />
       </Button>
-    </div>
-  );
+    </div>;
 };
-
 export default WeekNavigator;
