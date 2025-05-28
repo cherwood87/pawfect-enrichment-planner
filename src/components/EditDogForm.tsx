@@ -70,15 +70,13 @@ const EditDogForm: React.FC<EditDogFormProps> = ({ dog, onClose }) => {
     }
   };
 
-  if (showDeleteConfirm) {
-    return (
-      <DeleteConfirmation
-        dog={dog}
-        onConfirm={handleDelete}
-        onCancel={() => setShowDeleteConfirm(false)}
-      />
-    );
-  }
+  const handleDeleteClick = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteConfirm(false);
+  };
 
   return (
     <div className="w-full h-full flex flex-col">
@@ -89,7 +87,7 @@ const EditDogForm: React.FC<EditDogFormProps> = ({ dog, onClose }) => {
           <Button 
             variant="ghost" 
             size="sm" 
-            onClick={() => setShowDeleteConfirm(true)}
+            onClick={handleDeleteClick}
             className="text-red-500 hover:text-red-700 touch-target"
           >
             <Trash2 className="w-4 h-4" />
@@ -118,6 +116,15 @@ const EditDogForm: React.FC<EditDogFormProps> = ({ dog, onClose }) => {
           </Button>
         </form>
       </div>
+
+      {/* Delete Confirmation */}
+      <DeleteConfirmation
+        isOpen={showDeleteConfirm}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDelete}
+        title="Delete Dog Profile"
+        message={`Are you sure you want to delete ${dog.name}'s profile? This action cannot be undone and will remove all associated data.`}
+      />
     </div>
   );
 };
