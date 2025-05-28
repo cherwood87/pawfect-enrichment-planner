@@ -3,11 +3,13 @@ import React, { useEffect, useState } from 'react';
 import { useActivity } from '@/contexts/ActivityContext';
 import { useDog } from '@/contexts/DogContext';
 import { useFavourites } from '@/hooks/useFavourites';
+import { useAuth } from '@/contexts/AuthContext';
 import DailyPlannerCard from '@/components/DailyPlannerCard';
 import WeeklyPlannerCard from '@/components/WeeklyPlannerCard';
 import QuickStats from './QuickStats';
 import ReflectionJournal from '@/components/ReflectionJournal';
 import EmptyDashboard from '@/components/EmptyDashboard';
+import AuthenticatedHeader from './AuthenticatedHeader';
 
 const daysOfWeek = [
   'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'
@@ -26,6 +28,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
 }) => {
   const { getTodaysActivities, getStreakData, addScheduledActivity } = useActivity();
   const { currentDog } = useDog();
+  const { user } = useAuth();
   const { favourites, isLoading: favouritesLoading, removeFromFavourites } = useFavourites(currentDog?.id || null);
 
   const [showDayPickerFor, setShowDayPickerFor] = useState<string | null>(null);
@@ -82,87 +85,97 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
   const streakData = getStreakData();
 
   if (!currentDog) {
-    return <EmptyDashboard onAddDogOpen={onAddDogOpen} />;
+    return (
+      <div>
+        <AuthenticatedHeader />
+        <EmptyDashboard onAddDogOpen={onAddDogOpen} />
+      </div>
+    );
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <QuickStats
-        activeDays={streakData.activeDays}
-        completionRate={streakData.completionRate}
-        currentStreak={streakData.currentStreak}
-      />
+    <div>
+      <AuthenticatedHeader />
+      <div className="container mx-auto p-6 space-y-6">
+        <QuickStats
+          activeDays={streakData.activeDays}
+          completionRate={streakData.completionRate}
+          currentStreak={streakData.currentStreak}
+        />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <DailyPlannerCard />
-        <WeeklyPlannerCard />
-      </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <DailyPlannerCard />
+          <WeeklyPlannerCard />
+        </div>
 
-      <div className="mb-8">
-        <h2 className="text-xl font-bold text-gray-800 mb-4">Favourite Activities</h2>
-        {favouritesLoading ? (
-          <div className="text-gray-400 text-center py-4">Loading favourites...</div>
-        ) : favourites.length === 0 ? (
-          <div className="text-gray-400 text-center py-4">No favourites yet!</div>
-        ) : (
-          <ul className="space-y-3">
-            {favourites.map((favourite) => (
-              <li
-                key={favourite.id}
-                className="border rounded p-3 bg-white flex flex-col md:flex-row md:items-center md:justify-between"
-              >
-                <div>
-                  <div className="font-semibold">{favourite.title}</div>
-                  <div className="text-xs text-gray-500 capitalize">
-                    {favourite.pillar} • {favourite.difficulty} • {favourite.duration} min
-                  </div>
-                </div>
-                <div className="flex mt-2 md:mt-0 md:ml-4 space-x-2 items-center">
-                  <button
-                    className="px-3 py-1 rounded bg-blue-500 text-white text-xs hover:bg-blue-600"
-                    onClick={() => setShowDayPickerFor(favourite.id)}
-                  >
-                    Add to Weekly Plan
-                  </button>
-                  {showDayPickerFor === favourite.id && (
-                    <div className="flex items-center space-x-1 ml-2">
-                      <select
-                        className="border rounded px-2 py-1 text-xs"
-                        value={selectedDay}
-                        onChange={e => setSelectedDay(Number(e.target.value))}
-                      >
-                        {daysOfWeek.map((day, idx) => (
-                          <option key={idx} value={idx}>{day}</option>
-                        ))}
-                      </select>
-                      <button
-                        className="px-2 py-1 bg-green-500 text-white rounded text-xs"
-                        onClick={() => handleAddToWeeklyPlan(favourite, selectedDay)}
-                      >
-                        Confirm
-                      </button>
-                      <button
-                        className="px-2 py-1 bg-gray-200 text-gray-700 rounded text-xs"
-                        onClick={() => setShowDayPickerFor(null)}
-                      >
-                        Cancel
-                      </button>
+        <div className="mb-8">
+          <h2 className="text-xl font-bold text-gray-800 mb-4">Favourite Activities</h2>
+          {favouritesLoading ? (
+            <div className="text-gray-400 text-center py-4">Loading favourites...</div>
+          ) : favourites.length === 0 ? (
+            <div className="text-gray-400 text-center py-4">
+              No favourites yet! Add activities to your favourites from the Activity Library or Chat.
+            </div>
+          ) : (
+            <ul className="space-y-3">
+              {favourites.map((favourite) => (
+                <li
+                  key={favourite.id}
+                  className="border rounded p-3 bg-white flex flex-col md:flex-row md:items-center md:justify-between"
+                >
+                  <div>
+                    <div className="font-semibold">{favourite.title}</div>
+                    <div className="text-xs text-gray-500 capitalize">
+                      {favourite.pillar} • {favourite.difficulty} • {favourite.duration} min
                     </div>
-                  )}
-                  <button
-                    className="px-3 py-1 rounded bg-red-100 text-red-600 text-xs hover:bg-red-200"
-                    onClick={() => handleRemoveFavourite(favourite.id)}
-                  >
-                    Remove
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+                  </div>
+                  <div className="flex mt-2 md:mt-0 md:ml-4 space-x-2 items-center">
+                    <button
+                      className="px-3 py-1 rounded bg-blue-500 text-white text-xs hover:bg-blue-600"
+                      onClick={() => setShowDayPickerFor(favourite.id)}
+                    >
+                      Add to Weekly Plan
+                    </button>
+                    {showDayPickerFor === favourite.id && (
+                      <div className="flex items-center space-x-1 ml-2">
+                        <select
+                          className="border rounded px-2 py-1 text-xs"
+                          value={selectedDay}
+                          onChange={e => setSelectedDay(Number(e.target.value))}
+                        >
+                          {daysOfWeek.map((day, idx) => (
+                            <option key={idx} value={idx}>{day}</option>
+                          ))}
+                        </select>
+                        <button
+                          className="px-2 py-1 bg-green-500 text-white rounded text-xs"
+                          onClick={() => handleAddToWeeklyPlan(favourite, selectedDay)}
+                        >
+                          Confirm
+                        </button>
+                        <button
+                          className="px-2 py-1 bg-gray-200 text-gray-700 rounded text-xs"
+                          onClick={() => setShowDayPickerFor(null)}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    )}
+                    <button
+                      className="px-3 py-1 rounded bg-red-100 text-red-600 text-xs hover:bg-red-200"
+                      onClick={() => handleRemoveFavourite(favourite.id)}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
 
-      <ReflectionJournal />
+        <ReflectionJournal />
+      </div>
     </div>
   );
 };
