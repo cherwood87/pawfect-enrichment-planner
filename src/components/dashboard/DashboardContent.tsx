@@ -7,7 +7,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import DailyPlannerCard from '@/components/DailyPlannerCard';
 import WeeklyPlannerCard from '@/components/WeeklyPlannerCard';
 import WeeklyProgressCard from '@/components/weekly-planner/WeeklyProgressCard';
-import QuickStats from './QuickStats';
 import ReflectionJournal from '@/components/ReflectionJournal';
 import EmptyDashboard from '@/components/EmptyDashboard';
 import AuthenticatedHeader from './AuthenticatedHeader';
@@ -98,13 +97,6 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
     <div>
       <AuthenticatedHeader />
       <div className="container mx-auto p-4 lg:p-6 space-y-6">
-        {/* Top Stats Section */}
-        <QuickStats
-          activeDays={streakData.activeDays}
-          completionRate={streakData.completionRate}
-          currentStreak={streakData.currentStreak}
-        />
-
         {/* Main Dashboard Grid - Responsive Layout */}
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
           {/* Left Column - Daily Planner (Full width on mobile, 1/3 on desktop) */}

@@ -40,9 +40,9 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
   const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
   // Helper function to safely render instructions
-  const renderInstructions = (): React.ReactNode => {
+  const renderInstructions = (): string => {
     if (!('instructions' in activityDetails) || !activityDetails.instructions) {
-      return null;
+      return '';
     }
     
     if (Array.isArray(activityDetails.instructions)) {
@@ -55,6 +55,8 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
     
     return String(activityDetails.instructions);
   };
+
+  const instructionsText = renderInstructions();
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -119,14 +121,14 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
           </div>
 
           {/* Instructions */}
-          {'instructions' in activityDetails && activityDetails.instructions && (
+          {instructionsText && (
             <div>
               <h3 className="text-lg font-semibold text-gray-800 mb-2 flex items-center space-x-2">
                 <Target className={`w-4 h-4 ${pillarColor.icon}`} />
                 <span>Instructions</span>
               </h3>
               <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-gray-700 leading-relaxed">{renderInstructions()}</p>
+                <p className="text-gray-700 leading-relaxed">{instructionsText}</p>
               </div>
             </div>
           )}
