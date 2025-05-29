@@ -3,7 +3,6 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { cleanupAuthState, robustSignOut, robustSignIn, robustSignUp } from '@/utils/authUtils';
-import { handleError, AppError } from '@/utils/errorUtils';
 
 interface AuthContextType {
   user: User | null;
@@ -59,11 +58,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           }
         } catch (authError) {
           console.error('❌ Error in auth state change handler:', authError);
-          handleError(authError as Error, {
-            component: 'AuthContext',
-            action: 'onAuthStateChange',
-            metadata: { event, userId: session?.user?.id }
-          });
         }
       }
     );
@@ -72,10 +66,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     supabase.auth.getSession().then(({ data: { session }, error }) => {
       if (error) {
         console.error('❌ Error getting session:', error);
-        handleError(error, {
-          component: 'AuthContext',
-          action: 'getSession'
-        });
         cleanupAuthState();
         setError('Failed to restore your session. Please sign in again.');
       }
@@ -99,13 +89,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       const { error } = await robustSignUp(email, password);
       if (error) {
-        const appError = new AppError(
-          error.message,
-          'SIGNUP_ERROR',
-          { component: 'AuthContext', action: 'signUp', metadata: { email } }
-        );
-        handleError(appError, undefined, false);
-        throw appError;
+        throw new Error(error.message);
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Sign up failed';
@@ -121,13 +105,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       const { error } = await robustSignIn(email, password);
       if (error) {
-        const appError = new AppError(
-          error.message,
-          'SIGNIN_ERROR',
-          { component: 'AuthContext', action: 'signIn', metadata: { email } }
-        );
-        handleError(appError, undefined, false);
-        throw appError;
+        throw new Error(error.message);
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Sign in failed';
@@ -145,11 +123,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Sign out failed';
       setError(errorMessage);
-      handleError(error as Error, {
-        component: 'AuthContext',
-        action: 'signOut',
-        metadata: { userId: user?.id }
-      });
+      console.error('Sign out error:', error);
       throw error;
     }
   };
