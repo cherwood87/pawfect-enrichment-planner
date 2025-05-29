@@ -1,7 +1,8 @@
 
 import React, { useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { LoadingSkeleton } from '@/components/ui/loading-skeleton';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -9,6 +10,7 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { user, loading, session } = useAuth();
+  const navigate = useNavigate();
 
   // Debug logging for protected route behavior
   useEffect(() => {
@@ -18,14 +20,23 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     console.log('⏳ Loading:', loading);
   }, [user, session, loading]);
 
+  // Handle navigation after auth state is determined
+  useEffect(() => {
+    if (!loading && user && session) {
+      console.log('✅ ProtectedRoute: User authenticated, ensuring proper navigation');
+      // Only navigate if we're not already on an app route
+      const currentPath = window.location.pathname;
+      if (currentPath === '/' || currentPath === '/auth') {
+        navigate('/app', { replace: true });
+      }
+    }
+  }, [user, session, loading, navigate]);
+
   if (loading) {
-    console.log('⏳ ProtectedRoute: Showing loading state');
+    console.log('⏳ ProtectedRoute: Showing loading skeleton');
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto mb-2"></div>
-          <p className="text-gray-600">Loading...</p>
-        </div>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-orange-50">
+        <LoadingSkeleton type="dashboard" />
       </div>
     );
   }

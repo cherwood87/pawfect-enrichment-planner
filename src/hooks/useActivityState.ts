@@ -16,6 +16,7 @@ export const useActivityStateHook = (currentDog: Dog | null) => {
   const [discoveryConfig, setDiscoveryConfig] = useState<ContentDiscoveryConfig>(
     ContentDiscoveryService.getDefaultConfig()
   );
+  const [dataLoaded, setDataLoaded] = useState(false);
 
   const { isLoading, setIsLoading, loadActivitiesFromSupabase, migrateScheduledActivity } = useActivityLoader(currentDog);
   
@@ -35,17 +36,32 @@ export const useActivityStateHook = (currentDog: Dog | null) => {
       setScheduledActivities([]);
       setUserActivities([]);
       setDiscoveredActivities([]);
+      setDataLoaded(false);
       return;
     }
 
-    loadActivitiesFromSupabase(
-      setScheduledActivities,
-      setUserActivities,
-      setDiscoveredActivities,
-      setDiscoveryConfig,
-      loadAndMigrateScheduledActivities,
-      loadAndMigrateUserActivities
-    );
+    console.log('🔄 Loading activities for dog:', currentDog.name);
+    setDataLoaded(false);
+
+    const loadData = async () => {
+      try {
+        await loadActivitiesFromSupabase(
+          setScheduledActivities,
+          setUserActivities,
+          setDiscoveredActivities,
+          setDiscoveryConfig,
+          loadAndMigrateScheduledActivities,
+          loadAndMigrateUserActivities
+        );
+        setDataLoaded(true);
+        console.log('✅ Activities loaded successfully for dog:', currentDog.name);
+      } catch (error) {
+        console.error('❌ Error loading activities:', error);
+        setDataLoaded(true); // Set to true even on error to prevent infinite loading
+      }
+    };
+
+    loadData();
   }, [currentDog]);
 
   return {
@@ -57,6 +73,6 @@ export const useActivityStateHook = (currentDog: Dog | null) => {
     setUserActivities,
     setDiscoveredActivities,
     setDiscoveryConfig,
-    isLoading
+    isLoading: isLoading || !dataLoaded
   };
 };

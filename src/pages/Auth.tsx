@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,7 +17,7 @@ const Auth: React.FC = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, user, session } = useAuth();
   const navigate = useNavigate();
   
   const { retry, isRetrying, attempt } = useRetry({
@@ -28,6 +27,14 @@ const Auth: React.FC = () => {
       console.log(`Auth retry attempt ${attemptNum}:`, error.message);
     }
   });
+
+  // Redirect authenticated users
+  useEffect(() => {
+    if (user && session) {
+      console.log('🔄 Auth: User already authenticated, redirecting to app');
+      navigate('/app', { replace: true });
+    }
+  }, [user, session, navigate]);
 
   const validateForm = (): string | null => {
     if (!email || !password) {
@@ -64,7 +71,7 @@ const Auth: React.FC = () => {
           title: "Welcome back!",
           description: "You have successfully signed in."
         });
-        navigate('/app');
+        // Navigation will be handled by ProtectedRoute/auth state change
       });
     } catch (error: any) {
       const friendlyMessage = getUserFriendlyMessage(error);
@@ -130,7 +137,7 @@ const Auth: React.FC = () => {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-gradient-to-br from-purple-500 via-cyan-400 to-purple-600 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-purple-500 via-cyan-400 to-purple-600 flex items-center justify-center p-4 animate-fade-in">
         {/* Enhanced background elements */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
@@ -138,7 +145,7 @@ const Auth: React.FC = () => {
           <div className="absolute top-3/4 left-3/4 w-48 h-48 bg-purple-300/20 rounded-full blur-3xl"></div>
         </div>
 
-        <Card className="w-full max-w-md modern-card shadow-2xl relative z-10 bg-white/95 backdrop-blur-lg border-2 border-white/30">
+        <Card className="w-full max-w-md modern-card shadow-2xl relative z-10 bg-white/95 backdrop-blur-lg border-2 border-white/30 animate-scale-in">
           <CardHeader className="text-center pb-6">
             <div className="flex items-center justify-center mb-6">
               <div className="bg-gradient-to-r from-purple-500 to-cyan-500 p-4 rounded-3xl shadow-lg">
@@ -154,14 +161,14 @@ const Auth: React.FC = () => {
           </CardHeader>
           <CardContent>
             {error && (
-              <Alert variant="destructive" className="mb-4">
+              <Alert variant="destructive" className="mb-4 animate-fade-in">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
             
             {isRetrying && (
-              <Alert className="mb-4">
+              <Alert className="mb-4 animate-fade-in">
                 <AlertDescription>
                   Retrying... (Attempt {attempt}/3)
                 </AlertDescription>
@@ -172,14 +179,14 @@ const Auth: React.FC = () => {
               <TabsList className="grid w-full grid-cols-2 bg-purple-100 rounded-2xl p-1">
                 <TabsTrigger 
                   value="signin" 
-                  className="rounded-2xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-purple-600 data-[state=active]:text-white font-semibold"
+                  className="rounded-2xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-purple-600 data-[state=active]:text-white font-semibold transition-all"
                   onClick={clearError}
                 >
                   Log in
                 </TabsTrigger>
                 <TabsTrigger 
                   value="signup"
-                  className="rounded-2xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500 data-[state=active]:to-cyan-600 data-[state=active]:text-white font-semibold"
+                  className="rounded-2xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500 data-[state=active]:to-cyan-600 data-[state=active]:text-white font-semibold transition-all"
                   onClick={clearError}
                 >
                   Sign up

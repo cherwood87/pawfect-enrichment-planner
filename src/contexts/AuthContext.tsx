@@ -48,11 +48,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           
           if (event === 'SIGNED_IN' && session?.user) {
             console.log('👋 User signed in:', session.user.email);
-            // Navigate to app without page reload
-            setTimeout(() => {
-              console.log('🎯 Navigating to app dashboard...');
-              window.location.href = '/app';
-            }, 100);
+            // No forced page reload - let React Router handle navigation naturally
           }
           
           if (event === 'TOKEN_REFRESHED') {
@@ -109,6 +105,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (error) {
         throw new Error(error.message);
       }
+      // Let the auth state change handler manage navigation naturally
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Sign in failed';
       setError(errorMessage);
