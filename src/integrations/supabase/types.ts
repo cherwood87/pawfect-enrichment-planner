@@ -232,6 +232,56 @@ export type Database = {
           },
         ]
       }
+      discovery_configs: {
+        Row: {
+          breed_specific: boolean
+          created_at: string
+          dog_id: string
+          enabled: boolean
+          frequency: string
+          id: string
+          last_discovery_run: string | null
+          max_activities_per_discovery: number
+          quality_threshold: number
+          target_sources: string[]
+          updated_at: string
+        }
+        Insert: {
+          breed_specific?: boolean
+          created_at?: string
+          dog_id: string
+          enabled?: boolean
+          frequency?: string
+          id?: string
+          last_discovery_run?: string | null
+          max_activities_per_discovery?: number
+          quality_threshold?: number
+          target_sources?: string[]
+          updated_at?: string
+        }
+        Update: {
+          breed_specific?: boolean
+          created_at?: string
+          dog_id?: string
+          enabled?: boolean
+          frequency?: string
+          id?: string
+          last_discovery_run?: string | null
+          max_activities_per_discovery?: number
+          quality_threshold?: number
+          target_sources?: string[]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discovery_configs_dog_id_fkey"
+            columns: ["dog_id"]
+            isOneToOne: true
+            referencedRelation: "dogs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dogs: {
         Row: {
           activity_level: Database["public"]["Enums"]["activity_level"]
