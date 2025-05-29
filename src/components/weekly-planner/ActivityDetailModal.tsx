@@ -72,7 +72,7 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
                   <MessageCircle className="w-4 h-4 text-purple-600" />
                   <span className="text-purple-700 font-medium">Need Help?</span>
                 </Button>}
-              <Button variant="ghost" size="sm" onClick={() => onToggleCompletion(activity.id)} className="flex items-center space-x-2 hover:bg-purple-100 rounded-xl">
+              <Button variant="ghost" size="sm" onClick={() => onToggleCompletion(activity.id)} className="flex items-center space-x-2 hover:bg-purple-100 rounded-xl text-violet-200">
                 {activity.completed ? <>
                     <CheckCircle className="w-5 h-5 text-emerald-500" />
                     <span className="text-emerald-600">Completed</span>
