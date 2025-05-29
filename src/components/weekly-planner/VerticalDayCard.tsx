@@ -1,8 +1,10 @@
+
 import React from 'react';
 import { ScheduledActivity, ActivityLibraryItem, UserActivity } from '@/types/activity';
 import { DiscoveredActivity } from '@/types/discovery';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, Circle, Clock, Calendar } from 'lucide-react';
+
 interface VerticalDayCardProps {
   dayName: string;
   dayShort: string;
@@ -12,6 +14,7 @@ interface VerticalDayCardProps {
   onToggleCompletion: (activityId: string) => void;
   onActivityClick?: (activity: ScheduledActivity) => void;
 }
+
 const VerticalDayCard: React.FC<VerticalDayCardProps> = ({
   dayName,
   dayShort,
@@ -24,16 +27,48 @@ const VerticalDayCard: React.FC<VerticalDayCardProps> = ({
   const completedCount = activities.filter(a => a.completed).length;
   const totalCount = activities.length;
   const isToday = new Date().getDay() === dayIndex;
-  const getPillarGradient = (pillar: string) => {
-    const gradients = {
-      mental: 'from-purple-400 to-purple-500',
-      physical: 'from-green-400 to-green-500',
-      social: 'from-blue-400 to-blue-500',
-      environmental: 'from-teal-400 to-teal-500',
-      instinctual: 'from-orange-400 to-orange-500'
+
+  const getPillarColor = (pillar: string) => {
+    const colors = {
+      mental: {
+        bg: 'bg-purple-50',
+        border: 'border-purple-100',
+        text: 'text-purple-700',
+        badge: 'bg-purple-100 text-purple-700'
+      },
+      physical: {
+        bg: 'bg-emerald-50',
+        border: 'border-emerald-100', 
+        text: 'text-emerald-700',
+        badge: 'bg-emerald-100 text-emerald-700'
+      },
+      social: {
+        bg: 'bg-sky-50',
+        border: 'border-sky-100',
+        text: 'text-sky-700',
+        badge: 'bg-sky-100 text-sky-700'
+      },
+      environmental: {
+        bg: 'bg-teal-50',
+        border: 'border-teal-100',
+        text: 'text-teal-700',
+        badge: 'bg-teal-100 text-teal-700'
+      },
+      instinctual: {
+        bg: 'bg-amber-50',
+        border: 'border-amber-100',
+        text: 'text-amber-700',
+        badge: 'bg-amber-100 text-amber-700'
+      }
     };
-    return gradients[pillar as keyof typeof gradients] || 'from-gray-400 to-gray-500';
+    return colors[pillar as keyof typeof colors] || {
+      bg: 'bg-gray-50',
+      border: 'border-gray-100',
+      text: 'text-gray-700',
+      badge: 'bg-gray-100 text-gray-700'
+    };
   };
+
   const getCompletionStatus = () => {
     if (totalCount === 0) return {
       color: 'bg-gray-100',
@@ -56,12 +91,15 @@ const VerticalDayCard: React.FC<VerticalDayCardProps> = ({
       label: 'Not started'
     };
   };
+
   const status = getCompletionStatus();
-  return <div className={`
+
+  return (
+    <div className={`
       rounded-xl border transition-all duration-300 hover:shadow-md
       ${isToday ? 'border-blue-300 bg-gradient-to-br from-blue-50 to-indigo-50 shadow-sm' : 'border-gray-200 bg-white hover:border-blue-200'}
     `}>
-      {/* Simplified Day Header */}
+      {/* Day Header */}
       <div className={`
         flex items-center justify-between p-4 border-b border-gray-100
         ${isToday ? 'bg-blue-50/50' : 'bg-gray-50/50'}
@@ -81,7 +119,7 @@ const VerticalDayCard: React.FC<VerticalDayCardProps> = ({
           </div>
         </div>
         
-        {/* Consolidated Status */}
+        {/* Status */}
         <div className="flex items-center space-x-2">
           <Badge className={`${status.color} ${status.text} border-0 text-xs font-medium`}>
             {totalCount > 0 ? `${completedCount}/${totalCount}` : '0'}
@@ -92,40 +130,64 @@ const VerticalDayCard: React.FC<VerticalDayCardProps> = ({
 
       {/* Activities */}
       <div className="p-4 bg-slate-50">
-        {totalCount === 0 ? <div className="text-center py-4 text-gray-400 rounded-none my-[3px]">
+        {totalCount === 0 ? (
+          <div className="text-center py-4 text-gray-400 rounded-none my-[3px]">
             <Calendar className="w-6 h-6 mx-auto mb-2 opacity-50" />
             <p className="text-sm">No activities</p>
-          </div> : <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {activities.map(activity => {
-          const activityDetails = getActivityDetails(activity.activityId);
-          if (!activityDetails) return null;
-          const pillarGradient = getPillarGradient(activityDetails.pillar);
-          return <div key={activity.id} onClick={() => onActivityClick?.(activity)} className={`
-                    relative p-3 rounded-lg border cursor-pointer transition-all duration-200
+              const activityDetails = getActivityDetails(activity.activityId);
+              if (!activityDetails) return null;
+              
+              const pillarColors = getPillarColor(activityDetails.pillar);
+              
+              return (
+                <div 
+                  key={activity.id} 
+                  onClick={() => onActivityClick?.(activity)} 
+                  className={`
+                    relative p-4 rounded-lg border cursor-pointer transition-all duration-200
                     hover:shadow-md transform hover:scale-105
-                    ${activity.completed ? 'border-emerald-200 bg-emerald-50/50' : 'border-gray-200 bg-white hover:border-blue-200'}
-                  `}>
-                  {/* Enhanced Pillar Indicator */}
-                  <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${pillarGradient} rounded-t-lg`} />
+                    ${activity.completed 
+                      ? `${pillarColors.bg} ${pillarColors.border} shadow-sm` 
+                      : 'border-gray-150 bg-white hover:border-gray-200 hover:bg-gray-50/50'
+                    }
+                  `}
+                >
+                  {/* Subtle pillar indicator for completed activities */}
+                  {activity.completed && (
+                    <div className={`absolute top-0 left-0 right-0 h-1 ${pillarColors.bg.replace('50', '200')} rounded-t-lg`} />
+                  )}
                   
                   {/* Activity Content */}
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     {/* Header with completion toggle */}
                     <div className="flex items-start justify-between">
-                      <h4 className={`font-semibold text-sm leading-tight flex-1 pr-2 ${activity.completed ? 'text-emerald-600 line-through' : 'text-gray-800'}`}>
+                      <h4 className={`font-semibold text-sm leading-tight flex-1 pr-2 ${
+                        activity.completed ? `${pillarColors.text} line-through` : 'text-gray-800'
+                      }`}>
                         {activityDetails.title}
                       </h4>
-                      <button onClick={e => {
-                  e.stopPropagation();
-                  onToggleCompletion(activity.id);
-                }} className="flex-shrink-0 p-1 rounded-full hover:bg-gray-100 transition-colors">
-                        {activity.completed ? <CheckCircle className="w-4 h-4 text-emerald-500" /> : <Circle className="w-4 h-4 text-gray-400" />}
+                      <button 
+                        onClick={e => {
+                          e.stopPropagation();
+                          onToggleCompletion(activity.id);
+                        }} 
+                        className="flex-shrink-0 p-1 rounded-full hover:bg-gray-100 transition-colors"
+                      >
+                        {activity.completed ? (
+                          <CheckCircle className={`w-4 h-4 ${pillarColors.text}`} />
+                        ) : (
+                          <Circle className="w-4 h-4 text-gray-400" />
+                        )}
                       </button>
                     </div>
 
-                    {/* Simplified Meta Info */}
+                    {/* Meta Info */}
                     <div className="flex items-center justify-between text-xs">
-                      <Badge className={`bg-gradient-to-r ${pillarGradient} text-white border-0 text-xs px-2 py-1`}>
+                      <Badge className={`${pillarColors.badge} border-0 text-xs px-2 py-1 font-medium`}>
                         {activityDetails.pillar.charAt(0).toUpperCase()}
                       </Badge>
                       <div className="flex items-center space-x-1 text-gray-500">
@@ -135,14 +197,20 @@ const VerticalDayCard: React.FC<VerticalDayCardProps> = ({
                     </div>
 
                     {/* Completion Notes Preview */}
-                    {activity.completed && activity.completionNotes && <div className="text-xs text-emerald-600 bg-emerald-50 px-2 py-1 rounded border border-emerald-200 truncate">
+                    {activity.completed && activity.completionNotes && (
+                      <div className={`text-xs ${pillarColors.text} ${pillarColors.bg} px-2 py-1 rounded ${pillarColors.border} truncate`}>
                         "{activity.completionNotes}"
-                      </div>}
+                      </div>
+                    )}
                   </div>
-                </div>;
-        })}
-          </div>}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default VerticalDayCard;
