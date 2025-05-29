@@ -52,7 +52,7 @@ const EmptyDashboard: React.FC<EmptyDashboardProps> = ({
             </span>
           </h1>
           
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">Transform you dog's life with science-based enrichment activities. Let's start by creating their personalized profile.</p>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">Transform your dog's life with science-based enrichment activities. Let's start by creating their personalized profile.</p>
         </div>
 
         {/* Main CTA Card */}
