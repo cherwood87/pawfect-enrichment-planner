@@ -34,7 +34,6 @@ ${Object.entries(pillarBalance || {}).map(([pillar, count]) => `- ${pillar}: ${c
 
 Quiz Results: ${dogProfile?.quizResults ? `Top pillars: ${dogProfile.quizResults.ranking.slice(0, 2).map(r => r.pillar).join(', ')}` : 'Not completed'}`;
 
-    // Add activity-specific context if provided
     if (activityContext) {
       systemPrompt += `
 
@@ -73,7 +72,10 @@ Guidelines:
   "energyLevel": "Low|Medium|High"
 }
 
-Always write the JSON exactly as shown, and do not include any markdown or commentary inside the JSON. Only suggest activities that are not already in the provided activityHistory.
+Always return the JSON exactly as shown:
+- No Markdown formatting (no triple backticks, no **bold**, no # headings)
+- No intros like “Here’s your JSON activity” or “Try this one”
+- Just clean plain text followed by the JSON block
 
 Respond in a friendly, expert tone as a professional dog enrichment specialist.`;
 
@@ -99,25 +101,30 @@ Respond in a friendly, expert tone as a professional dog enrichment specialist.`
     }
 
     const data = await response.json();
-    const reply = data.choices[0].message.content;
+    let reply = data.choices[0].message.content;
 
-    // Extract any JSON objects matching the activity schema from the reply
+    // Clean reply of markdown, headers, and intro phrases
+    const cleanedReply = reply
+      .replace(/^#+\s*/gm, '')                      // remove # headings
+      .replace(/```json|```/g, '')                  // remove markdown code blocks
+      .replace(/^\s*(Here('|’)s|Try this).*?({)/im, '$1') // remove intro phrases before JSON
+      .trim();
+
+    // Extract JSON blocks that match activity schema
     const activityMatches = [];
     const activityRegex = /{[\s\S]*?"title":\s*".+?[\s\S]*?"energyLevel":\s*".+?"[\s\S]*?}/g;
     let match;
-    while ((match = activityRegex.exec(reply)) !== null) {
+    while ((match = activityRegex.exec(cleanedReply)) !== null) {
       try {
-        // Try to parse the JSON object
         const activityObj = JSON.parse(match[0]);
         activityMatches.push(activityObj);
       } catch (err) {
-        // If parsing fails, skip this one
         continue;
       }
     }
 
     return new Response(JSON.stringify({
-      reply,
+      reply: cleanedReply,
       activities: activityMatches
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
