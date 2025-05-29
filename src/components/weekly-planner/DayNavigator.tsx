@@ -27,35 +27,37 @@ const DayNavigator: React.FC<DayNavigatorProps> = ({
   };
 
   return (
-    <div className="flex items-center justify-between backdrop-blur-sm rounded-lg p-3 border border-white/60 bg-purple-300">
+    <div className="flex items-center justify-between bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-purple-200 shadow-sm">
       <Button 
         variant="ghost" 
         size="sm" 
         onClick={() => onNavigateDay('prev')} 
-        className="h-8 w-8 p-0 hover:bg-white/70 transition-colors"
+        className="h-10 w-10 p-0 hover:bg-purple-100 transition-colors rounded-xl border border-purple-200"
       >
-        <ChevronLeft className="w-4 h-4" />
+        <ChevronLeft className="w-5 h-5 text-purple-700" />
       </Button>
       
-      <div className="flex items-center space-x-2">
-        <Calendar className="w-4 h-4 text-gray-600" />
-        <span className="text-sm font-semibold text-gray-800">
-          {formatDate(currentDate)}
-        </span>
-        {isToday(currentDate) && (
-          <span className="text-xs bg-blue-500 text-white px-2 py-1 rounded-full">
-            Today
+      <div className="flex items-center space-x-3">
+        <Calendar className="w-5 h-5 text-purple-600" />
+        <div className="text-center">
+          <span className="text-lg font-bold text-purple-800 block">
+            {formatDate(currentDate)}
           </span>
-        )}
+          {isToday(currentDate) && (
+            <span className="text-xs bg-gradient-to-r from-purple-500 to-cyan-500 text-white px-3 py-1 rounded-full font-medium">
+              Today
+            </span>
+          )}
+        </div>
       </div>
       
       <Button 
         variant="ghost" 
         size="sm" 
         onClick={() => onNavigateDay('next')} 
-        className="h-8 w-8 p-0 hover:bg-white/70 transition-colors"
+        className="h-10 w-10 p-0 hover:bg-purple-100 transition-colors rounded-xl border border-purple-200"
       >
-        <ChevronRight className="w-4 h-4" />
+        <ChevronRight className="w-5 h-5 text-purple-700" />
       </Button>
     </div>
   );

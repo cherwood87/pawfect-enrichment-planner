@@ -37,64 +37,64 @@ const WeeklyPlannerHeader: React.FC<WeeklyPlannerHeaderProps> = ({
   const isComplete = completedActivities === totalActivities && totalActivities > 0;
 
   return (
-    <CardHeader className="bg-gradient-to-br from-purple-50 via-cyan-50 to-amber-50 border-b border-purple-200 py-[27px] px-[21px]">
+    <CardHeader className="bg-gradient-to-br from-purple-50 via-cyan-50 to-amber-50 border-b border-purple-200 py-6 px-6">
       {/* Main Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center space-x-3">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center space-x-4">
           <div className={`
-            bg-gradient-to-r from-purple-500 to-cyan-500 p-2.5 rounded-xl shadow-lg
+            bg-gradient-to-r from-purple-500 to-cyan-500 p-3 rounded-2xl shadow-lg
             ${isComplete ? 'from-emerald-500 to-cyan-500' : ''}
           `}>
-            {isComplete ? <Trophy className="w-5 h-5 text-white" /> : <Calendar className="w-5 h-5 text-white" />}
+            {isComplete ? <Trophy className="w-6 h-6 text-white" /> : <Calendar className="w-6 h-6 text-white" />}
           </div>
           <div>
-            <CardTitle className="text-lg font-bold text-purple-800 flex items-center space-x-2">
-              <span>{viewMode === 'week' ? 'Weekly Plan' : 'Daily Plan'}</span>
+            <CardTitle className="text-2xl font-bold text-purple-800 flex items-center space-x-3">
+              <span>{viewMode === 'week' ? 'Weekly Planner' : 'Daily Focus'}</span>
               {isComplete && (
-                <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full font-medium">
+                <span className="text-sm bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full font-medium">
                   Complete!
                 </span>
               )}
             </CardTitle>
-            <p className="text-sm text-purple-600">
+            <p className="text-purple-600 mt-1">
               {totalActivities > 0 ? `${completedActivities}/${totalActivities} activities completed` : 'No activities planned'}
             </p>
           </div>
         </div>
         
-        <div className="flex items-center space-x-3">
-          {/* View Toggle */}
-          <div className="flex items-center bg-white/60 rounded-lg p-1 border border-white/60">
+        <div className="flex items-center space-x-4">
+          {/* Enhanced View Toggle */}
+          <div className="flex items-center bg-white/80 backdrop-blur-sm rounded-xl p-1 border-2 border-purple-200 shadow-sm">
             <button
               onClick={() => onViewModeChange('day')}
-              className={`flex items-center space-x-1 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
                 viewMode === 'day'
-                  ? 'bg-purple-500 text-white shadow-sm'
-                  : 'text-purple-700 hover:bg-white/70'
+                  ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-md'
+                  : 'text-purple-700 hover:bg-purple-50'
               }`}
             >
-              <CalendarDays className="w-3 h-3" />
-              <span className={isMobile ? 'hidden' : 'block'}>Day</span>
+              <CalendarDays className="w-4 h-4" />
+              {!isMobile && <span>Day</span>}
             </button>
             <button
               onClick={() => onViewModeChange('week')}
-              className={`flex items-center space-x-1 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
                 viewMode === 'week'
-                  ? 'bg-purple-500 text-white shadow-sm'
-                  : 'text-purple-700 hover:bg-white/70'
+                  ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-md'
+                  : 'text-purple-700 hover:bg-purple-50'
               }`}
             >
-              <Grid3x3 className="w-3 h-3" />
-              <span className={isMobile ? 'hidden' : 'block'}>Week</span>
+              <Grid3x3 className="w-4 h-4" />
+              {!isMobile && <span>Week</span>}
             </button>
           </div>
 
           {/* Progress Badge */}
           {totalActivities > 0 && (
-            <Badge className={`font-bold px-3 py-1.5 rounded-xl ${
+            <Badge className={`font-bold px-4 py-2 rounded-xl text-base ${
               isComplete 
-                ? 'bg-emerald-100 text-emerald-700 border border-emerald-300' 
-                : 'bg-purple-100 text-purple-700 border border-purple-300'
+                ? 'bg-emerald-100 text-emerald-700 border-2 border-emerald-300' 
+                : 'bg-purple-100 text-purple-700 border-2 border-purple-300'
             }`}>
               {Math.round(progressPercentage)}%
             </Badge>
@@ -104,24 +104,24 @@ const WeeklyPlannerHeader: React.FC<WeeklyPlannerHeaderProps> = ({
           <button
             onClick={() => navigate('/activity-library')}
             className="
-              flex items-center space-x-2 px-4 py-2 rounded-xl
+              flex items-center space-x-2 px-6 py-3 rounded-xl
               bg-gradient-to-r from-purple-500 to-cyan-500 text-white 
               shadow-lg hover:shadow-xl hover:from-purple-600 hover:to-cyan-600
-              transition-all duration-300 font-medium
+              transition-all duration-300 font-semibold
             "
           >
-            <Plus className="w-4 h-4" />
-            <span className={isMobile ? 'hidden' : 'block'}>Add Activity</span>
+            <Plus className="w-5 h-5" />
+            {!isMobile && <span>Add Activity</span>}
           </button>
         </div>
       </div>
 
-      {/* Progress Bar */}
+      {/* Enhanced Progress Bar */}
       {totalActivities > 0 && (
-        <div className="mb-4">
-          <div className="w-full bg-white/60 rounded-full h-2 shadow-inner">
+        <div className="mb-6">
+          <div className="w-full bg-white/80 backdrop-blur-sm rounded-full h-3 shadow-inner border border-purple-200">
             <div 
-              className={`h-2 rounded-full transition-all duration-700 ${
+              className={`h-3 rounded-full transition-all duration-700 ${
                 isComplete 
                   ? 'bg-gradient-to-r from-emerald-400 to-cyan-400' 
                   : 'bg-gradient-to-r from-purple-400 to-cyan-400'

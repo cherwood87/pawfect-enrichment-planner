@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useActivity } from '@/contexts/ActivityContext';
@@ -37,7 +36,7 @@ const WeeklyPlannerCard: React.FC<WeeklyPlannerCardProps> = ({
   const [currentWeek, setCurrentWeek] = useState(getISOWeek(new Date()));
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [viewMode, setViewMode] = useState<'week' | 'day'>('day');
+  const [viewMode, setViewMode] = useState<'week' | 'day'>('day'); // Changed default to 'day'
   const [selectedActivity, setSelectedActivity] = useState<ScheduledActivity | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -60,11 +59,21 @@ const WeeklyPlannerCard: React.FC<WeeklyPlannerCardProps> = ({
     [scheduledActivities, currentWeek, currentDog?.id]
   );
 
-  // Memoize computed values
-  const { totalActivities, completedActivities } = useMemo(() => ({
-    totalActivities: weekActivities.length,
-    completedActivities: weekActivities.filter(a => a.completed).length
-  }), [weekActivities]);
+  // Memoize computed values - for day view, only count current day's activities
+  const { totalActivities, completedActivities } = useMemo(() => {
+    if (viewMode === 'day') {
+      const currentDayIndex = currentDate.getDay();
+      const dayActivities = weekActivities.filter(activity => activity.dayOfWeek === currentDayIndex);
+      return {
+        totalActivities: dayActivities.length,
+        completedActivities: dayActivities.filter(a => a.completed).length
+      };
+    }
+    return {
+      totalActivities: weekActivities.length,
+      completedActivities: weekActivities.filter(a => a.completed).length
+    };
+  }, [weekActivities, viewMode, currentDate]);
 
   const navigateWeek = useCallback((direction: 'prev' | 'next') => {
     if (direction === 'prev') {
@@ -103,7 +112,34 @@ const WeeklyPlannerCard: React.FC<WeeklyPlannerCardProps> = ({
 
   const handleViewModeChange = useCallback((mode: 'week' | 'day') => {
     setViewMode(mode);
-  }, []);
+    
+    // When switching to day view, ensure currentDate is in the current week
+    if (mode === 'day') {
+      const weekStart = getWeekStartDate(currentWeek, currentYear);
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekStart.getDate() + 6);
+      
+      // If current date is not in the current week, set it to today or week start
+      if (currentDate < weekStart || currentDate > weekEnd) {
+        const today = new Date();
+        if (today >= weekStart && today <= weekEnd) {
+          setCurrentDate(today);
+        } else {
+          setCurrentDate(weekStart);
+        }
+      }
+    }
+  }, [currentWeek, currentYear, currentDate]);
+
+  // Helper function to get week start date
+  const getWeekStartDate = (week: number, year: number): Date => {
+    const jan1 = new Date(year, 0, 1);
+    const daysToFirstThursday = (4 - jan1.getDay() + 7) % 7;
+    const firstThursday = new Date(year, 0, 1 + daysToFirstThursday);
+    const weekStart = new Date(firstThursday);
+    weekStart.setDate(firstThursday.getDate() + (week - 1) * 7 - 3);
+    return weekStart;
+  };
 
   const handleActivityClick = useCallback((activity: ScheduledActivity) => {
     setSelectedActivity(activity);
@@ -146,13 +182,13 @@ const WeeklyPlannerCard: React.FC<WeeklyPlannerCardProps> = ({
     }
   }, [selectedActivity, currentDog, getActivityDetails, loadConversation, sendMessage, handleModalClose, onChatOpen]);
 
-  if (totalActivities === 0) {
+  if (totalActivities === 0 && viewMode === 'week') {
     return <EmptyWeeklyPlanner onPillarSelect={onPillarSelect} />;
   }
 
   return (
     <>
-      <Card className="overflow-hidden">
+      <Card className="overflow-hidden shadow-lg border-2 border-purple-200">
         <WeeklyPlannerHeader 
           completedActivities={completedActivities} 
           totalActivities={totalActivities} 
@@ -165,7 +201,7 @@ const WeeklyPlannerCard: React.FC<WeeklyPlannerCardProps> = ({
           onViewModeChange={handleViewModeChange}
         />
         
-        <CardContent className="text-purple-600 text-center py-8 bg-gradient-to-br from-purple-50 to-cyan-50 rounded-2xl border-2 border-purple-200">
+        <CardContent className="p-6 bg-gradient-to-br from-purple-50/50 to-cyan-50/50">
           {viewMode === 'week' ? (
             <>
               <WeeklyGrid 
