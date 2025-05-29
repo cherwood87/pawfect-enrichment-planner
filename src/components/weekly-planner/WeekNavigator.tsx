@@ -28,7 +28,7 @@ const WeekNavigator: React.FC<WeekNavigatorProps> = ({
         <span className="text-sm font-semibold text-gray-800">
           Week {currentWeek}, {currentYear}
         </span>
-        {isCurrentWeek && <span className="text-xs bg-white-500 text-white px-2 py-1 rounded-full">
+        {isCurrentWeek && <span className="bg-white-500 px-2 py-1 rounded-full text-blue-700 text-xs">
             Current
           </span>}
       </div>
