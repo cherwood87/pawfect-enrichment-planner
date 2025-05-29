@@ -6,6 +6,7 @@ import { useDog } from '@/contexts/DogContext';
 import { useChat } from '@/contexts/ChatContext';
 import WeeklyPlannerHeader from './weekly-planner/WeeklyPlannerHeader';
 import WeeklyGrid from './weekly-planner/WeeklyGrid';
+import SingleDayView from './weekly-planner/SingleDayView';
 import WeeklySummary from './weekly-planner/WeeklySummary';
 import EmptyWeeklyPlanner from './weekly-planner/EmptyWeeklyPlanner';
 import ActivityDetailModal from './weekly-planner/ActivityDetailModal';
@@ -32,8 +33,11 @@ const WeeklyPlannerCard: React.FC<WeeklyPlannerCardProps> = ({
     loadConversation,
     sendMessage
   } = useChat();
+
   const [currentWeek, setCurrentWeek] = useState(getISOWeek(new Date()));
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [viewMode, setViewMode] = useState<'week' | 'day'>('day');
   const [selectedActivity, setSelectedActivity] = useState<ScheduledActivity | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -79,6 +83,27 @@ const WeeklyPlannerCard: React.FC<WeeklyPlannerCardProps> = ({
       }
     }
   }, [currentWeek, currentYear]);
+
+  const navigateDay = useCallback((direction: 'prev' | 'next') => {
+    const newDate = new Date(currentDate);
+    if (direction === 'prev') {
+      newDate.setDate(newDate.getDate() - 1);
+    } else {
+      newDate.setDate(newDate.getDate() + 1);
+    }
+    setCurrentDate(newDate);
+    
+    // Update week if we moved to a different week
+    const newWeek = getISOWeek(newDate);
+    if (newWeek !== currentWeek) {
+      setCurrentWeek(newWeek);
+      setCurrentYear(newDate.getFullYear());
+    }
+  }, [currentDate, currentWeek]);
+
+  const handleViewModeChange = useCallback((mode: 'week' | 'day') => {
+    setViewMode(mode);
+  }, []);
 
   const handleActivityClick = useCallback((activity: ScheduledActivity) => {
     setSelectedActivity(activity);
@@ -133,20 +158,35 @@ const WeeklyPlannerCard: React.FC<WeeklyPlannerCardProps> = ({
           totalActivities={totalActivities} 
           currentWeek={currentWeek} 
           currentYear={currentYear} 
-          onNavigateWeek={navigateWeek} 
+          currentDate={currentDate}
+          viewMode={viewMode}
+          onNavigateWeek={navigateWeek}
+          onNavigateDay={navigateDay}
+          onViewModeChange={handleViewModeChange}
         />
         
         <CardContent className="text-purple-600 text-center py-8 bg-gradient-to-br from-purple-50 to-cyan-50 rounded-2xl border-2 border-purple-200">
-          <WeeklyGrid 
-            weekActivities={weekActivities} 
-            onToggleCompletion={toggleActivityCompletion} 
-            onActivityClick={handleActivityClick} 
-          />
+          {viewMode === 'week' ? (
+            <>
+              <WeeklyGrid 
+                weekActivities={weekActivities} 
+                onToggleCompletion={toggleActivityCompletion} 
+                onActivityClick={handleActivityClick} 
+              />
 
-          <WeeklySummary 
-            completedActivities={completedActivities} 
-            totalActivities={totalActivities} 
-          />
+              <WeeklySummary 
+                completedActivities={completedActivities} 
+                totalActivities={totalActivities} 
+              />
+            </>
+          ) : (
+            <SingleDayView
+              currentDate={currentDate}
+              weekActivities={weekActivities}
+              onToggleCompletion={toggleActivityCompletion}
+              onActivityClick={handleActivityClick}
+            />
+          )}
         </CardContent>
       </Card>
 
