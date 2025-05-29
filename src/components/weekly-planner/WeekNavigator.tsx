@@ -18,7 +18,7 @@ const WeekNavigator: React.FC<WeekNavigatorProps> = ({
     return Math.ceil(days / 7);
   };
   const isCurrentWeek = currentWeek === getCurrentWeek() && currentYear === new Date().getFullYear();
-  return <div className="flex items-center justify-between backdrop-blur-sm rounded-lg p-3 border border-white/60 bg-purple-300">
+  return <div className="flex items-center justify-between backdrop-blur-sm rounded-lg p-3 border border-white/60 bg-neutral-50">
       <Button variant="ghost" size="sm" onClick={() => onNavigateWeek('prev')} className="h-8 w-8 p-0 hover:bg-white/70 transition-colors">
         <ChevronLeft className="w-4 h-4" />
       </Button>
@@ -28,7 +28,7 @@ const WeekNavigator: React.FC<WeekNavigatorProps> = ({
         <span className="text-sm font-semibold text-gray-800">
           Week {currentWeek}, {currentYear}
         </span>
-        {isCurrentWeek && <span className="bg-white-500 px-2 py-1 rounded-full text-blue-700 text-xs">
+        {isCurrentWeek && <span className="text-xs bg-blue-500 text-white px-2 py-1 rounded-full">
             Current
           </span>}
       </div>
