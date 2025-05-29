@@ -1,13 +1,13 @@
 
 import React, { useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Navigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import Hero_Intro from '@/components/landing/Hero_Intro';
 import Benefits_Overview from '@/components/landing/Benefits_Overview';
 import PillarPreview_Grid from '@/components/landing/PillarPreview_Grid';
 import CTA_AddDog from '@/components/landing/CTA_AddDog';
+import DashboardBanner from '@/components/landing/DashboardBanner';
 import { LogIn } from 'lucide-react';
 
 const Landing: React.FC = () => {
@@ -34,25 +34,24 @@ const Landing: React.FC = () => {
     );
   }
 
-  // Redirect authenticated users to the app
-  if (user && session) {
-    console.log('🚀 Landing: Redirecting authenticated user to /app');
-    return <Navigate to="/app" replace />;
-  }
-
-  console.log('🏠 Landing: Showing landing page for unauthenticated user');
+  console.log('🏠 Landing: Showing landing page for user:', user?.email || 'unauthenticated');
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-cyan-50 to-amber-50">
-      {/* Enhanced Header with Sign In button */}
-      <header className="absolute top-0 right-0 p-6 z-10">
-        <Link to="/auth">
-          <Button className="modern-button-outline flex items-center space-x-2 shadow-lg hover:shadow-xl">
-            <LogIn className="w-4 h-4" />
-            <span>Sign In</span>
-          </Button>
-        </Link>
-      </header>
+      {/* Dashboard Banner for Authenticated Users */}
+      <DashboardBanner />
+
+      {/* Header with Sign In button (only for unauthenticated users) */}
+      {!user && !session && (
+        <header className="absolute top-0 right-0 p-6 z-10">
+          <Link to="/auth">
+            <Button className="modern-button-outline flex items-center space-x-2 shadow-lg hover:shadow-xl">
+              <LogIn className="w-4 h-4" />
+              <span>Sign In</span>
+            </Button>
+          </Link>
+        </header>
+      )}
       
       <Hero_Intro />
       <Benefits_Overview />
