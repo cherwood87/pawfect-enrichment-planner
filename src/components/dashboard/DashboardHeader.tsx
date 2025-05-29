@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Settings, Home, Library, MessageCircle, Menu, User, LogOut, Globe } from 'lucide-react';
+import { Settings, Library, MessageCircle, Menu, User, LogOut } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useIsMobile, useIsSmallMobile } from '@/hooks/use-mobile';
 import { useDog } from '@/contexts/DogContext';
@@ -159,27 +159,6 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = React.memo(
                   align="end"
                   className="w-56 bg-white/95 border shadow-lg z-50 rounded-xl mt-2"
                 >
-                  <DropdownMenuItem
-                    onClick={() => handleNavigation('/')}
-                    className={`touch-target rounded ${
-                      isCurrentPage('/') ? 'bg-blue-50 text-blue-700' : ''
-                    }`}
-                    aria-current={isCurrentPage('/') ? 'page' : undefined}
-                  >
-                    <Globe className="mr-2 h-4 w-4" />
-                    <span>Home</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={() => handleNavigation('/app')}
-                    className={`touch-target rounded ${
-                      isCurrentPage('/app') ? 'bg-blue-50 text-blue-700' : ''
-                    }`}
-                    aria-current={isCurrentPage('/app') ? 'page' : undefined}
-                  >
-                    <Home className="mr-2 h-4 w-4" />
-                    <span>Dashboard</span>
-                  </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => handleNavigation('/activity-library')}
                     className={`touch-target rounded ${
