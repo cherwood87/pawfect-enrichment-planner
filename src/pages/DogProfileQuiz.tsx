@@ -4,12 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useDog } from '@/contexts/DogContext';
-import DogProfileQuiz from '@/components/DogProfileQuiz';
+import DogPersonalityQuiz from '@/components/DogPersonalityQuiz';
 import { ArrowLeft, PlusCircle } from 'lucide-react';
+import { QuizResults } from '@/types/quiz';
 
 const DogProfileQuizPage: React.FC = () => {
   const navigate = useNavigate();
-  const { currentDog } = useDog();
+  const { currentDog, updateDog } = useDog();
   const [showQuiz, setShowQuiz] = useState(true);
 
   if (!currentDog) {
@@ -68,8 +69,12 @@ const DogProfileQuizPage: React.FC = () => {
     );
   }
 
-  const handleQuizComplete = (results: any) => {
-    // Handle quiz completion - could save results and navigate to dashboard
+  const handleQuizComplete = (results: QuizResults) => {
+    // Save results to the dog profile
+    updateDog({
+      ...currentDog,
+      quizResults: results
+    });
     console.log('Quiz completed:', results);
     navigate('/app');
   };
@@ -81,7 +86,7 @@ const DogProfileQuizPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-cyan-50 to-amber-50 flex items-center justify-center p-6">
       {showQuiz && (
-        <DogProfileQuiz
+        <DogPersonalityQuiz
           dogName={currentDog.name}
           onComplete={handleQuizComplete}
           onClose={handleQuizClose}

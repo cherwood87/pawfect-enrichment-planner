@@ -1,18 +1,35 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Brain, Zap, Users, TreePine, Target, Trophy, RefreshCw } from 'lucide-react';
 import { QuizResults } from '@/types/quiz';
+import { Dog } from '@/types/dog';
 
-interface QuizResultsProps {
-  results: QuizResults;
+interface DogProfileDialogsProps {
+  showQuiz: boolean;
+  showResults: boolean;
+  currentDog: Dog;
+  onQuizComplete: (results: QuizResults) => void;
   onRetakeQuiz: () => void;
-  onClose: () => void;
-  dogName: string;
+  onCloseQuiz: () => void;
+  onCloseResults: () => void;
+  setShowQuiz: React.Dispatch<React.SetStateAction<boolean>>;
+  setShowResults: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const QuizResultsComponent: React.FC<QuizResultsProps> = ({ results, onRetakeQuiz, onClose, dogName }) => {
+const DogProfileDialogs: React.FC<DogProfileDialogsProps> = ({
+  showQuiz,
+  showResults,
+  currentDog,
+  onQuizComplete,
+  onRetakeQuiz,
+  onCloseQuiz,
+  onCloseResults,
+  setShowQuiz,
+  setShowResults
+}) => {
   const pillarIcons = {
     mental: Brain,
     physical: Zap,
@@ -50,19 +67,25 @@ const QuizResultsComponent: React.FC<QuizResultsProps> = ({ results, onRetakeQui
     instinctual: 'Your dog is driven by natural instincts—sniffing, foraging, chasing. Enrichment should allow for instinct-safe expression.'
   };
 
+  if (!showResults || !currentDog.quizResults) {
+    return null;
+  }
+
+  const results = currentDog.quizResults;
+
   return (
     <Card className="max-w-md mx-auto border border-gray-200 shadow-xl rounded-3xl">
       <CardHeader className="text-center pb-4">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg font-bold text-gray-800">Quiz Results</CardTitle>
-          <Button variant="ghost" size="sm" onClick={onClose}>✕</Button>
+          <Button variant="ghost" size="sm" onClick={onCloseResults}>✕</Button>
         </div>
 
         <div className="mt-4">
           <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-3">
             <Trophy className="w-8 h-8 text-white" />
           </div>
-          <h3 className="text-xl font-bold text-gray-800 mb-2">{dogName}'s Personality</h3>
+          <h3 className="text-xl font-bold text-gray-800 mb-2">{currentDog.name}'s Personality</h3>
           <Badge variant="secondary" className="text-lg px-4 py-2 bg-gradient-to-r from-blue-100 to-orange-100 text-gray-800">
             {results.personality}
           </Badge>
@@ -123,7 +146,7 @@ const QuizResultsComponent: React.FC<QuizResultsProps> = ({ results, onRetakeQui
             <span>Retake Quiz</span>
           </Button>
           <Button 
-            onClick={onClose}
+            onClick={onCloseResults}
             className="flex-1 bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600 text-white"
           >
             Save Results
@@ -134,4 +157,4 @@ const QuizResultsComponent: React.FC<QuizResultsProps> = ({ results, onRetakeQui
   );
 };
 
-export default QuizResultsComponent;
+export default DogProfileDialogs;
