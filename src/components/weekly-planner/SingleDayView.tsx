@@ -3,7 +3,6 @@ import React from 'react';
 import { ScheduledActivity } from '@/types/activity';
 import { useActivity } from '@/contexts/ActivityContext';
 import { Calendar, Target, Plus, Clock, Trophy } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
 import { CheckCircle, Circle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -29,15 +28,37 @@ const SingleDayView: React.FC<SingleDayViewProps> = ({
   const completedCount = dayActivities.filter(a => a.completed).length;
   const totalCount = dayActivities.length;
 
-  const getPillarGradient = (pillar: string) => {
-    const gradients = {
-      mental: 'from-purple-400 to-purple-500',
-      physical: 'from-green-400 to-green-500',
-      social: 'from-blue-400 to-blue-500',
-      environmental: 'from-teal-400 to-teal-500',
-      instinctual: 'from-orange-400 to-orange-500'
+  const getPillarBackgroundColor = (pillar: string, completed: boolean) => {
+    const colors = {
+      mental: completed ? 'bg-purple-200' : 'bg-purple-100',
+      physical: completed ? 'bg-emerald-200' : 'bg-emerald-100',  
+      social: completed ? 'bg-blue-200' : 'bg-blue-100',
+      environmental: completed ? 'bg-teal-200' : 'bg-teal-100',
+      instinctual: completed ? 'bg-orange-200' : 'bg-orange-100'
     };
-    return gradients[pillar as keyof typeof gradients] || 'from-gray-400 to-gray-500';
+    return colors[pillar as keyof typeof colors] || (completed ? 'bg-gray-200' : 'bg-gray-100');
+  };
+
+  const getPillarIcon = (pillar: string) => {
+    const icons = {
+      mental: 'M',
+      physical: 'P', 
+      social: 'S',
+      environmental: 'E',
+      instinctual: 'I'
+    };
+    return icons[pillar as keyof typeof icons] || 'A';
+  };
+
+  const getPillarIconColor = (pillar: string) => {
+    const colors = {
+      mental: 'bg-purple-500 text-white',
+      physical: 'bg-emerald-500 text-white',
+      social: 'bg-blue-500 text-white', 
+      environmental: 'bg-teal-500 text-white',
+      instinctual: 'bg-orange-500 text-white'
+    };
+    return colors[pillar as keyof typeof colors] || 'bg-gray-500 text-white';
   };
 
   const getCompletionStatus = () => {
@@ -93,119 +114,123 @@ const SingleDayView: React.FC<SingleDayViewProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Enhanced Day Status Header */}
-      <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-purple-200 shadow-sm">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center space-x-3">
-            <div className={`${status.color} p-3 rounded-2xl`}>
-              <StatusIcon className={`w-6 h-6 ${status.text}`} />
-            </div>
-            <div>
-              <h3 className="text-xl font-bold text-purple-800">
-                {currentDate.toLocaleDateString('en-US', { weekday: 'long' })}
-              </h3>
-              <p className={`text-sm font-medium ${status.text}`}>
-                {status.label}
-              </p>
-            </div>
-          </div>
-          <div className="text-right">
-            <div className="text-2xl font-bold text-purple-800">
-              {completedCount}/{totalCount}
-            </div>
-            <p className="text-xs text-purple-600">Activities</p>
-          </div>
+      {/* Day Header */}
+      <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+        <div className="text-center mb-4">
+          <h2 className="text-3xl font-bold text-gray-800 mb-2">
+            {currentDate.toLocaleDateString('en-US', { weekday: 'long' }).toUpperCase()}
+          </h2>
+          <p className="text-lg text-gray-600 mb-4">
+            {currentDate.toLocaleDateString('en-US', { day: 'numeric', month: 'long' })}
+          </p>
+          <p className="text-sm text-gray-600">
+            {totalCount} activities • {completedCount} completed
+          </p>
         </div>
 
-        {/* Progress Bar */}
-        <div className="w-full bg-purple-100 rounded-full h-3 shadow-inner">
-          <div 
-            className={`h-3 rounded-full transition-all duration-700 ${
-              completedCount === totalCount && totalCount > 0
-                ? 'bg-gradient-to-r from-emerald-400 to-cyan-400' 
-                : 'bg-gradient-to-r from-purple-400 to-cyan-400'
-            }`} 
-            style={{ width: `${totalCount > 0 ? (completedCount / totalCount) * 100 : 0}%` }} 
-          />
+        {/* Progress indicator dots */}
+        <div className="flex justify-center space-x-2 mb-4">
+          <span className="text-sm text-gray-500">APR</span>
+          <div className="flex space-x-1 mx-4">
+            {[1, 2, 3, 4, 5].map(i => (
+              <div key={i} className="w-2 h-2 rounded-full bg-gray-300"></div>
+            ))}
+          </div>
+          <span className="text-sm font-semibold text-gray-800">MAY</span>
+          <div className="flex space-x-1 mx-4">
+            {[1, 2, 3, 4, 5].map(i => (
+              <div key={i} className="w-2 h-2 rounded-full bg-gray-300"></div>
+            ))}
+          </div>
+          <span className="text-sm text-gray-500">JUN</span>
         </div>
       </div>
 
-      {/* Activities Grid */}
-      <div className="grid gap-4 md:grid-cols-2">
+      {/* Activities */}
+      <div className="space-y-4">
         {dayActivities.map((activity, index) => {
           const activityDetails = getActivityDetails(activity.activityId);
           if (!activityDetails) return null;
           
-          const pillarGradient = getPillarGradient(activityDetails.pillar);
+          const pillarBg = getPillarBackgroundColor(activityDetails.pillar, activity.completed);
+          const pillarIcon = getPillarIcon(activityDetails.pillar);
+          const pillarIconColor = getPillarIconColor(activityDetails.pillar);
           
           return (
             <div
               key={activity.id}
               onClick={() => onActivityClick?.(activity)}
               className={`
-                relative p-6 rounded-xl border-2 cursor-pointer transition-all duration-300
-                hover:shadow-xl transform hover:scale-[1.02]
-                ${activity.completed 
-                  ? 'border-emerald-200 bg-emerald-50/50 shadow-lg' 
-                  : 'border-purple-200 bg-white hover:border-blue-300 shadow-md'
-                }
+                relative p-6 rounded-2xl cursor-pointer transition-all duration-300
+                hover:shadow-lg transform hover:scale-[1.02] border border-gray-100
+                ${pillarBg}
               `}
-              style={{
-                animationDelay: `${index * 100}ms`
-              }}
             >
-              {/* Enhanced Pillar Indicator */}
-              <div className={`absolute top-0 left-0 right-0 h-3 bg-gradient-to-r ${pillarGradient} rounded-t-xl`} />
-              
-              {/* Activity Content */}
-              <div className="space-y-4 mt-2">
-                {/* Header with completion toggle */}
-                <div className="flex items-start justify-between">
-                  <h4 className={`font-bold text-lg leading-tight flex-1 pr-3 ${
-                    activity.completed ? 'text-emerald-600 line-through' : 'text-gray-800'
-                  }`}>
-                    {activityDetails.title}
-                  </h4>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4 flex-1">
+                  {/* Pillar Icon */}
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold ${pillarIconColor}`}>
+                    {pillarIcon}
+                  </div>
+                  
+                  {/* Activity Info */}
+                  <div className="flex-1 min-w-0">
+                    <h3 className={`text-xl font-bold text-gray-800 mb-1 ${
+                      activity.completed ? 'line-through opacity-75' : ''
+                    }`}>
+                      {activityDetails.title}
+                    </h3>
+                    <div className="flex items-center space-x-4 text-gray-600">
+                      <div className="flex items-center space-x-1">
+                        <Clock className="w-4 h-4" />
+                        <span className="text-sm">{activityDetails.duration} m</span>
+                      </div>
+                      {activity.completed && (
+                        <div className="flex items-center space-x-1">
+                          <Clock className="w-4 h-4" />
+                          <span className="text-sm">{activityDetails.duration}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-4">
+                  {/* Star for favorites (if needed) */}
+                  {activity.completed && (
+                    <div className="text-yellow-500">
+                      ⭐
+                    </div>
+                  )}
+                  
+                  {/* Completion Toggle */}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       onToggleCompletion(activity.id);
                     }}
-                    className="flex-shrink-0 p-2 rounded-full hover:bg-gray-100 transition-colors"
+                    className="p-2 rounded-full hover:bg-white/50 transition-colors"
                   >
                     {activity.completed ? (
-                      <CheckCircle className="w-7 h-7 text-emerald-500" />
+                      <CheckCircle className="w-8 h-8 text-emerald-600" />
                     ) : (
-                      <Circle className="w-7 h-7 text-gray-400 hover:text-purple-500" />
+                      <Circle className="w-8 h-8 text-gray-400" />
                     )}
                   </button>
                 </div>
-
-                {/* Activity Meta */}
-                <div className="flex items-center justify-between">
-                  <Badge className={`bg-gradient-to-r ${pillarGradient} text-white border-0 px-4 py-2 font-semibold text-sm`}>
-                    {activityDetails.pillar.charAt(0).toUpperCase() + activityDetails.pillar.slice(1)}
-                  </Badge>
-                  <div className="flex items-center space-x-2 text-purple-600 bg-purple-50 px-3 py-2 rounded-lg">
-                    <Clock className="w-4 h-4" />
-                    <span className="text-sm font-semibold">{activityDetails.duration} min</span>
-                  </div>
-                </div>
-
-                {/* Completion Notes */}
-                {activity.completed && activity.completionNotes && (
-                  <div className="text-sm text-emerald-700 bg-emerald-50 px-4 py-3 rounded-lg border border-emerald-200">
-                    <span className="font-semibold">Completed Notes:</span> "{activity.completionNotes}"
-                  </div>
-                )}
-
-                {/* Activity Notes */}
-                {activity.notes && (
-                  <div className="text-sm text-purple-700 bg-purple-50 px-4 py-3 rounded-lg border border-purple-200">
-                    <span className="font-semibold">Plan:</span> {activity.notes}
-                  </div>
-                )}
               </div>
+
+              {/* Completion Notes */}
+              {activity.completed && activity.completionNotes && (
+                <div className="mt-4 p-4 bg-white/70 rounded-xl">
+                  <p className="text-gray-800 font-medium">
+                    {activity.completionNotes}
+                  </p>
+                  <button className="mt-2 text-sm text-gray-600 underline">
+                    Add Reflection
+                  </button>
+                </div>
+              )}
             </div>
           );
         })}

@@ -28,185 +28,145 @@ const VerticalDayCard: React.FC<VerticalDayCardProps> = ({
   const totalCount = activities.length;
   const isToday = new Date().getDay() === dayIndex;
 
-  const getPillarColor = (pillar: string) => {
+  const getPillarBackgroundColor = (pillar: string, completed: boolean) => {
     const colors = {
-      mental: {
-        bg: 'bg-purple-50',
-        border: 'border-purple-100',
-        text: 'text-purple-700',
-        badge: 'bg-purple-100 text-purple-700'
-      },
-      physical: {
-        bg: 'bg-emerald-50',
-        border: 'border-emerald-100', 
-        text: 'text-emerald-700',
-        badge: 'bg-emerald-100 text-emerald-700'
-      },
-      social: {
-        bg: 'bg-sky-50',
-        border: 'border-sky-100',
-        text: 'text-sky-700',
-        badge: 'bg-sky-100 text-sky-700'
-      },
-      environmental: {
-        bg: 'bg-teal-50',
-        border: 'border-teal-100',
-        text: 'text-teal-700',
-        badge: 'bg-teal-100 text-teal-700'
-      },
-      instinctual: {
-        bg: 'bg-amber-50',
-        border: 'border-amber-100',
-        text: 'text-amber-700',
-        badge: 'bg-amber-100 text-amber-700'
-      }
+      mental: completed ? 'bg-purple-200' : 'bg-purple-100',
+      physical: completed ? 'bg-emerald-200' : 'bg-emerald-100',
+      social: completed ? 'bg-blue-200' : 'bg-blue-100',
+      environmental: completed ? 'bg-teal-200' : 'bg-teal-100',
+      instinctual: completed ? 'bg-orange-200' : 'bg-orange-100'
     };
-    return colors[pillar as keyof typeof colors] || {
-      bg: 'bg-gray-50',
-      border: 'border-gray-100',
-      text: 'text-gray-700',
-      badge: 'bg-gray-100 text-gray-700'
-    };
+    return colors[pillar as keyof typeof colors] || (completed ? 'bg-gray-200' : 'bg-gray-100');
   };
 
-  const getCompletionStatus = () => {
-    if (totalCount === 0) return {
-      color: 'bg-gray-100',
-      text: 'text-gray-500',
-      label: 'No activities'
+  const getPillarIcon = (pillar: string) => {
+    const icons = {
+      mental: 'M',
+      physical: 'P',
+      social: 'S',
+      environmental: 'E',
+      instinctual: 'I'
     };
-    if (completedCount === totalCount) return {
-      color: 'bg-emerald-100',
-      text: 'text-emerald-700',
-      label: 'Complete!'
-    };
-    if (completedCount > 0) return {
-      color: 'bg-blue-100',
-      text: 'text-blue-700',
-      label: `${completedCount} done`
-    };
-    return {
-      color: 'bg-orange-100',
-      text: 'text-orange-700',
-      label: 'Not started'
-    };
+    return icons[pillar as keyof typeof icons] || 'A';
   };
 
-  const status = getCompletionStatus();
+  const getPillarIconColor = (pillar: string) => {
+    const colors = {
+      mental: 'bg-purple-500 text-white',
+      physical: 'bg-emerald-500 text-white',
+      social: 'bg-blue-500 text-white',
+      environmental: 'bg-teal-500 text-white',
+      instinctual: 'bg-orange-500 text-white'
+    };
+    return colors[pillar as keyof typeof colors] || 'bg-gray-500 text-white';
+  };
 
   return (
-    <div className={`
-      rounded-xl border transition-all duration-300 hover:shadow-md
-      ${isToday ? 'border-blue-300 bg-gradient-to-br from-blue-50 to-indigo-50 shadow-sm' : 'border-gray-200 bg-white hover:border-blue-200'}
-    `}>
+    <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
       {/* Day Header */}
       <div className={`
         flex items-center justify-between p-4 border-b border-gray-100
-        ${isToday ? 'bg-blue-50/50' : 'bg-gray-50/50'}
+        ${isToday ? 'bg-blue-50' : 'bg-gray-50'}
       `}>
         <div className="flex items-center space-x-3">
           <div className={`
             w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm
-            ${isToday ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white' : 'bg-white text-gray-700 border border-gray-200'}
+            ${isToday ? 'bg-blue-500 text-white' : 'bg-white text-gray-700 border border-gray-200'}
           `}>
             {dayShort}
           </div>
           <div>
-            <h3 className={`font-bold ${isToday ? 'text-blue-800' : 'text-gray-800'}`}>
+            <h3 className={`font-bold text-lg ${isToday ? 'text-blue-800' : 'text-gray-800'}`}>
               {dayName}
-              {isToday && <span className="ml-2 text-xs bg-blue-500 text-white px-2 py-0.5 rounded-full">Today</span>}
+              {isToday && <span className="ml-2 text-xs bg-blue-500 text-white px-2 py-1 rounded-full">Today</span>}
             </h3>
+            <p className="text-sm text-gray-600">{completedCount}/{totalCount} completed</p>
           </div>
         </div>
         
-        {/* Status */}
-        <div className="flex items-center space-x-2">
-          <Badge className={`${status.color} ${status.text} border-0 text-xs font-medium`}>
-            {totalCount > 0 ? `${completedCount}/${totalCount}` : '0'}
-          </Badge>
-          <span className="text-xs text-gray-500">{status.label}</span>
+        <div className="text-right">
+          <span className="text-lg font-bold text-orange-600">{completedCount}/{totalCount}</span>
+          <p className="text-xs text-gray-500">
+            {totalCount === 0 ? 'Not started' : 
+             completedCount === totalCount ? 'Complete!' : 
+             completedCount > 0 ? 'In progress' : 'Not started'}
+          </p>
         </div>
       </div>
 
       {/* Activities */}
-      <div className="p-4 bg-slate-50">
+      <div className="p-4 space-y-3">
         {totalCount === 0 ? (
-          <div className="text-center py-4 text-gray-400 rounded-none my-[3px]">
-            <Calendar className="w-6 h-6 mx-auto mb-2 opacity-50" />
-            <p className="text-sm">No activities</p>
+          <div className="text-center py-8 text-gray-400">
+            <Calendar className="w-8 h-8 mx-auto mb-2 opacity-50" />
+            <p className="text-sm">No activities planned</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {activities.map(activity => {
-              const activityDetails = getActivityDetails(activity.activityId);
-              if (!activityDetails) return null;
-              
-              const pillarColors = getPillarColor(activityDetails.pillar);
-              
-              return (
-                <div 
-                  key={activity.id} 
-                  onClick={() => onActivityClick?.(activity)} 
-                  className={`
-                    relative p-4 rounded-lg border cursor-pointer transition-all duration-200
-                    hover:shadow-md transform hover:scale-105
-                    ${activity.completed 
-                      ? `${pillarColors.bg} ${pillarColors.border} shadow-sm` 
-                      : 'border-gray-150 bg-white hover:border-gray-200 hover:bg-gray-50/50'
-                    }
-                  `}
-                >
-                  {/* Subtle pillar indicator for completed activities */}
-                  {activity.completed && (
-                    <div className={`absolute top-0 left-0 right-0 h-1 ${pillarColors.bg.replace('50', '200')} rounded-t-lg`} />
-                  )}
-                  
-                  {/* Activity Content */}
-                  <div className="space-y-3">
-                    {/* Header with completion toggle */}
-                    <div className="flex items-start justify-between">
-                      <h4 className={`font-semibold text-sm leading-tight flex-1 pr-2 ${
-                        activity.completed ? `${pillarColors.text} line-through` : 'text-gray-800'
+          activities.map(activity => {
+            const activityDetails = getActivityDetails(activity.activityId);
+            if (!activityDetails) return null;
+            
+            const pillarBg = getPillarBackgroundColor(activityDetails.pillar, activity.completed);
+            const pillarIcon = getPillarIcon(activityDetails.pillar);
+            const pillarIconColor = getPillarIconColor(activityDetails.pillar);
+            
+            return (
+              <div 
+                key={activity.id} 
+                onClick={() => onActivityClick?.(activity)} 
+                className={`
+                  relative p-4 rounded-2xl cursor-pointer transition-all duration-200
+                  hover:shadow-md transform hover:scale-[1.02] border border-gray-100
+                  ${pillarBg}
+                `}
+              >
+                {/* Activity Content */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3 flex-1">
+                    {/* Pillar Icon */}
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${pillarIconColor}`}>
+                      {pillarIcon}
+                    </div>
+                    
+                    {/* Activity Info */}
+                    <div className="flex-1 min-w-0">
+                      <h4 className={`font-semibold text-gray-800 truncate ${
+                        activity.completed ? 'line-through opacity-75' : ''
                       }`}>
                         {activityDetails.title}
                       </h4>
-                      <button 
-                        onClick={e => {
-                          e.stopPropagation();
-                          onToggleCompletion(activity.id);
-                        }} 
-                        className="flex-shrink-0 p-1 rounded-full hover:bg-gray-100 transition-colors"
-                      >
-                        {activity.completed ? (
-                          <CheckCircle className={`w-4 h-4 ${pillarColors.text}`} />
-                        ) : (
-                          <Circle className="w-4 h-4 text-gray-400" />
-                        )}
-                      </button>
-                    </div>
-
-                    {/* Meta Info */}
-                    <div className="flex items-center justify-between text-xs">
-                      <Badge className={`${pillarColors.badge} border-0 text-xs px-2 py-1 font-medium`}>
-                        {activityDetails.pillar.charAt(0).toUpperCase()}
-                      </Badge>
-                      <div className="flex items-center space-x-1 text-gray-500">
-                        <Clock className="w-3 h-3" />
-                        <span>{activityDetails.duration}m</span>
+                      <div className="flex items-center space-x-2 mt-1">
+                        <Clock className="w-3 h-3 text-gray-500" />
+                        <span className="text-xs text-gray-600">{activityDetails.duration}m</span>
                       </div>
                     </div>
-
-                    {/* Completion Notes Preview */}
-                    {activity.completed && activity.completionNotes && (
-                      <div className={`text-xs ${pillarColors.text} ${pillarColors.bg} px-2 py-1 rounded ${pillarColors.border} truncate`}>
-                        "{activity.completionNotes}"
-                      </div>
-                    )}
                   </div>
+
+                  {/* Completion Toggle */}
+                  <button 
+                    onClick={e => {
+                      e.stopPropagation();
+                      onToggleCompletion(activity.id);
+                    }} 
+                    className="flex-shrink-0 p-1 rounded-full hover:bg-white/50 transition-colors"
+                  >
+                    {activity.completed ? (
+                      <CheckCircle className="w-6 h-6 text-emerald-600" />
+                    ) : (
+                      <Circle className="w-6 h-6 text-gray-400" />
+                    )}
+                  </button>
                 </div>
-              );
-            })}
-          </div>
+
+                {/* Completion Notes */}
+                {activity.completed && activity.completionNotes && (
+                  <div className="mt-3 text-xs text-gray-700 bg-white/50 px-3 py-2 rounded-lg">
+                    "{activity.completionNotes}"
+                  </div>
+                )}
+              </div>
+            );
+          })
         )}
       </div>
     </div>
