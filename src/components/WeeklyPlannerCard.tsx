@@ -1,10 +1,11 @@
+
 import React, { useState, useMemo, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useActivity } from '@/contexts/ActivityContext';
 import { useDog } from '@/contexts/DogContext';
 import { useChat } from '@/contexts/ChatContext';
 import WeeklyPlannerHeader from './weekly-planner/WeeklyPlannerHeader';
-import WeeklyGrid from './weekly-planner/WeeklyGrid';
+import AccordionWeeklyGrid from './weekly-planner/AccordionWeeklyGrid';
 import SingleDayView from './weekly-planner/SingleDayView';
 import WeeklySummary from './weekly-planner/WeeklySummary';
 import EmptyWeeklyPlanner from './weekly-planner/EmptyWeeklyPlanner';
@@ -33,10 +34,11 @@ const WeeklyPlannerCard: React.FC<WeeklyPlannerCardProps> = ({
     sendMessage
   } = useChat();
 
-  const [currentWeek, setCurrentWeek] = useState(getISOWeek(new Date()));
-  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+  // Always show current week for week view
+  const [currentWeek] = useState(getISOWeek(new Date()));
+  const [currentYear] = useState(new Date().getFullYear());
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [viewMode, setViewMode] = useState<'week' | 'day'>('day'); // Changed default to 'day'
+  const [viewMode, setViewMode] = useState<'week' | 'day'>('day');
   const [selectedActivity, setSelectedActivity] = useState<ScheduledActivity | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -75,23 +77,10 @@ const WeeklyPlannerCard: React.FC<WeeklyPlannerCardProps> = ({
     };
   }, [weekActivities, viewMode, currentDate]);
 
-  const navigateWeek = useCallback((direction: 'prev' | 'next') => {
-    if (direction === 'prev') {
-      if (currentWeek === 1) {
-        setCurrentYear(currentYear - 1);
-        setCurrentWeek(52);
-      } else {
-        setCurrentWeek(currentWeek - 1);
-      }
-    } else {
-      if (currentWeek === 52) {
-        setCurrentYear(currentYear + 1);
-        setCurrentWeek(1);
-      } else {
-        setCurrentWeek(currentWeek + 1);
-      }
-    }
-  }, [currentWeek, currentYear]);
+  // No week navigation needed for week view since it always shows current week
+  const navigateWeek = useCallback(() => {
+    // No-op since week view always shows current week
+  }, []);
 
   const navigateDay = useCallback((direction: 'prev' | 'next') => {
     const newDate = new Date(currentDate);
@@ -101,45 +90,16 @@ const WeeklyPlannerCard: React.FC<WeeklyPlannerCardProps> = ({
       newDate.setDate(newDate.getDate() + 1);
     }
     setCurrentDate(newDate);
-    
-    // Update week if we moved to a different week
-    const newWeek = getISOWeek(newDate);
-    if (newWeek !== currentWeek) {
-      setCurrentWeek(newWeek);
-      setCurrentYear(newDate.getFullYear());
-    }
-  }, [currentDate, currentWeek]);
+  }, [currentDate]);
 
   const handleViewModeChange = useCallback((mode: 'week' | 'day') => {
     setViewMode(mode);
     
-    // When switching to day view, ensure currentDate is in the current week
+    // When switching to day view, set current date to today
     if (mode === 'day') {
-      const weekStart = getWeekStartDate(currentWeek, currentYear);
-      const weekEnd = new Date(weekStart);
-      weekEnd.setDate(weekStart.getDate() + 6);
-      
-      // If current date is not in the current week, set it to today or week start
-      if (currentDate < weekStart || currentDate > weekEnd) {
-        const today = new Date();
-        if (today >= weekStart && today <= weekEnd) {
-          setCurrentDate(today);
-        } else {
-          setCurrentDate(weekStart);
-        }
-      }
+      setCurrentDate(new Date());
     }
-  }, [currentWeek, currentYear, currentDate]);
-
-  // Helper function to get week start date
-  const getWeekStartDate = (week: number, year: number): Date => {
-    const jan1 = new Date(year, 0, 1);
-    const daysToFirstThursday = (4 - jan1.getDay() + 7) % 7;
-    const firstThursday = new Date(year, 0, 1 + daysToFirstThursday);
-    const weekStart = new Date(firstThursday);
-    weekStart.setDate(firstThursday.getDate() + (week - 1) * 7 - 3);
-    return weekStart;
-  };
+  }, []);
 
   const handleActivityClick = useCallback((activity: ScheduledActivity) => {
     setSelectedActivity(activity);
@@ -204,7 +164,7 @@ const WeeklyPlannerCard: React.FC<WeeklyPlannerCardProps> = ({
         <CardContent className="p-6 bg-gradient-to-br from-purple-50/50 to-cyan-50/50">
           {viewMode === 'week' ? (
             <>
-              <WeeklyGrid 
+              <AccordionWeeklyGrid 
                 weekActivities={weekActivities} 
                 onToggleCompletion={toggleActivityCompletion} 
                 onActivityClick={handleActivityClick} 

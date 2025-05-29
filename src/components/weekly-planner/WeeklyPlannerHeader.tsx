@@ -5,7 +5,6 @@ import { Badge } from '@/components/ui/badge';
 import { Calendar, Plus, Trophy, Target, Grid3x3, CalendarDays } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
-import WeekNavigator from './WeekNavigator';
 import DayNavigator from './DayNavigator';
 
 interface WeeklyPlannerHeaderProps {
@@ -132,13 +131,18 @@ const WeeklyPlannerHeader: React.FC<WeeklyPlannerHeaderProps> = ({
         </div>
       )}
 
-      {/* Navigator */}
+      {/* Week indicator for week view (no navigation) or Day Navigator for day view */}
       {viewMode === 'week' ? (
-        <WeekNavigator 
-          currentWeek={currentWeek} 
-          currentYear={currentYear} 
-          onNavigateWeek={onNavigateWeek} 
-        />
+        <div className="flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-purple-200 shadow-sm">
+          <div className="flex items-center space-x-3">
+            <Calendar className="w-5 h-5 text-purple-600" />
+            <div className="text-center">
+              <span className="text-lg font-bold text-purple-800 block">
+                This Week (Week {currentWeek}, {currentYear})
+              </span>
+            </div>
+          </div>
+        </div>
       ) : (
         currentDate && onNavigateDay && (
           <DayNavigator 
