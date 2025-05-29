@@ -1,18 +1,13 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
-
 const Hero_Intro: React.FC = () => {
   const navigate = useNavigate();
-
   const handleGetStarted = () => {
     navigate('/app');
   };
-
-  return (
-    <section className="py-12 px-6 min-h-screen flex items-center">
+  return <section className="py-12 px-6 min-h-screen flex items-center">
       <div className="max-w-6xl mx-auto text-center w-full">
         {/* Enhanced Header */}
         <div className="mb-8 animate-fade-in">
@@ -75,11 +70,7 @@ const Hero_Intro: React.FC = () => {
               </p>
 
               <div className="flex justify-center lg:justify-start">
-                <Button 
-                  onClick={handleGetStarted}
-                  size="lg" 
-                  className="bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 text-lg px-8 py-4 rounded-2xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
-                >
+                <Button onClick={handleGetStarted} size="lg" className="bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 text-lg px-8 py-4 rounded-2xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300">
                   Start Your Dog's Journey
                 </Button>
               </div>
@@ -90,12 +81,7 @@ const Hero_Intro: React.FC = () => {
               <div className="relative">
                 {/* Main circular image container */}
                 <div className="w-80 h-80 md:w-96 md:h-96 rounded-full overflow-hidden shadow-2xl border-8 border-white bg-gradient-to-br from-purple-100 to-cyan-100 transform hover:scale-105 transition-all duration-500">
-                  <img 
-                    src="https://images.unsplash.com/photo-1582562124811-c09040d0a901?auto=format&fit=crop&w=800&h=800&q=80"
-                    alt="Happy dog enjoying enrichment activities"
-                    className="w-full h-full object-cover object-center"
-                    loading="eager"
-                  />
+                  <img alt="Happy dog enjoying enrichment activities" className="w-full h-full object-cover object-center" loading="eager" src="/lovable-uploads/4d858ca5-ffea-48cf-96f6-2d97792b42d1.jpg" />
                 </div>
                 
                 {/* Floating accent circles around the main image */}
@@ -130,8 +116,6 @@ const Hero_Intro: React.FC = () => {
           </div>
         </Card>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default Hero_Intro;
