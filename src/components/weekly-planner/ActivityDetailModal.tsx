@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { CheckCircle, Circle, Clock, Star, Target, MessageCircle } from 'lucide-react';
 import { ScheduledActivity, ActivityLibraryItem, UserActivity } from '@/types/activity';
 import { DiscoveredActivity } from '@/types/discovery';
-
 interface ActivityDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -20,7 +19,6 @@ interface ActivityDetailModalProps {
     activityDuration: number;
   }) => void;
 }
-
 const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
   isOpen,
   onClose,
@@ -30,12 +28,9 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
   onNeedHelp
 }) => {
   if (!activity || !activityDetails) return null;
-
   const handleNeedHelp = () => {
     if (!onNeedHelp || !activityDetails) return;
-    
     console.log('Need Help clicked for activity:', activityDetails.title);
-    
     const activityContext = {
       type: 'activity-help' as const,
       activityName: activityDetails.title,
@@ -43,11 +38,9 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
       activityDifficulty: activityDetails.difficulty,
       activityDuration: activityDetails.duration
     };
-    
     console.log('Passing activity context:', activityContext);
     onNeedHelp(activityContext);
   };
-
   const getPillarColor = (pillar: string) => {
     const colors = {
       mental: 'bg-purple-100 text-purple-700',
@@ -58,21 +51,13 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
     };
     return colors[pillar as keyof typeof colors] || 'bg-gray-100 text-gray-700';
   };
-
   const getDifficultyStars = (difficulty: string) => {
     const level = difficulty === 'Easy' ? 1 : difficulty === 'Medium' ? 2 : 3;
-    return Array.from({ length: 3 }, (_, i) => (
-      <Star
-        key={i}
-        className={`w-4 h-4 ${
-          i < level ? 'text-yellow-400 fill-current' : 'text-gray-300'
-        }`}
-      />
-    ));
+    return Array.from({
+      length: 3
+    }, (_, i) => <Star key={i} className={`w-4 h-4 ${i < level ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />);
   };
-
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+  return <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto bg-gradient-to-br from-purple-50 to-cyan-50 border-2 border-purple-200 rounded-3xl">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
@@ -83,34 +68,18 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
               <span className="text-purple-800">{activityDetails.title}</span>
             </span>
             <div className="flex items-center space-x-2">
-              {onNeedHelp && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleNeedHelp}
-                  className="flex items-center space-x-2 rounded-2xl border-2 border-purple-300 hover:bg-purple-100 bg-white/70 backdrop-blur-sm"
-                >
+              {onNeedHelp && <Button variant="outline" size="sm" onClick={handleNeedHelp} className="flex items-center space-x-2 rounded-2xl border-2 border-purple-300 hover:bg-purple-100 bg-white/70 backdrop-blur-sm">
                   <MessageCircle className="w-4 h-4 text-purple-600" />
                   <span className="text-purple-700 font-medium">Need Help?</span>
-                </Button>
-              )}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onToggleCompletion(activity.id)}
-                className="flex items-center space-x-2 rounded-2xl hover:bg-purple-100"
-              >
-                {activity.completed ? (
-                  <>
+                </Button>}
+              <Button variant="ghost" size="sm" onClick={() => onToggleCompletion(activity.id)} className="flex items-center space-x-2 hover:bg-purple-100 rounded-xl">
+                {activity.completed ? <>
                     <CheckCircle className="w-5 h-5 text-emerald-500" />
                     <span className="text-emerald-600">Completed</span>
-                  </>
-                ) : (
-                  <>
+                  </> : <>
                     <Circle className="w-5 h-5 text-gray-400" />
                     <span className="text-gray-600">Mark Complete</span>
-                  </>
-                )}
+                  </>}
               </Button>
             </div>
           </DialogTitle>
@@ -144,49 +113,35 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
           <div className="bg-white/70 rounded-3xl p-6 border border-cyan-200">
             <h3 className="text-lg font-semibold text-purple-800 mb-3">Instructions</h3>
             <div className="text-gray-700 leading-relaxed">
-              {typeof activityDetails.instructions === 'string' ? (
-                <p>{activityDetails.instructions}</p>
-              ) : (
-                <div>{activityDetails.instructions}</div>
-              )}
+              {typeof activityDetails.instructions === 'string' ? <p>{activityDetails.instructions}</p> : <div>{activityDetails.instructions}</div>}
             </div>
           </div>
 
           {/* Materials */}
-          {activityDetails.materials && activityDetails.materials.length > 0 && (
-            <div className="bg-white/70 rounded-3xl p-6 border border-emerald-200">
+          {activityDetails.materials && activityDetails.materials.length > 0 && <div className="bg-white/70 rounded-3xl p-6 border border-emerald-200">
               <h3 className="text-lg font-semibold text-purple-800 mb-3">Materials Needed</h3>
               <ul className="list-disc list-inside text-gray-700 space-y-1">
-                {activityDetails.materials.map((item, index) => (
-                  <li key={index}>{item}</li>
-                ))}
+                {activityDetails.materials.map((item, index) => <li key={index}>{item}</li>)}
               </ul>
-            </div>
-          )}
+            </div>}
 
           {/* Scheduled Notes */}
-          {activity.notes && (
-            <div className="bg-white/70 rounded-3xl p-6 border border-cyan-200">
+          {activity.notes && <div className="bg-white/70 rounded-3xl p-6 border border-cyan-200">
               <h3 className="text-lg font-semibold text-purple-800 mb-3">Notes</h3>
               <p className="text-gray-700 bg-cyan-50 p-4 rounded-2xl border border-cyan-200">
                 {activity.notes}
               </p>
-            </div>
-          )}
+            </div>}
 
           {/* Completion Notes */}
-          {activity.completionNotes && activity.completed && (
-            <div className="bg-white/70 rounded-3xl p-6 border border-emerald-200">
+          {activity.completionNotes && activity.completed && <div className="bg-white/70 rounded-3xl p-6 border border-emerald-200">
               <h3 className="text-lg font-semibold text-purple-800 mb-3">Completion Notes</h3>
               <p className="text-gray-700 bg-emerald-50 p-4 rounded-2xl border border-emerald-200">
                 {activity.completionNotes}
               </p>
-            </div>
-          )}
+            </div>}
         </div>
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>;
 };
-
 export default ActivityDetailModal;
