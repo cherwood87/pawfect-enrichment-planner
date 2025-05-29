@@ -38,6 +38,15 @@ const AccordionWeeklyGrid: React.FC<AccordionWeeklyGridProps> = ({
     return acc;
   }, {} as Record<number, ScheduledActivity[]>);
 
+  // Reorder days to start with today
+  const reorderedDays = [
+    ...dayNames.slice(currentDayIndex),
+    ...dayNames.slice(0, currentDayIndex)
+  ].map((day, index) => ({
+    ...day,
+    originalIndex: (currentDayIndex + index) % 7
+  }));
+
   const totalActivities = weekActivities.length;
 
   if (totalActivities === 0) {
@@ -56,12 +65,13 @@ const AccordionWeeklyGrid: React.FC<AccordionWeeklyGridProps> = ({
     );
   }
 
-  // Default to today's day being open
+  // Default to today's day being open (which is now first in the list)
   const defaultValue = `day-${currentDayIndex}`;
 
   return (
     <Accordion type="multiple" defaultValue={[defaultValue]} className="space-y-2">
-      {dayNames.map((day, dayIndex) => {
+      {reorderedDays.map((day, displayIndex) => {
+        const dayIndex = day.originalIndex;
         const dayActivities = activitiesByDay[dayIndex] || [];
         const completedCount = dayActivities.filter(a => a.completed).length;
         const totalCount = dayActivities.length;
@@ -91,15 +101,6 @@ const AccordionWeeklyGrid: React.FC<AccordionWeeklyGridProps> = ({
                   </h3>
                   <p className="text-sm text-gray-600">{completedCount}/{totalCount} completed</p>
                 </div>
-              </div>
-              
-              <div className="text-right mr-4">
-                <span className="text-lg font-bold text-orange-600">{completedCount}/{totalCount}</span>
-                <p className="text-xs text-gray-500">
-                  {totalCount === 0 ? 'Not started' : 
-                   completedCount === totalCount ? 'Complete!' : 
-                   completedCount > 0 ? 'In progress' : 'Not started'}
-                </p>
               </div>
             </AccordionTrigger>
             
