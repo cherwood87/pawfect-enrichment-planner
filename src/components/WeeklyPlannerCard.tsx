@@ -33,7 +33,9 @@ const WeeklyPlannerCard: React.FC<WeeklyPlannerCardProps> = ({
     handleViewModeChange,
     handleActivityClick,
     handleModalClose,
-    handleNeedHelp
+    handleNeedHelp,
+    getTargetWeek,
+    getTargetDate
   } = useWeeklyPlannerLogic(onChatOpen);
 
   if (totalActivities === 0 && viewMode === 'week') {

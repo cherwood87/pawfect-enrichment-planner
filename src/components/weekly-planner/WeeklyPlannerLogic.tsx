@@ -139,6 +139,9 @@ export const useWeeklyPlannerLogic = (onChatOpen?: () => void) => {
     handleViewModeChange,
     handleActivityClick,
     handleModalClose,
-    handleNeedHelp
+    handleNeedHelp,
+    // Export target context for ActivityCard
+    getTargetWeek: () => viewMode === 'day' ? getISOWeek(currentDate) : currentWeek,
+    getTargetDate: () => currentDate
   };
 };

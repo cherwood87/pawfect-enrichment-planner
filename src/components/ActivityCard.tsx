@@ -16,13 +16,24 @@ interface ActivityCardProps {
   activity: ActivityLibraryItem | DiscoveredActivity;
   isOpen: boolean;
   onClose: () => void;
+  targetDate?: Date; // Optional target date for scheduling
+  targetWeek?: number; // Optional target week for scheduling
 }
 
-const ActivityCard: React.FC<ActivityCardProps> = ({ activity, isOpen, onClose }) => {
+const ActivityCard: React.FC<ActivityCardProps> = ({ 
+  activity, 
+  isOpen, 
+  onClose, 
+  targetDate,
+  targetWeek 
+}) => {
   const { addScheduledActivity } = useActivity();
   const { currentDog } = useDog();
   const { addToFavourites } = useFavourites(currentDog?.id || null);
-  const [selectedDayOfWeek, setSelectedDayOfWeek] = useState<number>(1);
+  
+  // Use target date's day of week if provided, otherwise default to Monday
+  const defaultDayOfWeek = targetDate ? targetDate.getDay() : 1;
+  const [selectedDayOfWeek, setSelectedDayOfWeek] = useState<number>(defaultDayOfWeek);
 
   const isDiscoveredActivity = useCallback((activity: ActivityLibraryItem | DiscoveredActivity): activity is DiscoveredActivity => {
     return 'source' in activity && activity.source === 'discovered';
@@ -41,13 +52,27 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, isOpen, onClose }
   }, []);
 
   const getDateForDayOfWeek = useCallback((dayOfWeek: number) => {
+    // If we have a target date and week, calculate relative to that week
+    if (targetDate && targetWeek) {
+      const startOfTargetWeek = new Date(targetDate);
+      // Find Monday of the target week
+      const dayOffset = (startOfTargetWeek.getDay() + 6) % 7; // Days since Monday
+      startOfTargetWeek.setDate(startOfTargetWeek.getDate() - dayOffset);
+      
+      // Add the selected day offset
+      const targetDayDate = new Date(startOfTargetWeek);
+      targetDayDate.setDate(startOfTargetWeek.getDate() + dayOfWeek);
+      return targetDayDate;
+    }
+    
+    // Fallback to current week calculation
     const today = new Date();
     const currentDay = today.getDay();
     const diff = dayOfWeek - currentDay;
-    const targetDate = new Date(today);
-    targetDate.setDate(today.getDate() + diff);
-    return targetDate;
-  }, []);
+    const targetDateCalc = new Date(today);
+    targetDateCalc.setDate(today.getDate() + diff);
+    return targetDateCalc;
+  }, [targetDate, targetWeek]);
 
   const handleScheduleActivity = useCallback(async () => {
     if (!currentDog) {
@@ -56,15 +81,17 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, isOpen, onClose }
     }
     
     try {
-      const targetDate = getDateForDayOfWeek(selectedDayOfWeek);
-      const weekNumber = getISOWeek(targetDate);
-      const scheduledDate = targetDate.toISOString().split('T')[0];
+      const calculatedTargetDate = getDateForDayOfWeek(selectedDayOfWeek);
+      const weekNumber = targetWeek || getISOWeek(calculatedTargetDate);
+      const scheduledDate = calculatedTargetDate.toISOString().split('T')[0];
 
       console.log('Scheduling activity:', {
         activityId: activity.id,
         scheduledDate,
         weekNumber,
-        dayOfWeek: selectedDayOfWeek
+        dayOfWeek: selectedDayOfWeek,
+        targetDate: targetDate?.toISOString(),
+        targetWeek
       });
 
       await addScheduledActivity({
@@ -85,7 +112,7 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, isOpen, onClose }
     } catch (error) {
       console.error('Error scheduling activity:', error);
     }
-  }, [currentDog, selectedDayOfWeek, activity.id, getDateForDayOfWeek, getISOWeek, addScheduledActivity, onClose]);
+  }, [currentDog, selectedDayOfWeek, activity.id, getDateForDayOfWeek, getISOWeek, addScheduledActivity, onClose, targetWeek]);
 
   const handleAddToFavourites = useCallback(async () => {
     if (!currentDog) return;
@@ -113,6 +140,8 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, isOpen, onClose }
           <DaySelector 
             selectedDayOfWeek={selectedDayOfWeek}
             onDaySelect={handleDaySelect}
+            targetDate={targetDate}
+            targetWeek={targetWeek}
           />
 
           <ActivityCardActions
