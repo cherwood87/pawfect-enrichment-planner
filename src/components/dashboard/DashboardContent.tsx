@@ -89,7 +89,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
 
         {/* Enhanced Favourites Section */}
         <div className="mb-8">
-          <div className="modern-card p-6 bg-purple-400 rounded-sm">
+          <div className="modern-card p-6 rounded-sm bg-slate-50">
             <div className="flex items-center space-x-3 mb-6">
               <div className="bg-gradient-to-r from-purple-500 to-cyan-500 p-3 rounded-2xl">
                 <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
