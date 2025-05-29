@@ -36,14 +36,19 @@ const QuizResultsComponent: React.FC<QuizResultsProps> = ({ results, onRetakeQui
     instinctual: 'Instinctual'
   };
 
+  const getScorePercentage = (score: number) => {
+    const maxScore = 12; // Adjust based on the number of questions per pillar * max weight
+    return (score / maxScore) * 100;
+  };
+
   return (
-    <Card className="max-w-md mx-auto">
+    <Card className="max-w-md mx-auto border border-gray-200 shadow-xl rounded-3xl">
       <CardHeader className="text-center pb-4">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg font-bold text-gray-800">Quiz Results</CardTitle>
           <Button variant="ghost" size="sm" onClick={onClose}>✕</Button>
         </div>
-        
+
         <div className="mt-4">
           <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-3">
             <Trophy className="w-8 h-8 text-white" />
@@ -56,34 +61,29 @@ const QuizResultsComponent: React.FC<QuizResultsProps> = ({ results, onRetakeQui
       </CardHeader>
 
       <CardContent className="space-y-6">
-        {/* Pillar Rankings */}
         <div>
           <h4 className="font-medium text-gray-800 mb-3">Enrichment Pillar Rankings</h4>
-          <div className="space-y-2">
+          <div className="space-y-3">
             {results.ranking.map((item, index) => {
               const IconComponent = pillarIcons[item.pillar as keyof typeof pillarIcons];
               const color = pillarColors[item.pillar as keyof typeof pillarColors];
               const name = pillarNames[item.pillar as keyof typeof pillarNames];
-              
+              const percentage = getScorePercentage(item.score);
+
               return (
-                <div key={item.pillar} className="flex items-center space-x-3 p-2 rounded-lg bg-gray-50">
-                  <div className="flex items-center space-x-2 flex-1">
-                    <span className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center text-sm font-bold">
-                      {item.rank}
-                    </span>
-                    <div className={`w-8 h-8 bg-${color}-100 rounded-full flex items-center justify-center`}>
-                      <IconComponent className={`w-4 h-4 text-${color}-600`} />
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-medium text-sm">{name}</div>
-                      <div className="text-xs text-gray-600">{item.reason}</div>
-                    </div>
+                <div key={item.pillar} className="flex items-start space-x-4 p-3 rounded-lg bg-white shadow-sm border border-gray-100">
+                  <div className={`w-10 h-10 bg-${color}-100 rounded-full flex items-center justify-center`}>
+                    <IconComponent className={`w-5 h-5 text-${color}-600`} />
                   </div>
-                  <div className={`w-12 bg-${color}-200 rounded-full h-2`}>
-                    <div 
-                      className={`bg-${color}-500 h-2 rounded-full`}
-                      style={{width: `${(item.score / 6) * 100}%`}}
-                    ></div>
+                  <div className="flex-1">
+                    <div className="flex justify-between">
+                      <span className="text-sm font-semibold text-gray-800">{name}</span>
+                      <span className="text-sm text-gray-600">{item.rank} / 5</span>
+                    </div>
+                    <div className="text-xs text-gray-600 mb-1 italic">{item.reason}</div>
+                    <div className="w-full bg-gray-100 rounded-full h-2">
+                      <div className={`bg-${color}-500 h-2 rounded-full`} style={{ width: `${percentage}%` }}></div>
+                    </div>
                   </div>
                 </div>
               );
@@ -91,7 +91,6 @@ const QuizResultsComponent: React.FC<QuizResultsProps> = ({ results, onRetakeQui
           </div>
         </div>
 
-        {/* Recommendations */}
         <div>
           <h4 className="font-medium text-gray-800 mb-3">Recommended Activities</h4>
           <div className="grid grid-cols-2 gap-2">
@@ -103,7 +102,6 @@ const QuizResultsComponent: React.FC<QuizResultsProps> = ({ results, onRetakeQui
           </div>
         </div>
 
-        {/* Action Buttons */}
         <div className="flex space-x-3 pt-4">
           <Button 
             variant="outline" 
@@ -115,7 +113,7 @@ const QuizResultsComponent: React.FC<QuizResultsProps> = ({ results, onRetakeQui
           </Button>
           <Button 
             onClick={onClose}
-            className="flex-1 bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600"
+            className="flex-1 bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600 text-white"
           >
             Save Results
           </Button>
