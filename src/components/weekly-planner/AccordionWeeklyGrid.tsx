@@ -69,7 +69,7 @@ const AccordionWeeklyGrid: React.FC<AccordionWeeklyGridProps> = ({
   const defaultValue = `day-${currentDayIndex}`;
 
   return (
-    <Accordion type="multiple" defaultValue={[defaultValue]} className="space-y-2">
+    <Accordion type="multiple" defaultValue={[defaultValue]} className="space-y-4">
       {reorderedDays.map((day, displayIndex) => {
         const dayIndex = day.originalIndex;
         const dayActivities = activitiesByDay[dayIndex] || [];
@@ -81,30 +81,30 @@ const AccordionWeeklyGrid: React.FC<AccordionWeeklyGridProps> = ({
           <AccordionItem 
             key={dayIndex} 
             value={`day-${dayIndex}`} 
-            className="bg-white rounded-2xl border border-gray-200 overflow-hidden"
+            className="bg-white/90 backdrop-blur-sm rounded-3xl border-3 border-purple-300 overflow-hidden shadow-lg"
           >
             <AccordionTrigger className={`
-              flex items-center justify-between p-4 hover:no-underline transition-colors
-              ${isToday ? 'bg-blue-50' : 'bg-gray-50'}
+              flex items-center justify-between p-6 hover:no-underline transition-colors
+              ${isToday ? 'bg-gradient-to-r from-blue-100 to-blue-200' : 'bg-gradient-to-r from-gray-50 to-gray-100'}
             `}>
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-4">
                 <div className={`
-                  w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm
-                  ${isToday ? 'bg-blue-500 text-white' : 'bg-white text-gray-700 border border-gray-200'}
+                  w-12 h-12 rounded-2xl flex items-center justify-center font-bold text-base shadow-lg
+                  ${isToday ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white' : 'bg-white text-gray-700 border-2 border-gray-300'}
                 `}>
                   {day.short}
                 </div>
                 <div className="text-left">
-                  <h3 className={`font-bold text-lg ${isToday ? 'text-blue-800' : 'text-gray-800'}`}>
+                  <h3 className={`font-bold text-xl ${isToday ? 'text-blue-800' : 'text-gray-800'}`}>
                     {day.full}
-                    {isToday && <span className="ml-2 text-xs bg-blue-500 text-white px-2 py-1 rounded-full">Today</span>}
+                    {isToday && <span className="ml-3 text-xs bg-blue-500 text-white px-3 py-1 rounded-full font-medium">Today</span>}
                   </h3>
-                  <p className="text-sm text-gray-600">{completedCount}/{totalCount} completed</p>
+                  <p className="text-sm text-gray-600 font-medium">{completedCount}/{totalCount} completed</p>
                 </div>
               </div>
             </AccordionTrigger>
             
-            <AccordionContent className="p-4">
+            <AccordionContent className="p-6 bg-gradient-to-br from-white/95 to-gray-50/95 backdrop-blur-sm">
               <AccordionDayCard
                 activities={dayActivities}
                 getActivityDetails={getActivityDetails}
