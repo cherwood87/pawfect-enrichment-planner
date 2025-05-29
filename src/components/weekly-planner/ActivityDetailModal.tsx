@@ -28,7 +28,6 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
   onNeedHelp
 }) => {
   if (!activity || !activityDetails) return null;
-
   const handleNeedHelp = () => {
     if (!onNeedHelp || !activityDetails) return;
     console.log('Need Help clicked for activity:', activityDetails.title);
@@ -42,7 +41,6 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
     console.log('Passing activity context:', activityContext);
     onNeedHelp(activityContext);
   };
-
   const getPillarColor = (pillar: string) => {
     const colors = {
       mental: 'bg-purple-100 text-purple-700',
@@ -53,16 +51,13 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
     };
     return colors[pillar as keyof typeof colors] || 'bg-gray-100 text-gray-700';
   };
-
   const getDifficultyStars = (difficulty: string) => {
     const level = difficulty === 'Easy' ? 1 : difficulty === 'Medium' ? 2 : 3;
     return Array.from({
       length: 3
     }, (_, i) => <Star key={i} className={`w-4 h-4 ${i < level ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />);
   };
-
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+  return <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto bg-gradient-to-br from-purple-50 to-cyan-50 border-2 border-purple-200 rounded-3xl">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
@@ -77,7 +72,7 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
                   <MessageCircle className="w-4 h-4 text-purple-600" />
                   <span className="text-purple-700 font-medium">Need Help?</span>
                 </Button>}
-              <Button variant="ghost" size="sm" onClick={() => onToggleCompletion(activity.id)} className="flex items-center space-x-2 hover:bg-purple-100 rounded-xl text-violet-200">
+              <Button variant="ghost" size="sm" onClick={() => onToggleCompletion(activity.id)} className="flex items-center space-x-2 hover:bg-purple-100 rounded-xl">
                 {activity.completed ? <>
                     <CheckCircle className="w-5 h-5 text-emerald-500" />
                     <span className="text-emerald-600">Completed</span>
@@ -147,8 +142,6 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
             </div>}
         </div>
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>;
 };
-
 export default ActivityDetailModal;

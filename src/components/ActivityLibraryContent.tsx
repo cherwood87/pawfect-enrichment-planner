@@ -35,13 +35,13 @@ const ActivityLibraryContent: React.FC<ActivityLibraryContentProps> = memo(({
   curatedCount
 }) => {
   return (
-    <Card className="card-elevated animate-fade-in-up">
+    <Card className="modern-card">
       <ActivityLibraryHeader
         autoApprovedCount={autoApprovedCount}
         isDiscovering={isDiscovering}
         onDiscoverMore={onDiscoverMore}
       />
-      <CardContent className="spacing-content">
+      <CardContent className="space-y-6">
         <ActivityLibraryFilters
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
@@ -55,7 +55,7 @@ const ActivityLibraryContent: React.FC<ActivityLibraryContentProps> = memo(({
           filteredActivitiesCount={filteredActivitiesCount}
           curatedCount={curatedCount}
           autoApprovedCount={autoApprovedCount}
-          pendingReviewCount={0}
+          pendingReviewCount={0} // No manual review anymore
         />
       </CardContent>
     </Card>

@@ -29,28 +29,28 @@ const ActivityLibraryPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-cyan-50 to-amber-50">
       {/* Enhanced Header */}
-      <div className="bg-white/90 backdrop-blur-lg shadow-lg border-b-2 border-purple-200 sticky top-0 z-30">
-        <div className="container-primary py-4">
+      <div className="bg-white/80 backdrop-blur-lg shadow-lg border-b-2 border-purple-200">
+        <div className="max-w-screen-lg mx-auto mobile-container py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <Button 
-                variant="outline" 
+                variant="ghost" 
                 size="sm"
                 onClick={handleBackClick}
-                className="btn-outline interactive-press"
+                className="modern-button-outline"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back
               </Button>
-              <div className="bg-gradient-to-r from-purple-500 via-cyan-500 to-amber-500 p-3 rounded-2xl shadow-lg">
+              <div className="bg-gradient-to-r from-purple-500 via-cyan-500 to-amber-500 p-2 rounded-xl shadow-lg">
                 <BookOpen className="w-6 h-6 text-white" />
               </div>
               <div>
                 <h1 className="text-xl font-bold text-purple-800">Activity Library</h1>
-                <p className="text-purple-600 text-sm">Discover enriching activities</p>
+                <p className="text-purple-600">Discover enriching activities</p>
               </div>
             </div>
-            <div className="hidden sm:flex items-center space-x-2 card-glass px-4 py-2 rounded-2xl">
+            <div className="hidden sm:flex items-center space-x-2 bg-white/60 backdrop-blur-sm rounded-2xl px-4 py-2 border border-purple-200">
               <Sparkles className="w-4 h-4 text-purple-500" />
               <span className="text-sm font-medium text-purple-700">Beyond Busy</span>
             </div>
@@ -58,13 +58,15 @@ const ActivityLibraryPage = () => {
         </div>
       </div>
 
-      <div className="container-primary py-8 spacing-section pb-20 sm:pb-8">
+      <div className="max-w-screen-lg mx-auto mobile-container py-8 mobile-space-y pb-20 sm:pb-8">
         {/* Enhanced Educational Content */}
-        <div className="card-secondary padding-section text-center spacing-content animate-fade-in-up">
-          <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-cyan-500 rounded-2xl flex items-center justify-center mx-auto shadow-lg mb-6">
-            <Brain className="w-8 h-8 text-white" />
+        <div className="modern-card bg-gradient-to-r from-purple-50 via-cyan-50 to-amber-50 border-2 border-purple-200">
+          <div className="mobile-card text-center space-y-4">
+            <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-cyan-500 rounded-2xl flex items-center justify-center mx-auto shadow-lg">
+              <Brain className="w-8 h-8 text-white" />
+            </div>
+            <EducationalContent />
           </div>
-          <EducationalContent />
         </div>
         
         {/* Activity Library with Suspense for lazy loading */}
