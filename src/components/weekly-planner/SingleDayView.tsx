@@ -114,38 +114,6 @@ const SingleDayView: React.FC<SingleDayViewProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Day Header */}
-      <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
-        <div className="text-center mb-4">
-          <h2 className="text-3xl font-bold text-gray-800 mb-2">
-            {currentDate.toLocaleDateString('en-US', { weekday: 'long' }).toUpperCase()}
-          </h2>
-          <p className="text-lg text-gray-600 mb-4">
-            {currentDate.toLocaleDateString('en-US', { day: 'numeric', month: 'long' })}
-          </p>
-          <p className="text-sm text-gray-600">
-            {totalCount} activities • {completedCount} completed
-          </p>
-        </div>
-
-        {/* Progress indicator dots */}
-        <div className="flex justify-center space-x-2 mb-4">
-          <span className="text-sm text-gray-500">APR</span>
-          <div className="flex space-x-1 mx-4">
-            {[1, 2, 3, 4, 5].map(i => (
-              <div key={i} className="w-2 h-2 rounded-full bg-gray-300"></div>
-            ))}
-          </div>
-          <span className="text-sm font-semibold text-gray-800">MAY</span>
-          <div className="flex space-x-1 mx-4">
-            {[1, 2, 3, 4, 5].map(i => (
-              <div key={i} className="w-2 h-2 rounded-full bg-gray-300"></div>
-            ))}
-          </div>
-          <span className="text-sm text-gray-500">JUN</span>
-        </div>
-      </div>
-
       {/* Activities */}
       <div className="space-y-4">
         {dayActivities.map((activity, index) => {
