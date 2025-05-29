@@ -17,16 +17,26 @@ const AccordionDayCard: React.FC<AccordionDayCardProps> = ({
   onToggleCompletion,
   onActivityClick
 }) => {
-  const getPillarGradientBackground = (pillar: string, completed: boolean) => {
-    const baseOpacity = completed ? '0.8' : '0.6';
-    const gradients = {
-      mental: `bg-gradient-to-br from-purple-200/${baseOpacity} to-purple-300/${baseOpacity}`,
-      physical: `bg-gradient-to-br from-emerald-200/${baseOpacity} to-emerald-300/${baseOpacity}`,
-      social: `bg-gradient-to-br from-blue-200/${baseOpacity} to-blue-300/${baseOpacity}`,
-      environmental: `bg-gradient-to-br from-teal-200/${baseOpacity} to-teal-300/${baseOpacity}`,
-      instinctual: `bg-gradient-to-br from-orange-200/${baseOpacity} to-orange-300/${baseOpacity}`
+  const getPillarBackground = (pillar: string) => {
+    const backgrounds = {
+      mental: 'bg-purple-100',
+      physical: 'bg-green-100', 
+      social: 'bg-cyan-100',
+      environmental: 'bg-teal-100',
+      instinctual: 'bg-amber-100'
     };
-    return gradients[pillar as keyof typeof gradients] || `bg-gradient-to-br from-gray-200/${baseOpacity} to-gray-300/${baseOpacity}`;
+    return backgrounds[pillar as keyof typeof backgrounds] || 'bg-gray-100';
+  };
+
+  const getPillarBorder = (pillar: string) => {
+    const borders = {
+      mental: 'border-purple-200',
+      physical: 'border-green-200',
+      social: 'border-cyan-200', 
+      environmental: 'border-teal-200',
+      instinctual: 'border-amber-200'
+    };
+    return borders[pillar as keyof typeof borders] || 'border-gray-200';
   };
 
   const getPillarIcon = (pillar: string) => {
@@ -43,10 +53,10 @@ const AccordionDayCard: React.FC<AccordionDayCardProps> = ({
   const getPillarIconColor = (pillar: string) => {
     const colors = {
       mental: 'bg-purple-500 text-white',
-      physical: 'bg-emerald-500 text-white',
-      social: 'bg-blue-500 text-white',
+      physical: 'bg-green-500 text-white',
+      social: 'bg-cyan-500 text-white',
       environmental: 'bg-teal-500 text-white',
-      instinctual: 'bg-orange-500 text-white'
+      instinctual: 'bg-amber-500 text-white'
     };
     return colors[pillar as keyof typeof colors] || 'bg-gray-500 text-white';
   };
@@ -66,7 +76,8 @@ const AccordionDayCard: React.FC<AccordionDayCardProps> = ({
         const activityDetails = getActivityDetails(activity.activityId);
         if (!activityDetails) return null;
         
-        const pillarGradient = getPillarGradientBackground(activityDetails.pillar, activity.completed);
+        const pillarBg = getPillarBackground(activityDetails.pillar);
+        const pillarBorder = getPillarBorder(activityDetails.pillar);
         const pillarIcon = getPillarIcon(activityDetails.pillar);
         const pillarIconColor = getPillarIconColor(activityDetails.pillar);
         
@@ -75,16 +86,21 @@ const AccordionDayCard: React.FC<AccordionDayCardProps> = ({
             key={activity.id} 
             onClick={() => onActivityClick?.(activity)} 
             className={`
-              relative p-5 rounded-2xl cursor-pointer transition-all duration-200
-              hover:shadow-lg transform hover:scale-[1.02] border-3 border-gray-300
-              ${pillarGradient} backdrop-blur-sm
+              relative p-4 rounded-2xl cursor-pointer transition-all duration-200
+              hover:shadow-lg transform hover:scale-[1.02] border-2
+              ${pillarBg} ${pillarBorder}
+              shadow-sm
             `}
+            style={{ 
+              borderRadius: '16px',
+              boxShadow: '0 1px 5px rgba(0,0,0,0.05)'
+            }}
           >
             {/* Activity Content */}
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4 flex-1">
                 {/* Pillar Icon */}
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shadow-lg ${pillarIconColor}`}>
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shadow-sm ${pillarIconColor}`}>
                   {pillarIcon}
                 </div>
                 

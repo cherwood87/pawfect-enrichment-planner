@@ -23,18 +23,42 @@ const DayActivityCard: React.FC<DayActivityCardProps> = ({
   isStacked = false,
   stackIndex = 0
 }) => {
-  const getPillarColor = (pillar: string) => {
-    const colors = {
-      mental: 'from-purple-400 to-purple-500',
-      physical: 'from-green-400 to-green-500',
-      social: 'from-blue-400 to-blue-500',
-      environmental: 'from-teal-400 to-teal-500',
-      instinctual: 'from-orange-400 to-orange-500'
+  const getPillarBackground = (pillar: string) => {
+    const backgrounds = {
+      mental: 'bg-purple-100',
+      physical: 'bg-green-100',
+      social: 'bg-cyan-100', 
+      environmental: 'bg-teal-100',
+      instinctual: 'bg-amber-100'
     };
-    return colors[pillar as keyof typeof colors] || 'from-gray-400 to-gray-500';
+    return backgrounds[pillar as keyof typeof backgrounds] || 'bg-gray-100';
   };
 
-  const pillarGradient = getPillarColor(activityDetails.pillar);
+  const getPillarBorder = (pillar: string) => {
+    const borders = {
+      mental: 'border-purple-200',
+      physical: 'border-green-200',
+      social: 'border-cyan-200',
+      environmental: 'border-teal-200', 
+      instinctual: 'border-amber-200'
+    };
+    return borders[pillar as keyof typeof borders] || 'border-gray-200';
+  };
+
+  const getPillarGradient = (pillar: string) => {
+    const gradients = {
+      mental: 'from-purple-400 to-purple-500',
+      physical: 'from-green-400 to-green-500',
+      social: 'from-cyan-400 to-cyan-500',
+      environmental: 'from-teal-400 to-teal-500',
+      instinctual: 'from-amber-400 to-amber-500'
+    };
+    return gradients[pillar as keyof typeof gradients] || 'from-gray-400 to-gray-500';
+  };
+
+  const pillarBackground = getPillarBackground(activityDetails.pillar);
+  const pillarBorder = getPillarBorder(activityDetails.pillar);
+  const pillarGradient = getPillarGradient(activityDetails.pillar);
 
   const handleToggleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -50,22 +74,21 @@ const DayActivityCard: React.FC<DayActivityCardProps> = ({
   return (
     <div 
       className={`
-        relative w-full p-3 rounded-lg cursor-pointer
-        transition-all duration-200 hover:shadow-lg border
+        relative w-full p-4 rounded-2xl cursor-pointer
+        transition-all duration-200 hover:shadow-lg border-2
         ${activity.completed 
           ? 'border-emerald-200 bg-emerald-50 shadow-sm' 
-          : 'border-gray-200 bg-white hover:border-blue-200 shadow-md'
+          : `${pillarBackground} ${pillarBorder} shadow-sm`
         }
         ${isStacked ? 'shadow-lg' : ''}
       `}
       onClick={handleCardClick}
       style={{
-        transform: isStacked ? `rotate(${(stackIndex - 1) * 2}deg)` : 'none'
+        transform: isStacked ? `rotate(${(stackIndex - 1) * 2}deg)` : 'none',
+        borderRadius: '16px',
+        boxShadow: '0 1px 5px rgba(0,0,0,0.05)'
       }}
     >
-      {/* Enhanced pillar gradient bar */}
-      <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${pillarGradient} rounded-t-lg`} />
-      
       {/* Content */}
       <div className="space-y-2">
         {/* Header with completion toggle */}
@@ -89,7 +112,7 @@ const DayActivityCard: React.FC<DayActivityCardProps> = ({
           </button>
         </div>
 
-        {/* Simplified activity details */}
+        {/* Activity details */}
         <div className="flex items-center justify-between text-xs">
           <Badge 
             variant="secondary" 
@@ -103,7 +126,7 @@ const DayActivityCard: React.FC<DayActivityCardProps> = ({
           </div>
         </div>
 
-        {/* Enhanced completion indicator */}
+        {/* Completion indicator */}
         {activity.completed && (
           <div className="text-center">
             <div className="w-full h-1 bg-emerald-300 rounded-full" />

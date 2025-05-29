@@ -28,15 +28,26 @@ const VerticalDayCard: React.FC<VerticalDayCardProps> = ({
   const totalCount = activities.length;
   const isToday = new Date().getDay() === dayIndex;
 
-  const getPillarBackgroundColor = (pillar: string, completed: boolean) => {
-    const colors = {
-      mental: completed ? 'bg-purple-200' : 'bg-purple-100',
-      physical: completed ? 'bg-emerald-200' : 'bg-emerald-100',
-      social: completed ? 'bg-blue-200' : 'bg-blue-100',
-      environmental: completed ? 'bg-teal-200' : 'bg-teal-100',
-      instinctual: completed ? 'bg-orange-200' : 'bg-orange-100'
+  const getPillarBackground = (pillar: string) => {
+    const backgrounds = {
+      mental: 'bg-purple-100',
+      physical: 'bg-green-100',
+      social: 'bg-cyan-100',
+      environmental: 'bg-teal-100', 
+      instinctual: 'bg-amber-100'
     };
-    return colors[pillar as keyof typeof colors] || (completed ? 'bg-gray-200' : 'bg-gray-100');
+    return backgrounds[pillar as keyof typeof backgrounds] || 'bg-gray-100';
+  };
+
+  const getPillarBorder = (pillar: string) => {
+    const borders = {
+      mental: 'border-purple-200',
+      physical: 'border-green-200',
+      social: 'border-cyan-200',
+      environmental: 'border-teal-200',
+      instinctual: 'border-amber-200'
+    };
+    return borders[pillar as keyof typeof borders] || 'border-gray-200';
   };
 
   const getPillarIcon = (pillar: string) => {
@@ -53,16 +64,22 @@ const VerticalDayCard: React.FC<VerticalDayCardProps> = ({
   const getPillarIconColor = (pillar: string) => {
     const colors = {
       mental: 'bg-purple-500 text-white',
-      physical: 'bg-emerald-500 text-white',
-      social: 'bg-blue-500 text-white',
+      physical: 'bg-green-500 text-white',
+      social: 'bg-cyan-500 text-white',
       environmental: 'bg-teal-500 text-white',
-      instinctual: 'bg-orange-500 text-white'
+      instinctual: 'bg-amber-500 text-white'
     };
     return colors[pillar as keyof typeof colors] || 'bg-gray-500 text-white';
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+    <div 
+      className="bg-white rounded-2xl border-2 border-gray-200 overflow-hidden shadow-sm"
+      style={{ 
+        borderRadius: '16px',
+        boxShadow: '0 1px 5px rgba(0,0,0,0.05)'
+      }}
+    >
       {/* Day Header */}
       <div className={`
         flex items-center justify-between p-4 border-b border-gray-100
@@ -106,7 +123,8 @@ const VerticalDayCard: React.FC<VerticalDayCardProps> = ({
             const activityDetails = getActivityDetails(activity.activityId);
             if (!activityDetails) return null;
             
-            const pillarBg = getPillarBackgroundColor(activityDetails.pillar, activity.completed);
+            const pillarBg = getPillarBackground(activityDetails.pillar);
+            const pillarBorder = getPillarBorder(activityDetails.pillar);
             const pillarIcon = getPillarIcon(activityDetails.pillar);
             const pillarIconColor = getPillarIconColor(activityDetails.pillar);
             
@@ -116,9 +134,14 @@ const VerticalDayCard: React.FC<VerticalDayCardProps> = ({
                 onClick={() => onActivityClick?.(activity)} 
                 className={`
                   relative p-4 rounded-2xl cursor-pointer transition-all duration-200
-                  hover:shadow-md transform hover:scale-[1.02] border border-gray-100
-                  ${pillarBg}
+                  hover:shadow-md transform hover:scale-[1.02] border-2
+                  ${pillarBg} ${pillarBorder}
+                  shadow-sm
                 `}
+                style={{ 
+                  borderRadius: '16px',
+                  boxShadow: '0 1px 5px rgba(0,0,0,0.05)'
+                }}
               >
                 {/* Activity Content */}
                 <div className="flex items-center justify-between">
