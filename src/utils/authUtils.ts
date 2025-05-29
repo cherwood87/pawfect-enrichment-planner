@@ -55,8 +55,8 @@ export const robustSignOut = async () => {
       console.warn('⚠️ Supabase sign out failed (continuing anyway):', signOutError);
     }
     
-    // Step 3: Force page reload for clean state
-    console.log('🔄 Forcing page reload to ensure clean state...');
+    // Step 3: Use navigation instead of forcing page reload
+    console.log('🔄 Navigating to auth page...');
     window.location.href = '/auth';
     
   } catch (error) {
@@ -67,7 +67,7 @@ export const robustSignOut = async () => {
 };
 
 /**
- * Enhanced sign-in function with cleanup
+ * Enhanced sign-in function with cleanup but without aggressive reloading
  */
 export const robustSignIn = async (email: string, password: string) => {
   console.log('🔐 Starting robust sign-in process...');
@@ -96,9 +96,9 @@ export const robustSignIn = async (email: string, password: string) => {
     }
     
     if (data.user) {
-      console.log('✅ Sign in successful, redirecting...');
-      // Force page reload to ensure clean state
-      window.location.href = '/app';
+      console.log('✅ Sign in successful, user:', data.user.email);
+      // Return success - let the auth state change handler manage navigation
+      return { data, error: null };
     }
     
     return { data, error: null };

@@ -20,10 +20,17 @@ export interface DatabaseDog {
   last_updated: string;
   created_at: string;
   updated_at: string;
+  user_id: string; // Add user_id for RLS
 }
 
 export class DogService {
   static async createDog(dogData: Omit<Dog, 'id' | 'dateAdded' | 'lastUpdated'>): Promise<Dog> {
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      throw new Error('User must be authenticated to create a dog');
+    }
+
     const { data, error } = await supabase
       .from('dogs')
       .insert({
@@ -38,34 +45,49 @@ export class DogService {
         mobility_issues: dogData.mobilityIssues || [],
         image: dogData.image || dogData.photo || '',
         notes: dogData.notes || '',
-        quiz_results: dogData.quizResults ? JSON.parse(JSON.stringify(dogData.quizResults)) : null
+        quiz_results: dogData.quizResults ? JSON.parse(JSON.stringify(dogData.quizResults)) : null,
+        user_id: user.id // Associate with current user
       })
       .select()
       .single();
 
     if (error) {
       console.error('Error creating dog:', error);
-      throw new Error('Failed to create dog');
+      throw new Error('Failed to create dog: ' + error.message);
     }
 
     return this.mapToDog(data);
   }
 
   static async getAllDogs(): Promise<Dog[]> {
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      console.log('No authenticated user, returning empty array');
+      return [];
+    }
+
     const { data, error } = await supabase
       .from('dogs')
       .select('*')
+      .eq('user_id', user.id) // Filter by current user
       .order('created_at', { ascending: false });
 
     if (error) {
       console.error('Error fetching dogs:', error);
-      throw new Error('Failed to fetch dogs');
+      throw new Error('Failed to fetch dogs: ' + error.message);
     }
 
-    return data.map(this.mapToDog);
+    return (data || []).map(this.mapToDog);
   }
 
   static async updateDog(dog: Dog): Promise<Dog> {
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      throw new Error('User must be authenticated to update a dog');
+    }
+
     const { data, error } = await supabase
       .from('dogs')
       .update({
@@ -83,26 +105,34 @@ export class DogService {
         quiz_results: dog.quizResults ? JSON.parse(JSON.stringify(dog.quizResults)) : null
       })
       .eq('id', dog.id)
+      .eq('user_id', user.id) // Ensure user owns the dog
       .select()
       .single();
 
     if (error) {
       console.error('Error updating dog:', error);
-      throw new Error('Failed to update dog');
+      throw new Error('Failed to update dog: ' + error.message);
     }
 
     return this.mapToDog(data);
   }
 
   static async deleteDog(id: string): Promise<void> {
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      throw new Error('User must be authenticated to delete a dog');
+    }
+
     const { error } = await supabase
       .from('dogs')
       .delete()
-      .eq('id', id);
+      .eq('id', id)
+      .eq('user_id', user.id); // Ensure user owns the dog
 
     if (error) {
       console.error('Error deleting dog:', error);
-      throw new Error('Failed to delete dog');
+      throw new Error('Failed to delete dog: ' + error.message);
     }
   }
 
@@ -130,11 +160,18 @@ export class DogService {
   // Migration helper - moves dogs from localStorage to Supabase
   static async migrateFromLocalStorage(): Promise<void> {
     try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.log('No authenticated user, skipping migration');
+        return;
+      }
+
       const localDogs = localStorage.getItem('dogs');
       if (!localDogs) return;
 
       const dogs: Dog[] = JSON.parse(localDogs);
-      console.log(`Migrating ${dogs.length} dogs to Supabase...`);
+      console.log(`Migrating ${dogs.length} dogs to Supabase for user ${user.id}...`);
 
       for (const dog of dogs) {
         try {
@@ -145,7 +182,9 @@ export class DogService {
         }
       }
 
-      console.log('Dog migration completed');
+      // Clear localStorage after successful migration
+      localStorage.removeItem('dogs');
+      console.log('Dog migration completed and localStorage cleared');
     } catch (error) {
       console.error('Error during dog migration:', error);
     }

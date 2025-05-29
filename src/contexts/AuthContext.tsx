@@ -48,9 +48,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           
           if (event === 'SIGNED_IN' && session?.user) {
             console.log('👋 User signed in:', session.user.email);
+            // Navigate to app without page reload
             setTimeout(() => {
-              console.log('🎯 Auth initialization complete for user:', session.user.email);
-            }, 0);
+              console.log('🎯 Navigating to app dashboard...');
+              window.location.href = '/app';
+            }, 100);
           }
           
           if (event === 'TOKEN_REFRESHED') {

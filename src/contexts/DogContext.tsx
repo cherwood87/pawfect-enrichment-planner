@@ -3,6 +3,7 @@ import React, { createContext, useContext, useReducer, useEffect, ReactNode } fr
 import { Dog } from '@/types/dog';
 import { DogService } from '@/services/dogService';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface DogState {
   dogs: Dog[];
@@ -72,16 +73,40 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   });
 
   const { toast } = useToast();
+  const { user, loading: authLoading } = useAuth();
 
-  // Load dogs from Supabase on mount
+  // Load dogs from Supabase when user is authenticated
   useEffect(() => {
+    if (authLoading) {
+      console.log('🔐 Auth still loading, waiting...');
+      return;
+    }
+    
+    if (!user) {
+      console.log('👤 No authenticated user, clearing dogs state');
+      dispatch({ type: 'SET_DOGS', payload: [] });
+      dispatch({ type: 'SET_CURRENT_DOG', payload: '' });
+      dispatch({ type: 'SET_LOADING', payload: false });
+      return;
+    }
+
+    console.log('👤 User authenticated, loading dogs for:', user.email);
     loadDogs();
-  }, []);
+  }, [user, authLoading]);
 
   const loadDogs = async () => {
+    if (!user) {
+      console.log('❌ Cannot load dogs: no authenticated user');
+      return;
+    }
+
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
+      console.log('📋 Loading dogs for user:', user.email);
+      
       const dogs = await DogService.getAllDogs();
+      console.log('📋 Loaded dogs from Supabase:', dogs.length);
+      
       dispatch({ type: 'SET_DOGS', payload: dogs });
       
       // Set current dog from localStorage or first dog
@@ -92,7 +117,8 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         dispatch({ type: 'SET_CURRENT_DOG', payload: dogs[0].id });
       }
     } catch (error) {
-      console.error('Error loading dogs from Supabase:', error);
+      console.error('❌ Error loading dogs from Supabase:', error);
+      
       // Fallback to localStorage if Supabase fails
       try {
         const savedDogs = localStorage.getItem('dogs');
@@ -109,7 +135,7 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           }
         }
       } catch (localError) {
-        console.error('Error loading dogs from localStorage:', localError);
+        console.error('❌ Error loading dogs from localStorage:', localError);
       }
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false });
@@ -124,8 +150,17 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   }, [state.currentDogId, state.isLoading]);
 
   const addDog = async (dogData: Omit<Dog, 'id' | 'dateAdded' | 'lastUpdated'>) => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to add a dog.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
-      console.log('Adding new dog:', dogData.name);
+      console.log('Adding new dog for user:', user.email, dogData.name);
       const newDog = await DogService.createDog(dogData);
       dispatch({ type: 'ADD_DOG', payload: newDog });
       dispatch({ type: 'SET_CURRENT_DOG', payload: newDog.id });
@@ -135,18 +170,27 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         description: `${newDog.name} has been added to your profile.`,
       });
     } catch (error) {
-      console.error('Error adding dog:', error);
+      console.error('❌ Error adding dog:', error);
       toast({
         title: "Error",
-        description: "Failed to add dog. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to add dog. Please try again.",
         variant: "destructive",
       });
     }
   };
 
   const updateDog = async (dog: Dog) => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to update dogs.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
-      console.log('Updating dog:', dog.name);
+      console.log('Updating dog for user:', user.email, dog.name);
       const updatedDog = await DogService.updateDog(dog);
       dispatch({ type: 'UPDATE_DOG', payload: updatedDog });
       
@@ -155,19 +199,28 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         description: `${updatedDog.name}'s profile has been updated.`,
       });
     } catch (error) {
-      console.error('Error updating dog:', error);
+      console.error('❌ Error updating dog:', error);
       toast({
         title: "Error",
-        description: "Failed to update dog. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to update dog. Please try again.",
         variant: "destructive",
       });
     }
   };
 
   const deleteDog = async (id: string) => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to delete dogs.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       const dogToDelete = state.dogs.find(dog => dog.id === id);
-      console.log('Deleting dog with id:', id);
+      console.log('Deleting dog for user:', user.email, 'dog id:', id);
       await DogService.deleteDog(id);
       dispatch({ type: 'DELETE_DOG', payload: id });
       
@@ -176,10 +229,10 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         description: `${dogToDelete?.name || 'Dog'} has been removed from your profile.`,
       });
     } catch (error) {
-      console.error('Error deleting dog:', error);
+      console.error('❌ Error deleting dog:', error);
       toast({
         title: "Error",
-        description: "Failed to delete dog. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to delete dog. Please try again.",
         variant: "destructive",
       });
     }
@@ -190,11 +243,20 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       console.log('Setting current dog to:', id);
       dispatch({ type: 'SET_CURRENT_DOG', payload: id });
     } catch (error) {
-      console.error('Error setting current dog:', error);
+      console.error('❌ Error setting current dog:', error);
     }
   };
 
   const migrateFromLocalStorage = async () => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to migrate your data.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       dispatch({ type: 'SET_SYNCING', payload: true });
       
@@ -211,10 +273,10 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         description: "Your data has been successfully synced to the cloud!",
       });
     } catch (error) {
-      console.error('Error during migration:', error);
+      console.error('❌ Error during migration:', error);
       toast({
         title: "Migration Failed",
-        description: "Failed to sync data to the cloud. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to sync data to the cloud. Please try again.",
         variant: "destructive",
       });
     } finally {
