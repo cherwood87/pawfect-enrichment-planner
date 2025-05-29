@@ -1,44 +1,37 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, Heart, Sparkles, Target, TrendingUp } from 'lucide-react';
-
 interface EmptyDashboardProps {
   onAddDogOpen?: () => void;
   onPillarSelect?: (pillar: string, mode?: 'daily' | 'weekly') => void;
 }
-
-const features = [
-  {
-    icon: Target,
-    title: "Create personalized weekly enrichment plans",
-    color: "purple",
-    bgGradient: "from-purple-100 to-purple-200"
-  },
-  {
-    icon: Sparkles,
-    title: "Track enrichment activities across 5 key pillars",
-    color: "cyan",
-    bgGradient: "from-cyan-100 to-cyan-200"
-  },
-  {
-    icon: TrendingUp,
-    title: "Monitor your dog's progress and streaks",
-    color: "amber",
-    bgGradient: "from-amber-100 to-amber-200"
-  },
-  {
-    icon: Heart,
-    title: "Access our curated activity library",
-    color: "emerald",
-    bgGradient: "from-emerald-100 to-emerald-200"
-  }
-];
-
-const EmptyDashboard: React.FC<EmptyDashboardProps> = ({ onAddDogOpen, onPillarSelect }) => {
-  return (
-    <div className="container mx-auto mobile-container py-12">
+const features = [{
+  icon: Target,
+  title: "Create personalized weekly enrichment plans",
+  color: "purple",
+  bgGradient: "from-purple-100 to-purple-200"
+}, {
+  icon: Sparkles,
+  title: "Track enrichment activities across 5 key pillars",
+  color: "cyan",
+  bgGradient: "from-cyan-100 to-cyan-200"
+}, {
+  icon: TrendingUp,
+  title: "Monitor your dog's progress and streaks",
+  color: "amber",
+  bgGradient: "from-amber-100 to-amber-200"
+}, {
+  icon: Heart,
+  title: "Access our curated activity library",
+  color: "emerald",
+  bgGradient: "from-emerald-100 to-emerald-200"
+}];
+const EmptyDashboard: React.FC<EmptyDashboardProps> = ({
+  onAddDogOpen,
+  onPillarSelect
+}) => {
+  return <div className="container mx-auto mobile-container py-12">
       <div className="max-w-4xl mx-auto">
         {/* Hero Section */}
         <div className="text-center mb-12">
@@ -59,21 +52,14 @@ const EmptyDashboard: React.FC<EmptyDashboardProps> = ({ onAddDogOpen, onPillarS
             </span>
           </h1>
           
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
-            Transform your furry friend's life with science-based enrichment activities. 
-            Let's start by creating their personalized profile.
-          </p>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">Transform you rdog's life with science-based enrichment activities. Let's start by creating their personalized profile.</p>
         </div>
 
         {/* Main CTA Card */}
         <Card className="modern-card mb-12 overflow-hidden">
           <CardContent className="p-8 text-center bg-gradient-to-br from-purple-50 via-cyan-50 to-amber-50">
             <div className="mb-6">
-              <Button 
-                onClick={() => onAddDogOpen?.()}
-                size="lg"
-                className="bg-gradient-to-r from-purple-500 via-cyan-500 to-purple-600 hover:from-purple-600 hover:via-cyan-600 hover:to-purple-700 text-white px-12 py-6 text-xl rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105 border-2 border-purple-300"
-              >
+              <Button onClick={() => onAddDogOpen?.()} size="lg" className="bg-gradient-to-r from-purple-500 via-cyan-500 to-purple-600 hover:from-purple-600 hover:via-cyan-600 hover:to-purple-700 text-white px-12 py-6 text-xl rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105 border-2 border-purple-300">
                 <PlusCircle className="w-6 h-6 mr-3" />
                 Add Your Dog
               </Button>
@@ -108,21 +94,16 @@ const EmptyDashboard: React.FC<EmptyDashboardProps> = ({ onAddDogOpen, onPillarS
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {features.map((feature, idx) => {
-              const IconComponent = feature.icon;
-              return (
-                <Card 
-                  key={idx} 
-                  className={`hover:shadow-xl transition-all duration-300 transform hover:scale-105 bg-gradient-to-br ${feature.bgGradient} border-2 border-${feature.color}-300 rounded-3xl`}
-                >
+            const IconComponent = feature.icon;
+            return <Card key={idx} className={`hover:shadow-xl transition-all duration-300 transform hover:scale-105 bg-gradient-to-br ${feature.bgGradient} border-2 border-${feature.color}-300 rounded-3xl`}>
                   <CardContent className="p-6 flex items-center space-x-4">
                     <div className={`w-12 h-12 rounded-2xl bg-${feature.color}-100 flex items-center justify-center flex-shrink-0 shadow-lg border-2 border-${feature.color}-200`}>
                       <IconComponent className={`w-6 h-6 text-${feature.color}-600`} />
                     </div>
                     <p className="text-purple-800 font-medium">{feature.title}</p>
                   </CardContent>
-                </Card>
-              );
-            })}
+                </Card>;
+          })}
           </div>
         </div>
 
@@ -161,13 +142,10 @@ const EmptyDashboard: React.FC<EmptyDashboardProps> = ({ onAddDogOpen, onPillarS
           </CardContent>
         </Card>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 EmptyDashboard.defaultProps = {
   onAddDogOpen: () => {},
-  onPillarSelect: () => {},
+  onPillarSelect: () => {}
 };
-
 export default EmptyDashboard;
