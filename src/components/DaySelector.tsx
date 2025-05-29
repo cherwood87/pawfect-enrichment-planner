@@ -50,23 +50,29 @@ const DaySelector: React.FC<DaySelectorProps> = ({
     : `Select Day for Week ${targetWeek}`;
 
   return (
-    <div className="mb-4 p-4 bg-blue-50 rounded-lg">
-      <h3 className="font-medium text-gray-800 mb-2">{headerText}</h3>
+    <div className="card-secondary padding-content spacing-compact">
+      <h3 className="font-medium text-purple-800 mb-4">{headerText}</h3>
       <div className="grid grid-cols-7 gap-2">
         {dayNames.map((day, index) => {
           const dayDate = getDateForDay(index);
           const dateText = formatDate(dayDate);
+          const isSelected = selectedDayOfWeek === index;
           
           return (
             <Button
               key={day}
-              variant={selectedDayOfWeek === index ? "default" : "outline"}
+              variant={isSelected ? "default" : "outline"}
               size="sm"
               onClick={() => onDaySelect(index)}
-              className="text-xs flex flex-col p-2 h-auto"
+              className={cn(
+                "flex flex-col items-center p-3 h-auto transition-all duration-200",
+                isSelected 
+                  ? "btn-primary scale-105 shadow-md" 
+                  : "btn-outline hover:scale-105"
+              )}
             >
-              <span className="font-medium">{day.slice(0, 3)}</span>
-              <span className="text-xs opacity-75">{dateText}</span>
+              <span className="font-medium text-xs">{day.slice(0, 3)}</span>
+              <span className="text-xs opacity-75 mt-1">{dateText}</span>
             </Button>
           );
         })}

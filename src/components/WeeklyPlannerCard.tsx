@@ -44,7 +44,7 @@ const WeeklyPlannerCard: React.FC<WeeklyPlannerCardProps> = ({
 
   return (
     <>
-      <Card className="overflow-hidden shadow-lg border-2 border-purple-200">
+      <Card className="card-elevated overflow-hidden animate-fade-in-up">
         <WeeklyPlannerHeader 
           completedActivities={completedActivities} 
           totalActivities={totalActivities} 
