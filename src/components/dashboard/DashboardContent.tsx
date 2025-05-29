@@ -82,7 +82,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
   return <div className="min-h-screen bg-gradient-to-br from-purple-50 via-cyan-50 to-amber-50">
       <div className="container mx-auto mobile-container mobile-space-y">
         {/* Main Dashboard Content */}
-        <div className="mobile-space-y">
+        <div className="mobile-space-y bg-slate-100">
           {/* Weekly Planner */}
           <WeeklyPlannerCard onPillarSelect={onPillarSelect} onChatOpen={onChatOpen} />
         </div>
