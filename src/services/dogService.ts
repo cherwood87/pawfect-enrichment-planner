@@ -48,7 +48,7 @@ export class DogService {
         quiz_results: dogData.quizResults ? JSON.parse(JSON.stringify(dogData.quizResults)) : null,
         user_id: user.id
       })
-      .select('*, user_id')
+      .select()
       .single();
 
     if (error) {
@@ -69,7 +69,7 @@ export class DogService {
 
     const { data, error } = await supabase
       .from('dogs')
-      .select('*, user_id')
+      .select('*')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
@@ -106,7 +106,7 @@ export class DogService {
       })
       .eq('id', dog.id)
       .eq('user_id', user.id)
-      .select('*, user_id')
+      .select()
       .single();
 
     if (error) {

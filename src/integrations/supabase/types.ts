@@ -300,6 +300,7 @@ export type Database = {
           quiz_results: Json | null
           special_needs: string | null
           updated_at: string
+          user_id: string
           weight: number | null
         }
         Insert: {
@@ -319,6 +320,7 @@ export type Database = {
           quiz_results?: Json | null
           special_needs?: string | null
           updated_at?: string
+          user_id: string
           weight?: number | null
         }
         Update: {
@@ -338,6 +340,7 @@ export type Database = {
           quiz_results?: Json | null
           special_needs?: string | null
           updated_at?: string
+          user_id?: string
           weight?: number | null
         }
         Relationships: []
