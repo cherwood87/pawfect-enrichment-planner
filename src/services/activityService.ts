@@ -1,6 +1,8 @@
 
 import { ScheduledActivity, UserActivity } from '@/types/activity';
 import { ActivityDomainService } from './domain/ActivityDomainService';
+import { ActivityRepository } from './data/ActivityRepository';
+import { UserActivityService } from './userActivityService';
 
 export class ActivityService {
   // Scheduled Activities
@@ -23,20 +25,35 @@ export class ActivityService {
 
   // User Activities (Custom Activities)
   static async getUserActivities(dogId: string): Promise<UserActivity[]> {
-    // This will be implemented through the repository
-    throw new Error('User activities will be loaded through repository pattern');
+    try {
+      return await UserActivityService.getAll(dogId);
+    } catch (error) {
+      console.error('Failed to load user activities from Supabase, trying localStorage fallback:', error);
+      // Fallback to repository which handles localStorage
+      return ActivityRepository.getUserActivities(dogId, true);
+    }
   }
 
   static async createUserActivity(activity: Omit<UserActivity, 'id' | 'createdAt'>): Promise<UserActivity> {
     return ActivityDomainService.createUserActivity(activity, activity.dogId);
   }
 
-  // Migration helpers - these will be handled by the repository layer
+  // Migration helpers - now properly implemented
   static async migrateScheduledActivitiesFromLocalStorage(dogId: string): Promise<void> {
-    console.log('Migration will be handled by repository layer');
+    try {
+      await ActivityRepository.migrateFromLocalStorage(dogId);
+      console.log('Scheduled activities migration completed for dog:', dogId);
+    } catch (error) {
+      console.error('Failed to migrate scheduled activities for dog:', dogId, error);
+    }
   }
 
   static async migrateUserActivitiesFromLocalStorage(dogId: string): Promise<void> {
-    console.log('Migration will be handled by repository layer');
+    try {
+      await ActivityRepository.migrateFromLocalStorage(dogId);
+      console.log('User activities migration completed for dog:', dogId);
+    } catch (error) {
+      console.error('Failed to migrate user activities for dog:', dogId, error);
+    }
   }
 }
