@@ -33,35 +33,39 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       async (event, session) => {
         console.log('🔄 Auth state change:', event, session?.user?.email || 'no user');
         
-        try {
-          // Update state synchronously
-          setSession(session);
-          setUser(session?.user ?? null);
-          setLoading(false);
-          setError(null);
-          
-          // Handle specific auth events
-          if (event === 'SIGNED_OUT') {
-            console.log('👋 User signed out');
-            cleanupAuthState();
-          }
-          
-          if (event === 'SIGNED_IN' && session?.user) {
-            console.log('👋 User signed in:', session.user.email);
-            // No forced page reload - let React Router handle navigation naturally
-          }
-          
-          if (event === 'TOKEN_REFRESHED') {
-            console.log('🔄 Token refreshed for user:', session?.user?.email);
-          }
-        } catch (authError) {
-          console.error('❌ Error in auth state change handler:', authError);
+        // Update state synchronously - no async operations here to prevent deadlocks
+        setSession(session);
+        setUser(session?.user ?? null);
+        setError(null);
+        
+        // Handle specific auth events
+        if (event === 'SIGNED_OUT') {
+          console.log('👋 User signed out');
+          cleanupAuthState();
         }
+        
+        if (event === 'SIGNED_IN' && session?.user) {
+          console.log('👋 User signed in:', session.user.email);
+        }
+        
+        if (event === 'TOKEN_REFRESHED') {
+          console.log('🔄 Token refreshed for user:', session?.user?.email);
+        }
+        
+        // Always set loading to false after auth state change
+        setLoading(false);
       }
     );
 
-    // THEN check for existing session
+    // THEN check for existing session - with timeout for better UX
+    const sessionTimeout = setTimeout(() => {
+      console.log('⏰ Session check timeout, proceeding without session');
+      setLoading(false);
+    }, 3000); // 3 second timeout
+
     supabase.auth.getSession().then(({ data: { session }, error }) => {
+      clearTimeout(sessionTimeout);
+      
       if (error) {
         console.error('❌ Error getting session:', error);
         cleanupAuthState();
@@ -72,9 +76,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+    }).catch((error) => {
+      clearTimeout(sessionTimeout);
+      console.error('❌ Session check failed:', error);
+      setLoading(false);
     });
 
     return () => {
+      clearTimeout(sessionTimeout);
       console.log('🧹 Cleaning up auth subscription');
       subscription.unsubscribe();
     };
@@ -105,7 +114,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (error) {
         throw new Error(error.message);
       }
-      // Let the auth state change handler manage navigation naturally
+      // Navigation will be handled by auth state change
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Sign in failed';
       setError(errorMessage);

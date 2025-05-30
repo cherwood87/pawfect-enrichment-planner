@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
 import { Dog } from '@/types/dog';
 import { DogService } from '@/services/dogService';
@@ -10,6 +9,7 @@ interface DogState {
   currentDogId: string | null;
   isLoading: boolean;
   isSyncing: boolean;
+  error: string | null;
 }
 
 type DogAction =
@@ -19,7 +19,8 @@ type DogAction =
   | { type: 'DELETE_DOG'; payload: string }
   | { type: 'SET_CURRENT_DOG'; payload: string }
   | { type: 'SET_LOADING'; payload: boolean }
-  | { type: 'SET_SYNCING'; payload: boolean };
+  | { type: 'SET_SYNCING'; payload: boolean }
+  | { type: 'SET_ERROR'; payload: string | null };
 
 interface DogContextType {
   state: DogState;
@@ -37,21 +38,23 @@ const DogContext = createContext<DogContextType | undefined>(undefined);
 const dogReducer = (state: DogState, action: DogAction): DogState => {
   switch (action.type) {
     case 'SET_DOGS':
-      return { ...state, dogs: action.payload };
+      return { ...state, dogs: action.payload, error: null };
     case 'ADD_DOG':
-      return { ...state, dogs: [...state.dogs, action.payload] };
+      return { ...state, dogs: [...state.dogs, action.payload], error: null };
     case 'UPDATE_DOG':
       return {
         ...state,
         dogs: state.dogs.map(dog =>
           dog.id === action.payload.id ? action.payload : dog
-        )
+        ),
+        error: null
       };
     case 'DELETE_DOG':
       return {
         ...state,
         dogs: state.dogs.filter(dog => dog.id !== action.payload),
-        currentDogId: state.currentDogId === action.payload ? null : state.currentDogId
+        currentDogId: state.currentDogId === action.payload ? null : state.currentDogId,
+        error: null
       };
     case 'SET_CURRENT_DOG':
       return { ...state, currentDogId: action.payload };
@@ -59,6 +62,8 @@ const dogReducer = (state: DogState, action: DogAction): DogState => {
       return { ...state, isLoading: action.payload };
     case 'SET_SYNCING':
       return { ...state, isSyncing: action.payload };
+    case 'SET_ERROR':
+      return { ...state, error: action.payload };
     default:
       return state;
   }
@@ -69,13 +74,14 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     dogs: [],
     currentDogId: null,
     isLoading: true,
-    isSyncing: false
+    isSyncing: false,
+    error: null
   });
 
   const { toast } = useToast();
   const { user, loading: authLoading } = useAuth();
 
-  // Load dogs from Supabase when user is authenticated
+  // Optimized data loading with timeout and parallel operations
   useEffect(() => {
     if (authLoading) {
       console.log('🔐 Auth still loading, waiting...');
@@ -87,14 +93,15 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       dispatch({ type: 'SET_DOGS', payload: [] });
       dispatch({ type: 'SET_CURRENT_DOG', payload: '' });
       dispatch({ type: 'SET_LOADING', payload: false });
+      DogService.clearUserCache(); // Clear user cache
       return;
     }
 
     console.log('👤 User authenticated, loading dogs for:', user.email);
-    loadDogs();
+    loadDogsWithTimeout();
   }, [user, authLoading]);
 
-  const loadDogs = async () => {
+  const loadDogsWithTimeout = async () => {
     if (!user) {
       console.log('❌ Cannot load dogs: no authenticated user');
       return;
@@ -102,43 +109,75 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
+      dispatch({ type: 'SET_ERROR', payload: null });
       console.log('📋 Loading dogs for user:', user.email);
       
-      const dogs = await DogService.getAllDogs();
-      console.log('📋 Loaded dogs from Supabase:', dogs.length);
-      
-      dispatch({ type: 'SET_DOGS', payload: dogs });
-      
-      // Set current dog from localStorage or first dog
-      const savedCurrentDogId = localStorage.getItem('currentDogId');
-      if (savedCurrentDogId && dogs.find(dog => dog.id === savedCurrentDogId)) {
-        dispatch({ type: 'SET_CURRENT_DOG', payload: savedCurrentDogId });
-      } else if (dogs.length > 0) {
-        dispatch({ type: 'SET_CURRENT_DOG', payload: dogs[0].id });
-      }
-    } catch (error) {
-      console.error('❌ Error loading dogs from Supabase:', error);
-      
-      // Fallback to localStorage if Supabase fails
-      try {
-        const savedDogs = localStorage.getItem('dogs');
-        const savedCurrentDogId = localStorage.getItem('currentDogId');
+      // Add timeout for better UX
+      const loadingTimeout = setTimeout(() => {
+        console.log('⏰ Dog loading timeout, showing fallback');
+        dispatch({ type: 'SET_ERROR', payload: 'Loading is taking longer than expected. Please refresh the page.' });
+      }, 10000); // 10 second timeout
+
+      // Load dogs with parallel localStorage check
+      const [supabaseDogs, localStorageCheck] = await Promise.allSettled([
+        DogService.getAllDogs(),
+        checkLocalStorageForDogs()
+      ]);
+
+      clearTimeout(loadingTimeout);
+
+      if (supabaseDogs.status === 'fulfilled') {
+        const dogs = supabaseDogs.value;
+        console.log('📋 Loaded dogs from Supabase:', dogs.length);
         
-        if (savedDogs) {
-          const dogs = JSON.parse(savedDogs);
-          dispatch({ type: 'SET_DOGS', payload: dogs });
-          
-          if (savedCurrentDogId && dogs.find((dog: Dog) => dog.id === savedCurrentDogId)) {
-            dispatch({ type: 'SET_CURRENT_DOG', payload: savedCurrentDogId });
-          } else if (dogs.length > 0) {
-            dispatch({ type: 'SET_CURRENT_DOG', payload: dogs[0].id });
+        dispatch({ type: 'SET_DOGS', payload: dogs });
+        
+        // Set current dog from localStorage or first dog
+        const savedCurrentDogId = localStorage.getItem('currentDogId');
+        if (savedCurrentDogId && dogs.find(dog => dog.id === savedCurrentDogId)) {
+          dispatch({ type: 'SET_CURRENT_DOG', payload: savedCurrentDogId });
+        } else if (dogs.length > 0) {
+          dispatch({ type: 'SET_CURRENT_DOG', payload: dogs[0].id });
+        }
+      } else {
+        console.error('❌ Error loading dogs from Supabase:', supabaseDogs.reason);
+        dispatch({ type: 'SET_ERROR', payload: 'Failed to load your dogs. Please try refreshing the page.' });
+        
+        // Fallback to localStorage
+        if (localStorageCheck.status === 'fulfilled') {
+          const localDogs = localStorageCheck.value;
+          if (localDogs.length > 0) {
+            dispatch({ type: 'SET_DOGS', payload: localDogs });
+            console.log('📋 Loaded dogs from localStorage fallback:', localDogs.length);
           }
         }
-      } catch (localError) {
-        console.error('❌ Error loading dogs from localStorage:', localError);
       }
+    } catch (error) {
+      console.error('❌ Critical error loading dogs:', error);
+      dispatch({ type: 'SET_ERROR', payload: 'Failed to load your dogs. Please try refreshing the page.' });
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false });
+    }
+  };
+
+  const checkLocalStorageForDogs = async (): Promise<Dog[]> => {
+    try {
+      const savedDogs = localStorage.getItem('dogs');
+      const savedCurrentDogId = localStorage.getItem('currentDogId');
+      
+      if (savedDogs) {
+        const dogs = JSON.parse(savedDogs);
+        if (savedCurrentDogId && dogs.find((dog: Dog) => dog.id === savedCurrentDogId)) {
+          dispatch({ type: 'SET_CURRENT_DOG', payload: savedCurrentDogId });
+        } else if (dogs.length > 0) {
+          dispatch({ type: 'SET_CURRENT_DOG', payload: dogs[0].id });
+        }
+        return dogs;
+      }
+      return [];
+    } catch (error) {
+      console.error('❌ Error loading dogs from localStorage:', error);
+      return [];
     }
   };
 
@@ -266,7 +305,7 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       });
 
       await DogService.migrateFromLocalStorage();
-      await loadDogs(); // Reload from Supabase
+      await loadDogsWithTimeout(); // Reload from Supabase
 
       toast({
         title: "Migration Complete",

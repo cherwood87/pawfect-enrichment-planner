@@ -24,9 +24,38 @@ export interface DatabaseDog {
 }
 
 export class DogService {
+  // Cache for user authentication to reduce repeated calls
+  private static _currentUser: any = null;
+  private static _userPromise: Promise<any> | null = null;
+
+  private static async getCurrentUser() {
+    // Use cached user if available
+    if (this._currentUser) {
+      return this._currentUser;
+    }
+
+    // Reuse existing promise if one is in flight
+    if (this._userPromise) {
+      return this._userPromise;
+    }
+
+    // Create new promise and cache it
+    this._userPromise = supabase.auth.getUser().then(({ data: { user } }) => {
+      this._currentUser = user;
+      this._userPromise = null; // Clear promise cache
+      return user;
+    });
+
+    return this._userPromise;
+  }
+
+  static clearUserCache() {
+    this._currentUser = null;
+    this._userPromise = null;
+  }
+
   static async createDog(dogData: Omit<Dog, 'id' | 'dateAdded' | 'lastUpdated'>): Promise<Dog> {
-    // Get current user
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await this.getCurrentUser();
     if (!user) {
       throw new Error('User must be authenticated to create a dog');
     }
@@ -60,8 +89,7 @@ export class DogService {
   }
 
   static async getAllDogs(): Promise<Dog[]> {
-    // Get current user
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await this.getCurrentUser();
     if (!user) {
       console.log('No authenticated user, returning empty array');
       return [];
@@ -82,8 +110,7 @@ export class DogService {
   }
 
   static async updateDog(dog: Dog): Promise<Dog> {
-    // Get current user
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await this.getCurrentUser();
     if (!user) {
       throw new Error('User must be authenticated to update a dog');
     }
@@ -118,8 +145,7 @@ export class DogService {
   }
 
   static async deleteDog(id: string): Promise<void> {
-    // Get current user
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await this.getCurrentUser();
     if (!user) {
       throw new Error('User must be authenticated to delete a dog');
     }
@@ -149,7 +175,7 @@ export class DogService {
       breedGroup: dbDog.breed_group,
       mobilityIssues: dbDog.mobility_issues,
       image: dbDog.image,
-      photo: dbDog.image, // Keep for backward compatibility
+      photo: dbDog.image,
       notes: dbDog.notes,
       quizResults: dbDog.quiz_results,
       dateAdded: dbDog.date_added,
@@ -157,11 +183,10 @@ export class DogService {
     };
   }
 
-  // Migration helper - moves dogs from localStorage to Supabase
+  // Optimized migration with parallel processing
   static async migrateFromLocalStorage(): Promise<void> {
     try {
-      // Get current user
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = await this.getCurrentUser();
       if (!user) {
         console.log('No authenticated user, skipping migration');
         return;
@@ -173,18 +198,28 @@ export class DogService {
       const dogs: Dog[] = JSON.parse(localDogs);
       console.log(`Migrating ${dogs.length} dogs to Supabase for user ${user.id}...`);
 
-      for (const dog of dogs) {
+      // Process dogs in parallel for better performance
+      const migrationPromises = dogs.map(async (dog) => {
         try {
           await this.createDog(dog);
           console.log(`Migrated dog: ${dog.name}`);
+          return { success: true, dog: dog.name };
         } catch (error) {
           console.error(`Failed to migrate dog ${dog.name}:`, error);
+          return { success: false, dog: dog.name, error };
         }
-      }
+      });
 
-      // Clear localStorage after successful migration
-      localStorage.removeItem('dogs');
-      console.log('Dog migration completed and localStorage cleared');
+      const results = await Promise.allSettled(migrationPromises);
+      const successful = results.filter(r => r.status === 'fulfilled').length;
+      
+      console.log(`Migration completed: ${successful}/${dogs.length} dogs migrated successfully`);
+
+      // Only clear localStorage if all migrations were successful
+      if (successful === dogs.length) {
+        localStorage.removeItem('dogs');
+        console.log('Dog migration completed and localStorage cleared');
+      }
     } catch (error) {
       console.error('Error during dog migration:', error);
     }

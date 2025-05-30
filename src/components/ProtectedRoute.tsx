@@ -1,6 +1,6 @@
 
-import React, { useEffect } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import React from 'react';
+import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { LoadingSkeleton } from '@/components/ui/loading-skeleton';
 
@@ -9,31 +9,11 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { user, loading, session } = useAuth();
-  const navigate = useNavigate();
+  const { user, session, loading } = useAuth();
 
-  // Debug logging for protected route behavior
-  useEffect(() => {
-    console.log('🛡️ ProtectedRoute check');
-    console.log('👤 User:', user?.email || 'none');
-    console.log('📱 Session:', session ? 'exists' : 'none');
-    console.log('⏳ Loading:', loading);
-  }, [user, session, loading]);
-
-  // Handle navigation after auth state is determined
-  useEffect(() => {
-    if (!loading && user && session) {
-      console.log('✅ ProtectedRoute: User authenticated, ensuring proper navigation');
-      // Only navigate if we're not already on an app route
-      const currentPath = window.location.pathname;
-      if (currentPath === '/' || currentPath === '/auth') {
-        navigate('/app', { replace: true });
-      }
-    }
-  }, [user, session, loading, navigate]);
-
+  // Show loading only while auth is determining state
   if (loading) {
-    console.log('⏳ ProtectedRoute: Showing loading skeleton');
+    console.log('⏳ ProtectedRoute: Auth loading, showing skeleton');
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-orange-50">
         <LoadingSkeleton type="dashboard" />
@@ -41,12 +21,13 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     );
   }
 
+  // Redirect unauthenticated users
   if (!user || !session) {
-    console.log('🚫 ProtectedRoute: Redirecting unauthenticated user to /auth');
+    console.log('🚫 ProtectedRoute: No auth, redirecting to /auth');
     return <Navigate to="/auth" replace />;
   }
 
-  console.log('✅ ProtectedRoute: Allowing access for authenticated user');
+  console.log('✅ ProtectedRoute: User authenticated, rendering children');
   return <>{children}</>;
 };
 

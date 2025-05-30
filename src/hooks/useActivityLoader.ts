@@ -10,33 +10,6 @@ import { Dog } from '@/types/dog';
 export const useActivityLoader = (currentDog: Dog | null) => {
   const [isLoading, setIsLoading] = useState(false);
 
-  // Helper for migration: save discovered activities and config to Supabase
-  const migrateDiscoveredActivitiesToSupabase = async (
-    discoveredActivities: DiscoveredActivity[],
-    dogId: string
-  ) => {
-    if (!discoveredActivities?.length) return;
-    // Assumes ContentDiscoveryService.createDiscoveredActivities supports bulk insert
-    try {
-      await ContentDiscoveryService.createDiscoveredActivities(discoveredActivities, dogId);
-    } catch (error) {
-      console.error('Failed to migrate discovered activities to Supabase:', error);
-    }
-  };
-
-  // Helper for migration: save config to Supabase
-  const migrateDiscoveryConfigToSupabase = async (
-    config: ContentDiscoveryConfig,
-    dogId: string
-  ) => {
-    if (!config) return;
-    try {
-      await ContentDiscoveryService.saveDiscoveryConfig(config, dogId);
-    } catch (error) {
-      console.error('Failed to migrate discovery config to Supabase:', error);
-    }
-  };
-
   const loadActivitiesFromSupabase = async (
     setScheduledActivities: (activities: ScheduledActivity[]) => void,
     setUserActivities: (activities: UserActivity[]) => void,
@@ -53,80 +26,88 @@ export const useActivityLoader = (currentDog: Dog | null) => {
       
       console.log('🔄 Loading activities from Supabase for dog:', currentDog.name);
 
-      // Scheduled Activities with improved error handling
-      try {
-        const supabaseScheduledActivities = await ActivityService.getScheduledActivities(dogId);
-        console.log('📅 Loaded scheduled activities from Supabase:', supabaseScheduledActivities.length);
-        
-        if (supabaseScheduledActivities.length > 0) {
-          setScheduledActivities(supabaseScheduledActivities);
-        } else {
-          console.log('📅 No scheduled activities in Supabase, migrating from localStorage...');
-          await loadAndMigrateScheduledActivities();
-        }
-      } catch (error) {
-        console.error('❌ Error loading scheduled activities from Supabase:', error);
-        console.log('📅 Falling back to localStorage migration...');
+      // Execute all data loading operations in parallel for better performance
+      const [
+        scheduledResult,
+        userActivitiesResult,
+        discoveredActivitiesResult,
+        configResult
+      ] = await Promise.allSettled([
+        // Scheduled Activities
+        ActivityService.getScheduledActivities(dogId).catch((error) => {
+          console.warn('Scheduled activities failed, will try migration:', error);
+          return null;
+        }),
+        // User Activities
+        ActivityService.getUserActivities(dogId).catch((error) => {
+          console.warn('User activities failed, will try migration:', error);
+          return null;
+        }),
+        // Discovered Activities (try localStorage first)
+        (async () => {
+          const localDiscovered = getDiscoveredActivities(dogId);
+          if (localDiscovered && localDiscovered.length > 0) {
+            return localDiscovered;
+          }
+          try {
+            return await ContentDiscoveryService.getDiscoveredActivities(dogId);
+          } catch (error) {
+            console.warn('Discovery activities failed:', error);
+            return [];
+          }
+        })(),
+        // Discovery Config (try localStorage first)
+        (async () => {
+          const localConfig = localStorage.getItem(`discoveryConfig-${dogId}`);
+          if (localConfig) {
+            return JSON.parse(localConfig);
+          }
+          try {
+            return await ContentDiscoveryService.getDiscoveryConfig(dogId);
+          } catch (error) {
+            console.warn('Discovery config failed:', error);
+            return null;
+          }
+        })()
+      ]);
+
+      // Handle scheduled activities
+      if (scheduledResult.status === 'fulfilled' && scheduledResult.value && scheduledResult.value.length > 0) {
+        console.log('📅 Loaded scheduled activities from Supabase:', scheduledResult.value.length);
+        setScheduledActivities(scheduledResult.value);
+      } else {
+        console.log('📅 No scheduled activities in Supabase or failed, trying migration...');
         await loadAndMigrateScheduledActivities();
       }
 
-      // User Activities with improved error handling
-      try {
-        const supabaseUserActivities = await ActivityService.getUserActivities(dogId);
-        console.log('👤 Loaded user activities from Supabase:', supabaseUserActivities.length);
-        
-        if (supabaseUserActivities.length > 0) {
-          setUserActivities(supabaseUserActivities);
-        } else {
-          console.log('👤 No user activities in Supabase, migrating from localStorage...');
-          await loadAndMigrateUserActivities();
-        }
-      } catch (error) {
-        console.error('❌ Error loading user activities from Supabase:', error);
-        console.log('👤 Falling back to localStorage migration...');
+      // Handle user activities
+      if (userActivitiesResult.status === 'fulfilled' && userActivitiesResult.value && userActivitiesResult.value.length > 0) {
+        console.log('👤 Loaded user activities from Supabase:', userActivitiesResult.value.length);
+        setUserActivities(userActivitiesResult.value);
+      } else {
+        console.log('👤 No user activities in Supabase or failed, trying migration...');
         await loadAndMigrateUserActivities();
       }
 
-      // Discovered Activities (MIGRATION: localStorage to Supabase)
-      try {
-        const savedDiscovered = getDiscoveredActivities(dogId);
-        if (savedDiscovered && savedDiscovered.length > 0) {
-          console.log('🔍 Found discovered activities in localStorage, migrating...');
-          await migrateDiscoveredActivitiesToSupabase(savedDiscovered, dogId);
-          setDiscoveredActivities(savedDiscovered);
-        } else {
-          // Try to load from Supabase
-          const supabaseDiscovered = await ContentDiscoveryService.getDiscoveredActivities(dogId);
-          setDiscoveredActivities(supabaseDiscovered ?? []);
-        }
-      } catch (error) {
-        console.error('❌ Error handling discovered activities:', error);
-        setDiscoveredActivities([]);
+      // Handle discovered activities
+      if (discoveredActivitiesResult.status === 'fulfilled') {
+        const discoveredActivities = discoveredActivitiesResult.value || [];
+        console.log('🔍 Loaded discovered activities:', discoveredActivities.length);
+        setDiscoveredActivities(discoveredActivities);
       }
 
-      // Discovery Config (MIGRATION: localStorage to Supabase)
-      try {
-        const savedConfig = localStorage.getItem(`discoveryConfig-${dogId}`);
-        if (savedConfig) {
-          const config = JSON.parse(savedConfig);
-          console.log('⚙️ Found discovery config in localStorage, migrating...');
-          await migrateDiscoveryConfigToSupabase(config, dogId);
-          setDiscoveryConfig(config);
-        } else {
-          const supabaseConfig = await ContentDiscoveryService.getDiscoveryConfig(dogId);
-          if (supabaseConfig) setDiscoveryConfig(supabaseConfig);
-        }
-      } catch (error) {
-        console.error('❌ Error handling discovery config:', error);
-        // Continue with default config
+      // Handle discovery config
+      if (configResult.status === 'fulfilled' && configResult.value) {
+        console.log('⚙️ Loaded discovery config');
+        setDiscoveryConfig(configResult.value);
       }
 
-      console.log('✅ Successfully completed activity loading for dog:', currentDog.name);
+      console.log('✅ Successfully completed parallel activity loading for dog:', currentDog.name);
 
     } catch (error) {
       console.error('❌ Critical error during activity loading:', error);
       // Fallback to localStorage
-      console.log('🔄 Falling back to pure localStorage loading...');
+      console.log('🔄 Falling back to localStorage loading...');
       loadActivitiesFromLocalStorage(
         setScheduledActivities,
         setUserActivities,
@@ -146,23 +127,36 @@ export const useActivityLoader = (currentDog: Dog | null) => {
   ) => {
     console.log('📂 Loading activities from localStorage for dog:', dog.name);
     
-    const savedScheduled = localStorage.getItem(`scheduledActivities-${dog.id}`);
-    const savedUser = localStorage.getItem(`userActivities-${dog.id}`);
-    const savedDiscovered = getDiscoveredActivities(dog.id);
+    // Load all localStorage data in parallel
+    const [savedScheduled, savedUser, savedDiscovered] = [
+      localStorage.getItem(`scheduledActivities-${dog.id}`),
+      localStorage.getItem(`userActivities-${dog.id}`),
+      getDiscoveredActivities(dog.id)
+    ];
 
     if (savedScheduled) {
-      const parsedActivities = JSON.parse(savedScheduled);
-      const migratedActivities = parsedActivities.map(migrateScheduledActivity);
-      console.log('📅 Loaded scheduled activities from localStorage:', migratedActivities.length);
-      setScheduledActivities(migratedActivities);
+      try {
+        const parsedActivities = JSON.parse(savedScheduled);
+        const migratedActivities = parsedActivities.map(migrateScheduledActivity);
+        console.log('📅 Loaded scheduled activities from localStorage:', migratedActivities.length);
+        setScheduledActivities(migratedActivities);
+      } catch (error) {
+        console.error('Error parsing scheduled activities from localStorage:', error);
+        setScheduledActivities([]);
+      }
     } else {
       setScheduledActivities([]);
     }
 
     if (savedUser) {
-      const userActivities = JSON.parse(savedUser);
-      console.log('👤 Loaded user activities from localStorage:', userActivities.length);
-      setUserActivities(userActivities);
+      try {
+        const userActivities = JSON.parse(savedUser);
+        console.log('👤 Loaded user activities from localStorage:', userActivities.length);
+        setUserActivities(userActivities);
+      } catch (error) {
+        console.error('Error parsing user activities from localStorage:', error);
+        setUserActivities([]);
+      }
     } else {
       setUserActivities([]);
     }
