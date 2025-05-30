@@ -133,7 +133,7 @@ const Auth: React.FC = () => {
               </div>
             </div>
             <h1 className="text-3xl font-bold text-purple-800 mb-2">
-              Welcome to Paw Enrichment
+              Welcome to Beyond Busy Dog Enrichment Planner!
             </h1>
             <p className="text-gray-600">
               Sign in to continue your dog's enrichment journey
