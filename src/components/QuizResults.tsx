@@ -37,13 +37,13 @@ const QuizResultsComponent: React.FC<QuizResultsProps> = ({ results, onRetakeQui
   };
 
   const getScorePercentage = (score: number) => {
-    const maxScore = 12; // Adjust based on the number of questions per pillar * max weight
+    const maxScore = 12; // 4 questions per pillar * max 3 points
     return (score / maxScore) * 100;
   };
 
   return (
-    <Card className="max-w-md mx-auto border border-gray-200 shadow-xl rounded-3xl">
-      <CardHeader className="text-center pb-4">
+    <Card className="max-w-md mx-auto max-h-[90vh] overflow-y-auto border border-gray-200 shadow-xl rounded-3xl">
+      <CardHeader className="text-center pb-4 sticky top-0 bg-white z-10">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg font-bold text-gray-800">Quiz Results</CardTitle>
           <Button variant="ghost" size="sm" onClick={onClose}>✕</Button>
@@ -60,7 +60,7 @@ const QuizResultsComponent: React.FC<QuizResultsProps> = ({ results, onRetakeQui
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 pb-6">
         <div>
           <h4 className="font-medium text-gray-800 mb-3">Enrichment Pillar Rankings</h4>
           <div className="space-y-3">
