@@ -4,22 +4,27 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Edit, Trash2, Dog, Star } from 'lucide-react';
+import { Plus, Edit, Trash2, Dog, Star, Brain, Target } from 'lucide-react';
 import { useDog } from '@/contexts/DogContext';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 import { Dog as DogType } from '@/types/dog';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import AddDogForm from '@/components/AddDogForm';
 import EditDogForm from '@/components/EditDogForm';
 import DeleteConfirmation from '@/components/DeleteConfirmation';
+import DogProfileDialogs from '@/components/profile/DogProfileDialogs';
 
 const DogsTab = () => {
   const { state, currentDog, setCurrentDog, deleteDog } = useDog();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedDog, setSelectedDog] = useState<DogType | null>(null);
+  const [showQuizResults, setShowQuizResults] = useState(false);
+  const [showRetakeConfirmation, setShowRetakeConfirmation] = useState(false);
 
   const handleSetCurrentDog = (dogId: string) => {
     setCurrentDog(dogId);
@@ -44,11 +49,9 @@ const DogsTab = () => {
     
     try {
       await deleteDog(selectedDog.id);
-      // Close modal and clear selected dog
       setIsDeleteModalOpen(false);
       setSelectedDog(null);
       
-      // Show success message
       toast({
         title: "Dog profile deleted",
         description: `${selectedDog.name}'s profile has been successfully removed.`,
@@ -68,6 +71,39 @@ const DogsTab = () => {
     setSelectedDog(null);
   };
 
+  const handleTakeQuiz = (dog: DogType) => {
+    setCurrentDog(dog.id);
+    navigate('/dog-profile-quiz');
+  };
+
+  const handleViewResults = (dog: DogType) => {
+    setSelectedDog(dog);
+    setShowQuizResults(true);
+  };
+
+  const handleRetakeQuiz = () => {
+    setShowRetakeConfirmation(true);
+  };
+
+  const confirmRetakeQuiz = () => {
+    if (selectedDog) {
+      setCurrentDog(selectedDog.id);
+      setShowRetakeConfirmation(false);
+      setShowQuizResults(false);
+      setSelectedDog(null);
+      navigate('/dog-profile-quiz');
+    }
+  };
+
+  const closeRetakeConfirmation = () => {
+    setShowRetakeConfirmation(false);
+  };
+
+  const closeQuizResults = () => {
+    setShowQuizResults(false);
+    setSelectedDog(null);
+  };
+
   const getActivityLevelColor = (level: string) => {
     switch (level) {
       case 'low': return 'bg-blue-100 text-blue-700';
@@ -75,6 +111,28 @@ const DogsTab = () => {
       case 'high': return 'bg-purple-100 text-purple-700';
       default: return 'bg-gray-100 text-gray-700';
     }
+  };
+
+  const getPillarName = (pillar: string) => {
+    const names = {
+      mental: 'Mental',
+      physical: 'Physical', 
+      social: 'Social',
+      environmental: 'Environmental',
+      instinctual: 'Instinctual'
+    };
+    return names[pillar as keyof typeof names] || pillar;
+  };
+
+  const renderQuizSummary = (dog: DogType) => {
+    if (!dog.quizResults?.ranking) return null;
+    
+    const topTwoPillars = dog.quizResults.ranking.slice(0, 2);
+    return (
+      <div className="mt-2 text-xs text-gray-500 italic">
+        Top Pillars: {topTwoPillars.map(p => getPillarName(p.pillar)).join(' and ')} Enrichment
+      </div>
+    );
   };
 
   return (
@@ -160,6 +218,7 @@ const DogsTab = () => {
                             {dog.age} {dog.age === 1 ? 'year' : 'years'} old
                           </span>
                         </div>
+                        {renderQuizSummary(dog)}
                       </div>
 
                       {/* Actions */}
@@ -174,6 +233,30 @@ const DogsTab = () => {
                             Make Primary
                           </Button>
                         )}
+                        
+                        {/* Quiz Button */}
+                        {dog.quizResults ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleViewResults(dog)}
+                            className="rounded-xl border-orange-300 text-orange-700 hover:bg-orange-100 flex items-center space-x-1"
+                          >
+                            <Brain className="w-3 h-3" />
+                            <span>View Quiz Results</span>
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleTakeQuiz(dog)}
+                            className="rounded-xl border-green-300 text-green-700 hover:bg-green-100 flex items-center space-x-1"
+                          >
+                            <Target className="w-3 h-3" />
+                            <span>Take Personality Quiz</span>
+                          </Button>
+                        )}
+                        
                         <Button
                           variant="ghost"
                           size="sm"
@@ -223,6 +306,30 @@ const DogsTab = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Quiz Results Modal */}
+      {selectedDog && (
+        <DogProfileDialogs
+          showQuiz={false}
+          showResults={showQuizResults}
+          currentDog={selectedDog}
+          onQuizComplete={() => {}}
+          onRetakeQuiz={handleRetakeQuiz}
+          onCloseQuiz={() => {}}
+          onCloseResults={closeQuizResults}
+          setShowQuiz={() => {}}
+          setShowResults={setShowQuizResults}
+        />
+      )}
+
+      {/* Retake Quiz Confirmation */}
+      <DeleteConfirmation
+        isOpen={showRetakeConfirmation}
+        onClose={closeRetakeConfirmation}
+        onConfirm={confirmRetakeQuiz}
+        title="Retake Personality Quiz"
+        message={selectedDog ? `Are you sure you want to retake the personality quiz for ${selectedDog.name}? This will overwrite the existing results.` : ''}
+      />
 
       {/* Delete Confirmation */}
       <DeleteConfirmation
