@@ -1,11 +1,8 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Lightbulb, Zap, Star } from 'lucide-react';
-
 const PillarPreview_Grid: React.FC = () => {
-  return (
-    <section className="py-20 px-6 bg-gradient-to-br from-gray-50 to-purple-50">
+  return <section className="py-20 px-6 bg-gradient-to-br from-gray-50 to-purple-50">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold text-purple-800 mb-4">
@@ -59,9 +56,7 @@ const PillarPreview_Grid: React.FC = () => {
           <CardContent className="p-8 text-center">
             <div className="mb-6">
               <div className="inline-flex items-center space-x-2 bg-white/80 backdrop-blur-sm rounded-full px-6 py-3 shadow-lg">
-                <span className="text-lg font-bold text-purple-800">
-                  🎯 Take the quiz → 📋 Get custom plan → 📈 Track progress → 🐕 Happy dog!
-                </span>
+                <span className="text-lg font-bold text-purple-800">Take the quiz → Get custom plan →  Track progress </span>
               </div>
             </div>
             <h3 className="text-2xl font-bold text-purple-800 mb-4">
@@ -74,8 +69,6 @@ const PillarPreview_Grid: React.FC = () => {
           </CardContent>
         </Card>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default PillarPreview_Grid;
