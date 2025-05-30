@@ -64,7 +64,7 @@ const QuizResultsComponent: React.FC<QuizResultsProps> = ({ results, onRetakeQui
         <div>
           <h4 className="font-medium text-gray-800 mb-3">Enrichment Pillar Rankings</h4>
           <div className="space-y-3">
-            {results.ranking.map((item, index) => {
+            {results.ranking.map((item) => {
               const IconComponent = pillarIcons[item.pillar as keyof typeof pillarIcons];
               const color = pillarColors[item.pillar as keyof typeof pillarColors];
               const name = pillarNames[item.pillar as keyof typeof pillarNames];
@@ -88,17 +88,6 @@ const QuizResultsComponent: React.FC<QuizResultsProps> = ({ results, onRetakeQui
                 </div>
               );
             })}
-          </div>
-        </div>
-
-        <div>
-          <h4 className="font-medium text-gray-800 mb-3">Recommended Activities</h4>
-          <div className="grid grid-cols-2 gap-2">
-            {results.recommendations.map((rec, index) => (
-              <Badge key={index} variant="outline" className="text-xs p-2 text-center">
-                {rec}
-              </Badge>
-            ))}
           </div>
         </div>
 
