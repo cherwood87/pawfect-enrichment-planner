@@ -1,18 +1,13 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
-
 const CTA_AddDog: React.FC = () => {
   const navigate = useNavigate();
-
   const handleGetStarted = () => {
     navigate('/app');
   };
-
-  return (
-    <section className="py-20 px-6 bg-gradient-to-r from-purple-600 via-cyan-600 to-purple-600">
+  return <section className="py-20 px-6 bg-gradient-to-r from-purple-600 via-cyan-600 to-purple-600">
       <div className="max-w-4xl mx-auto text-center">
         <Card className="bg-white/95 backdrop-blur-sm shadow-2xl rounded-3xl border-4 border-white/50">
           <CardContent className="p-12">
@@ -49,11 +44,7 @@ const CTA_AddDog: React.FC = () => {
               </div>
             </div>
 
-            <Button 
-              onClick={handleGetStarted}
-              size="lg" 
-              className="bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 text-xl px-12 py-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
-            >
+            <Button onClick={handleGetStarted} size="lg" className="bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 text-xl px-12 py-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
               Start Your Dog's Journey!
             </Button>
             
@@ -62,9 +53,7 @@ const CTA_AddDog: React.FC = () => {
             </p>
 
             <div className="mt-8 pt-8 border-t border-purple-200">
-              <p className="text-lg font-semibold text-purple-800 mb-4">
-                Join the Pack! 🐾
-              </p>
+              <p className="text-lg font-semibold text-purple-800 mb-4">Join the Pack! </p>
               <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-600">
                 <div className="flex items-center bg-white/50 rounded-full px-4 py-2">
                   <div className="w-2 h-2 bg-emerald-400 rounded-full mr-2"></div>
@@ -83,8 +72,6 @@ const CTA_AddDog: React.FC = () => {
           </CardContent>
         </Card>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default CTA_AddDog;
