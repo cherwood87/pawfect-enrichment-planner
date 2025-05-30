@@ -1,9 +1,11 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
+import { AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { quizQuestions } from '@/data/quizQuestions';
 import { QuizResults } from '@/types/quiz';
 import { analyzeQuizResults } from '@/utils/quizAnalysis';
@@ -21,20 +23,34 @@ const DogPersonalityQuiz: React.FC<DogPersonalityQuizProps> = ({
 }) => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const progress = ((currentQuestion + 1) / quizQuestions.length) * 100;
+  const answeredQuestions = Object.keys(answers).length;
+  const canProceed = currentQuestion < quizQuestions.length - 1;
+  const isLastQuestion = currentQuestion === quizQuestions.length - 1;
 
   const handleAnswer = (questionId: string, value: string) => {
     setAnswers(prev => ({ ...prev, [questionId]: value }));
   };
 
-  const handleNext = () => {
-    if (currentQuestion < quizQuestions.length - 1) {
+  const handleNext = async () => {
+    if (canProceed) {
       setCurrentQuestion(prev => prev + 1);
     } else {
       // Quiz completed, analyze results
-      const results = analyzeQuizResults(quizQuestions, answers);
-      onComplete(results);
+      setIsAnalyzing(true);
+      
+      try {
+        // Add a small delay to show the analyzing state
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        const results = analyzeQuizResults(answers);
+        onComplete(results);
+      } catch (error) {
+        console.error('Error analyzing quiz results:', error);
+        setIsAnalyzing(false);
+      }
     }
   };
 
@@ -46,6 +62,28 @@ const DogPersonalityQuiz: React.FC<DogPersonalityQuizProps> = ({
 
   const currentQuestionData = quizQuestions[currentQuestion];
   const currentAnswer = answers[currentQuestionData.id];
+
+  // Show analyzing state
+  if (isAnalyzing) {
+    return (
+      <Card className="max-w-2xl mx-auto border border-gray-200 shadow-xl rounded-3xl">
+        <CardContent className="p-8 text-center">
+          <div className="mb-6">
+            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+              <span className="text-2xl">🧠</span>
+            </div>
+            <h3 className="text-xl font-bold text-gray-800 mb-2">
+              Analyzing {dogName}'s Personality...
+            </h3>
+            <p className="text-sm text-gray-600 mb-4">
+              We're processing the quiz results to create personalized enrichment recommendations.
+            </p>
+            <Progress value={100} className="mb-4" />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="max-w-2xl mx-auto border border-gray-200 shadow-xl rounded-3xl">
@@ -63,6 +101,13 @@ const DogPersonalityQuiz: React.FC<DogPersonalityQuizProps> = ({
             <span>{Math.round(progress)}% Complete</span>
           </div>
           <Progress value={progress} className="w-full" />
+          
+          {answeredQuestions < quizQuestions.length && (
+            <div className="flex items-center justify-center mt-2 text-xs text-gray-500">
+              <AlertCircle className="w-3 h-3 mr-1" />
+              <span>{quizQuestions.length - answeredQuestions} questions remaining</span>
+            </div>
+          )}
         </div>
       </CardHeader>
 
@@ -77,11 +122,11 @@ const DogPersonalityQuiz: React.FC<DogPersonalityQuizProps> = ({
             onValueChange={(value) => handleAnswer(currentQuestionData.id, value)}
           >
             {currentQuestionData.options.map((option) => (
-              <div key={option.value} className="flex items-center space-x-2 p-3 rounded-lg hover:bg-gray-50">
+              <div key={option.value} className="flex items-center space-x-3 p-4 rounded-lg hover:bg-gray-50 border border-transparent hover:border-gray-200 transition-colors">
                 <RadioGroupItem value={option.value} id={option.value} />
                 <Label 
                   htmlFor={option.value} 
-                  className="text-gray-700 cursor-pointer flex-1"
+                  className="text-gray-700 cursor-pointer flex-1 leading-relaxed"
                 >
                   {option.label}
                 </Label>
@@ -95,17 +140,38 @@ const DogPersonalityQuiz: React.FC<DogPersonalityQuizProps> = ({
             variant="outline"
             onClick={handleBack}
             disabled={currentQuestion === 0}
+            className="flex items-center space-x-2"
           >
-            Back
+            <ChevronLeft className="w-4 h-4" />
+            <span>Back</span>
           </Button>
           
           <Button
             onClick={handleNext}
             disabled={!currentAnswer}
-            className="bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600 text-white"
+            className="bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600 text-white flex items-center space-x-2"
           >
-            {currentQuestion === quizQuestions.length - 1 ? 'Complete Quiz' : 'Next'}
+            <span>{isLastQuestion ? 'Complete Quiz' : 'Next'}</span>
+            {!isLastQuestion && <ChevronRight className="w-4 h-4" />}
           </Button>
+        </div>
+
+        {/* Quiz progress indicator */}
+        <div className="pt-2 border-t border-gray-100">
+          <div className="flex justify-center space-x-1">
+            {quizQuestions.map((_, index) => (
+              <div
+                key={index}
+                className={`w-2 h-2 rounded-full transition-colors ${
+                  index <= currentQuestion
+                    ? 'bg-blue-500'
+                    : answers[quizQuestions[index].id]
+                    ? 'bg-green-500'
+                    : 'bg-gray-200'
+                }`}
+              />
+            ))}
+          </div>
         </div>
       </CardContent>
     </Card>

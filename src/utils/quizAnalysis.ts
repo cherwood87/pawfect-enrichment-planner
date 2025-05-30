@@ -1,5 +1,6 @@
 
 import { QuizResults, QuizQuestion } from '@/types/quiz';
+import { quizQuestions } from '@/data/quizQuestions';
 
 export const generateReason = (pillar: string, score: number): string => {
   const reasons = {
@@ -29,22 +30,19 @@ export const determinePersonality = (scores: Record<string, number>): string => 
 
 export const generateRecommendations = (topPillars: Array<{pillar: string; rank: number; score: number; reason: string}>): string[] => {
   const recommendations: Record<string, string[]> = {
-    mental: ['Puzzle feeders', 'Training sessions', 'Hide and seek games'],
-    physical: ['Daily walks', 'Fetch games', 'Agility training'],
-    social: ['Dog park visits', 'Playdates', 'Group training classes'],
-    environmental: ['New walking routes', 'Different surfaces', 'Outdoor adventures'],
-    instinctual: ['Sniff walks', 'Digging boxes', 'Scent games']
+    mental: ['Puzzle feeders', 'Training sessions', 'Hide and seek games', 'Nose work'],
+    physical: ['Daily walks', 'Fetch games', 'Agility training', 'Swimming'],
+    social: ['Dog park visits', 'Playdates', 'Group training classes', 'Family activities'],
+    environmental: ['New walking routes', 'Different surfaces', 'Outdoor adventures', 'Seasonal activities'],
+    instinctual: ['Sniff walks', 'Digging boxes', 'Scent games', 'Foraging activities']
   };
   
   return topPillars.flatMap(pillar => 
     recommendations[pillar.pillar]?.slice(0, 2) || []
-  ).slice(0, 4);
+  ).slice(0, 6);
 };
 
-export const analyzeQuizResults = (
-  questions: QuizQuestion[], 
-  answers: Record<string, string>
-): QuizResults => {
+export const analyzeQuizResults = (answers: Record<string, string>): QuizResults => {
   // Calculate pillar scores
   const pillarScores: Record<string, number> = {
     mental: 0,
@@ -54,7 +52,8 @@ export const analyzeQuizResults = (
     instinctual: 0
   };
 
-  questions.forEach(question => {
+  // Process each question and accumulate scores
+  quizQuestions.forEach(question => {
     const answer = answers[question.id];
     if (answer) {
       const option = question.options.find(opt => opt.value === answer);
