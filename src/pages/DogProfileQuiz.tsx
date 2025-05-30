@@ -1,9 +1,10 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useDog } from '@/contexts/DogContext';
 import DogPersonalityQuiz from '@/components/DogPersonalityQuiz';
-import QuizResultsComponent from '@/components/QuizResultsComponent';
+import QuizResultsComponent from '@/components/QuizResults';
 import { ArrowLeft, PlusCircle } from 'lucide-react';
 import { QuizResults } from '@/types/quiz';
 
