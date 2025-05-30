@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -68,7 +67,9 @@ const DogProfileQuizPage: React.FC = () => {
 
   const handleResultsClose = () => {
     setQuizCompleted(false);
-    // Optionally return to Dogs tab or leave as-is
+    setQuizResults(null);
+    // ✅ Redirect to Account Settings - Dogs tab
+    window.location.href = '/settings?tab=dogs';
   };
 
   return (
