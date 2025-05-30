@@ -31,19 +31,117 @@ interface ChatModalProps {
   chatContext?: ActivityHelpContext;
 }
 
-// Utility to strip JSON blocks and markdown from LLM reply
 function stripJsonBlocks(text: string): string {
   return text
-    .replace(/(\{[\s\S]*?"title":\s*".+?[\s\S]*?"energyLevel":\s*".+?"[\s\S]*?\})/g, '') // remove JSON blocks
-    .replace(/\*\*(.*?)\*\*/g, '$1') // bold markdown
-    .replace(/\*(.*?)\*/g, '$1') // italic markdown
-    .replace(/^#+\s*/gm, '') // markdown headings
+    .replace(/(\{[\s\S]*?"title":\s*".+?[\s\S]*?"energyLevel":\s*".+?"[\s\S]*?\})/g, '')
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/\*(.*?)\*/g, '$1')
+    .replace(/^#+\s*/gm, '')
     .trim();
 }
 
 const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, chatContext }) => {
-  // ... rest of your component remains unchanged
-  // Only stripJsonBlocks was updated above
+  const [input, setInput] = useState('');
+  const { currentConversation, isLoading, sendMessage } = useChat();
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleSend = async () => {
+    if (!input.trim() || isLoading) return;
+    const messageContent = input.trim();
+    setInput('');
+    try {
+      await sendMessage(messageContent);
+    } catch (error) {
+      console.error('Send message failed:', error);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen && inputRef.current) {
+      setTimeout(() => inputRef.current?.focus(), 100);
+    }
+  }, [isOpen]);
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-md h-[600px] flex flex-col p-0">
+        <DialogHeader className="p-4 pb-0">
+          <DialogTitle className="flex items-center space-x-2">
+            <MessageCircle className="w-5 h-5 text-blue-500" />
+            <span>Chat</span>
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="flex-1 flex flex-col min-h-0">
+          <ScrollArea className="flex-1 p-4">
+            {currentConversation?.messages.map((message) => (
+              <div
+                key={message.id}
+                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                <div
+                  className={`max-w-[80%] p-3 rounded-lg ${
+                    message.role === 'user'
+                      ? 'bg-blue-500 text-white rounded-br-sm'
+                      : 'bg-gray-100 text-gray-800 rounded-bl-sm'
+                  }`}
+                >
+                  <p className="text-sm whitespace-pre-wrap">
+                    {message.role === 'assistant'
+                      ? stripJsonBlocks(message.content)
+                      : message.content}
+                  </p>
+                </div>
+              </div>
+            ))}
+
+            {isLoading && (
+              <div className="flex justify-start">
+                <div className="bg-gray-100 text-gray-800 rounded-lg rounded-bl-sm p-3">
+                  <div className="flex items-center space-x-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span className="text-sm">Thinking...</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </ScrollArea>
+
+          <div className="p-4 border-t">
+            <div className="flex space-x-2">
+              <Input
+                ref={inputRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Ask your question..."
+                disabled={isLoading}
+                className="flex-1"
+              />
+              <Button
+                onClick={handleSend}
+                disabled={!input.trim() || isLoading}
+                size="icon"
+              >
+                {isLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Send className="w-4 h-4" />
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
 };
 
 export default ChatModal;
