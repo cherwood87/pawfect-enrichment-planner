@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -11,7 +12,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import ErrorBoundary from '@/components/error/ErrorBoundary';
 import { useRetry } from '@/hooks/useRetry';
 import { handleError, getUserFriendlyMessage } from '@/utils/errorUtils';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 
 const Auth: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -122,9 +123,144 @@ const Auth: React.FC = () => {
   const clearError = () => setError(null);
 
   return (
-    // ... UI code remains unchanged (same as provided above)
     <ErrorBoundary>
-      {/* Form UI here */}
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-cyan-50 to-amber-50 flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-8">
+            <div className="flex justify-center mb-4">
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-cyan-500 rounded-full flex items-center justify-center">
+                <Heart className="w-8 h-8 text-white" />
+              </div>
+            </div>
+            <h1 className="text-3xl font-bold text-purple-800 mb-2">
+              Welcome to Paw Enrichment
+            </h1>
+            <p className="text-gray-600">
+              Sign in to continue your dog's enrichment journey
+            </p>
+          </div>
+
+          <Card className="shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
+            <CardHeader className="space-y-1 pb-4">
+              <CardTitle className="text-2xl text-center text-purple-800">
+                Get Started
+              </CardTitle>
+              <CardDescription className="text-center text-gray-600">
+                Enter your credentials to access your account
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue="signin" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 mb-6">
+                  <TabsTrigger value="signin">Sign In</TabsTrigger>
+                  <TabsTrigger value="signup">Sign Up</TabsTrigger>
+                </TabsList>
+
+                {error && (
+                  <Alert className="mb-4 border-red-200 bg-red-50">
+                    <AlertCircle className="h-4 w-4 text-red-600" />
+                    <AlertDescription className="text-red-800">
+                      {error}
+                      <button
+                        onClick={clearError}
+                        className="ml-2 text-red-600 hover:text-red-800 underline"
+                      >
+                        Dismiss
+                      </button>
+                    </AlertDescription>
+                  </Alert>
+                )}
+
+                <TabsContent value="signin">
+                  <form onSubmit={handleSignIn} className="space-y-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700 flex items-center">
+                        <Mail className="w-4 h-4 mr-2" />
+                        Email
+                      </label>
+                      <Input
+                        type="email"
+                        placeholder="your@email.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="border-purple-200 focus:border-purple-400"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700 flex items-center">
+                        <Lock className="w-4 h-4 mr-2" />
+                        Password
+                      </label>
+                      <Input
+                        type="password"
+                        placeholder="Enter your password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="border-purple-200 focus:border-purple-400"
+                        required
+                      />
+                    </div>
+                    <Button
+                      type="submit"
+                      className="w-full bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600"
+                      disabled={loading || isRetrying}
+                    >
+                      {loading || isRetrying ? 'Signing In...' : 'Sign In'}
+                    </Button>
+                  </form>
+                </TabsContent>
+
+                <TabsContent value="signup">
+                  <form onSubmit={handleSignUp} className="space-y-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700 flex items-center">
+                        <Mail className="w-4 h-4 mr-2" />
+                        Email
+                      </label>
+                      <Input
+                        type="email"
+                        placeholder="your@email.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="border-purple-200 focus:border-purple-400"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700 flex items-center">
+                        <Lock className="w-4 h-4 mr-2" />
+                        Password
+                      </label>
+                      <Input
+                        type="password"
+                        placeholder="Create a password (min 6 characters)"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="border-purple-200 focus:border-purple-400"
+                        required
+                      />
+                    </div>
+                    <Button
+                      type="submit"
+                      className="w-full bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600"
+                      disabled={loading || isRetrying}
+                    >
+                      {loading || isRetrying ? 'Creating Account...' : 'Sign Up'}
+                    </Button>
+                  </form>
+                </TabsContent>
+              </Tabs>
+
+              <div className="mt-6 text-center">
+                <p className="text-sm text-gray-600">
+                  By continuing, you agree to our Terms of Service
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </ErrorBoundary>
   );
 };
