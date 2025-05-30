@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -34,7 +33,7 @@ const DogPersonalityQuiz: React.FC<DogPersonalityQuizProps> = ({
       setCurrentQuestion(prev => prev + 1);
     } else {
       // Quiz completed, analyze results
-      const results = analyzeQuizResults(answers);
+      const results = analyzeQuizResults(quizQuestions, answers);
       onComplete(results);
     }
   };
