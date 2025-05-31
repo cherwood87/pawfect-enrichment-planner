@@ -1,4 +1,3 @@
-
 import { ScheduledActivity, UserActivity } from '@/types/activity';
 import { Dog } from '@/types/dog';
 import { ActivityDomainService } from '@/services/domain/ActivityDomainService';
