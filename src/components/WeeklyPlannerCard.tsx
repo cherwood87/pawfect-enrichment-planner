@@ -1,13 +1,15 @@
+
 import React, { useState, useMemo, useCallback } from 'react';
 import { useActivity } from '@/contexts/ActivityContext';
 import { useDog } from '@/contexts/DogContext';
 import WeeklyPlannerHeader from './weekly-planner/WeeklyPlannerHeader';
-import VerticalDayCard from './VerticalDayCard'; // This component replaces the old accordion-style day panels
+import VerticalDayCard from './weekly-planner/VerticalDayCard';
 import WeeklySummary from './weekly-planner/WeeklySummary';
 import EmptyWeeklyPlanner from './weekly-planner/EmptyWeeklyPlanner';
 import ActivityDetailModal from './weekly-planner/ActivityDetailModal';
 
 const DAY_LABELS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const DAY_LABELS_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 const WeeklyPlannerCard = ({ onPillarSelect, onChatOpen }) => {
   const { scheduledActivities, toggleActivityCompletion, getActivityDetails } = useActivity();
@@ -31,7 +33,9 @@ const WeeklyPlannerCard = ({ onPillarSelect, onChatOpen }) => {
       dayDate.setDate(startOfWeek.getDate() + dayIdx);
       return {
         label: DAY_LABELS[dayDate.getDay()],
+        labelShort: DAY_LABELS_SHORT[dayDate.getDay()],
         date: dayDate,
+        dayIndex: dayDate.getDay(),
         activities: scheduledActivities
           .filter(
             (a) => new Date(a.scheduledDate).toDateString() === dayDate.toDateString() &&
@@ -55,6 +59,11 @@ const WeeklyPlannerCard = ({ onPillarSelect, onChatOpen }) => {
     setSelectedActivity(null);
   }, []);
 
+  // Calculate totals for summary
+  const totalActivities = weekDays.reduce((total, day) => total + day.activities.length, 0);
+  const completedActivities = weekDays.reduce((total, day) => 
+    total + day.activities.filter(a => a.completed).length, 0);
+
   if (!hasActivities) {
     return <EmptyWeeklyPlanner onPillarSelect={onPillarSelect} />;
   }
@@ -62,25 +71,33 @@ const WeeklyPlannerCard = ({ onPillarSelect, onChatOpen }) => {
   return (
     <div className="bg-white/80 rounded-3xl shadow-lg border border-purple-100 max-w-4xl mx-auto my-8 overflow-hidden">
       <WeeklyPlannerHeader
-        // ...your header props here
+        completedActivities={completedActivities}
+        totalActivities={totalActivities}
+        currentWeek={Math.ceil((startOfWeek.getDate() + startOfWeek.getDay()) / 7)}
+        currentYear={startOfWeek.getFullYear()}
+        viewMode="week"
+        onNavigateWeek={() => {}}
+        onViewModeChange={() => {}}
       />
 
       <div className="flex flex-col gap-6 p-4 md:p-8 bg-gradient-to-br from-purple-50/40 to-cyan-50/40">
         {weekDays.map((day) => (
           <VerticalDayCard
             key={day.label}
-            date={day.date}
-            label={day.label}
+            dayName={day.label}
+            dayShort={day.labelShort}
+            dayIndex={day.dayIndex}
             activities={day.activities}
-            onActivityClick={handleActivityClick}
-            onToggleCompletion={toggleActivityCompletion}
             getActivityDetails={getActivityDetails}
+            onToggleCompletion={toggleActivityCompletion}
+            onActivityClick={handleActivityClick}
           />
         ))}
       </div>
 
       <WeeklySummary
-        // ...your summary props here
+        completedActivities={completedActivities}
+        totalActivities={totalActivities}
       />
 
       <ActivityDetailModal
