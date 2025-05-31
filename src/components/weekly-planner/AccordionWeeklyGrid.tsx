@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { ScheduledActivity } from '@/types/activity';
 import { useActivity } from '@/contexts/ActivityContext';
 import { Calendar, Target } from 'lucide-react';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import AccordionDayCard from './AccordionDayCard';
+import ActivityCardHeader from './ActivityCardHeader';
+import ActivityCardStats from './ActivityCardStats';
 
 interface AccordionWeeklyGridProps {
   weekActivities: ScheduledActivity[];
@@ -18,10 +17,10 @@ const AccordionWeeklyGrid: React.FC<AccordionWeeklyGridProps> = ({
   onActivityClick
 }) => {
   const { getActivityDetails } = useActivity();
-  
+
   const dayNames = [
     { short: 'Sun', full: 'Sunday' },
-    { short: 'Mon', full: 'Monday' }, 
+    { short: 'Mon', full: 'Monday' },
     { short: 'Tue', full: 'Tuesday' },
     { short: 'Wed', full: 'Wednesday' },
     { short: 'Thu', full: 'Thursday' },
@@ -29,16 +28,13 @@ const AccordionWeeklyGrid: React.FC<AccordionWeeklyGridProps> = ({
     { short: 'Sat', full: 'Saturday' }
   ];
 
-  // Get current day index
   const currentDayIndex = new Date().getDay();
-  
-  // Group activities by day of week
+
   const activitiesByDay = dayNames.reduce((acc, _, dayIndex) => {
     acc[dayIndex] = weekActivities.filter(activity => activity.dayOfWeek === dayIndex);
     return acc;
   }, {} as Record<number, ScheduledActivity[]>);
 
-  // Reorder days to start with today
   const reorderedDays = [
     ...dayNames.slice(currentDayIndex),
     ...dayNames.slice(0, currentDayIndex)
@@ -65,57 +61,67 @@ const AccordionWeeklyGrid: React.FC<AccordionWeeklyGridProps> = ({
     );
   }
 
-  // Default to today's day being open (which is now first in the list)
-  const defaultValue = `day-${currentDayIndex}`;
-
   return (
-    <Accordion type="multiple" defaultValue={[defaultValue]} className="space-y-4">
-      {reorderedDays.map((day, displayIndex) => {
+    <div className="space-y-6">
+      {reorderedDays.map((day) => {
         const dayIndex = day.originalIndex;
         const dayActivities = activitiesByDay[dayIndex] || [];
         const completedCount = dayActivities.filter(a => a.completed).length;
-        const totalCount = dayActivities.length;
         const isToday = currentDayIndex === dayIndex;
-        
+
         return (
-          <AccordionItem 
-            key={dayIndex} 
-            value={`day-${dayIndex}`} 
-            className="bg-white/90 backdrop-blur-sm rounded-3xl border-3 border-purple-300 overflow-hidden shadow-lg"
+          <div
+            key={dayIndex}
+            className="bg-white rounded-3xl shadow-lg p-5 space-y-4 border border-gray-100"
           >
-            <AccordionTrigger className={`
-              flex items-center justify-between p-6 hover:no-underline transition-colors
-              ${isToday ? 'bg-gradient-to-r from-blue-100 to-blue-200' : 'bg-gradient-to-r from-gray-50 to-gray-100'}
-            `}>
-              <div className="flex items-center space-x-4">
-                <div className={`
-                  w-12 h-12 rounded-2xl flex items-center justify-center font-bold text-base shadow-lg
-                  ${isToday ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white' : 'bg-white text-gray-700 border-2 border-gray-300'}
-                `}>
-                  {day.short}
-                </div>
-                <div className="text-left">
-                  <h3 className={`font-bold text-xl ${isToday ? 'text-blue-800' : 'text-gray-800'}`}>
-                    {day.full}
-                    {isToday && <span className="ml-3 text-xs bg-blue-500 text-white px-3 py-1 rounded-full font-medium">Today</span>}
-                  </h3>
-                  <p className="text-sm text-gray-600 font-medium">{completedCount}/{totalCount} completed</p>
-                </div>
+            {/* Day Header */}
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-bold text-purple-800">
+                  {day.full}{' '}
+                  {isToday && (
+                    <span className="ml-2 text-xs bg-blue-500 text-white px-3 py-1 rounded-full font-medium">
+                      Today
+                    </span>
+                  )}
+                </h2>
+                <p className="text-sm text-gray-500">{completedCount}/{dayActivities.length} completed</p>
               </div>
-            </AccordionTrigger>
-            
-            <AccordionContent className="p-6 bg-gradient-to-br from-white/95 to-gray-50/95 backdrop-blur-sm">
-              <AccordionDayCard
-                activities={dayActivities}
-                getActivityDetails={getActivityDetails}
-                onToggleCompletion={onToggleCompletion}
-                onActivityClick={onActivityClick}
-              />
-            </AccordionContent>
-          </AccordionItem>
+              <div className="w-10 h-10 rounded-full bg-gray-100 text-gray-700 flex items-center justify-center font-bold">
+                {day.short}
+              </div>
+            </div>
+
+            {/* Activities List */}
+            {dayActivities.length === 0 ? (
+              <p className="text-sm text-gray-400 italic">No activities scheduled.</p>
+            ) : (
+              <div className="space-y-4">
+                {dayActivities.map((activity) => (
+                  <div
+                    key={activity.id}
+                    className="p-4 rounded-2xl bg-gradient-to-br from-white to-gray-50 border shadow-sm hover:shadow-md transition cursor-pointer"
+                    onClick={() => onActivityClick?.(activity)}
+                  >
+                    <ActivityCardHeader activity={activity} />
+                    <ActivityCardStats activity={activity} />
+
+                    <div className="flex justify-between items-center pt-2">
+                      <span className="text-sm text-gray-600">Mark as done</span>
+                      <input
+                        type="checkbox"
+                        checked={activity.completed}
+                        onChange={() => onToggleCompletion(activity.id)}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         );
       })}
-    </Accordion>
+    </div>
   );
 };
 
