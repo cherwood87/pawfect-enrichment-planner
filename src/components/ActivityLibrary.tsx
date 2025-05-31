@@ -4,7 +4,7 @@ import { DiscoveredActivity } from '@/types/discovery';
 import { useActivity } from '@/contexts/ActivityContext';
 import { useActivityFiltering } from '@/hooks/useActivityFiltering';
 import ActivityCard from '@/components/ActivityCard';
-import ActivityLibraryModal from '@/components/ActivityLibraryModal';
+import ConsolidatedActivityModal from '@/components/modals/ConsolidatedActivityModal';
 import PillarSelectionCards from '@/components/PillarSelectionCards';
 import ActivityLibraryContent from '@/components/ActivityLibraryContent';
 import ActivityLibraryDebug from '@/components/ActivityLibraryDebug';
@@ -146,7 +146,7 @@ const ActivityLibrary = () => {
 
       {/* Activity Detail Modal */}
       {selectedActivity && (
-        <ActivityLibraryModal
+        <ConsolidatedActivityModal
           isOpen={!!selectedActivity}
           onClose={handleActivityModalClose}
           activityDetails={selectedActivity}

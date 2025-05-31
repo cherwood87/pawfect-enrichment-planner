@@ -3,24 +3,23 @@ import React from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { ScheduledActivity, ActivityLibraryItem, UserActivity } from '@/types/activity';
 import { DiscoveredActivity } from '@/types/discovery';
-import { useDog } from '@/contexts/DogContext';
+import { ActivityHelpContext } from '@/types/activityContext';
 import { useActivityModalState } from '@/hooks/useActivityModalState';
 import ActivityModalHeader from '@/components/modals/ActivityModalHeader';
 import ActivityModalContent from '@/components/modals/ActivityModalContent';
 import ActivityModalActions from '@/components/modals/ActivityModalActions';
 import ChatModal from '@/components/chat/ChatModal';
-import { ActivityHelpContext } from '@/types/activityContext';
 
-interface ActivityLibraryModalProps {
+interface ConsolidatedActivityModalProps {
   isOpen: boolean;
   onClose: () => void;
   activityDetails: ActivityLibraryItem | UserActivity | DiscoveredActivity | null;
   scheduledActivity?: ScheduledActivity | null;
-  onToggleCompletion?: (activityId: string) => void;
+  onToggleCompletion?: (activityId: string, completionNotes?: string) => void;
   mode?: 'scheduled' | 'library';
 }
 
-const ActivityLibraryModal: React.FC<ActivityLibraryModalProps> = ({
+const ConsolidatedActivityModal: React.FC<ConsolidatedActivityModalProps> = ({
   isOpen,
   onClose,
   activityDetails,
@@ -28,7 +27,6 @@ const ActivityLibraryModal: React.FC<ActivityLibraryModalProps> = ({
   onToggleCompletion,
   mode = 'library'
 }) => {
-  const { currentDog } = useDog();
   const {
     selectedDayOfWeek,
     setSelectedDayOfWeek,
@@ -91,4 +89,4 @@ const ActivityLibraryModal: React.FC<ActivityLibraryModalProps> = ({
   );
 };
 
-export default ActivityLibraryModal;
+export default ConsolidatedActivityModal;
