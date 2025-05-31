@@ -2,8 +2,8 @@ import React from 'react';
 import { ScheduledActivity } from '@/types/activity';
 import { useActivity } from '@/contexts/ActivityContext';
 import { Calendar, Target } from 'lucide-react';
-import ActivityCardHeader from './ActivityCardHeader';
-import ActivityCardStats from './ActivityCardStats';
+import ActivityCardHeader from '../ActivityCardHeader';
+import ActivityCardStats from '../ActivityCardStats';
 
 interface AccordionWeeklyGridProps {
   weekActivities: ScheduledActivity[];
