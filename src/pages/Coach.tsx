@@ -75,7 +75,7 @@ const Coach = () => {
             </h2>
             
             <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
-              Your AI-powered companion for creating the perfect enrichment plan. 
+              Your companion for creating the perfect enrichment plan. 
               Get personalized advice, activity suggestions, and expert guidance tailored to {currentDog?.name || "your dog"}'s unique needs.
             </p>
           </div>
