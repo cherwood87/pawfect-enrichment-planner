@@ -1,15 +1,29 @@
 import React from 'react';
 import { ScheduledActivity } from '@/types/activity';
 import { useActivity } from '@/contexts/ActivityContext';
+import ActivityCard from '../activity/ActivityCard';
 import { Calendar, Target } from 'lucide-react';
-import ActivityCardHeader from '../ActivityCardHeader';
-import ActivityCardStats from '../ActivityCardStats';
 
 interface WeeklyGridProps {
   weekActivities: ScheduledActivity[];
   onToggleCompletion: (activityId: string) => void;
   onActivityClick?: (activity: ScheduledActivity) => void;
 }
+
+// Array of soft pastel backgrounds for days (customize as desired)
+const dayBackgrounds = [
+  "bg-purple-50", // Sunday
+  "bg-blue-50",   // Monday
+  "bg-pink-50",   // Tuesday
+  "bg-yellow-50", // Wednesday
+  "bg-green-50",  // Thursday
+  "bg-cyan-50",   // Friday
+  "bg-orange-50"  // Saturday
+];
+
+const dayNames = [
+  "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
+];
 
 const WeeklyGrid: React.FC<WeeklyGridProps> = ({
   weekActivities,
@@ -18,32 +32,10 @@ const WeeklyGrid: React.FC<WeeklyGridProps> = ({
 }) => {
   const { getActivityDetails } = useActivity();
 
-  const dayNames = [
-    { short: 'Sun', full: 'Sunday' },
-    { short: 'Mon', full: 'Monday' },
-    { short: 'Tue', full: 'Tuesday' },
-    { short: 'Wed', full: 'Wednesday' },
-    { short: 'Thu', full: 'Thursday' },
-    { short: 'Fri', full: 'Friday' },
-    { short: 'Sat', full: 'Saturday' }
-  ];
-
-  const getCurrentDayIndex = () => new Date().getDay();
-  const currentDayIndex = getCurrentDayIndex();
-
-  const reorderedDays = [
-    ...dayNames.slice(currentDayIndex),
-    ...dayNames.slice(0, currentDayIndex)
-  ];
-
-  const getOriginalDayIndex = (reorderedIndex: number) => {
-    return (currentDayIndex + reorderedIndex) % 7;
-  };
-
-  const activitiesByDay = dayNames.reduce((acc, _, dayIndex) => {
-    acc[dayIndex] = weekActivities.filter(activity => activity.dayOfWeek === dayIndex);
-    return acc;
-  }, {} as Record<number, ScheduledActivity[]>);
+  // Build activities per day
+  const activitiesByDay = Array(7)
+    .fill(null)
+    .map((_, idx) => weekActivities.filter(a => a.dayOfWeek === idx));
 
   const totalActivities = weekActivities.length;
 
@@ -64,56 +56,43 @@ const WeeklyGrid: React.FC<WeeklyGridProps> = ({
   }
 
   return (
-    <div className="space-y-6">
-      {reorderedDays.map((day, reorderedIndex) => {
-        const originalDayIndex = getOriginalDayIndex(reorderedIndex);
-        const activities = activitiesByDay[originalDayIndex] || [];
+    <div className="flex flex-col gap-6 px-2 max-w-2xl mx-auto md:py-4">
+      {activitiesByDay.map((activities, dayIdx) => {
         const completed = activities.filter(a => a.completed).length;
 
         return (
-          <div
-            key={originalDayIndex}
-            className="bg-white rounded-3xl shadow-lg p-5 space-y-4 border border-gray-100"
+          <section
+            key={dayIdx}
+            className={`rounded-3xl ${dayBackgrounds[dayIdx]} shadow-md px-0 pb-4 pt-4`}
           >
-            <div className="flex items-center justify-between">
-              <div className="text-left">
-                <h2 className="text-xl font-bold text-purple-800">{day.full}</h2>
-                <p className="text-sm text-gray-500">
-                  {completed}/{activities.length} activities completed
-                </p>
+            <header className="flex flex-col gap-1 px-4 pt-2 pb-2 md:flex-row md:items-center md:justify-between">
+              <div>
+                <div className="text-lg md:text-xl font-bold text-purple-800">{dayNames[dayIdx]}</div>
+                <div className="text-sm text-gray-500">{completed}/{activities.length} completed</div>
               </div>
-              <span className="text-sm text-purple-600 font-medium">{day.short}</span>
-            </div>
-
-            {activities.length === 0 ? (
-              <p className="text-sm text-gray-400 italic">No activities scheduled for this day.</p>
-            ) : (
-              <div className="space-y-4">
-                {activities.map(activity => {
-                  const details = getActivityDetails(activity.activityId); // <--- The fix: resolve full details
+            </header>
+            <div className="flex flex-col gap-4 px-4">
+              {activities.length === 0 ? (
+                <div className="text-sm italic text-gray-300">No activities scheduled.</div>
+              ) : (
+                activities.map((activity) => {
+                  const details = getActivityDetails(activity.activityId);
                   if (!details) return null;
                   return (
-                    <div
+                    <ActivityCard
                       key={activity.id}
-                      className="p-4 rounded-2xl bg-gradient-to-br from-white to-gray-50 border shadow-sm hover:shadow-md transition cursor-pointer"
+                      activity={details}
+                      completed={activity.completed}
+                      onComplete={() => onToggleCompletion(activity.id)}
                       onClick={() => onActivityClick?.(activity)}
-                    >
-                      <ActivityCardHeader activity={details} />
-                      <ActivityCardStats activity={details} />
-                      <div className="flex justify-between items-center pt-2">
-                        <span className="text-sm text-gray-600">Mark as done</span>
-                        <input
-                          type="checkbox"
-                          checked={activity.completed}
-                          onChange={() => onToggleCompletion(activity.id)}
-                        />
-                      </div>
-                    </div>
+                      // Optionally: add gradient/pastel via className
+                      className="bg-gradient-to-br from-white to-purple-50"
+                    />
                   );
-                })}
-              </div>
-            )}
-          </div>
+                })
+              )}
+            </div>
+          </section>
         );
       })}
     </div>
