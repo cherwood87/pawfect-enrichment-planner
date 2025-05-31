@@ -2,6 +2,7 @@
 import React, { useState, useCallback } from 'react';
 import { useWeeklyPlannerState } from '@/hooks/useWeeklyPlannerState';
 import { useWeeklyPlannerActions } from '@/hooks/useWeeklyPlannerActions';
+import { useActivity } from '@/contexts/ActivityContext';
 import WeeklyPlannerView from '@/components/weekly-planner/WeeklyPlannerView';
 import ActivityModal from '@/components/ActivityModal';
 
@@ -15,23 +16,74 @@ const WeeklyPlannerPage: React.FC = () => {
     currentWeek,
     currentYear,
     currentDate,
+    setCurrentDate,
     viewMode,
+    setViewMode,
     weekDays,
     selectedActivity,
+    setSelectedActivity,
     isModalOpen,
+    setIsModalOpen,
     loadingStates,
-    isRetrying
+    setLoadingStates,
+    optimisticUpdates,
+    setOptimisticUpdates,
+    allWeekActivities
   } = useWeeklyPlannerState();
 
+  const { getCombinedActivityLibrary, userActivities, discoveredActivities } = useActivity();
+
   const {
-    onNavigateWeek,
-    onNavigateDay,
-    onViewModeChange,
-    onActivityClick,
-    onToggleCompletion,
-    onModalClose,
-    getActivityDetails
-  } = useWeeklyPlannerActions();
+    handleToggleCompletion,
+    isRetrying
+  } = useWeeklyPlannerActions(
+    allWeekActivities,
+    optimisticUpdates,
+    loadingStates,
+    setOptimisticUpdates,
+    setLoadingStates
+  );
+
+  // Navigation functions
+  const handleNavigateWeek = useCallback((direction: 'prev' | 'next') => {
+    const newDate = new Date(currentDate);
+    if (direction === 'next') {
+      newDate.setDate(currentDate.getDate() + 7);
+    } else {
+      newDate.setDate(currentDate.getDate() - 7);
+    }
+    setCurrentDate(newDate);
+  }, [currentDate, setCurrentDate]);
+
+  const handleNavigateDay = useCallback((direction: 'prev' | 'next') => {
+    const newDate = new Date(currentDate);
+    if (direction === 'next') {
+      newDate.setDate(currentDate.getDate() + 1);
+    } else {
+      newDate.setDate(currentDate.getDate() - 1);
+    }
+    setCurrentDate(newDate);
+  }, [currentDate, setCurrentDate]);
+
+  const handleViewModeChange = useCallback((mode: 'week' | 'day') => {
+    setViewMode(mode);
+  }, [setViewMode]);
+
+  const handleActivityClick = useCallback((activity: any) => {
+    setSelectedActivity(activity);
+    setIsModalOpen(true);
+  }, [setSelectedActivity, setIsModalOpen]);
+
+  const handleModalClose = useCallback(() => {
+    setIsModalOpen(false);
+    setSelectedActivity(null);
+  }, [setIsModalOpen, setSelectedActivity]);
+
+  const getActivityDetails = useCallback((activityId: string) => {
+    // Combine all possible activity sources
+    const allActivities = [...getCombinedActivityLibrary(), ...userActivities, ...discoveredActivities];
+    return allActivities.find(activity => activity.id === activityId);
+  }, [getCombinedActivityLibrary, userActivities, discoveredActivities]);
 
   const handlePillarSelect = useCallback((pillar: string) => {
     setSelectedPillar(pillar);
@@ -68,12 +120,12 @@ const WeeklyPlannerPage: React.FC = () => {
             isModalOpen={isModalOpen}
             loadingStates={loadingStates}
             isRetrying={isRetrying}
-            onNavigateWeek={onNavigateWeek}
-            onNavigateDay={onNavigateDay}
-            onViewModeChange={onViewModeChange}
-            onActivityClick={onActivityClick}
-            onToggleCompletion={onToggleCompletion}
-            onModalClose={onModalClose}
+            onNavigateWeek={handleNavigateWeek}
+            onNavigateDay={handleNavigateDay}
+            onViewModeChange={handleViewModeChange}
+            onActivityClick={handleActivityClick}
+            onToggleCompletion={handleToggleCompletion}
+            onModalClose={handleModalClose}
             getActivityDetails={getActivityDetails}
           />
         </div>
