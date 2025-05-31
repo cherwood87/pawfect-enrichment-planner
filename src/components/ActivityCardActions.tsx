@@ -1,49 +1,75 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Calendar, Heart } from 'lucide-react';
+import { Calendar, Heart, MessageCircle } from 'lucide-react';
 
 interface ActivityCardActionsProps {
   onClose: () => void;
   onScheduleActivity: () => Promise<void>;
   onAddToFavourites: () => Promise<void>;
   disabled: boolean;
+  onNeedHelp?: () => void;
 }
 
 const ActivityCardActions: React.FC<ActivityCardActionsProps> = ({
   onClose,
   onScheduleActivity,
   onAddToFavourites,
-  disabled
+  disabled,
+  onNeedHelp
 }) => {
+  const handleScheduleClick = async () => {
+    try {
+      await onScheduleActivity();
+    } catch (error) {
+      console.error('Error scheduling activity:', error);
+    }
+  };
+
+  const handleFavouritesClick = async () => {
+    try {
+      await onAddToFavourites();
+    } catch (error) {
+      console.error('Error adding to favourites:', error);
+    }
+  };
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 pt-4 border-t">
-      <Button variant="outline" onClick={onClose} className="lg:col-span-1">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 pt-4 border-t border-purple-200/50">
+      <Button 
+        variant="outline" 
+        onClick={onClose} 
+        className="rounded-2xl border-purple-300 hover:bg-purple-50"
+      >
         Close
       </Button>
       <Button
-        onClick={onScheduleActivity}
-        className="lg:col-span-2 bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600"
+        onClick={handleScheduleClick}
+        className="bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600 text-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
         disabled={disabled}
       >
         <Calendar className="w-4 h-4 mr-2" />
         Add to Weekly Plan
       </Button>
       <Button
-        onClick={onAddToFavourites}
-        className="lg:col-span-1 bg-yellow-400 text-white hover:bg-yellow-500"
+        onClick={handleFavouritesClick}
+        className="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
         disabled={disabled}
       >
         <Heart className="w-4 h-4 mr-2" />
         Add to Favourites
       </Button>
-      <Button
-        variant="outline"
-        className="lg:col-span-1 border-purple-300 text-purple-700 hover:bg-purple-50"
-        disabled={disabled}
-      >
-        Need Help?
-      </Button>
+      {onNeedHelp && (
+        <Button
+          onClick={onNeedHelp}
+          variant="outline"
+          className="rounded-2xl border-purple-300 text-purple-700 hover:bg-purple-50"
+          disabled={disabled}
+        >
+          <MessageCircle className="w-4 h-4 mr-2" />
+          Need Help?
+        </Button>
+      )}
     </div>
   );
 };
