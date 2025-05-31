@@ -124,9 +124,9 @@ const WeeklyPlannerLogic: React.FC<WeeklyPlannerLogicProps> = ({ onPillarSelect,
         }
       }
     } else {
-      // Navigate to activity library with selected pillar
+      // Navigate to activity library with selected pillar - updated path
       onPillarSelect('all');
-      navigate('/dog-profile-dashboard/activity-library');
+      navigate('/activity-library');
     }
   };
 

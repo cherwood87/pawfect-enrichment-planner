@@ -17,6 +17,7 @@ import Auth from "./pages/Auth";
 import Coach from "./pages/Coach";
 import DogProfileQuizPage from "./pages/DogProfileQuiz";
 import ActivityLibraryPage from "./pages/ActivityLibraryPage";
+import WeeklyPlannerPage from "./pages/WeeklyPlannerPage";
 import AccountSettings from "./pages/AccountSettings";
 import NotFound from "./pages/NotFound";
 
@@ -78,6 +79,20 @@ const App = () => (
                         <ProtectedRoute>
                           <ErrorBoundary>
                             <ActivityLibraryPage />
+                          </ErrorBoundary>
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/dog-profile-dashboard/activity-library" element={
+                        <ProtectedRoute>
+                          <ErrorBoundary>
+                            <ActivityLibraryPage />
+                          </ErrorBoundary>
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/dog-profile-dashboard/weekly-plan" element={
+                        <ProtectedRoute>
+                          <ErrorBoundary>
+                            <WeeklyPlannerPage />
                           </ErrorBoundary>
                         </ProtectedRoute>
                       } />
