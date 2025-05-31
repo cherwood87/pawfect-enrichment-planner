@@ -3,8 +3,8 @@ import React, { createContext, useContext } from 'react';
 import { ScheduledActivity, UserActivity, ActivityLibraryItem, StreakData, WeeklyProgress, PillarGoals } from '@/types/activity';
 import { DiscoveredActivity } from '@/types/discovery';
 import { useDog } from '@/contexts/DogContext';
-import { useActivityActions } from '@/hooks/useActivityActions';
-import { useActivityOperations as useActivityOperationsHook } from '@/hooks/useActivityOperations';
+import { useActivityActions } from '@/hooks/core/useActivityActions';
+import { useActivityOperations as useActivityOperationsCore } from '@/hooks/core/useActivityOperations';
 import { useActivityState } from './ActivityStateContext';
 
 interface ActivityOperationsContextType {
@@ -40,7 +40,7 @@ export const ActivityOperationsProvider: React.FC<{ children: React.ReactNode }>
     setUserActivities 
   } = useActivityState();
 
-  // Activity actions
+  // Activity actions using the new organized hook
   const {
     addScheduledActivity,
     toggleActivityCompletion,
@@ -48,8 +48,8 @@ export const ActivityOperationsProvider: React.FC<{ children: React.ReactNode }>
     addUserActivity
   } = useActivityActions(setScheduledActivities, setUserActivities, currentDog);
 
-  // Activity operations hook
-  const activityOps = useActivityOperationsHook(
+  // Activity operations using the new organized hook
+  const activityOps = useActivityOperationsCore(
     scheduledActivities,
     userActivities,
     discoveredActivities,

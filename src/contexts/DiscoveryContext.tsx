@@ -1,10 +1,10 @@
 
-import React, { createContext, useContext } from 'react';
-import { ActivityLibraryItem } from '@/types/activity';
+import React, { createContext, useContext, useState } from 'react';
 import { DiscoveredActivity, ContentDiscoveryConfig } from '@/types/discovery';
+import { ActivityLibraryItem } from '@/types/activity';
 import { useDog } from '@/contexts/DogContext';
-import { useDiscoveryOperations } from '@/hooks/useDiscoveryOperations';
 import { useActivityState } from './ActivityStateContext';
+import { useDiscoveryOperations } from '@/hooks/core/useDiscoveryOperations';
 
 interface DiscoveryContextType {
   isDiscovering: boolean;
@@ -28,29 +28,51 @@ export const useDiscovery = () => {
 
 export const DiscoveryProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { currentDog } = useDog();
-  const {
-    discoveredActivities,
+  const { 
+    discoveredActivities, 
     discoveryConfig,
     setDiscoveredActivities,
-    setDiscoveryConfig
+    setDiscoveryConfig 
   } = useActivityState();
+  
+  const [isDiscovering, setIsDiscovering] = useState(false);
 
-  // Discovery operations hook
   const discoveryOps = useDiscoveryOperations(
     discoveredActivities,
-    setDiscoveredActivities,
     discoveryConfig,
-    setDiscoveryConfig,
-    currentDog
+    currentDog,
+    setDiscoveredActivities,
+    setDiscoveryConfig
   );
 
+  const discoverNewActivities = async () => {
+    setIsDiscovering(true);
+    try {
+      await discoveryOps.discoverNewActivities();
+    } finally {
+      setIsDiscovering(false);
+    }
+  };
+
+  const approveDiscoveredActivity = async (activityId: string) => {
+    await discoveryOps.approveDiscoveredActivity(activityId);
+  };
+
+  const rejectDiscoveredActivity = async (activityId: string) => {
+    await discoveryOps.rejectDiscoveredActivity(activityId);
+  };
+
+  const updateDiscoveryConfig = async (updates: Partial<ContentDiscoveryConfig>) => {
+    await discoveryOps.updateDiscoveryConfig(updates);
+  };
+
   const value: DiscoveryContextType = {
-    isDiscovering: discoveryOps.isDiscovering,
+    isDiscovering,
     getCombinedActivityLibrary: discoveryOps.getCombinedActivityLibrary,
-    discoverNewActivities: discoveryOps.discoverNewActivities,
-    approveDiscoveredActivity: discoveryOps.approveDiscoveredActivity,
-    rejectDiscoveredActivity: discoveryOps.rejectDiscoveredActivity,
-    updateDiscoveryConfig: discoveryOps.updateDiscoveryConfig,
+    discoverNewActivities,
+    approveDiscoveredActivity,
+    rejectDiscoveredActivity,
+    updateDiscoveryConfig,
     checkAndRunAutoDiscovery: discoveryOps.checkAndRunAutoDiscovery
   };
 

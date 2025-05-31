@@ -1,8 +1,8 @@
 
-import React, { createContext, useContext, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { useDog } from '@/contexts/DogContext';
-import { useActivitySync } from '@/hooks/useActivitySync';
 import { useActivityState } from './ActivityStateContext';
+import { SyncService } from '@/services/core/SyncService';
 
 interface SyncContextType {
   isSyncing: boolean;
@@ -23,33 +23,43 @@ export const useSync = () => {
 export const SyncProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { currentDog } = useDog();
   const { discoveredActivities, userActivities } = useActivityState();
-  const { isSyncing, lastSyncTime, performSync } = useActivitySync();
+  
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
 
-  // Auto-sync on app load and when activities change
-  useEffect(() => {
-    const performAutoSync = async () => {
-      if (!currentDog) return;
+  const syncToSupabase = async () => {
+    if (!currentDog || isSyncing) return { success: false, error: 'No dog selected or sync in progress' };
+    
+    setIsSyncing(true);
+    try {
+      const result = await SyncService.performFullSync(
+        discoveredActivities,
+        userActivities,
+        currentDog.id
+      );
       
-      console.log('Performing auto-sync on app load...');
-      await performSync(discoveredActivities, userActivities, currentDog.id);
-    };
-
-    // Debounce the auto-sync to avoid excessive calls
-    const timeoutId = setTimeout(performAutoSync, 1000);
-    return () => clearTimeout(timeoutId);
-  }, [currentDog?.id]); // Only run when current dog changes
-
-  // Manual sync function
-  const manualSync = async () => {
-    if (!currentDog) return;
-    console.log('Performing manual sync...');
-    return await performSync(discoveredActivities, userActivities, currentDog.id);
+      if (result.success) {
+        setLastSyncTime(new Date());
+      }
+      
+      return result;
+    } catch (error) {
+      console.error('Sync failed:', error);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Unknown error',
+        totalSynced: 0,
+        details: {}
+      };
+    } finally {
+      setIsSyncing(false);
+    }
   };
 
   const value: SyncContextType = {
     isSyncing,
     lastSyncTime,
-    syncToSupabase: manualSync
+    syncToSupabase
   };
 
   return (
