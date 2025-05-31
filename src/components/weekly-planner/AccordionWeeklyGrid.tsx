@@ -97,25 +97,30 @@ const AccordionWeeklyGrid: React.FC<AccordionWeeklyGridProps> = ({
               <p className="text-sm text-gray-400 italic">No activities scheduled.</p>
             ) : (
               <div className="space-y-4">
-                {dayActivities.map((activity) => (
-                  <div
-                    key={activity.id}
-                    className="p-4 rounded-2xl bg-gradient-to-br from-white to-gray-50 border shadow-sm hover:shadow-md transition cursor-pointer"
-                    onClick={() => onActivityClick?.(activity)}
-                  >
-                    <ActivityCardHeader activity={activity} />
-                    <ActivityCardStats activity={activity} />
+                {dayActivities.map((activity) => {
+                  const details = getActivityDetails(activity.activityId); // <-- Key fix!
+                  if (!details) return null;
 
-                    <div className="flex justify-between items-center pt-2">
-                      <span className="text-sm text-gray-600">Mark as done</span>
-                      <input
-                        type="checkbox"
-                        checked={activity.completed}
-                        onChange={() => onToggleCompletion(activity.id)}
-                      />
+                  return (
+                    <div
+                      key={activity.id}
+                      className="p-4 rounded-2xl bg-gradient-to-br from-white to-gray-50 border shadow-sm hover:shadow-md transition cursor-pointer"
+                      onClick={() => onActivityClick?.(activity)}
+                    >
+                      <ActivityCardHeader activity={details} />
+                      <ActivityCardStats activity={details} />
+
+                      <div className="flex justify-between items-center pt-2">
+                        <span className="text-sm text-gray-600">Mark as done</span>
+                        <input
+                          type="checkbox"
+                          checked={activity.completed}
+                          onChange={() => onToggleCompletion(activity.id)}
+                        />
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
