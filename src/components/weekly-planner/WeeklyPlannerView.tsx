@@ -23,7 +23,7 @@ interface WeeklyPlannerViewProps {
   isModalOpen: boolean;
   loadingStates: Record<string, boolean>;
   isRetrying: boolean;
-  onNavigateWeek: () => void;
+  onNavigateWeek: (direction: 'prev' | 'next') => void;
   onNavigateDay: (direction: 'prev' | 'next') => void;
   onViewModeChange: (mode: 'week' | 'day') => void;
   onActivityClick: (activity: ScheduledActivity) => void;
