@@ -1,58 +1,58 @@
-import React, { useState } from 'react';
-import { Calendar, Plus, Check, ChevronLeft, ChevronRight } from 'lucide-react';
+import React, { useState, useCallback } from 'react';
+import { useWeeklyPlannerState } from '@/hooks/useWeeklyPlannerState';
+import { useWeeklyPlannerActions } from '@/hooks/useWeeklyPlannerActions';
+import { useActivity } from '@/contexts/ActivityContext';
+import { useDog } from '@/contexts/DogContext';
+import DashboardHeader from '@/components/dashboard/DashboardHeader';
+import DashboardModals from '@/components/dashboard/DashboardModals';
+import WeeklyPlannerView from '@/components/weekly-planner/WeeklyPlannerView';
+import ActivityModal from '@/components/ActivityModal';
+import { Dog } from '@/types/dog';
 
-const WeeklyActivityPlanner = () => {
-  const [activities, setActivities] = useState({});
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [showAddForm, setShowAddForm] = useState(null);
-  const [newActivity, setNewActivity] = useState('');
+const WeeklyPlannerPage: React.FC = () => {
+  const [selectedPillar, setSelectedPillar] = useState<string | null>(null);
+  const [isActivityModalOpen, setIsActivityModalOpen] = useState(false);
+  const [isChatModalOpen, setIsChatModalOpen] = useState(false);
+  const [isAddDogModalOpen, setIsAddDogModalOpen] = useState(false);
+  const [isEditDogModalOpen, setIsEditDogModalOpen] = useState(false);
+  const [selectedDog, setSelectedDog] = useState<Dog | null>(null);
 
-  // Generate 7 days starting from current date
-  const generateWeekDays = (startDate) => {
-    const days = [];
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(startDate);
-      date.setDate(startDate.getDate() + i);
-      days.push({
-        date: date,
-        dayName: date.toLocaleDateString('en-US', { weekday: 'long' }),
-        shortDate: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-        dateKey: date.toDateString()
-      });
-    }
-    return days;
-  };
+  const {
+    completedActivities,
+    totalActivities,
+    currentWeek,
+    currentYear,
+    currentDate,
+    setCurrentDate,
+    viewMode,
+    setViewMode,
+    weekDays,
+    selectedActivity,
+    setSelectedActivity,
+    isModalOpen,
+    setIsModalOpen,
+    loadingStates,
+    setLoadingStates,
+    optimisticUpdates,
+    setOptimisticUpdates,
+    allWeekActivities
+  } = useWeeklyPlannerState();
 
-  const weekDays = generateWeekDays(currentDate);
+  const { getCombinedActivityLibrary, userActivities, discoveredActivities } = useActivity();
 
-  const addActivity = (dateKey) => {
-    if (newActivity.trim()) {
-      const newActivityObj = {
-        id: Date.now(),
-        name: newActivity.trim(),
-        completed: false
-      };
-      
-      setActivities(prev => ({
-        ...prev,
-        [dateKey]: [...(prev[dateKey] || []), newActivityObj]
-      }));
-      
-      setNewActivity('');
-      setShowAddForm(null);
-    }
-  };
+  const {
+    handleToggleCompletion,
+    isRetrying
+  } = useWeeklyPlannerActions(
+    allWeekActivities,
+    optimisticUpdates,
+    loadingStates,
+    setOptimisticUpdates,
+    setLoadingStates
+  );
 
-  const toggleActivity = (dateKey, activityId) => {
-    setActivities(prev => ({
-      ...prev,
-      [dateKey]: prev[dateKey].map(activity => 
-        activity.id === activityId ? { ...activity, completed: !activity.completed } : activity
-      )
-    }));
-  };
-
-  const navigateWeek = (direction) => {
+  // Navigation functions
+  const handleNavigateWeek = useCallback((direction: 'prev' | 'next') => {
     const newDate = new Date(currentDate);
     if (direction === 'next') {
       newDate.setDate(currentDate.getDate() + 7);
@@ -60,199 +60,139 @@ const WeeklyActivityPlanner = () => {
       newDate.setDate(currentDate.getDate() - 7);
     }
     setCurrentDate(newDate);
-  };
+  }, [currentDate, setCurrentDate]);
 
-  // Calculate total completion stats
-  const getTotalStats = () => {
-    let total = 0;
-    let completed = 0;
-    
-    Object.values(activities).forEach(dayActivities => {
-      total += dayActivities.length;
-      completed += dayActivities.filter(a => a.completed).length;
-    });
-    
-    return { total, completed, percentage: total > 0 ? Math.round((completed / total) * 100) : 0 };
-  };
+  const handleNavigateDay = useCallback((direction: 'prev' | 'next') => {
+    const newDate = new Date(currentDate);
+    if (direction === 'next') {
+      newDate.setDate(currentDate.getDate() + 1);
+    } else {
+      newDate.setDate(currentDate.getDate() - 1);
+    }
+    setCurrentDate(newDate);
+  }, [currentDate, setCurrentDate]);
 
-  const { total, completed, percentage } = getTotalStats();
+  const handleViewModeChange = useCallback((mode: 'week' | 'day') => {
+    setViewMode(mode);
+  }, [setViewMode]);
 
-  const getWeekRange = () => {
-    const firstDay = weekDays[0];
-    const lastDay = weekDays[6];
-    return `${firstDay.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${lastDay.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
-  };
+  const handleActivityClick = useCallback((activity: any) => {
+    setSelectedActivity(activity);
+    setIsModalOpen(true);
+  }, [setSelectedActivity, setIsModalOpen]);
+
+  const handleModalClose = useCallback(() => {
+    setIsModalOpen(false);
+    setSelectedActivity(null);
+  }, [setIsModalOpen, setSelectedActivity]);
+
+  const getActivityDetails = useCallback((activityId: string) => {
+    // Combine all possible activity sources
+    const allActivities = [...getCombinedActivityLibrary(), ...userActivities, ...discoveredActivities];
+    return allActivities.find(activity => activity.id === activityId);
+  }, [getCombinedActivityLibrary, userActivities, discoveredActivities]);
+
+  const handlePillarSelect = useCallback((pillar: string) => {
+    setSelectedPillar(pillar);
+    setIsActivityModalOpen(true);
+  }, []);
+
+  const handleActivityModalClose = useCallback(() => {
+    setIsActivityModalOpen(false);
+    setSelectedPillar(null);
+  }, []);
+
+  // Modal handlers for dashboard header
+  const handleChatModalOpen = useCallback(() => {
+    setIsChatModalOpen(true);
+  }, []);
+
+  const handleChatModalClose = useCallback(() => {
+    setIsChatModalOpen(false);
+  }, []);
+
+  const handleAddDogModalOpen = useCallback(() => {
+    setIsAddDogModalOpen(true);
+  }, []);
+
+  const handleAddDogModalClose = useCallback(() => {
+    setIsAddDogModalOpen(false);
+  }, []);
+
+  const handleEditDogModalOpen = useCallback((dog: Dog) => {
+    setSelectedDog(dog);
+    setIsEditDogModalOpen(true);
+  }, []);
+
+  const handleEditDogModalClose = useCallback(() => {
+    setIsEditDogModalOpen(false);
+    setSelectedDog(null);
+  }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-6">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
-            Weekly Activity Planner
-          </h1>
-          <p className="text-gray-600 text-lg">
-            Plan and track your dog's enrichment activities for the week
-          </p>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-cyan-50 to-amber-50 mobile-safe">
+      {/* Header */}
+      <DashboardHeader 
+        onChatOpen={handleChatModalOpen} 
+        onAddDogOpen={handleAddDogModalOpen}
+      />
 
-        {/* Main Card */}
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-                <Calendar className="w-6 h-6 text-purple-600" />
-              </div>
-              <div>
-                <h2 className="text-xl font-semibold text-purple-600">Weekly Planner</h2>
-                <p className="text-gray-500">{completed}/{total} activities completed</p>
-              </div>
-            </div>
-            
-            <div className="bg-purple-100 text-purple-600 px-4 py-2 rounded-lg font-semibold">
-              {percentage}%
-            </div>
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 via-cyan-600 to-amber-600 bg-clip-text text-transparent mb-4">
+              Weekly Activity Planner
+            </h1>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Plan and track your dog's enrichment activities for the week
+            </p>
           </div>
 
-          {/* Week Navigation */}
-          <div className="bg-purple-50 rounded-lg p-4 mb-6">
-            <div className="flex items-center justify-between">
-              <button
-                onClick={() => navigateWeek('prev')}
-                className="p-2 hover:bg-purple-100 rounded-lg transition-colors"
-              >
-                <ChevronLeft className="w-5 h-5 text-purple-600" />
-              </button>
-              
-              <div className="flex items-center">
-                <Calendar className="w-5 h-5 text-purple-600 mr-2" />
-                <h3 className="text-lg font-semibold text-purple-600">{getWeekRange()}</h3>
-              </div>
-              
-              <button
-                onClick={() => navigateWeek('next')}
-                className="p-2 hover:bg-purple-100 rounded-lg transition-colors"
-              >
-                <ChevronRight className="w-5 h-5 text-purple-600" />
-              </button>
-            </div>
-          </div>
-
-          {/* Week Days Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {weekDays.map((day, index) => {
-              const dayActivities = activities[day.dateKey] || [];
-              const dayCompleted = dayActivities.filter(a => a.completed).length;
-              const isToday = day.date.toDateString() === new Date().toDateString();
-              
-              return (
-                <div
-                  key={day.dateKey}
-                  className={`bg-orange-50 rounded-lg p-4 border-2 ${
-                    isToday ? 'border-purple-300 bg-purple-50' : 'border-orange-100'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <h4 className={`font-semibold ${isToday ? 'text-purple-700' : 'text-purple-600'}`}>
-                      {day.dayName} {isToday && '(Today)'}
-                    </h4>
-                    <span className="text-xs text-gray-500">{day.shortDate}</span>
-                  </div>
-                  
-                  <p className="text-xs text-gray-500 mb-3">
-                    {dayCompleted} of {dayActivities.length} activities completed
-                  </p>
-
-                  {/* Activities List */}
-                  <div className="space-y-2 mb-3">
-                    {dayActivities.map((activity) => (
-                      <div
-                        key={activity.id}
-                        className={`flex items-center space-x-2 p-2 rounded text-sm transition-all ${
-                          activity.completed
-                            ? 'bg-green-50 border border-green-200'
-                            : 'bg-white border border-gray-200 hover:border-purple-200'
-                        }`}
-                      >
-                        <button
-                          onClick={() => toggleActivity(day.dateKey, activity.id)}
-                          className={`w-4 h-4 rounded-full border flex items-center justify-center flex-shrink-0 transition-all ${
-                            activity.completed
-                              ? 'bg-green-500 border-green-500'
-                              : 'border-gray-300 hover:border-purple-400'
-                          }`}
-                        >
-                          {activity.completed && <Check className="w-3 h-3 text-white" />}
-                        </button>
-                        <span className={`flex-1 ${activity.completed ? 'line-through text-gray-500' : 'text-gray-700'}`}>
-                          {activity.name}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Add Activity Section */}
-                  {dayActivities.length === 0 && showAddForm !== day.dateKey && (
-                    <div className="text-center py-4">
-                      <button
-                        onClick={() => setShowAddForm(day.dateKey)}
-                        className="inline-flex items-center space-x-1 text-purple-600 hover:text-purple-700 transition-colors text-sm"
-                      >
-                        <Plus className="w-3 h-3" />
-                        <span>Add Activity</span>
-                      </button>
-                    </div>
-                  )}
-
-                  {dayActivities.length > 0 && showAddForm !== day.dateKey && (
-                    <button
-                      onClick={() => setShowAddForm(day.dateKey)}
-                      className="w-full text-center py-2 text-purple-600 hover:text-purple-700 transition-colors text-sm border border-dashed border-purple-300 rounded hover:border-purple-400"
-                    >
-                      <Plus className="w-3 h-3 inline mr-1" />
-                      Add Activity
-                    </button>
-                  )}
-
-                  {/* Add Activity Form */}
-                  {showAddForm === day.dateKey && (
-                    <div className="space-y-2">
-                      <input
-                        type="text"
-                        value={newActivity}
-                        onChange={(e) => setNewActivity(e.target.value)}
-                        placeholder="Activity name..."
-                        className="w-full p-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-transparent"
-                        onKeyPress={(e) => e.key === 'Enter' && addActivity(day.dateKey)}
-                        autoFocus
-                      />
-                      <div className="flex space-x-1">
-                        <button
-                          onClick={() => addActivity(day.dateKey)}
-                          className="px-3 py-1 bg-purple-600 text-white rounded text-sm hover:bg-purple-700 transition-colors"
-                        >
-                          Add
-                        </button>
-                        <button
-                          onClick={() => {
-                            setShowAddForm(null);
-                            setNewActivity('');
-                          }}
-                          className="px-3 py-1 text-gray-600 hover:text-gray-700 transition-colors text-sm"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+          <WeeklyPlannerView
+            completedActivities={completedActivities}
+            totalActivities={totalActivities}
+            currentWeek={currentWeek}
+            currentYear={currentYear}
+            currentDate={currentDate}
+            viewMode={viewMode}
+            weekDays={weekDays}
+            selectedActivity={selectedActivity}
+            isModalOpen={isModalOpen}
+            loadingStates={loadingStates}
+            isRetrying={isRetrying}
+            onNavigateWeek={handleNavigateWeek}
+            onNavigateDay={handleNavigateDay}
+            onViewModeChange={handleViewModeChange}
+            onActivityClick={handleActivityClick}
+            onToggleCompletion={handleToggleCompletion}
+            onModalClose={handleModalClose}
+            getActivityDetails={getActivityDetails}
+          />
         </div>
       </div>
+
+      <ActivityModal
+        isOpen={isActivityModalOpen}
+        onClose={handleActivityModalClose}
+        selectedPillar={selectedPillar}
+      />
+
+      {/* Dashboard Modals */}
+      <DashboardModals
+        isActivityModalOpen={false}
+        isChatModalOpen={isChatModalOpen}
+        isAddDogModalOpen={isAddDogModalOpen}
+        isEditDogModalOpen={isEditDogModalOpen}
+        selectedPillar={null}
+        selectedDog={selectedDog}
+        onActivityModalClose={() => {}}
+        onChatModalClose={handleChatModalClose}
+        onAddDogModalClose={handleAddDogModalClose}
+        onEditDogModalClose={handleEditDogModalClose}
+      />
     </div>
   );
 };
 
-export default WeeklyActivityPlanner;
+export default WeeklyPlannerPage;
