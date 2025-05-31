@@ -1,7 +1,8 @@
 
 import React, { useState } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import ActivityModalHeader from './modals/ActivityModalHeader';
+import { DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Target } from 'lucide-react';
 import DaySelector from './DaySelector';
 import ActivityModalTabs from './ActivityModalTabs';
 import { useActivity } from '@/contexts/ActivityContext';
@@ -134,7 +135,14 @@ const ActivityModal: React.FC<ActivityModalProps> = ({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <ActivityModalHeader onClose={onClose} />
+        <DialogHeader>
+          <DialogTitle className="flex items-center space-x-2">
+            <div className="bg-gradient-to-r from-purple-500 to-cyan-500 p-2 rounded-2xl">
+              <Target className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-purple-800">Add Activity</span>
+          </DialogTitle>
+        </DialogHeader>
 
         <DaySelector 
           selectedDayOfWeek={selectedDayOfWeek}
