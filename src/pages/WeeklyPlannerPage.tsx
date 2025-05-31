@@ -3,12 +3,20 @@ import React, { useState, useCallback } from 'react';
 import { useWeeklyPlannerState } from '@/hooks/useWeeklyPlannerState';
 import { useWeeklyPlannerActions } from '@/hooks/useWeeklyPlannerActions';
 import { useActivity } from '@/contexts/ActivityContext';
+import { useDog } from '@/contexts/DogContext';
+import DashboardHeader from '@/components/dashboard/DashboardHeader';
+import DashboardModals from '@/components/dashboard/DashboardModals';
 import WeeklyPlannerView from '@/components/weekly-planner/WeeklyPlannerView';
 import ActivityModal from '@/components/ActivityModal';
+import { Dog } from '@/types/dog';
 
 const WeeklyPlannerPage: React.FC = () => {
   const [selectedPillar, setSelectedPillar] = useState<string | null>(null);
   const [isActivityModalOpen, setIsActivityModalOpen] = useState(false);
+  const [isChatModalOpen, setIsChatModalOpen] = useState(false);
+  const [isAddDogModalOpen, setIsAddDogModalOpen] = useState(false);
+  const [isEditDogModalOpen, setIsEditDogModalOpen] = useState(false);
+  const [selectedDog, setSelectedDog] = useState<Dog | null>(null);
 
   const {
     completedActivities,
@@ -95,8 +103,42 @@ const WeeklyPlannerPage: React.FC = () => {
     setSelectedPillar(null);
   }, []);
 
+  // Modal handlers for dashboard header
+  const handleChatModalOpen = useCallback(() => {
+    setIsChatModalOpen(true);
+  }, []);
+
+  const handleChatModalClose = useCallback(() => {
+    setIsChatModalOpen(false);
+  }, []);
+
+  const handleAddDogModalOpen = useCallback(() => {
+    setIsAddDogModalOpen(true);
+  }, []);
+
+  const handleAddDogModalClose = useCallback(() => {
+    setIsAddDogModalOpen(false);
+  }, []);
+
+  const handleEditDogModalOpen = useCallback((dog: Dog) => {
+    setSelectedDog(dog);
+    setIsEditDogModalOpen(true);
+  }, []);
+
+  const handleEditDogModalClose = useCallback(() => {
+    setIsEditDogModalOpen(false);
+    setSelectedDog(null);
+  }, []);
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-cyan-50 to-amber-50">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-cyan-50 to-amber-50 mobile-safe">
+      {/* Header */}
+      <DashboardHeader 
+        onChatOpen={handleChatModalOpen} 
+        onAddDogOpen={handleAddDogModalOpen}
+      />
+
+      {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-8">
@@ -135,6 +177,20 @@ const WeeklyPlannerPage: React.FC = () => {
         isOpen={isActivityModalOpen}
         onClose={handleActivityModalClose}
         selectedPillar={selectedPillar}
+      />
+
+      {/* Dashboard Modals */}
+      <DashboardModals
+        isActivityModalOpen={false}
+        isChatModalOpen={isChatModalOpen}
+        isAddDogModalOpen={isAddDogModalOpen}
+        isEditDogModalOpen={isEditDogModalOpen}
+        selectedPillar={null}
+        selectedDog={selectedDog}
+        onActivityModalClose={() => {}}
+        onChatModalClose={handleChatModalClose}
+        onAddDogModalClose={handleAddDogModalClose}
+        onEditDogModalClose={handleEditDogModalClose}
       />
     </div>
   );

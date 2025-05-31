@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Settings, Library, MessageCircle, Menu, User, LogOut } from 'lucide-react';
+import { Settings, Library, MessageCircle, Menu, User, LogOut, CalendarDays } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useIsMobile, useIsSmallMobile } from '@/hooks/use-mobile';
 import { useDog } from '@/contexts/DogContext';
@@ -172,6 +172,20 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = React.memo(
                   >
                     <Library className="mr-2 h-4 w-4" />
                     <span>Activity Library</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => handleNavigation('/dog-profile-dashboard/weekly-plan')}
+                    className={`touch-target rounded ${
+                      isCurrentPage('/dog-profile-dashboard/weekly-plan')
+                        ? 'bg-blue-50 text-blue-700'
+                        : ''
+                    }`}
+                    aria-current={
+                      isCurrentPage('/dog-profile-dashboard/weekly-plan') ? 'page' : undefined
+                    }
+                  >
+                    <CalendarDays className="mr-2 h-4 w-4" />
+                    <span>Weekly Planner</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
