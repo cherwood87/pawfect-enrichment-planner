@@ -6,38 +6,37 @@ import { Button } from '@/components/ui/button';
 import { CheckCircle, Circle, Clock, Star, Target, MessageSquare, Calendar, Heart } from 'lucide-react';
 import { ScheduledActivity, ActivityLibraryItem, UserActivity } from '@/types/activity';
 import { DiscoveredActivity } from '@/types/discovery';
+import { ActivityHelpContext } from '@/types/activityContext';
 import { useNavigate } from 'react-router-dom';
 import { useDog } from '@/contexts/DogContext';
 import { useActivity } from '@/contexts/ActivityContext';
 import { useFavourites } from '@/hooks/useFavourites';
 import { toast } from '@/hooks/use-toast';
-import ChatModal from '@/components/chat/ChatModal';
 import DaySelector from '@/components/DaySelector';
-import { ActivityHelpContext } from '@/types/activityContext';
+import ChatModal from '@/components/chat/ChatModal';
 
-interface ActivityDetailModalProps {
+interface UnifiedActivityModalProps {
   isOpen: boolean;
   onClose: () => void;
-  scheduledActivity?: ScheduledActivity | null;
   activityDetails: ActivityLibraryItem | UserActivity | DiscoveredActivity | null;
+  scheduledActivity?: ScheduledActivity | null;
   onToggleCompletion?: (activityId: string, completionNotes?: string) => void;
-  mode?: 'scheduled' | 'library';
+  mode: 'scheduled' | 'library';
 }
 
-const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
+const UnifiedActivityModal: React.FC<UnifiedActivityModalProps> = ({
   isOpen,
   onClose,
-  scheduledActivity = null,
   activityDetails,
+  scheduledActivity,
   onToggleCompletion,
-  mode = 'scheduled'
+  mode
 }) => {
   const navigate = useNavigate();
   const { currentDog } = useDog();
   const { addScheduledActivity } = useActivity();
   const { addToFavourites } = useFavourites(currentDog?.id || null);
   
-  // State management
   const [selectedDayOfWeek, setSelectedDayOfWeek] = useState<number>(new Date().getDay());
   const [isScheduling, setIsScheduling] = useState(false);
   const [isFavouriting, setIsFavouriting] = useState(false);
@@ -73,7 +72,6 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
     setIsScheduling(true);
     
     try {
-      // Get ISO week number
       function getISOWeek(date: Date): number {
         const target = new Date(date.valueOf());
         const dayNr = (date.getDay() + 6) % 7;
@@ -88,8 +86,6 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
 
       const currentWeek = getISOWeek(new Date());
       const today = new Date();
-      
-      // Calculate the date for the selected day of week
       const dayDiff = selectedDayOfWeek - today.getDay();
       const scheduledDate = new Date(today);
       scheduledDate.setDate(today.getDate() + dayDiff);
@@ -215,7 +211,6 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
               </div>
             </div>
 
-            {/* Day Selector for library mode */}
             {mode === 'library' && (
               <div className="bg-white/70 rounded-3xl p-4 border border-purple-200">
                 <DaySelector
@@ -274,7 +269,6 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
               </div>
             )}
 
-            {/* Action buttons for library mode */}
             {mode === 'library' && (
               <div className="grid grid-cols-2 gap-3 pt-4 border-t border-purple-200/50">
                 <Button
@@ -318,4 +312,4 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
   );
 };
 
-export default ActivityDetailModal;
+export default UnifiedActivityModal;

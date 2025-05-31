@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useCallback } from 'react';
 import { useActivity } from '@/contexts/ActivityContext';
 import { useDog } from '@/contexts/DogContext';
@@ -246,9 +247,10 @@ const WeeklyPlannerCard = ({ onPillarSelect, onChatOpen }) => {
       <ActivityDetailModal
         isOpen={isModalOpen}
         onClose={handleModalClose}
-        activity={selectedActivity}
+        scheduledActivity={selectedActivity}
         activityDetails={selectedActivity ? getActivityDetails(selectedActivity.activityId) : null}
         onToggleCompletion={handleToggleCompletion}
+        mode="scheduled"
       />
     </div>
   );

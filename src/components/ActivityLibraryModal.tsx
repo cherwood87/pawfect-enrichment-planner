@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, Circle, Clock, Star, Target, Calendar, Heart } from 'lucide-react';
+import { CheckCircle, Circle, Clock, Star, Target, Calendar, Heart, MessageSquare } from 'lucide-react';
 import { ScheduledActivity, ActivityLibraryItem, UserActivity } from '@/types/activity';
 import { DiscoveredActivity } from '@/types/discovery';
 import { useNavigate } from 'react-router-dom';
@@ -14,23 +14,24 @@ import { useChat } from '@/contexts/ChatContext';
 import { toast } from '@/hooks/use-toast';
 import DaySelector from '@/components/DaySelector';
 import ChatModal from '@/components/chat/ChatModal';
+import { ActivityHelpContext } from '@/types/activityContext';
 
 interface ActivityLibraryModalProps {
   isOpen: boolean;
   onClose: () => void;
-  activity: ScheduledActivity | null;
   activityDetails: ActivityLibraryItem | UserActivity | DiscoveredActivity | null;
-  onToggleCompletion: (activityId: string) => void;
+  scheduledActivity?: ScheduledActivity | null;
+  onToggleCompletion?: (activityId: string) => void;
   mode?: 'scheduled' | 'library';
 }
 
 const ActivityLibraryModal: React.FC<ActivityLibraryModalProps> = ({
   isOpen,
   onClose,
-  activity,
   activityDetails,
+  scheduledActivity = null,
   onToggleCompletion,
-  mode = 'scheduled'
+  mode = 'library'
 }) => {
   const navigate = useNavigate();
   const { currentDog } = useDog();
@@ -43,22 +44,12 @@ const ActivityLibraryModal: React.FC<ActivityLibraryModalProps> = ({
   const [isScheduling, setIsScheduling] = useState(false);
   const [isFavouriting, setIsFavouriting] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const [chatContext, setChatContext] = useState<any>(null);
 
   if (!activityDetails) return null;
 
   const handleNeedHelp = () => {
     if (!activityDetails) return;
     
-    const activityContext = {
-      type: 'activity-help' as const,
-      activityName: activityDetails.title,
-      activityPillar: activityDetails.pillar,
-      activityDifficulty: activityDetails.difficulty,
-      activityDuration: activityDetails.duration
-    };
-    
-    setChatContext(activityContext);
     loadConversation(currentDog?.id || '', 'activity-help');
     setIsChatOpen(true);
   };
@@ -160,6 +151,14 @@ const ActivityLibraryModal: React.FC<ActivityLibraryModalProps> = ({
     ));
   };
 
+  const chatContext: ActivityHelpContext = {
+    type: 'activity-help',
+    activityName: activityDetails.title,
+    activityPillar: activityDetails.pillar,
+    activityDifficulty: activityDetails.difficulty,
+    activityDuration: activityDetails.duration
+  };
+
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
@@ -172,26 +171,37 @@ const ActivityLibraryModal: React.FC<ActivityLibraryModalProps> = ({
                 </div>
                 <span className="text-purple-800">{activityDetails.title}</span>
               </span>
-              {mode === 'scheduled' && activity && (
+              <div className="flex items-center space-x-2">
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => onToggleCompletion(activity.id)}
+                  onClick={handleNeedHelp}
                   className="flex items-center space-x-2 hover:bg-purple-100 rounded-xl"
                 >
-                  {activity.completed ? (
-                    <>
-                      <CheckCircle className="w-5 h-5 text-emerald-500" />
-                      <span className="text-emerald-600">Completed</span>
-                    </>
-                  ) : (
-                    <>
-                      <Circle className="w-5 h-5 text-gray-400" />
-                      <span className="text-gray-600">Mark Complete</span>
-                    </>
-                  )}
+                  <MessageSquare className="w-4 h-4 text-purple-600" />
+                  <span className="text-purple-600">Get Help</span>
                 </Button>
-              )}
+                {mode === 'scheduled' && scheduledActivity && onToggleCompletion && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onToggleCompletion(scheduledActivity.id)}
+                    className="flex items-center space-x-2 hover:bg-purple-100 rounded-xl"
+                  >
+                    {scheduledActivity.completed ? (
+                      <>
+                        <CheckCircle className="w-5 h-5 text-emerald-500" />
+                        <span className="text-emerald-600">Completed</span>
+                      </>
+                    ) : (
+                      <>
+                        <Circle className="w-5 h-5 text-gray-400" />
+                        <span className="text-gray-600">Mark Complete</span>
+                      </>
+                    )}
+                  </Button>
+                )}
+              </div>
             </DialogTitle>
           </DialogHeader>
 
@@ -251,20 +261,20 @@ const ActivityLibraryModal: React.FC<ActivityLibraryModalProps> = ({
               </div>
             )}
 
-            {mode === 'scheduled' && activity?.notes && (
+            {mode === 'scheduled' && scheduledActivity?.notes && (
               <div className="bg-white/70 rounded-3xl p-6 border border-cyan-200">
                 <h3 className="text-lg font-semibold text-purple-800 mb-3">Notes</h3>
                 <p className="text-gray-700 bg-cyan-50 p-4 rounded-2xl border border-cyan-200">
-                  {activity.notes}
+                  {scheduledActivity.notes}
                 </p>
               </div>
             )}
 
-            {mode === 'scheduled' && activity?.completionNotes && activity.completed && (
+            {mode === 'scheduled' && scheduledActivity?.completionNotes && scheduledActivity.completed && (
               <div className="bg-white/70 rounded-3xl p-6 border border-emerald-200">
                 <h3 className="text-lg font-semibold text-purple-800 mb-3">Completion Notes</h3>
                 <p className="text-gray-700 bg-emerald-50 p-4 rounded-2xl border border-emerald-200">
-                  {activity.completionNotes}
+                  {scheduledActivity.completionNotes}
                 </p>
               </div>
             )}
@@ -288,22 +298,18 @@ const ActivityLibraryModal: React.FC<ActivityLibraryModalProps> = ({
                   <Heart className="w-4 h-4 mr-2" />
                   {isFavouriting ? 'Adding...' : 'Add to Favourites'}
                 </Button>
-                <Button
-                  onClick={handleNeedHelp}
-                  variant="outline"
-                  className="col-span-2 rounded-2xl border-purple-300 text-purple-700 hover:bg-purple-50"
-                >
-                  Need Help with This Activity?
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={onClose} 
-                  className="col-span-2 rounded-2xl border-purple-300 hover:bg-purple-50"
-                >
-                  Close
-                </Button>
               </div>
             )}
+
+            <div className="pt-4 border-t border-purple-200/50">
+              <Button 
+                variant="outline" 
+                onClick={onClose} 
+                className="w-full rounded-2xl border-purple-300 hover:bg-purple-50"
+              >
+                Close
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
