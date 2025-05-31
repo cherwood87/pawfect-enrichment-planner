@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { JournalEntry } from '@/types/journal';
 
@@ -17,41 +16,76 @@ export interface DatabaseJournalEntry {
 }
 
 export class JournalService {
-  static async createEntry(dogId: string, entry: Omit<JournalEntry, 'id'>): Promise<JournalEntry> {
-    console.log('Creating new journal entry for dog:', dogId, 'entry:', entry);
-    
-    try {
-      const { data, error } = await supabase
-        .from('journal_entries')
-        .insert({
-          dog_id: dogId,
-          date: entry.date,
-          prompt: entry.prompt,
-          response: entry.response,
-          mood: entry.mood,
-          behaviors: entry.behaviors,
-          notes: entry.notes,
-          entry_timestamp: new Date().toISOString()
-        })
-        .select()
-        .single();
+  static async createOrUpdateEntry(dogId: string, entry: Omit<JournalEntry, 'id'>): Promise<JournalEntry> {
+    console.log('Creating or updating journal entry for dog:', dogId, 'entry:', entry);
 
-      if (error) {
-        console.error('Supabase error creating journal entry:', error);
-        throw new Error(`Failed to create journal entry: ${error.message}`);
+    try {
+      const { data: existing, error: fetchError } = await supabase
+        .from('journal_entries')
+        .select('*')
+        .eq('dog_id', dogId)
+        .eq('date', entry.date)
+        .limit(1)
+        .maybeSingle();
+
+      if (fetchError) {
+        console.error('Error checking existing journal entry:', fetchError);
+        throw new Error('Failed to check existing journal entry');
       }
-      
-      console.log('Journal entry created successfully:', data);
-      return this.mapToJournalEntry(data);
+
+      if (existing) {
+        const { data: updated, error: updateError } = await supabase
+          .from('journal_entries')
+          .update({
+            prompt: entry.prompt,
+            response: entry.response,
+            mood: entry.mood,
+            behaviors: entry.behaviors,
+            notes: entry.notes,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', existing.id)
+          .select()
+          .single();
+
+        if (updateError) {
+          console.error('Error updating journal entry:', updateError);
+          throw new Error('Failed to update journal entry');
+        }
+
+        return this.mapToJournalEntry(updated);
+      } else {
+        const { data, error } = await supabase
+          .from('journal_entries')
+          .insert({
+            dog_id: dogId,
+            date: entry.date,
+            prompt: entry.prompt,
+            response: entry.response,
+            mood: entry.mood,
+            behaviors: entry.behaviors,
+            notes: entry.notes,
+            entry_timestamp: new Date().toISOString()
+          })
+          .select()
+          .single();
+
+        if (error) {
+          console.error('Error inserting journal entry:', error);
+          throw new Error('Failed to create journal entry');
+        }
+
+        return this.mapToJournalEntry(data);
+      }
     } catch (error) {
-      console.error('Error in createEntry:', error);
+      console.error('Error in createOrUpdateEntry:', error);
       throw error;
     }
   }
 
   static async updateEntry(entryId: string, entry: Partial<JournalEntry>): Promise<JournalEntry> {
     console.log('Updating journal entry:', entryId, 'with data:', entry);
-    
+
     try {
       const updateData: any = {};
       if (entry.prompt !== undefined) updateData.prompt = entry.prompt;
@@ -71,8 +105,7 @@ export class JournalService {
         console.error('Supabase error updating journal entry:', error);
         throw new Error(`Failed to update journal entry: ${error.message}`);
       }
-      
-      console.log('Journal entry updated successfully:', data);
+
       return this.mapToJournalEntry(data);
     } catch (error) {
       console.error('Error in updateEntry:', error);
@@ -81,8 +114,6 @@ export class JournalService {
   }
 
   static async getEntriesForDate(dogId: string, date: string): Promise<JournalEntry[]> {
-    console.log('Fetching journal entries for dog:', dogId, 'date:', date);
-    
     try {
       const { data, error } = await supabase
         .from('journal_entries')
@@ -92,21 +123,16 @@ export class JournalService {
         .order('entry_timestamp', { ascending: false });
 
       if (error) {
-        console.error('Supabase error fetching journal entries for date:', error);
         throw new Error(`Failed to fetch journal entries: ${error.message}`);
       }
 
-      console.log('Fetched journal entries for date:', data);
       return data.map(this.mapToJournalEntry);
     } catch (error) {
-      console.error('Error in getEntriesForDate:', error);
       throw error;
     }
   }
 
   static async getEntries(dogId: string): Promise<JournalEntry[]> {
-    console.log('Fetching all journal entries for dog:', dogId);
-    
     try {
       const { data, error } = await supabase
         .from('journal_entries')
@@ -116,21 +142,16 @@ export class JournalService {
         .order('entry_timestamp', { ascending: false });
 
       if (error) {
-        console.error('Supabase error fetching journal entries:', error);
         throw new Error(`Failed to fetch journal entries: ${error.message}`);
       }
 
-      console.log('Fetched all journal entries:', data);
       return data.map(this.mapToJournalEntry);
     } catch (error) {
-      console.error('Error in getEntries:', error);
       throw error;
     }
   }
 
   static async deleteEntry(entryId: string): Promise<void> {
-    console.log('Deleting journal entry:', entryId);
-    
     try {
       const { error } = await supabase
         .from('journal_entries')
@@ -138,26 +159,20 @@ export class JournalService {
         .eq('id', entryId);
 
       if (error) {
-        console.error('Supabase error deleting journal entry:', error);
         throw new Error(`Failed to delete journal entry: ${error.message}`);
       }
-      
-      console.log('Journal entry deleted successfully');
     } catch (error) {
-      console.error('Error in deleteEntry:', error);
       throw error;
     }
   }
 
-  // Legacy method for backward compatibility
+  // ✅ Updated to use safe logic
   static async saveEntry(dogId: string, entry: JournalEntry): Promise<void> {
-    console.log('Legacy saveEntry called - redirecting to createEntry');
-    await this.createEntry(dogId, entry);
+    console.log('saveEntry called - using createOrUpdateEntry');
+    await this.createOrUpdateEntry(dogId, entry);
   }
 
-  // Legacy method for backward compatibility  
   static async getEntry(dogId: string, date: string): Promise<JournalEntry | null> {
-    console.log('Legacy getEntry called - getting latest entry for date');
     const entries = await this.getEntriesForDate(dogId, date);
     return entries.length > 0 ? entries[0] : null;
   }
