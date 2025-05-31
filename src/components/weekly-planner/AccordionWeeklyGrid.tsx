@@ -1,9 +1,8 @@
+
 import React from 'react';
 import { ScheduledActivity } from '@/types/activity';
 import { useActivity } from '@/contexts/ActivityContext';
 import { Calendar, Target } from 'lucide-react';
-import ActivityCardHeader from '../ActivityCardHeader';
-import ActivityCardStats from '../ActivityCardStats';
 
 interface AccordionWeeklyGridProps {
   weekActivities: ScheduledActivity[];
@@ -98,7 +97,7 @@ const AccordionWeeklyGrid: React.FC<AccordionWeeklyGridProps> = ({
             ) : (
               <div className="space-y-4">
                 {dayActivities.map((activity) => {
-                  const details = getActivityDetails(activity.activityId); // <-- Key fix!
+                  const details = getActivityDetails(activity.activityId);
                   if (!details) return null;
 
                   return (
@@ -107,17 +106,22 @@ const AccordionWeeklyGrid: React.FC<AccordionWeeklyGridProps> = ({
                       className="p-4 rounded-2xl bg-gradient-to-br from-white to-gray-50 border shadow-sm hover:shadow-md transition cursor-pointer"
                       onClick={() => onActivityClick?.(activity)}
                     >
-                      <ActivityCardHeader activity={details} />
-                      <ActivityCardStats activity={details} />
-
-                      <div className="flex justify-between items-center pt-2">
-                        <span className="text-sm text-gray-600">Mark as done</span>
+                      <div className="flex justify-between items-start mb-2">
+                        <h3 className="font-semibold text-gray-800">{details.title}</h3>
                         <input
                           type="checkbox"
                           checked={activity.completed}
-                          onChange={() => onToggleCompletion(activity.id)}
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            onToggleCompletion(activity.id);
+                          }}
+                          className="ml-2"
                         />
                       </div>
+                      <p className="text-sm text-gray-600 mb-1">
+                        <span className="capitalize">{details.pillar}</span> • {details.duration} min • {details.difficulty}
+                      </p>
+                      <p className="text-xs text-gray-500">{details.benefits}</p>
                     </div>
                   );
                 })}

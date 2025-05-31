@@ -1,7 +1,8 @@
+
 import React from 'react';
 import { ScheduledActivity } from '@/types/activity';
 import { useActivity } from '@/contexts/ActivityContext';
-import ActivityCard from '../activity/ActivityCard';
+import ActivityCard from '../ActivityCard';
 import { Calendar, Target } from 'lucide-react';
 
 interface WeeklyGridProps {
@@ -79,15 +80,28 @@ const WeeklyGrid: React.FC<WeeklyGridProps> = ({
                   const details = getActivityDetails(activity.activityId);
                   if (!details) return null;
                   return (
-                    <ActivityCard
+                    <div
                       key={activity.id}
-                      activity={details}
-                      completed={activity.completed}
-                      onComplete={() => onToggleCompletion(activity.id)}
+                      className="p-4 rounded-2xl bg-gradient-to-br from-white to-purple-50 border shadow-sm hover:shadow-md transition cursor-pointer"
                       onClick={() => onActivityClick?.(activity)}
-                      // Optionally: add gradient/pastel via className
-                      className="bg-gradient-to-br from-white to-purple-50"
-                    />
+                    >
+                      <div className="flex justify-between items-start mb-2">
+                        <h3 className="font-semibold text-gray-800">{details.title}</h3>
+                        <input
+                          type="checkbox"
+                          checked={activity.completed}
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            onToggleCompletion(activity.id);
+                          }}
+                          className="ml-2"
+                        />
+                      </div>
+                      <p className="text-sm text-gray-600 mb-1">
+                        <span className="capitalize">{details.pillar}</span> • {details.duration} min • {details.difficulty}
+                      </p>
+                      <p className="text-xs text-gray-500">{details.benefits}</p>
+                    </div>
                   );
                 })
               )}
