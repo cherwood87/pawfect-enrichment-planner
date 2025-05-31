@@ -1,8 +1,9 @@
+
 import React, { useState, useMemo, useCallback } from 'react';
 import { useActivity } from '@/contexts/ActivityContext';
 import { useDog } from '@/contexts/DogContext';
 import WeeklyPlannerHeader from './weekly-planner/WeeklyPlannerHeader';
-import VerticalDayCard from './VerticalDayCard';
+import VerticalDayCard from './weekly-planner/VerticalDayCard';
 import WeeklySummary from './weekly-planner/WeeklySummary';
 import EmptyWeeklyPlanner from './weekly-planner/EmptyWeeklyPlanner';
 import ActivityDetailModal from './weekly-planner/ActivityDetailModal';
@@ -49,6 +50,17 @@ const WeeklyPlannerCard = ({ onPillarSelect, onChatOpen }) => {
   const completedActivities = allWeekActivities.filter(a => a.completed).length;
   const totalActivities = allWeekActivities.length;
 
+  // Get current week and year for header
+  const getWeekOfYear = (date: Date) => {
+    const start = new Date(date.getFullYear(), 0, 1);
+    const diff = date.getTime() - start.getTime();
+    const oneWeek = 1000 * 60 * 60 * 24 * 7;
+    return Math.floor(diff / oneWeek) + 1;
+  };
+
+  const currentWeek = getWeekOfYear(startOfWeek);
+  const currentYear = startOfWeek.getFullYear();
+
   // Navigation handlers (if you want day navigation for mobile/future)
   const handleDayChange = useCallback((direction: 'prev' | 'next') => {
     const next = new Date(currentDate);
@@ -84,8 +96,8 @@ const WeeklyPlannerCard = ({ onPillarSelect, onChatOpen }) => {
       <WeeklyPlannerHeader
         completedActivities={completedActivities}
         totalActivities={totalActivities}
-        currentWeek={null}
-        currentYear={null}
+        currentWeek={currentWeek}
+        currentYear={currentYear}
         currentDate={currentDate}
         viewMode={viewMode}
         onNavigateWeek={() => {}}
