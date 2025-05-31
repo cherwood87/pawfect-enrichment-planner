@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { ActivityLibraryItem } from '@/types/activity';
 import { DiscoveredActivity } from '@/types/discovery';
@@ -150,7 +149,6 @@ const ActivityLibrary = () => {
         <ActivityLibraryModal
           isOpen={!!selectedActivity}
           onClose={handleActivityModalClose}
-          activity={null}
           activityDetails={selectedActivity}
           onToggleCompletion={() => {}}
           mode="library"
