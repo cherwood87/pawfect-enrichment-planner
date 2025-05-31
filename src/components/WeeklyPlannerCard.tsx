@@ -1,105 +1,51 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { useActivity } from '@/contexts/ActivityContext';
 import { useDog } from '@/contexts/DogContext';
-import { useChat } from '@/contexts/ChatContext';
 import WeeklyPlannerHeader from './weekly-planner/WeeklyPlannerHeader';
-import AccordionWeeklyGrid from './weekly-planner/AccordionWeeklyGrid';
-import SingleDayView from './weekly-planner/SingleDayView';
+import VerticalDayCard from './VerticalDayCard'; // This component replaces the old accordion-style day panels
 import WeeklySummary from './weekly-planner/WeeklySummary';
 import EmptyWeeklyPlanner from './weekly-planner/EmptyWeeklyPlanner';
 import ActivityDetailModal from './weekly-planner/ActivityDetailModal';
-import { ScheduledActivity } from '@/types/activity';
 
-interface WeeklyPlannerCardProps {
-  onPillarSelect?: (pillar: string) => void;
-  onChatOpen?: () => void;
-}
+const DAY_LABELS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-const WeeklyPlannerCard: React.FC<WeeklyPlannerCardProps> = ({
-  onPillarSelect,
-  onChatOpen
-}) => {
-  const {
-    scheduledActivities,
-    toggleActivityCompletion,
-    getActivityDetails
-  } = useActivity();
-  const {
-    currentDog
-  } = useDog();
-  const {
-    loadConversation,
-    sendMessage
-  } = useChat();
+const WeeklyPlannerCard = ({ onPillarSelect, onChatOpen }) => {
+  const { scheduledActivities, toggleActivityCompletion, getActivityDetails } = useActivity();
+  const { currentDog } = useDog();
 
-  // Always show current week for week view
-  const [currentWeek] = useState(getISOWeek(new Date()));
-  const [currentYear] = useState(new Date().getFullYear());
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [viewMode, setViewMode] = useState<'week' | 'day'>('day');
-  const [selectedActivity, setSelectedActivity] = useState<ScheduledActivity | null>(null);
+  const [selectedActivity, setSelectedActivity] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Get ISO week number
-  function getISOWeek(date: Date): number {
-    const target = new Date(date.valueOf());
-    const dayNr = (date.getDay() + 6) % 7;
-    target.setDate(target.getDate() - dayNr + 3);
-    const firstThursday = target.valueOf();
-    target.setMonth(0, 1);
-    if (target.getDay() !== 4) {
-      target.setMonth(0, 1 + (4 - target.getDay() + 7) % 7);
-    }
-    return 1 + Math.ceil((firstThursday - target.valueOf()) / 604800000);
-  }
-
-  // Memoize week activities calculation
-  const weekActivities = useMemo(() => 
-    scheduledActivities.filter(activity => activity.weekNumber === currentWeek && activity.dogId === currentDog?.id),
-    [scheduledActivities, currentWeek, currentDog?.id]
-  );
-
-  // Memoize computed values - for day view, only count current day's activities
-  const { totalActivities, completedActivities } = useMemo(() => {
-    if (viewMode === 'day') {
-      const currentDayIndex = currentDate.getDay();
-      const dayActivities = weekActivities.filter(activity => activity.dayOfWeek === currentDayIndex);
-      return {
-        totalActivities: dayActivities.length,
-        completedActivities: dayActivities.filter(a => a.completed).length
-      };
-    }
-    return {
-      totalActivities: weekActivities.length,
-      completedActivities: weekActivities.filter(a => a.completed).length
-    };
-  }, [weekActivities, viewMode, currentDate]);
-
-  // No week navigation needed for week view since it always shows current week
-  const navigateWeek = useCallback(() => {
-    // No-op since week view always shows current week
-  }, []);
-
-  const navigateDay = useCallback((direction: 'prev' | 'next') => {
-    const newDate = new Date(currentDate);
-    if (direction === 'prev') {
-      newDate.setDate(newDate.getDate() - 1);
-    } else {
-      newDate.setDate(newDate.getDate() + 1);
-    }
-    setCurrentDate(newDate);
+  // Get start of week (Sunday) for the current week
+  const startOfWeek = React.useMemo(() => {
+    const date = new Date(currentDate);
+    const day = date.getDay();
+    return new Date(date.setDate(date.getDate() - day));
   }, [currentDate]);
 
-  const handleViewModeChange = useCallback((mode: 'week' | 'day') => {
-    setViewMode(mode);
-    
-    // When switching to day view, set current date to today
-    if (mode === 'day') {
-      setCurrentDate(new Date());
-    }
-  }, []);
+  // Create a list: [{label: "Monday", date: Date, activities: ScheduledActivity[]}, ...]
+  const weekDays = React.useMemo(() => {
+    return Array.from({ length: 7 }).map((_, dayIdx) => {
+      const dayDate = new Date(startOfWeek);
+      dayDate.setDate(startOfWeek.getDate() + dayIdx);
+      return {
+        label: DAY_LABELS[dayDate.getDay()],
+        date: dayDate,
+        activities: scheduledActivities
+          .filter(
+            (a) => new Date(a.scheduledDate).toDateString() === dayDate.toDateString() &&
+            (!currentDog || a.dogId === currentDog.id)
+          ),
+      };
+    });
+  }, [startOfWeek, scheduledActivities, currentDog]);
 
-  const handleActivityClick = useCallback((activity: ScheduledActivity) => {
+  // Show empty planner if no activities this week
+  const hasActivities = weekDays.some(day => day.activities.length > 0);
+
+  // Show modal for activity details
+  const handleActivityClick = useCallback((activity) => {
     setSelectedActivity(activity);
     setIsModalOpen(true);
   }, []);
@@ -109,89 +55,42 @@ const WeeklyPlannerCard: React.FC<WeeklyPlannerCardProps> = ({
     setSelectedActivity(null);
   }, []);
 
-  const handleNeedHelp = useCallback(async () => {
-    if (!selectedActivity || !currentDog) return;
-    const activityDetails = getActivityDetails(selectedActivity.activityId);
-    if (!activityDetails) return;
-
-    // Start a new activity-help conversation
-    loadConversation(currentDog.id, 'activity-help');
-
-    // Prepare activity context for the AI coach
-    const activityContext = {
-      activityName: activityDetails.title,
-      activityPillar: activityDetails.pillar,
-      activityDifficulty: activityDetails.difficulty,
-      activityDuration: activityDetails.duration
-    };
-
-    // Send initial help message with activity context
-    const helpMessage = `I need help with the "${activityDetails.title}" activity. Can you provide step-by-step guidance and tips for this ${activityDetails.pillar} enrichment activity?`;
-    try {
-      await sendMessage(helpMessage, activityContext);
-
-      // Close the modal and open chat
-      handleModalClose();
-      if (onChatOpen) {
-        onChatOpen();
-      }
-    } catch (error) {
-      console.error('Error starting help conversation:', error);
-    }
-  }, [selectedActivity, currentDog, getActivityDetails, loadConversation, sendMessage, handleModalClose, onChatOpen]);
-
-  if (totalActivities === 0 && viewMode === 'week') {
+  if (!hasActivities) {
     return <EmptyWeeklyPlanner onPillarSelect={onPillarSelect} />;
   }
 
   return (
-    <>
-      <div className="bg-white/80 rounded-3xl shadow-lg border border-purple-100 max-w-5xl mx-auto my-8 overflow-hidden">
-        <WeeklyPlannerHeader 
-          completedActivities={completedActivities} 
-          totalActivities={totalActivities} 
-          currentWeek={currentWeek} 
-          currentYear={currentYear} 
-          currentDate={currentDate}
-          viewMode={viewMode}
-          onNavigateWeek={navigateWeek}
-          onNavigateDay={navigateDay}
-          onViewModeChange={handleViewModeChange}
-        />
+    <div className="bg-white/80 rounded-3xl shadow-lg border border-purple-100 max-w-4xl mx-auto my-8 overflow-hidden">
+      <WeeklyPlannerHeader
+        // ...your header props here
+      />
 
-        <div className="p-6 md:p-10 bg-gradient-to-br from-purple-50/60 to-cyan-50/60">
-          {viewMode === 'week' ? (
-            <>
-              <AccordionWeeklyGrid 
-                weekActivities={weekActivities} 
-                onToggleCompletion={toggleActivityCompletion} 
-                onActivityClick={handleActivityClick} 
-              />
-              <WeeklySummary 
-                completedActivities={completedActivities} 
-                totalActivities={totalActivities} 
-              />
-            </>
-          ) : (
-            <SingleDayView
-              currentDate={currentDate}
-              weekActivities={weekActivities}
-              onToggleCompletion={toggleActivityCompletion}
-              onActivityClick={handleActivityClick}
-            />
-          )}
-        </div>
+      <div className="flex flex-col gap-6 p-4 md:p-8 bg-gradient-to-br from-purple-50/40 to-cyan-50/40">
+        {weekDays.map((day) => (
+          <VerticalDayCard
+            key={day.label}
+            date={day.date}
+            label={day.label}
+            activities={day.activities}
+            onActivityClick={handleActivityClick}
+            onToggleCompletion={toggleActivityCompletion}
+            getActivityDetails={getActivityDetails}
+          />
+        ))}
       </div>
 
-      <ActivityDetailModal 
-        isOpen={isModalOpen} 
-        onClose={handleModalClose} 
-        activity={selectedActivity} 
-        activityDetails={selectedActivity ? getActivityDetails(selectedActivity.activityId) : null} 
-        onToggleCompletion={toggleActivityCompletion} 
-        onNeedHelp={handleNeedHelp} 
+      <WeeklySummary
+        // ...your summary props here
       />
-    </>
+
+      <ActivityDetailModal
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        activity={selectedActivity}
+        activityDetails={selectedActivity ? getActivityDetails(selectedActivity.activityId) : null}
+        onToggleCompletion={toggleActivityCompletion}
+      />
+    </div>
   );
 };
 
