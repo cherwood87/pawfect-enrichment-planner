@@ -146,12 +146,13 @@ const ActivityLibrary = () => {
 
       {/* Activity Detail Modal */}
       {selectedActivity && (
-        <ActivityModal
-          isOpen={!!selectedActivity}
-          onClose={handleActivityModalClose}
-          selectedActivity={selectedActivity}
-        />
-      )}
+  <ActivityModal
+    isOpen={!!selectedActivity}
+    onClose={handleActivityModalClose}
+    activity={null} // Pass null if you don't have a scheduled activity
+    activityDetails={selectedActivity} // Correct prop name as expected by your modal component
+  />
+)}
     </div>
   );
 };
