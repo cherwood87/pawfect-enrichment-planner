@@ -17,23 +17,18 @@ export const useJournalEntry = (currentDog: Dog | null) => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-
-  // Track if we just created a new blank entry (after save)
   const justCreatedNewRef = useRef(false);
 
-  // Get a random prompt for new entries
   const getRandomPrompt = () => {
     const randomIndex = Math.floor(Math.random() * DAILY_PROMPTS.length);
     return DAILY_PROMPTS[randomIndex];
   };
 
-  // Initialize with a random prompt
   useEffect(() => {
     const randomPrompt = getRandomPrompt();
     setCurrentEntry(prev => ({ ...prev, prompt: randomPrompt }));
   }, []);
 
-  // Load existing entries for today
   useEffect(() => {
     if (!currentDog) return;
 
@@ -55,21 +50,19 @@ export const useJournalEntry = (currentDog: Dog | null) => {
             notes: ''
           });
         } else if (!justCreatedNewRef.current) {
-          // Only set currentEntry to latest if not just created a new one
           setCurrentEntry(entries[0]);
         }
-        // If justCreatedNewRef.current, don't override currentEntry!
       } catch (error) {
         console.error('Error loading today\'s entries:', error);
         if (currentDog.journalEntries) {
-          const todaysEntries = currentDog.journalEntries.filter(
+          const fallbackEntries = currentDog.journalEntries.filter(
             entry => entry.date === format(new Date(), 'yyyy-MM-dd')
           );
-          setTodaysEntries(todaysEntries);
+          setTodaysEntries(fallbackEntries);
         }
       } finally {
         setIsLoading(false);
-        justCreatedNewRef.current = false; // Reset after entries load
+        justCreatedNewRef.current = false;
       }
     };
 
@@ -103,20 +96,16 @@ export const useJournalEntry = (currentDog: Dog | null) => {
     try {
       setIsSaving(true);
 
-      if (currentEntry.id) {
-        // Update existing entry
-        const updatedEntry = await JournalService.updateEntry(currentEntry.id, currentEntry);
-        setTodaysEntries(prev =>
-          prev.map(entry => entry.id === updatedEntry.id ? updatedEntry : entry)
-        );
-      } else {
-        // Create new entry
-        const newEntry = await JournalService.createEntry(currentDog.id, currentEntry);
-        setTodaysEntries(prev => [newEntry, ...prev]);
-        createNewEntry();
-        justCreatedNewRef.current = true; // Set flag to prevent effect from overwriting blank
-      }
+      // Use createOrUpdateEntry instead of createEntry
+      const savedEntry = await JournalService.createOrUpdateEntry(currentDog.id, currentEntry);
 
+      setTodaysEntries(prev => {
+        const updated = prev.filter(entry => entry.id !== savedEntry.id);
+        return [savedEntry, ...updated];
+      });
+
+      setCurrentEntry(savedEntry);
+      justCreatedNewRef.current = true;
       return true;
     } catch (error) {
       console.error('Error saving journal entry:', error);
