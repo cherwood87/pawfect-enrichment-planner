@@ -46,6 +46,17 @@ const ActivityLibraryGrid: React.FC<ActivityLibraryGridProps> = ({
     onActivitySelect(activity);
   };
 
+  // Show loading state if no activities
+  if (activities.length === 0) {
+    return (
+      <div className="mobile-grid mobile-gap">
+        <div className="text-center py-12 text-gray-500">
+          <p>No activities found. Try adjusting your filters or discover new activities.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mobile-grid mobile-gap">
       {activities.map((activity) => {
@@ -56,7 +67,8 @@ const ActivityLibraryGrid: React.FC<ActivityLibraryGridProps> = ({
         return (
           <Card 
             key={activity.id} 
-            className="modern-card hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group" 
+            className="modern-card hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group cursor-pointer" 
+            onClick={() => onActivitySelect(activity)}
           >
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between mb-3">
@@ -123,16 +135,20 @@ const ActivityLibraryGrid: React.FC<ActivityLibraryGridProps> = ({
                 <div className="bg-gradient-to-r from-purple-50 to-cyan-50 rounded-xl p-3 border border-purple-200">
                   <p className="text-xs font-semibold text-purple-700 mb-1">Materials needed:</p>
                   <p className="text-xs text-purple-600">
-                    {activity.materials.slice(0, 2).join(', ')}
-                    {activity.materials.length > 2 ? '...' : ''}
+                    {activity.materials && activity.materials.length > 0 
+                      ? activity.materials.slice(0, 2).join(', ') + (activity.materials.length > 2 ? '...' : '')
+                      : 'None required'
+                    }
                   </p>
                 </div>
                 
                 <div className="bg-gradient-to-r from-cyan-50 to-amber-50 rounded-xl p-3 border border-cyan-200">
                   <p className="text-xs font-semibold text-cyan-700 mb-1">Emotional goals:</p>
                   <p className="text-xs text-cyan-600">
-                    {activity.emotionalGoals.slice(0, 2).join(', ')}
-                    {activity.emotionalGoals.length > 2 ? '...' : ''}
+                    {activity.emotionalGoals && activity.emotionalGoals.length > 0
+                      ? activity.emotionalGoals.slice(0, 2).join(', ') + (activity.emotionalGoals.length > 2 ? '...' : '')
+                      : 'General enrichment'
+                    }
                   </p>
                 </div>
               </div>

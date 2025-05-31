@@ -97,6 +97,19 @@ const ActivityLibrary = () => {
     setSelectedPillar(pillar);
   }, []);
 
+  // Handle the "Need Help" functionality for activities
+  const handleNeedHelp = useCallback((activityContext: {
+    type: 'activity-help';
+    activityName: string;
+    activityPillar: string;
+    activityDifficulty: string;
+    activityDuration: number;
+  }) => {
+    console.log('Need help requested for activity:', activityContext);
+    // For now, just log the context. This could be expanded to open a chat modal
+    // or navigate to a help page with the activity context
+  }, []);
+
   // Memoize computed values
   const { autoApprovedCount, curatedCount } = useMemo(() => {
     const isDiscoveredActivity = (activity: ActivityLibraryItem | DiscoveredActivity): activity is DiscoveredActivity => {
@@ -153,6 +166,7 @@ const ActivityLibrary = () => {
           activity={null}
           activityDetails={selectedActivity}
           onToggleCompletion={() => {}}
+          onNeedHelp={handleNeedHelp}
           mode="library"
         />
       )}

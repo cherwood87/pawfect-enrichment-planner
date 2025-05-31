@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -10,6 +11,7 @@ import { useDog } from '@/contexts/DogContext';
 import { useActivity } from '@/contexts/ActivityContext';
 import { useFavourites } from '@/hooks/useFavourites';
 import ActivityCardActions from '@/components/ActivityCardActions';
+import DaySelector from '@/components/DaySelector';
 
 interface ActivityDetailModalProps {
   isOpen: boolean;
@@ -40,6 +42,11 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
   const { currentDog } = useDog();
   const { addScheduledActivity } = useActivity();
   const { addToFavourites } = useFavourites(currentDog?.id || null);
+  
+  // Add state for day selection and loading states
+  const [selectedDayOfWeek, setSelectedDayOfWeek] = useState<number>(new Date().getDay());
+  const [isScheduling, setIsScheduling] = useState(false);
+  const [isFavouriting, setIsFavouriting] = useState(false);
 
   if (!activityDetails) return null;
 
@@ -58,51 +65,71 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
   const handleScheduleActivity = async () => {
     if (!currentDog || !activityDetails) return;
     
-    // Get ISO week number
-    function getISOWeek(date: Date): number {
-      const target = new Date(date.valueOf());
-      const dayNr = (date.getDay() + 6) % 7;
-      target.setDate(target.getDate() - dayNr + 3);
-      const firstThursday = target.valueOf();
-      target.setMonth(0, 1);
-      if (target.getDay() !== 4) {
-        target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
+    setIsScheduling(true);
+    
+    try {
+      // Get ISO week number
+      function getISOWeek(date: Date): number {
+        const target = new Date(date.valueOf());
+        const dayNr = (date.getDay() + 6) % 7;
+        target.setDate(target.getDate() - dayNr + 3);
+        const firstThursday = target.valueOf();
+        target.setMonth(0, 1);
+        if (target.getDay() !== 4) {
+          target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
+        }
+        return 1 + Math.ceil((firstThursday - target.valueOf()) / 604800000);
       }
-      return 1 + Math.ceil((firstThursday - target.valueOf()) / 604800000);
-    }
 
-    const currentWeek = getISOWeek(new Date());
-    const today = new Date();
-    const scheduledDate = today.toISOString().split('T')[0];
-    
-    addScheduledActivity({
-      dogId: currentDog.id,
-      activityId: activityDetails.id,
-      scheduledDate: scheduledDate,
-      completed: false,
-      notes: '',
-      completionNotes: '',
-      reminderEnabled: false,
-      weekNumber: currentWeek,
-      dayOfWeek: today.getDay()
-    });
-    
-    onClose();
-    navigate('/dog-profile-dashboard/weekly-plan');
+      const currentWeek = getISOWeek(new Date());
+      const today = new Date();
+      
+      // Calculate the date for the selected day of week
+      const dayDiff = selectedDayOfWeek - today.getDay();
+      const scheduledDate = new Date(today);
+      scheduledDate.setDate(today.getDate() + dayDiff);
+      
+      addScheduledActivity({
+        dogId: currentDog.id,
+        activityId: activityDetails.id,
+        scheduledDate: scheduledDate.toISOString().split('T')[0],
+        completed: false,
+        notes: '',
+        completionNotes: '',
+        reminderEnabled: false,
+        weekNumber: currentWeek,
+        dayOfWeek: selectedDayOfWeek
+      });
+      
+      onClose();
+      navigate('/dog-profile-dashboard/weekly-plan');
+    } catch (error) {
+      console.error('Error scheduling activity:', error);
+    } finally {
+      setIsScheduling(false);
+    }
   };
 
   const handleAddToFavourites = async () => {
     if (!activityDetails) return;
     
-    // Determine activity type based on the activity structure
-    let activityType: 'library' | 'user' | 'discovered' = 'library';
-    if ('isCustom' in activityDetails && activityDetails.isCustom) {
-      activityType = 'user';
-    } else if ('source' in activityDetails && activityDetails.source === 'discovered') {
-      activityType = 'discovered';
-    }
+    setIsFavouriting(true);
     
-    await addToFavourites(activityDetails, activityType);
+    try {
+      // Determine activity type based on the activity structure
+      let activityType: 'library' | 'user' | 'discovered' = 'library';
+      if ('isCustom' in activityDetails && activityDetails.isCustom) {
+        activityType = 'user';
+      } else if ('source' in activityDetails && activityDetails.source === 'discovered') {
+        activityType = 'discovered';
+      }
+      
+      await addToFavourites(activityDetails, activityType);
+    } catch (error) {
+      console.error('Error adding to favourites:', error);
+    } finally {
+      setIsFavouriting(false);
+    }
   };
 
   const getPillarColor = (pillar: string) => {
@@ -185,6 +212,16 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
             </div>
           </div>
 
+          {/* Day Selector for library mode */}
+          {mode === 'library' && (
+            <div className="bg-white/70 rounded-3xl p-4 border border-purple-200">
+              <DaySelector
+                selectedDayOfWeek={selectedDayOfWeek}
+                onDaySelect={setSelectedDayOfWeek}
+              />
+            </div>
+          )}
+
           <div className="bg-white/70 rounded-3xl p-6 border border-purple-200">
             <h3 className="text-lg font-semibold text-purple-800 mb-3">Benefits</h3>
             <p className="text-gray-700 leading-relaxed">{activityDetails.benefits}</p>
@@ -234,13 +271,14 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
             </div>
           )}
 
-          {/* Use ActivityCardActions for library mode */}
+          {/* Use ActivityCardActions for library mode with loading states */}
           {mode === 'library' && (
             <ActivityCardActions
               onClose={onClose}
               onScheduleActivity={handleScheduleActivity}
               onAddToFavourites={handleAddToFavourites}
-              disabled={false}
+              disabled={isScheduling || isFavouriting}
+              onNeedHelp={handleNeedHelp}
             />
           )}
         </div>
