@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { ActivityLibraryItem } from '@/types/activity';
 import { DiscoveredActivity } from '@/types/discovery';
@@ -152,6 +153,7 @@ const ActivityLibrary = () => {
           activity={null}
           activityDetails={selectedActivity}
           onToggleCompletion={() => {}}
+          mode="library"
         />
       )}
     </div>

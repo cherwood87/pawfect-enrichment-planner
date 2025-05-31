@@ -41,6 +41,11 @@ const ActivityLibraryGrid: React.FC<ActivityLibraryGridProps> = ({
     return 'source' in activity && activity.source === 'discovered';
   };
 
+  const handleViewDetailsClick = (event: React.MouseEvent, activity: ActivityLibraryItem | DiscoveredActivity) => {
+    event.stopPropagation();
+    onActivitySelect(activity);
+  };
+
   return (
     <div className="mobile-grid mobile-gap">
       {activities.map((activity) => {
@@ -51,8 +56,7 @@ const ActivityLibraryGrid: React.FC<ActivityLibraryGridProps> = ({
         return (
           <Card 
             key={activity.id} 
-            className="modern-card hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer group" 
-            onClick={() => onActivitySelect(activity)}
+            className="modern-card hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group" 
           >
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between mb-3">
@@ -133,7 +137,11 @@ const ActivityLibraryGrid: React.FC<ActivityLibraryGridProps> = ({
                 </div>
               </div>
               
-              <Button className="w-full mt-4 modern-button-primary group-hover:shadow-lg transition-all duration-300" size="sm">
+              <Button 
+                className="w-full mt-4 modern-button-primary group-hover:shadow-lg transition-all duration-300" 
+                size="sm"
+                onClick={(event) => handleViewDetailsClick(event, activity)}
+              >
                 View Details
               </Button>
             </CardContent>

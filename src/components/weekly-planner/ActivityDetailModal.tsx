@@ -1,10 +1,12 @@
+
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, Circle, Clock, Star, Target, MessageCircle } from 'lucide-react';
+import { CheckCircle, Circle, Clock, Star, Target, MessageCircle, Plus } from 'lucide-react';
 import { ScheduledActivity, ActivityLibraryItem, UserActivity } from '@/types/activity';
 import { DiscoveredActivity } from '@/types/discovery';
+import { useNavigate } from 'react-router-dom';
 
 interface ActivityDetailModalProps {
   isOpen: boolean;
@@ -19,6 +21,7 @@ interface ActivityDetailModalProps {
     activityDifficulty: string;
     activityDuration: number;
   }) => void;
+  mode?: 'scheduled' | 'library';
 }
 
 const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
@@ -27,9 +30,12 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
   activity,
   activityDetails,
   onToggleCompletion,
-  onNeedHelp
+  onNeedHelp,
+  mode = 'scheduled'
 }) => {
-  if (!activity || !activityDetails) return null;
+  const navigate = useNavigate();
+
+  if (!activityDetails) return null;
 
   const handleNeedHelp = () => {
     if (!onNeedHelp || !activityDetails) return;
@@ -41,6 +47,12 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
       activityDuration: activityDetails.duration
     };
     onNeedHelp(activityContext);
+  };
+
+  const handleAddToSchedule = () => {
+    onClose();
+    // Navigate to activity library with the specific activity selected
+    navigate('/activity-library', { state: { selectedActivity: activityDetails } });
   };
 
   const getPillarColor = (pillar: string) => {
@@ -84,24 +96,36 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
                   <span className="text-purple-700 font-medium">Need Help?</span>
                 </Button>
               )}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onToggleCompletion(activity.id)}
-                className="flex items-center space-x-2 hover:bg-purple-100 rounded-xl"
-              >
-                {activity.completed ? (
-                  <>
-                    <CheckCircle className="w-5 h-5 text-emerald-500" />
-                    <span className="text-emerald-600">Completed</span>
-                  </>
-                ) : (
-                  <>
-                    <Circle className="w-5 h-5 text-gray-400" />
-                    <span className="text-gray-600">Mark Complete</span>
-                  </>
-                )}
-              </Button>
+              {mode === 'library' ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleAddToSchedule}
+                  className="flex items-center space-x-2 rounded-2xl border-2 border-emerald-300 hover:bg-emerald-100 bg-white/70 backdrop-blur-sm"
+                >
+                  <Plus className="w-4 h-4 text-emerald-600" />
+                  <span className="text-emerald-700 font-medium">Add to Schedule</span>
+                </Button>
+              ) : activity && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onToggleCompletion(activity.id)}
+                  className="flex items-center space-x-2 hover:bg-purple-100 rounded-xl"
+                >
+                  {activity.completed ? (
+                    <>
+                      <CheckCircle className="w-5 h-5 text-emerald-500" />
+                      <span className="text-emerald-600">Completed</span>
+                    </>
+                  ) : (
+                    <>
+                      <Circle className="w-5 h-5 text-gray-400" />
+                      <span className="text-gray-600">Mark Complete</span>
+                    </>
+                  )}
+                </Button>
+              )}
             </div>
           </DialogTitle>
         </DialogHeader>
@@ -152,7 +176,7 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
             </div>
           )}
 
-          {activity.notes && (
+          {mode === 'scheduled' && activity?.notes && (
             <div className="bg-white/70 rounded-3xl p-6 border border-cyan-200">
               <h3 className="text-lg font-semibold text-purple-800 mb-3">Notes</h3>
               <p className="text-gray-700 bg-cyan-50 p-4 rounded-2xl border border-cyan-200">
@@ -161,7 +185,7 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
             </div>
           )}
 
-          {activity.completionNotes && activity.completed && (
+          {mode === 'scheduled' && activity?.completionNotes && activity.completed && (
             <div className="bg-white/70 rounded-3xl p-6 border border-emerald-200">
               <h3 className="text-lg font-semibold text-purple-800 mb-3">Completion Notes</h3>
               <p className="text-gray-700 bg-emerald-50 p-4 rounded-2xl border border-emerald-200">
