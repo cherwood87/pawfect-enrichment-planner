@@ -116,14 +116,14 @@ export const useActivityActions = (
     }
   };
 
-  const toggleActivityCompletion = async (activityId: string, completionNotes?: string) => {
+  const toggleActivityCompletion = async (activityId: string, completionNotes?: string): Promise<void> => {
     if (!currentDog) {
       toast({
         title: "No dog selected",
         description: "Please select a dog first",
         variant: "destructive"
       });
-      return;
+      throw new Error("No dog selected");
     }
     
     try {
