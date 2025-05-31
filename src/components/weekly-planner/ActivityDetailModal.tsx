@@ -3,10 +3,14 @@ import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, Circle, Clock, Star, Target, MessageCircle, Plus } from 'lucide-react';
+import { CheckCircle, Circle, Clock, Star, Target, MessageCircle } from 'lucide-react';
 import { ScheduledActivity, ActivityLibraryItem, UserActivity } from '@/types/activity';
 import { DiscoveredActivity } from '@/types/discovery';
 import { useNavigate } from 'react-router-dom';
+import { useDog } from '@/contexts/DogContext';
+import { useActivity } from '@/contexts/ActivityContext';
+import { useFavourites } from '@/hooks/useFavourites';
+import ActivityCardActions from '@/components/ActivityCardActions';
 
 interface ActivityDetailModalProps {
   isOpen: boolean;
@@ -34,6 +38,9 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
   mode = 'scheduled'
 }) => {
   const navigate = useNavigate();
+  const { currentDog } = useDog();
+  const { addScheduledActivity } = useActivity();
+  const { addToFavourites } = useFavourites(currentDog?.id || null);
 
   if (!activityDetails) return null;
 
@@ -49,10 +56,54 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
     onNeedHelp(activityContext);
   };
 
-  const handleAddToSchedule = () => {
+  const handleScheduleActivity = async () => {
+    if (!currentDog || !activityDetails) return;
+    
+    // Get ISO week number
+    function getISOWeek(date: Date): number {
+      const target = new Date(date.valueOf());
+      const dayNr = (date.getDay() + 6) % 7;
+      target.setDate(target.getDate() - dayNr + 3);
+      const firstThursday = target.valueOf();
+      target.setMonth(0, 1);
+      if (target.getDay() !== 4) {
+        target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
+      }
+      return 1 + Math.ceil((firstThursday - target.valueOf()) / 604800000);
+    }
+
+    const currentWeek = getISOWeek(new Date());
+    const today = new Date();
+    const scheduledDate = today.toISOString().split('T')[0];
+    
+    addScheduledActivity({
+      dogId: currentDog.id,
+      activityId: activityDetails.id,
+      scheduledDate: scheduledDate,
+      completed: false,
+      notes: '',
+      completionNotes: '',
+      reminderEnabled: false,
+      weekNumber: currentWeek,
+      dayOfWeek: today.getDay()
+    });
+    
     onClose();
-    // Navigate to activity library with the specific activity selected
-    navigate('/activity-library', { state: { selectedActivity: activityDetails } });
+    navigate('/dog-profile-dashboard/weekly-plan');
+  };
+
+  const handleAddToFavourites = async () => {
+    if (!activityDetails) return;
+    
+    // Determine activity type based on the activity structure
+    let activityType: 'library' | 'user' | 'discovered' = 'library';
+    if ('isCustom' in activityDetails && activityDetails.isCustom) {
+      activityType = 'user';
+    } else if ('source' in activityDetails && activityDetails.source === 'discovered') {
+      activityType = 'discovered';
+    }
+    
+    await addToFavourites(activityDetails, activityType);
   };
 
   const getPillarColor = (pillar: string) => {
@@ -96,17 +147,7 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
                   <span className="text-purple-700 font-medium">Need Help?</span>
                 </Button>
               )}
-              {mode === 'library' ? (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleAddToSchedule}
-                  className="flex items-center space-x-2 rounded-2xl border-2 border-emerald-300 hover:bg-emerald-100 bg-white/70 backdrop-blur-sm"
-                >
-                  <Plus className="w-4 h-4 text-emerald-600" />
-                  <span className="text-emerald-700 font-medium">Add to Schedule</span>
-                </Button>
-              ) : activity && (
+              {mode === 'scheduled' && activity && (
                 <Button
                   variant="ghost"
                   size="sm"
@@ -192,6 +233,16 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
                 {activity.completionNotes}
               </p>
             </div>
+          )}
+
+          {/* Use ActivityCardActions for library mode */}
+          {mode === 'library' && (
+            <ActivityCardActions
+              onClose={onClose}
+              onScheduleActivity={handleScheduleActivity}
+              onAddToFavourites={handleAddToFavourites}
+              disabled={false}
+            />
           )}
         </div>
       </DialogContent>
