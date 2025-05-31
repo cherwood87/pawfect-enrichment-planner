@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import ActivityModalHeader from './ActivityModalHeader';
+import ActivityModalHeader from './modals/ActivityModalHeader';
 import DaySelector from './DaySelector';
 import ActivityModalTabs from './ActivityModalTabs';
 import { useActivity } from '@/contexts/ActivityContext';

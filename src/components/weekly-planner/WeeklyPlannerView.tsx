@@ -5,7 +5,7 @@ import WeeklyPlannerHeader from './WeeklyPlannerHeader';
 import VerticalDayCard from './VerticalDayCard';
 import WeeklySummary from './WeeklySummary';
 import SimpleEmptyState from './SimpleEmptyState';
-import ActivityDetailModal from './ActivityDetailModal';
+import ConsolidatedActivityModal from '@/components/modals/ConsolidatedActivityModal';
 
 interface WeeklyPlannerViewProps {
   completedActivities: number;
@@ -93,11 +93,11 @@ const WeeklyPlannerView: React.FC<WeeklyPlannerViewProps> = ({
         </>
       )}
 
-      <ActivityDetailModal
+      <ConsolidatedActivityModal
         isOpen={isModalOpen}
         onClose={onModalClose}
-        scheduledActivity={selectedActivity}
         activityDetails={selectedActivity ? getActivityDetails(selectedActivity.activityId) : null}
+        scheduledActivity={selectedActivity}
         onToggleCompletion={onToggleCompletion}
         mode="scheduled"
       />

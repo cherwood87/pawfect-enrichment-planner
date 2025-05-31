@@ -27,7 +27,7 @@ const WeeklyPlannerLogic: React.FC<WeeklyPlannerLogicProps> = ({ onPillarSelect,
   const navigate = useNavigate();
   const { toast } = useToast();
   const { currentDog } = useDog();
-  const { scheduledActivities, toggleScheduledActivityCompletion } = useActivity();
+  const { scheduledActivities, toggleActivityCompletion, getCombinedActivityLibrary, userActivities, discoveredActivities } = useActivity();
 
   const [currentWeekStartDate, setCurrentWeekStartDate] = useState(new Date());
   const [weeklyActivities, setWeeklyActivities] = useState<ScheduledActivity[]>([]);
@@ -95,7 +95,7 @@ const WeeklyPlannerLogic: React.FC<WeeklyPlannerLogicProps> = ({ onPillarSelect,
   // Handle activity completion toggle
   const handleToggleCompletion = async (activityId: string) => {
     try {
-      await toggleScheduledActivityCompletion(activityId);
+      await toggleActivityCompletion(activityId);
       toast({
         title: "Activity Updated!",
         description: "Activity completion status has been updated.",
@@ -132,7 +132,7 @@ const WeeklyPlannerLogic: React.FC<WeeklyPlannerLogicProps> = ({ onPillarSelect,
 
   const getActivityDetails = (activityId: string): ActivityLibraryItem | UserActivity | DiscoveredActivity | undefined => {
     // Combine all possible activity sources
-    const allActivities = [...useActivity().activityLibrary, ...useActivity().userActivities, ...useActivity().discoveredActivities];
+    const allActivities = [...getCombinedActivityLibrary(), ...userActivities, ...discoveredActivities];
     return allActivities.find(activity => activity.id === activityId);
   };
 
