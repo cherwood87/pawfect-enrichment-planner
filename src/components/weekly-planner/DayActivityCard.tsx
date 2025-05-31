@@ -1,9 +1,7 @@
-
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, Circle, Clock } from 'lucide-react';
-import { ScheduledActivity, ActivityLibraryItem } from '@/types/activity';
-import { UserActivity } from '@/types/activity';
+import { CheckCircle, Circle, Clock, Star } from 'lucide-react';
+import { ScheduledActivity, ActivityLibraryItem, UserActivity } from '@/types/activity';
 import { DiscoveredActivity } from '@/types/discovery';
 
 interface DayActivityCardProps {
@@ -15,6 +13,36 @@ interface DayActivityCardProps {
   stackIndex?: number;
 }
 
+const getPillarChip = (pillar: string) => {
+  switch (pillar) {
+    case 'mental':
+      return <span className="px-3 py-1 rounded-full bg-purple-100 text-purple-700 text-xs font-semibold">Mental</span>;
+    case 'physical':
+      return <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-semibold">Physical</span>;
+    case 'social':
+      return <span className="px-3 py-1 rounded-full bg-cyan-100 text-cyan-700 text-xs font-semibold">Social</span>;
+    case 'environmental':
+      return <span className="px-3 py-1 rounded-full bg-teal-100 text-teal-700 text-xs font-semibold">Environmental</span>;
+    case 'instinctual':
+      return <span className="px-3 py-1 rounded-full bg-orange-100 text-orange-700 text-xs font-semibold">Instinctual</span>;
+    default:
+      return <span className="px-3 py-1 rounded-full bg-gray-100 text-gray-700 text-xs font-semibold">{pillar}</span>;
+  }
+};
+
+const getDifficultyBadge = (difficulty: string) => {
+  switch (difficulty?.toLowerCase()) {
+    case 'easy':
+      return <span className="px-2 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-semibold">Easy</span>;
+    case 'medium':
+      return <span className="px-2 py-1 rounded-full bg-orange-100 text-orange-700 text-xs font-semibold">Medium</span>;
+    case 'hard':
+      return <span className="px-2 py-1 rounded-full bg-red-100 text-red-700 text-xs font-semibold">Hard</span>;
+    default:
+      return <span className="px-2 py-1 rounded-full bg-gray-100 text-gray-700 text-xs font-semibold">{difficulty}</span>;
+  }
+};
+
 const DayActivityCard: React.FC<DayActivityCardProps> = ({
   activity,
   activityDetails,
@@ -23,43 +51,6 @@ const DayActivityCard: React.FC<DayActivityCardProps> = ({
   isStacked = false,
   stackIndex = 0
 }) => {
-  const getPillarBackground = (pillar: string) => {
-    const backgrounds = {
-      mental: 'bg-purple-100',
-      physical: 'bg-green-100',
-      social: 'bg-cyan-100', 
-      environmental: 'bg-teal-100',
-      instinctual: 'bg-amber-100'
-    };
-    return backgrounds[pillar as keyof typeof backgrounds] || 'bg-gray-100';
-  };
-
-  const getPillarBorder = (pillar: string) => {
-    const borders = {
-      mental: 'border-purple-200',
-      physical: 'border-green-200',
-      social: 'border-cyan-200',
-      environmental: 'border-teal-200', 
-      instinctual: 'border-amber-200'
-    };
-    return borders[pillar as keyof typeof borders] || 'border-gray-200';
-  };
-
-  const getPillarGradient = (pillar: string) => {
-    const gradients = {
-      mental: 'from-purple-400 to-purple-500',
-      physical: 'from-green-400 to-green-500',
-      social: 'from-cyan-400 to-cyan-500',
-      environmental: 'from-teal-400 to-teal-500',
-      instinctual: 'from-amber-400 to-amber-500'
-    };
-    return gradients[pillar as keyof typeof gradients] || 'from-gray-400 to-gray-500';
-  };
-
-  const pillarBackground = getPillarBackground(activityDetails.pillar);
-  const pillarBorder = getPillarBorder(activityDetails.pillar);
-  const pillarGradient = getPillarGradient(activityDetails.pillar);
-
   const handleToggleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     onToggleCompletion(activity.id);
@@ -71,78 +62,66 @@ const DayActivityCard: React.FC<DayActivityCardProps> = ({
     }
   };
 
+  // Show the first letter of the pillar as a round icon avatar (optional)
+  const avatarBg = {
+    mental: "bg-purple-400",
+    physical: "bg-emerald-400",
+    social: "bg-cyan-400",
+    environmental: "bg-teal-400",
+    instinctual: "bg-orange-400",
+  }[activityDetails.pillar] || "bg-gray-300";
+
   return (
-    <div 
-      className={`
-        relative w-full p-4 rounded-2xl cursor-pointer
-        transition-all duration-200 hover:shadow-lg border-2
-        ${activity.completed 
-          ? 'border-emerald-200 bg-emerald-50 shadow-sm' 
-          : `${pillarBackground} ${pillarBorder} shadow-sm`
-        }
-        ${isStacked ? 'shadow-lg' : ''}
-      `}
-      onClick={handleCardClick}
+    <div
+      className={`relative p-6 bg-white rounded-3xl shadow-lg border border-purple-100 flex flex-col gap-3 transition hover:shadow-xl cursor-pointer`}
       style={{
-        transform: isStacked ? `rotate(${(stackIndex - 1) * 2}deg)` : 'none',
-        borderRadius: '16px',
-        boxShadow: '0 1px 5px rgba(0,0,0,0.05)'
+        transform: isStacked ? `rotate(${(stackIndex - 1) * 2}deg)` : 'none'
       }}
+      onClick={handleCardClick}
     >
-      {/* Content */}
-      <div className="space-y-2">
-        {/* Header with completion toggle */}
-        <div className="flex items-start justify-between">
-          <div className="flex-1 min-w-0 pr-2">
-            <h4 className={`text-xs font-semibold leading-tight ${
-              activity.completed ? 'text-emerald-600 line-through' : 'text-gray-800'
-            }`}>
-              {activityDetails.title}
-            </h4>
-          </div>
+      {/* Pillar and difficulty badges */}
+      <div className="flex gap-2 items-center mb-2">
+        {getPillarChip(activityDetails.pillar)}
+        {getDifficultyBadge(activityDetails.difficulty)}
+        <div className="ml-auto">
           <button
             onClick={handleToggleClick}
-            className="flex-shrink-0 p-1 rounded-full hover:bg-gray-100 transition-colors"
+            className="p-1 rounded-full hover:bg-gray-200 focus:outline-none"
+            tabIndex={0}
+            aria-label={activity.completed ? "Mark as incomplete" : "Mark as completed"}
           >
             {activity.completed ? (
-              <CheckCircle className="w-4 h-4 text-emerald-500" />
+              <CheckCircle className="w-5 h-5 text-emerald-500" />
             ) : (
-              <Circle className="w-4 h-4 text-gray-400" />
+              <Circle className="w-5 h-5 text-gray-400" />
             )}
           </button>
         </div>
-
-        {/* Activity details */}
-        <div className="flex items-center justify-between text-xs">
-          <Badge 
-            variant="secondary" 
-            className={`text-xs bg-gradient-to-r ${pillarGradient} text-white border-0 px-2 py-1`}
-          >
-            {activityDetails.pillar.charAt(0).toUpperCase()}
-          </Badge>
-          <div className="flex items-center space-x-1 text-gray-500">
-            <Clock className="w-3 h-3" />
-            <span>{activityDetails.duration}m</span>
-          </div>
-        </div>
-
-        {/* Completion indicator */}
-        {activity.completed && (
-          <div className="text-center">
-            <div className="w-full h-1 bg-emerald-300 rounded-full" />
-            {activity.completionNotes && (
-              <div className="text-xs text-emerald-600 mt-1 truncate">
-                "{activity.completionNotes}"
-              </div>
-            )}
-          </div>
-        )}
       </div>
-
-      {/* Stack indicator */}
-      {isStacked && stackIndex === 0 && (
-        <div className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
-          {stackIndex + 1}
+      {/* Title and duration */}
+      <div className="flex items-center gap-3">
+        {/* Round avatar for pillar */}
+        <span className={`w-8 h-8 flex items-center justify-center rounded-full text-white font-bold text-lg ${avatarBg} shadow`}>
+          {activityDetails.pillar.charAt(0).toUpperCase()}
+        </span>
+        <span className="font-semibold text-purple-900 text-lg">{activityDetails.title}</span>
+      </div>
+      {/* Description */}
+      {activityDetails.benefits && (
+        <div className="text-gray-600 text-sm">{activityDetails.benefits}</div>
+      )}
+      {/* Duration */}
+      <div className="flex gap-2 mt-2">
+        <span className="text-xs flex items-center text-purple-700 bg-purple-100 rounded-2xl px-3 py-1">
+          <Clock className="w-4 h-4 mr-1" />
+          {activityDetails.duration} min
+        </span>
+        {/* Add more info if desired */}
+      </div>
+      {/* CompletionNotes if completed */}
+      {activity.completed && activity.completionNotes && (
+        <div className="bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2 text-xs text-emerald-900 mt-2">
+          {activity.completionNotes}
         </div>
       )}
     </div>
