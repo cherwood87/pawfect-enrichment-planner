@@ -1,8 +1,9 @@
+
 import React, { useState, useMemo, useCallback } from 'react';
 import { useActivity } from '@/contexts/ActivityContext';
 import { useDog } from '@/contexts/DogContext';
 import WeeklyPlannerHeader from './weekly-planner/WeeklyPlannerHeader';
-import VerticalDayCard from './VerticalDayCard'; // This component replaces the old accordion-style day panels
+import VerticalDayCard from './weekly-planner/VerticalDayCard';
 import WeeklySummary from './weekly-planner/WeeklySummary';
 import EmptyWeeklyPlanner from './weekly-planner/EmptyWeeklyPlanner';
 import ActivityDetailModal from './weekly-planner/ActivityDetailModal';
