@@ -2,6 +2,8 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { useActivity } from '@/contexts/ActivityContext';
 import { useDog } from '@/contexts/DogContext';
+import { useToast } from '@/hooks/use-toast';
+import { useRetry } from '@/hooks/useRetry';
 import WeeklyPlannerHeader from './weekly-planner/WeeklyPlannerHeader';
 import VerticalDayCard from './weekly-planner/VerticalDayCard';
 import WeeklySummary from './weekly-planner/WeeklySummary';
@@ -14,12 +16,29 @@ const DAY_LABELS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Fri
 const WeeklyPlannerCard = ({ onPillarSelect, onChatOpen }) => {
   const { scheduledActivities, toggleActivityCompletion, getActivityDetails } = useActivity();
   const { currentDog } = useDog();
+  const { toast } = useToast();
 
   // Use today as the anchor for the current week
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedActivity, setSelectedActivity] = useState<ScheduledActivity | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'week' | 'day'>('week');
+  const [optimisticUpdates, setOptimisticUpdates] = useState<Record<string, boolean>>({});
+  const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
+
+  // Retry mechanism for failed operations
+  const { retry, isRetrying } = useRetry({
+    maxAttempts: 3,
+    delay: 1000,
+    onRetry: (attempt, error) => {
+      console.log(`Retry attempt ${attempt} for error:`, error);
+      toast({
+        title: `Retrying... (${attempt}/3)`,
+        description: "Please wait while we try again.",
+        variant: "default"
+      });
+    }
+  });
 
   // Get start of week (Sunday)
   const startOfWeek = useMemo(() => {
@@ -47,7 +66,9 @@ const WeeklyPlannerCard = ({ onPillarSelect, onChatOpen }) => {
   const allWeekActivities = weekDays.flatMap(day => day.activities);
 
   // Progress summary (used in header and summary)
-  const completedActivities = allWeekActivities.filter(a => a.completed).length;
+  const completedActivities = allWeekActivities.filter(a => 
+    optimisticUpdates[a.id] !== undefined ? optimisticUpdates[a.id] : a.completed
+  ).length;
   const totalActivities = allWeekActivities.length;
 
   // Get current week and year for header
@@ -60,6 +81,60 @@ const WeeklyPlannerCard = ({ onPillarSelect, onChatOpen }) => {
 
   const currentWeek = getWeekOfYear(startOfWeek);
   const currentYear = startOfWeek.getFullYear();
+
+  // Enhanced toggle completion with optimistic updates and error handling
+  const handleToggleCompletion = useCallback(async (activityId: string, completionNotes?: string) => {
+    if (loadingStates[activityId]) return; // Prevent double-clicks
+
+    // Set loading state
+    setLoadingStates(prev => ({ ...prev, [activityId]: true }));
+
+    // Find current state
+    const activity = allWeekActivities.find(a => a.id === activityId);
+    if (!activity) {
+      console.error('Activity not found:', activityId);
+      setLoadingStates(prev => ({ ...prev, [activityId]: false }));
+      return;
+    }
+
+    const currentState = optimisticUpdates[activityId] !== undefined ? optimisticUpdates[activityId] : activity.completed;
+    const newState = !currentState;
+
+    // Optimistic update
+    setOptimisticUpdates(prev => ({ ...prev, [activityId]: newState }));
+
+    try {
+      await retry(() => toggleActivityCompletion(activityId, completionNotes));
+      
+      // Clear optimistic update on success
+      setOptimisticUpdates(prev => {
+        const { [activityId]: _, ...rest } = prev;
+        return rest;
+      });
+      
+      toast({
+        title: newState ? "Activity completed!" : "Activity marked incomplete",
+        description: newState ? "Great job on completing this activity!" : "Activity status updated",
+        variant: "default"
+      });
+    } catch (error) {
+      console.error('Failed to toggle activity completion:', error);
+      
+      // Revert optimistic update
+      setOptimisticUpdates(prev => {
+        const { [activityId]: _, ...rest } = prev;
+        return rest;
+      });
+      
+      toast({
+        title: "Update failed",
+        description: "We couldn't update the activity. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoadingStates(prev => ({ ...prev, [activityId]: false }));
+    }
+  }, [allWeekActivities, optimisticUpdates, loadingStates, toggleActivityCompletion, retry, toast]);
 
   // Navigation handlers (if you want day navigation for mobile/future)
   const handleDayChange = useCallback((direction: 'prev' | 'next') => {
@@ -111,10 +186,15 @@ const WeeklyPlannerCard = ({ onPillarSelect, onChatOpen }) => {
             key={day.date.toISOString()}
             label={day.label}
             date={day.date}
-            activities={day.activities}
+            activities={day.activities.map(activity => ({
+              ...activity,
+              completed: optimisticUpdates[activity.id] !== undefined ? optimisticUpdates[activity.id] : activity.completed
+            }))}
             onActivityClick={handleActivityClick}
-            onToggleCompletion={toggleActivityCompletion}
+            onToggleCompletion={handleToggleCompletion}
             getActivityDetails={getActivityDetails}
+            loadingStates={loadingStates}
+            isRetrying={isRetrying}
           />
         ))}
       </div>
@@ -129,7 +209,7 @@ const WeeklyPlannerCard = ({ onPillarSelect, onChatOpen }) => {
         onClose={handleModalClose}
         activity={selectedActivity}
         activityDetails={selectedActivity ? getActivityDetails(selectedActivity.activityId) : null}
-        onToggleCompletion={toggleActivityCompletion}
+        onToggleCompletion={handleToggleCompletion}
       />
     </div>
   );

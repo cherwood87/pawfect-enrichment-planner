@@ -1,27 +1,46 @@
-
 import { ScheduledActivity, UserActivity, ActivityLibraryItem, StreakData, WeeklyProgress, PillarGoals } from '@/types/activity';
 import { DiscoveredActivity } from '@/types/discovery';
 import { Dog } from '@/types/dog';
 import { ActivityRepository } from '../data/ActivityRepository';
 import { getActivityById } from '@/data/activityLibrary';
+import { AppError, handleError } from '@/utils/errorUtils';
 
 export class ActivityDomainService {
-  // Business logic for activity operations
+  // Business logic for activity operations with enhanced error handling
   static async getScheduledActivitiesForDog(dogId: string): Promise<ScheduledActivity[]> {
-    return await ActivityRepository.getScheduledActivities(dogId);
+    try {
+      if (!dogId?.trim()) {
+        throw new AppError('Dog ID is required', 'INVALID_DOG_ID');
+      }
+      
+      return await ActivityRepository.getScheduledActivities(dogId);
+    } catch (error) {
+      handleError(error as Error, { operation: 'getScheduledActivitiesForDog', dogId });
+      throw error;
+    }
   }
 
   static async createScheduledActivity(activity: Omit<ScheduledActivity, 'id'>): Promise<ScheduledActivity> {
-    // Add business logic validation here if needed
-    const newActivity: ScheduledActivity = {
-      ...activity,
-      id: `scheduled-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      notes: activity.notes || '',
-      completionNotes: activity.completionNotes || '',
-      reminderEnabled: activity.reminderEnabled ?? false,
-    };
+    try {
+      // Enhanced validation
+      this.validateScheduledActivityData(activity);
+      
+      // Check for duplicates
+      await this.checkForDuplicateActivity(activity);
+      
+      const newActivity: ScheduledActivity = {
+        ...activity,
+        id: `scheduled-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        notes: activity.notes || '',
+        completionNotes: activity.completionNotes || '',
+        reminderEnabled: activity.reminderEnabled ?? false,
+      };
 
-    return await ActivityRepository.createScheduledActivity(newActivity);
+      return await ActivityRepository.createScheduledActivity(newActivity);
+    } catch (error) {
+      handleError(error as Error, { operation: 'createScheduledActivity', activity });
+      throw error;
+    }
   }
 
   static async toggleActivityCompletion(
@@ -29,21 +48,30 @@ export class ActivityDomainService {
     dogId: string, 
     completionNotes?: string
   ): Promise<ScheduledActivity> {
-    const activities = await ActivityRepository.getScheduledActivities(dogId);
-    const activity = activities.find(a => a.id === activityId);
-    
-    if (!activity) {
-      throw new Error('Activity not found');
+    try {
+      if (!activityId?.trim() || !dogId?.trim()) {
+        throw new AppError('Activity ID and Dog ID are required', 'MISSING_REQUIRED_FIELDS');
+      }
+
+      const activities = await ActivityRepository.getScheduledActivities(dogId);
+      const activity = activities.find(a => a.id === activityId);
+      
+      if (!activity) {
+        throw new AppError('Activity not found', 'ACTIVITY_NOT_FOUND', { activityId, dogId });
+      }
+
+      const updatedActivity: ScheduledActivity = {
+        ...activity,
+        completed: !activity.completed,
+        completedAt: !activity.completed ? new Date().toISOString() : undefined,
+        completionNotes: !activity.completed ? (completionNotes || '') : activity.completionNotes,
+      };
+
+      return await ActivityRepository.updateScheduledActivity(updatedActivity);
+    } catch (error) {
+      handleError(error as Error, { operation: 'toggleActivityCompletion', activityId, dogId });
+      throw error;
     }
-
-    const updatedActivity: ScheduledActivity = {
-      ...activity,
-      completed: !activity.completed,
-      completedAt: !activity.completed ? new Date().toISOString() : undefined,
-      completionNotes: !activity.completed ? (completionNotes || '') : activity.completionNotes,
-    };
-
-    return await ActivityRepository.updateScheduledActivity(updatedActivity);
   }
 
   static async updateScheduledActivity(
@@ -51,26 +79,121 @@ export class ActivityDomainService {
     dogId: string, 
     updates: Partial<ScheduledActivity>
   ): Promise<ScheduledActivity> {
-    const activities = await ActivityRepository.getScheduledActivities(dogId);
-    const activity = activities.find(a => a.id === activityId);
-    
-    if (!activity) {
-      throw new Error('Activity not found');
-    }
+    try {
+      if (!activityId?.trim() || !dogId?.trim()) {
+        throw new AppError('Activity ID and Dog ID are required', 'MISSING_REQUIRED_FIELDS');
+      }
 
-    const updatedActivity = { ...activity, ...updates };
-    return await ActivityRepository.updateScheduledActivity(updatedActivity);
+      const activities = await ActivityRepository.getScheduledActivities(dogId);
+      const activity = activities.find(a => a.id === activityId);
+      
+      if (!activity) {
+        throw new AppError('Activity not found', 'ACTIVITY_NOT_FOUND', { activityId, dogId });
+      }
+
+      // Validate updates
+      if (updates.scheduledDate) {
+        this.validateScheduledDate(updates.scheduledDate);
+      }
+
+      const updatedActivity = { ...activity, ...updates };
+      return await ActivityRepository.updateScheduledActivity(updatedActivity);
+    } catch (error) {
+      handleError(error as Error, { operation: 'updateScheduledActivity', activityId, dogId, updates });
+      throw error;
+    }
   }
 
   static async createUserActivity(activity: Omit<UserActivity, 'id' | 'createdAt' | 'dogId'>, dogId: string): Promise<UserActivity> {
-    const newActivity: UserActivity = {
-      ...activity,
-      id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      dogId,
-      createdAt: new Date().toISOString(),
-    };
+    try {
+      if (!dogId?.trim()) {
+        throw new AppError('Dog ID is required', 'INVALID_DOG_ID');
+      }
 
-    return await ActivityRepository.createUserActivity(newActivity);
+      this.validateUserActivityData(activity);
+
+      const newActivity: UserActivity = {
+        ...activity,
+        id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        dogId,
+        createdAt: new Date().toISOString(),
+      };
+
+      return await ActivityRepository.createUserActivity(newActivity);
+    } catch (error) {
+      handleError(error as Error, { operation: 'createUserActivity', activity, dogId });
+      throw error;
+    }
+  }
+
+  // Validation methods
+  private static validateScheduledActivityData(activity: Omit<ScheduledActivity, 'id'>): void {
+    if (!activity.activityId?.trim()) {
+      throw new AppError('Activity ID is required', 'VALIDATION_ERROR');
+    }
+    
+    if (!activity.dogId?.trim()) {
+      throw new AppError('Dog ID is required', 'VALIDATION_ERROR');
+    }
+    
+    if (!activity.scheduledDate) {
+      throw new AppError('Scheduled date is required', 'VALIDATION_ERROR');
+    }
+
+    this.validateScheduledDate(activity.scheduledDate);
+  }
+
+  private static validateScheduledDate(scheduledDate: string): void {
+    const date = new Date(scheduledDate);
+    if (isNaN(date.getTime())) {
+      throw new AppError('Invalid scheduled date format', 'VALIDATION_ERROR');
+    }
+
+    // Don't allow scheduling too far in the past
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    if (date < yesterday) {
+      throw new AppError('Cannot schedule activities for past dates', 'VALIDATION_ERROR');
+    }
+  }
+
+  private static validateUserActivityData(activity: Omit<UserActivity, 'id' | 'createdAt' | 'dogId'>): void {
+    if (!activity.title?.trim()) {
+      throw new AppError('Activity title is required', 'VALIDATION_ERROR');
+    }
+    
+    if (!activity.pillar) {
+      throw new AppError('Activity pillar is required', 'VALIDATION_ERROR');
+    }
+    
+    if (!activity.duration || activity.duration <= 0) {
+      throw new AppError('Valid duration is required', 'VALIDATION_ERROR');
+    }
+  }
+
+  private static async checkForDuplicateActivity(activity: Omit<ScheduledActivity, 'id'>): Promise<void> {
+    try {
+      const existingActivities = await ActivityRepository.getScheduledActivities(activity.dogId);
+      const duplicate = existingActivities.find(existing => 
+        existing.activityId === activity.activityId &&
+        existing.scheduledDate === activity.scheduledDate &&
+        existing.dogId === activity.dogId
+      );
+
+      if (duplicate) {
+        throw new AppError(
+          'This activity is already scheduled for this date', 
+          'DUPLICATE_ACTIVITY',
+          { existingActivityId: duplicate.id }
+        );
+      }
+    } catch (error) {
+      if (error instanceof AppError && error.code === 'DUPLICATE_ACTIVITY') {
+        throw error;
+      }
+      // If we can't check for duplicates, log but don't block the operation
+      console.warn('Could not check for duplicate activities:', error);
+    }
   }
 
   // Business logic for analytics and calculations
