@@ -1,4 +1,3 @@
-
 import { useState, useMemo } from 'react';
 import { ScheduledActivity } from '@/types/activity';
 import { useDog } from '@/contexts/DogContext';
@@ -17,18 +16,18 @@ export const useWeeklyPlannerState = () => {
   const [optimisticUpdates, setOptimisticUpdates] = useState<Record<string, boolean>>({});
   const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
 
-  // Get start of week (Sunday)
-  const startOfWeek = useMemo(() => {
-    const date = new Date(currentDate);
-    const day = date.getDay();
-    return new Date(date.setDate(date.getDate() - day));
-  }, [currentDate]);
+  // Get start of rolling 7-day period (today + next 6 days)
+  const startOfPeriod = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset to start of day
+    return today;
+  }, []); // Always start from today, no dependency on currentDate
 
-  // Build structure: [{ label, date, activities }]
+  // Build structure: [{ label, date, activities }] for rolling 7-day window
   const weekDays = useMemo(() => {
     return Array.from({ length: 7 }).map((_, i) => {
-      const dayDate = new Date(startOfWeek);
-      dayDate.setDate(startOfWeek.getDate() + i);
+      const dayDate = new Date(startOfPeriod);
+      dayDate.setDate(startOfPeriod.getDate() + i);
       return {
         label: DAY_LABELS[dayDate.getDay()],
         date: new Date(dayDate), // clone
@@ -38,7 +37,7 @@ export const useWeeklyPlannerState = () => {
         ),
       };
     });
-  }, [startOfWeek, scheduledActivities, currentDog]);
+  }, [startOfPeriod, scheduledActivities, currentDog]);
 
   const allWeekActivities = weekDays.flatMap(day => day.activities);
 
@@ -48,7 +47,7 @@ export const useWeeklyPlannerState = () => {
   ).length;
   const totalActivities = allWeekActivities.length;
 
-  // Get current week and year for header
+  // Get current week and year for header (based on today)
   const getWeekOfYear = (date: Date) => {
     const start = new Date(date.getFullYear(), 0, 1);
     const diff = date.getTime() - start.getTime();
@@ -56,8 +55,8 @@ export const useWeeklyPlannerState = () => {
     return Math.floor(diff / oneWeek) + 1;
   };
 
-  const currentWeek = getWeekOfYear(startOfWeek);
-  const currentYear = startOfWeek.getFullYear();
+  const currentWeek = getWeekOfYear(startOfPeriod);
+  const currentYear = startOfPeriod.getFullYear();
 
   // Check if this is the initial load with no activities ever scheduled
   const hasNeverScheduledActivities = scheduledActivities.length === 0;
@@ -75,7 +74,7 @@ export const useWeeklyPlannerState = () => {
     setOptimisticUpdates,
     loadingStates,
     setLoadingStates,
-    startOfWeek,
+    startOfWeek: startOfPeriod, // Keep same property name for compatibility
     weekDays,
     allWeekActivities,
     completedActivities,
