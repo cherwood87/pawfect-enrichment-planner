@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useCallback } from 'react';
 import { useActivity } from '@/contexts/ActivityContext';
 import { useDog } from '@/contexts/DogContext';
@@ -10,6 +9,9 @@ import WeeklySummary from './weekly-planner/WeeklySummary';
 import EmptyWeeklyPlanner from './weekly-planner/EmptyWeeklyPlanner';
 import ActivityDetailModal from './weekly-planner/ActivityDetailModal';
 import { ScheduledActivity } from '@/types/activity';
+import { Button } from '@/components/ui/button';
+import { Plus, Calendar } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const DAY_LABELS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -17,6 +19,7 @@ const WeeklyPlannerCard = ({ onPillarSelect, onChatOpen }) => {
   const { scheduledActivities, toggleActivityCompletion, getActivityDetails } = useActivity();
   const { currentDog } = useDog();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   // Use today as the anchor for the current week
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -81,6 +84,9 @@ const WeeklyPlannerCard = ({ onPillarSelect, onChatOpen }) => {
 
   const currentWeek = getWeekOfYear(startOfWeek);
   const currentYear = startOfWeek.getFullYear();
+
+  // Check if this is the initial load with no activities ever scheduled
+  const hasNeverScheduledActivities = scheduledActivities.length === 0;
 
   // Enhanced toggle completion with optimistic updates and error handling
   const handleToggleCompletion = useCallback(async (activityId: string, completionNotes?: string) => {
@@ -164,10 +170,33 @@ const WeeklyPlannerCard = ({ onPillarSelect, onChatOpen }) => {
     setIsModalOpen(false);
   }, []);
 
-  // Show empty planner if there's nothing scheduled
-  if (totalActivities === 0) {
+  // Show full empty planner only if user has never scheduled any activities
+  if (hasNeverScheduledActivities) {
     return <EmptyWeeklyPlanner onPillarSelect={onPillarSelect} />;
   }
+
+  // Simple empty state for current week with no activities
+  const SimpleEmptyState = () => (
+    <div className="text-center py-12 px-6">
+      <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mb-4 mx-auto">
+        <Calendar className="w-8 h-8 text-blue-500" />
+      </div>
+      <h3 className="text-lg font-semibold text-gray-700 mb-2">
+        No activities this week
+      </h3>
+      <p className="text-gray-500 mb-4 text-sm">
+        Add some enrichment activities to get started!
+      </p>
+      <Button 
+        onClick={() => navigate('/activity-library')} 
+        size="sm"
+        className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+      >
+        <Plus className="w-4 h-4 mr-2" />
+        Add Activities
+      </Button>
+    </div>
+  );
 
   // --- MAIN RENDER ---
   return (
@@ -184,29 +213,35 @@ const WeeklyPlannerCard = ({ onPillarSelect, onChatOpen }) => {
         onViewModeChange={handleViewModeChange}
       />
 
-      <div className="flex flex-col gap-6 p-4 md:p-8 bg-gradient-to-br from-purple-50/40 to-cyan-50/40">
-        {weekDays.map(day => (
-          <VerticalDayCard
-            key={day.date.toISOString()}
-            label={day.label}
-            date={day.date}
-            activities={day.activities.map(activity => ({
-              ...activity,
-              completed: optimisticUpdates[activity.id] !== undefined ? optimisticUpdates[activity.id] : activity.completed
-            }))}
-            onActivityClick={handleActivityClick}
-            onToggleCompletion={handleToggleCompletion}
-            getActivityDetails={getActivityDetails}
-            loadingStates={loadingStates}
-            isRetrying={isRetrying}
-          />
-        ))}
-      </div>
+      {totalActivities === 0 ? (
+        <SimpleEmptyState />
+      ) : (
+        <>
+          <div className="flex flex-col gap-6 p-4 md:p-8 bg-gradient-to-br from-purple-50/40 to-cyan-50/40">
+            {weekDays.map(day => (
+              <VerticalDayCard
+                key={day.date.toISOString()}
+                label={day.label}
+                date={day.date}
+                activities={day.activities.map(activity => ({
+                  ...activity,
+                  completed: optimisticUpdates[activity.id] !== undefined ? optimisticUpdates[activity.id] : activity.completed
+                }))}
+                onActivityClick={handleActivityClick}
+                onToggleCompletion={handleToggleCompletion}
+                getActivityDetails={getActivityDetails}
+                loadingStates={loadingStates}
+                isRetrying={isRetrying}
+              />
+            ))}
+          </div>
 
-      <WeeklySummary
-        completedActivities={completedActivities}
-        totalActivities={totalActivities}
-      />
+          <WeeklySummary
+            completedActivities={completedActivities}
+            totalActivities={totalActivities}
+          />
+        </>
+      )}
 
       <ActivityDetailModal
         isOpen={isModalOpen}
