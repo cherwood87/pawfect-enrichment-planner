@@ -1,4 +1,3 @@
-
 import { ScheduledActivity, UserActivity } from '@/types/activity';
 import { Dog } from '@/types/dog';
 import { ActivityDomainService } from '@/services/domain/ActivityDomainService';
@@ -18,7 +17,7 @@ export const useActivityActions = (
 ) => {
   const { toast } = useToast();
 
-  // Refresh scheduled activities from the domain service
+  // ✅ Added to return at the bottom
   const refreshScheduledActivities = async () => {
     if (!currentDog) return;
     try {
@@ -30,11 +29,9 @@ export const useActivityActions = (
     }
   };
 
-  // Refresh user activities from the domain service
   const refreshUserActivities = async () => {
     if (!currentDog) return;
     try {
-      // This will need to be implemented in the domain service
       console.log('User activities refresh will be implemented through domain service');
     } catch (error) {
       console.error('Failed to refresh user activities:', error);
@@ -52,7 +49,6 @@ export const useActivityActions = (
       return;
     }
 
-    // Normalize and validate the activity data
     const normalizedActivity = normalizeActivityData({
       ...activity,
       dogId: currentDog.id,
@@ -69,7 +65,6 @@ export const useActivityActions = (
       return;
     }
 
-    // Show warnings if any
     if (validation.warnings.length > 0) {
       console.warn('Activity validation warnings:', validation.warnings);
       toast({
@@ -79,7 +74,6 @@ export const useActivityActions = (
       });
     }
 
-    // Check for duplicates
     if (checkForDuplicates(normalizedActivity as ScheduledActivity, existingScheduledActivities)) {
       toast({
         title: "Duplicate Activity",
@@ -97,9 +91,9 @@ export const useActivityActions = (
         completionNotes: normalizedActivity.completionNotes || '',
         reminderEnabled: normalizedActivity.reminderEnabled ?? false,
       } as Omit<ScheduledActivity, 'id'>);
-      
+
       await refreshScheduledActivities();
-      
+
       toast({
         title: "Activity scheduled!",
         description: "Your activity has been added to the schedule",
@@ -108,13 +102,13 @@ export const useActivityActions = (
     } catch (error) {
       console.error('Failed to create scheduled activity:', error);
       const userMessage = getUserFriendlyMessage(error);
-      
+
       toast({
         title: "Failed to schedule activity",
         description: userMessage,
         variant: "destructive"
       });
-      
+
       handleError(error as Error, 'addScheduledActivity', false);
     }
   };
@@ -129,7 +123,6 @@ export const useActivityActions = (
       throw new Error("No dog selected");
     }
 
-    // Validate completion notes if provided
     if (completionNotes) {
       const sanitizedNotes = DataValidator.sanitizeInput(completionNotes);
       if (sanitizedNotes.length > 1000) {
@@ -141,19 +134,17 @@ export const useActivityActions = (
         throw new Error("Completion notes too long");
       }
     }
-    
+
     try {
       await ActivityDomainService.toggleActivityCompletion(
-        activityId, 
-        currentDog.id, 
+        activityId,
+        currentDog.id,
         completionNotes ? DataValidator.sanitizeInput(completionNotes) : undefined
       );
       await refreshScheduledActivities();
     } catch (error) {
       console.error('Failed to toggle activity completion:', error);
       const userMessage = getUserFriendlyMessage(error);
-      
-      // Re-throw the error so the calling component can handle optimistic updates
       throw new Error(userMessage);
     }
   };
@@ -168,10 +159,9 @@ export const useActivityActions = (
       return;
     }
 
-    // Normalize and validate the updates
     const normalizedUpdates = normalizeActivityData(updates);
     const validation = DataValidator.validateScheduledActivity(normalizedUpdates);
-    
+
     if (!validation.isValid) {
       toast({
         title: "Validation Error",
@@ -181,15 +171,14 @@ export const useActivityActions = (
       return;
     }
 
-    // Show warnings if any
     if (validation.warnings.length > 0) {
       console.warn('Activity update warnings:', validation.warnings);
     }
-    
+
     try {
       await ActivityDomainService.updateScheduledActivity(activityId, currentDog.id, normalizedUpdates);
       await refreshScheduledActivities();
-      
+
       toast({
         title: "Activity updated",
         description: "Your changes have been saved",
@@ -198,13 +187,13 @@ export const useActivityActions = (
     } catch (error) {
       console.error('Failed to update scheduled activity:', error);
       const userMessage = getUserFriendlyMessage(error);
-      
+
       toast({
         title: "Update failed",
         description: userMessage,
         variant: "destructive"
       });
-      
+
       handleError(error as Error, 'updateScheduledActivity', false);
     }
   };
@@ -219,9 +208,8 @@ export const useActivityActions = (
       return;
     }
 
-    // Validate the user activity
     const validation = DataValidator.validateUserActivity(activity);
-    
+
     if (!validation.isValid) {
       toast({
         title: "Validation Error",
@@ -231,7 +219,6 @@ export const useActivityActions = (
       return;
     }
 
-    // Show warnings if any
     if (validation.warnings.length > 0) {
       console.warn('User activity warnings:', validation.warnings);
       toast({
@@ -241,15 +228,14 @@ export const useActivityActions = (
       });
     }
 
-    // Sanitize string fields
     const sanitizedActivity = {
       ...activity,
       title: DataValidator.sanitizeInput(activity.title),
       benefits: activity.benefits ? DataValidator.sanitizeInput(activity.benefits) : activity.benefits,
-      instructions: activity.instructions ? activity.instructions.map(instruction => 
+      instructions: activity.instructions ? activity.instructions.map(instruction =>
         DataValidator.sanitizeInput(instruction)
       ) : activity.instructions,
-      materials: activity.materials ? activity.materials.map(material => 
+      materials: activity.materials ? activity.materials.map(material =>
         DataValidator.sanitizeInput(material)
       ) : activity.materials
     };
@@ -257,7 +243,7 @@ export const useActivityActions = (
     try {
       await ActivityDomainService.createUserActivity(sanitizedActivity, currentDog.id);
       await refreshUserActivities();
-      
+
       toast({
         title: "Custom activity created!",
         description: "Your custom activity has been added",
@@ -266,13 +252,13 @@ export const useActivityActions = (
     } catch (error) {
       console.error('Failed to create user activity:', error);
       const userMessage = getUserFriendlyMessage(error);
-      
+
       toast({
         title: "Failed to create activity",
         description: userMessage,
         variant: "destructive"
       });
-      
+
       handleError(error as Error, 'addUserActivity', false);
     }
   };
@@ -282,5 +268,9 @@ export const useActivityActions = (
     toggleActivityCompletion,
     updateScheduledActivity,
     addUserActivity,
+    refreshScheduledActivities // ✅ Now included
   };
 };
+
+
+   
