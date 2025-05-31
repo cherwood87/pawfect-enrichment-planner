@@ -1,9 +1,9 @@
-
 import React from 'react';
 import { ScheduledActivity } from '@/types/activity';
 import { useActivity } from '@/contexts/ActivityContext';
 import { Calendar, Target } from 'lucide-react';
-import VerticalDayCard from './VerticalDayCard';
+import ActivityCardHeader from './ActivityCardHeader';
+import ActivityCardStats from './ActivityCardStats';
 
 interface WeeklyGridProps {
   weekActivities: ScheduledActivity[];
@@ -17,10 +17,10 @@ const WeeklyGrid: React.FC<WeeklyGridProps> = ({
   onActivityClick
 }) => {
   const { getActivityDetails } = useActivity();
-  
+
   const dayNames = [
     { short: 'Sun', full: 'Sunday' },
-    { short: 'Mon', full: 'Monday' }, 
+    { short: 'Mon', full: 'Monday' },
     { short: 'Tue', full: 'Tuesday' },
     { short: 'Wed', full: 'Wednesday' },
     { short: 'Thu', full: 'Thursday' },
@@ -28,22 +28,18 @@ const WeeklyGrid: React.FC<WeeklyGridProps> = ({
     { short: 'Sat', full: 'Saturday' }
   ];
 
-  // Get current day and reorder starting from today
   const getCurrentDayIndex = () => new Date().getDay();
   const currentDayIndex = getCurrentDayIndex();
-  
-  // Create reordered days array starting from today
+
   const reorderedDays = [
     ...dayNames.slice(currentDayIndex),
     ...dayNames.slice(0, currentDayIndex)
   ];
 
-  // Map original day indices to reordered positions
   const getOriginalDayIndex = (reorderedIndex: number) => {
     return (currentDayIndex + reorderedIndex) % 7;
   };
 
-  // Group activities by day of week
   const activitiesByDay = dayNames.reduce((acc, _, dayIndex) => {
     acc[dayIndex] = weekActivities.filter(activity => activity.dayOfWeek === dayIndex);
     return acc;
@@ -68,22 +64,53 @@ const WeeklyGrid: React.FC<WeeklyGridProps> = ({
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-6">
       {reorderedDays.map((day, reorderedIndex) => {
         const originalDayIndex = getOriginalDayIndex(reorderedIndex);
-        const dayActivities = activitiesByDay[originalDayIndex] || [];
-        
+        const activities = activitiesByDay[originalDayIndex] || [];
+        const completed = activities.filter(a => a.completed).length;
+
         return (
-          <VerticalDayCard
+          <div
             key={originalDayIndex}
-            dayName={day.full}
-            dayShort={day.short}
-            dayIndex={originalDayIndex}
-            activities={dayActivities}
-            getActivityDetails={getActivityDetails}
-            onToggleCompletion={onToggleCompletion}
-            onActivityClick={onActivityClick}
-          />
+            className="bg-white rounded-3xl shadow-lg p-5 space-y-4 border border-gray-100"
+          >
+            <div className="flex items-center justify-between">
+              <div className="text-left">
+                <h2 className="text-xl font-bold text-purple-800">{day.full}</h2>
+                <p className="text-sm text-gray-500">
+                  {completed}/{activities.length} activities completed
+                </p>
+              </div>
+              <span className="text-sm text-purple-600 font-medium">{day.short}</span>
+            </div>
+
+            {activities.length === 0 ? (
+              <p className="text-sm text-gray-400 italic">No activities scheduled for this day.</p>
+            ) : (
+              <div className="space-y-4">
+                {activities.map(activity => (
+                  <div
+                    key={activity.id}
+                    className="p-4 rounded-2xl bg-gradient-to-br from-white to-gray-50 border shadow-sm hover:shadow-md transition cursor-pointer"
+                    onClick={() => onActivityClick?.(activity)}
+                  >
+                    <ActivityCardHeader activity={activity} />
+                    <ActivityCardStats activity={activity} />
+
+                    <div className="flex justify-between items-center pt-2">
+                      <span className="text-sm text-gray-600">Mark as done</span>
+                      <input
+                        type="checkbox"
+                        checked={activity.completed}
+                        onChange={() => onToggleCompletion(activity.id)}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         );
       })}
     </div>
