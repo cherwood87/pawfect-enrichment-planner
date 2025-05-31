@@ -1,10 +1,9 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useWeeklyPlannerState } from '@/hooks/useWeeklyPlannerState';
 import { useWeeklyPlannerActions } from '@/hooks/useWeeklyPlannerActions';
+import { useActivityActions } from '@/hooks/core/useActivityActions';
 import { useActivity } from '@/contexts/ActivityContext';
 import { useDog } from '@/contexts/DogContext';
-import { useActivityState } from '@/contexts/ActivityStateContext';
-import { useActivityActions } from '@/hooks/core/useActivityActions';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import DashboardModals from '@/components/dashboard/DashboardModals';
 import WeeklyPlannerView from '@/components/weekly-planner/WeeklyPlannerView';
@@ -20,23 +19,19 @@ const WeeklyPlannerPage: React.FC = () => {
   const [selectedDog, setSelectedDog] = useState<Dog | null>(null);
 
   const { currentDog } = useDog();
-  const { setScheduledActivities, setUserActivities } = useActivityState();
 
-  // Import refreshScheduledActivities from useActivityActions
-  const {
-    addScheduledActivity,
-    toggleActivityCompletion,
-    updateScheduledActivity,
-    addUserActivity,
-    refreshScheduledActivities,
-  } = useActivityActions(setScheduledActivities, setUserActivities, currentDog);
+  // ⬇️ NEW: Get refresh function to pull latest activities from Supabase
+  const { refreshScheduledActivities } = useActivityActions(
+    () => {}, // dummy setScheduledActivities; handled inside context
+    () => {}, // dummy setUserActivities
+    currentDog
+  );
 
-  // Run refresh on component mount
   useEffect(() => {
-    if (currentDog) {
+    if (currentDog?.id) {
       refreshScheduledActivities();
     }
-  }, [currentDog, refreshScheduledActivities]);
+  }, [currentDog]);
 
   const {
     completedActivities,
@@ -56,14 +51,14 @@ const WeeklyPlannerPage: React.FC = () => {
     setLoadingStates,
     optimisticUpdates,
     setOptimisticUpdates,
-    allWeekActivities,
+    allWeekActivities
   } = useWeeklyPlannerState();
 
   const { getCombinedActivityLibrary, userActivities, discoveredActivities } = useActivity();
 
   const {
     handleToggleCompletion,
-    isRetrying,
+    isRetrying
   } = useWeeklyPlannerActions(
     allWeekActivities,
     optimisticUpdates,
@@ -72,55 +67,36 @@ const WeeklyPlannerPage: React.FC = () => {
     setLoadingStates
   );
 
-  const handleNavigateWeek = useCallback(
-    (direction: 'prev' | 'next') => {
-      const newDate = new Date(currentDate);
-      newDate.setDate(currentDate.getDate() + (direction === 'next' ? 7 : -7));
-      setCurrentDate(newDate);
-    },
-    [currentDate, setCurrentDate]
-  );
+  const handleNavigateWeek = useCallback((direction: 'prev' | 'next') => {
+    const newDate = new Date(currentDate);
+    newDate.setDate(currentDate.getDate() + (direction === 'next' ? 7 : -7));
+    setCurrentDate(newDate);
+  }, [currentDate, setCurrentDate]);
 
-  const handleNavigateDay = useCallback(
-    (direction: 'prev' | 'next') => {
-      const newDate = new Date(currentDate);
-      newDate.setDate(currentDate.getDate() + (direction === 'next' ? 1 : -1));
-      setCurrentDate(newDate);
-    },
-    [currentDate, setCurrentDate]
-  );
+  const handleNavigateDay = useCallback((direction: 'prev' | 'next') => {
+    const newDate = new Date(currentDate);
+    newDate.setDate(currentDate.getDate() + (direction === 'next' ? 1 : -1));
+    setCurrentDate(newDate);
+  }, [currentDate, setCurrentDate]);
 
-  const handleViewModeChange = useCallback(
-    (mode: 'week' | 'day') => {
-      setViewMode(mode);
-    },
-    [setViewMode]
-  );
+  const handleViewModeChange = useCallback((mode: 'week' | 'day') => {
+    setViewMode(mode);
+  }, [setViewMode]);
 
-  const handleActivityClick = useCallback(
-    (activity: any) => {
-      setSelectedActivity(activity);
-      setIsModalOpen(true);
-    },
-    [setSelectedActivity, setIsModalOpen]
-  );
+  const handleActivityClick = useCallback((activity: any) => {
+    setSelectedActivity(activity);
+    setIsModalOpen(true);
+  }, [setSelectedActivity, setIsModalOpen]);
 
   const handleModalClose = useCallback(() => {
     setIsModalOpen(false);
     setSelectedActivity(null);
   }, [setIsModalOpen, setSelectedActivity]);
 
-  const getActivityDetails = useCallback(
-    (activityId: string) => {
-      const allActivities = [
-        ...getCombinedActivityLibrary(),
-        ...userActivities,
-        ...discoveredActivities,
-      ];
-      return allActivities.find((activity) => activity.id === activityId);
-    },
-    [getCombinedActivityLibrary, userActivities, discoveredActivities]
-  );
+  const getActivityDetails = useCallback((activityId: string) => {
+    const allActivities = [...getCombinedActivityLibrary(), ...userActivities, ...discoveredActivities];
+    return allActivities.find(activity => activity.id === activityId);
+  }, [getCombinedActivityLibrary, userActivities, discoveredActivities]);
 
   const handlePillarSelect = useCallback((pillar: string) => {
     setSelectedPillar(pillar);
@@ -160,8 +136,8 @@ const WeeklyPlannerPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-cyan-50 to-amber-50 mobile-safe">
-      <DashboardHeader
-        onChatOpen={handleChatModalOpen}
+      <DashboardHeader 
+        onChatOpen={handleChatModalOpen} 
         onAddDogOpen={handleAddDogModalOpen}
       />
 
