@@ -4,15 +4,17 @@ import { Dog } from '@/types/dog';
 import { ActivityDomainService } from '@/services/domain/ActivityDomainService';
 import { useToast } from '@/hooks/use-toast';
 import { handleError, getUserFriendlyMessage } from '@/utils/errorUtils';
+import { DataValidator, checkForDuplicates, normalizeActivityData } from '@/utils/dataValidation';
 
 /**
- * Custom hook for activity actions, using the new domain service architecture.
- * All mutations are handled through the domain service layer with enhanced error handling.
+ * Custom hook for activity actions with comprehensive validation and error handling.
+ * All mutations are handled through the domain service layer with enhanced data integrity.
  */
 export const useActivityActions = (
   setScheduledActivities: (activities: ScheduledActivity[]) => void,
   setUserActivities: (activities: UserActivity[]) => void,
-  currentDog: Dog | null
+  currentDog: Dog | null,
+  existingScheduledActivities: ScheduledActivity[] = []
 ) => {
   const { toast } = useToast();
 
@@ -40,31 +42,6 @@ export const useActivityActions = (
     }
   };
 
-  // Validate activity data before submission
-  const validateScheduledActivity = (activity: Omit<ScheduledActivity, 'id'>): string[] => {
-    const errors: string[] = [];
-    
-    if (!activity.activityId?.trim()) {
-      errors.push('Activity ID is required');
-    }
-    
-    if (!activity.scheduledDate) {
-      errors.push('Scheduled date is required');
-    }
-    
-    if (!activity.dogId?.trim()) {
-      errors.push('Dog ID is required');
-    }
-
-    // Check for duplicate scheduling
-    const isDuplicate = false; // This would be implemented with actual duplicate detection
-    if (isDuplicate) {
-      errors.push('This activity is already scheduled for this date');
-    }
-    
-    return errors;
-  };
-
   const addScheduledActivity = async (activity: Omit<ScheduledActivity, 'id'>) => {
     if (!currentDog) {
       toast({
@@ -75,12 +52,38 @@ export const useActivityActions = (
       return;
     }
 
-    // Client-side validation
-    const validationErrors = validateScheduledActivity(activity);
-    if (validationErrors.length > 0) {
+    // Normalize and validate the activity data
+    const normalizedActivity = normalizeActivityData({
+      ...activity,
+      dogId: currentDog.id,
+    });
+
+    const validation = DataValidator.validateScheduledActivity(normalizedActivity);
+    
+    if (!validation.isValid) {
       toast({
         title: "Validation Error",
-        description: validationErrors.join(', '),
+        description: validation.errors.join(', '),
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Show warnings if any
+    if (validation.warnings.length > 0) {
+      console.warn('Activity validation warnings:', validation.warnings);
+      toast({
+        title: "Warning",
+        description: validation.warnings[0],
+        variant: "default"
+      });
+    }
+
+    // Check for duplicates
+    if (checkForDuplicates(normalizedActivity as ScheduledActivity, existingScheduledActivities)) {
+      toast({
+        title: "Duplicate Activity",
+        description: "This activity is already scheduled for this date",
         variant: "destructive"
       });
       return;
@@ -88,12 +91,12 @@ export const useActivityActions = (
 
     try {
       await ActivityDomainService.createScheduledActivity({
-        ...activity,
+        ...normalizedActivity,
         dogId: currentDog.id,
-        notes: activity.notes || '',
-        completionNotes: activity.completionNotes || '',
-        reminderEnabled: activity.reminderEnabled ?? false,
-      });
+        notes: normalizedActivity.notes || '',
+        completionNotes: normalizedActivity.completionNotes || '',
+        reminderEnabled: normalizedActivity.reminderEnabled ?? false,
+      } as Omit<ScheduledActivity, 'id'>);
       
       await refreshScheduledActivities();
       
@@ -125,9 +128,26 @@ export const useActivityActions = (
       });
       throw new Error("No dog selected");
     }
+
+    // Validate completion notes if provided
+    if (completionNotes) {
+      const sanitizedNotes = DataValidator.sanitizeInput(completionNotes);
+      if (sanitizedNotes.length > 1000) {
+        toast({
+          title: "Validation Error",
+          description: "Completion notes are too long (max 1000 characters)",
+          variant: "destructive"
+        });
+        throw new Error("Completion notes too long");
+      }
+    }
     
     try {
-      await ActivityDomainService.toggleActivityCompletion(activityId, currentDog.id, completionNotes);
+      await ActivityDomainService.toggleActivityCompletion(
+        activityId, 
+        currentDog.id, 
+        completionNotes ? DataValidator.sanitizeInput(completionNotes) : undefined
+      );
       await refreshScheduledActivities();
     } catch (error) {
       console.error('Failed to toggle activity completion:', error);
@@ -147,9 +167,27 @@ export const useActivityActions = (
       });
       return;
     }
+
+    // Normalize and validate the updates
+    const normalizedUpdates = normalizeActivityData(updates);
+    const validation = DataValidator.validateScheduledActivity(normalizedUpdates);
+    
+    if (!validation.isValid) {
+      toast({
+        title: "Validation Error",
+        description: validation.errors.join(', '),
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Show warnings if any
+    if (validation.warnings.length > 0) {
+      console.warn('Activity update warnings:', validation.warnings);
+    }
     
     try {
-      await ActivityDomainService.updateScheduledActivity(activityId, currentDog.id, updates);
+      await ActivityDomainService.updateScheduledActivity(activityId, currentDog.id, normalizedUpdates);
       await refreshScheduledActivities();
       
       toast({
@@ -181,8 +219,43 @@ export const useActivityActions = (
       return;
     }
 
+    // Validate the user activity
+    const validation = DataValidator.validateUserActivity(activity);
+    
+    if (!validation.isValid) {
+      toast({
+        title: "Validation Error",
+        description: validation.errors.join(', '),
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Show warnings if any
+    if (validation.warnings.length > 0) {
+      console.warn('User activity warnings:', validation.warnings);
+      toast({
+        title: "Warning",
+        description: validation.warnings[0],
+        variant: "default"
+      });
+    }
+
+    // Sanitize string fields
+    const sanitizedActivity = {
+      ...activity,
+      title: DataValidator.sanitizeInput(activity.title),
+      benefits: activity.benefits ? DataValidator.sanitizeInput(activity.benefits) : activity.benefits,
+      instructions: activity.instructions ? activity.instructions.map(instruction => 
+        DataValidator.sanitizeInput(instruction)
+      ) : activity.instructions,
+      materials: activity.materials ? activity.materials.map(material => 
+        DataValidator.sanitizeInput(material)
+      ) : activity.materials
+    };
+
     try {
-      await ActivityDomainService.createUserActivity(activity, currentDog.id);
+      await ActivityDomainService.createUserActivity(sanitizedActivity, currentDog.id);
       await refreshUserActivities();
       
       toast({

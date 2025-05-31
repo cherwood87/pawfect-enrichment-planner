@@ -104,7 +104,11 @@ const WeeklyPlannerCard = ({ onPillarSelect, onChatOpen }) => {
     setOptimisticUpdates(prev => ({ ...prev, [activityId]: newState }));
 
     try {
-      await retry(() => toggleActivityCompletion(activityId, completionNotes));
+      // Wrap the toggleActivityCompletion call to ensure it returns a Promise
+      await retry(async () => {
+        await toggleActivityCompletion(activityId, completionNotes);
+        return Promise.resolve(); // Ensure we return a Promise
+      });
       
       // Clear optimistic update on success
       setOptimisticUpdates(prev => {
