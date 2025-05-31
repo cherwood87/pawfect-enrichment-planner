@@ -1,6 +1,4 @@
-
 import React, { useState, useMemo, useCallback } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
 import { useActivity } from '@/contexts/ActivityContext';
 import { useDog } from '@/contexts/DogContext';
 import { useChat } from '@/contexts/ChatContext';
@@ -148,7 +146,7 @@ const WeeklyPlannerCard: React.FC<WeeklyPlannerCardProps> = ({
 
   return (
     <>
-      <Card className="overflow-hidden shadow-lg border-2 border-purple-200">
+      <div className="bg-white/80 rounded-3xl shadow-lg border border-purple-100 max-w-5xl mx-auto my-8 overflow-hidden">
         <WeeklyPlannerHeader 
           completedActivities={completedActivities} 
           totalActivities={totalActivities} 
@@ -160,8 +158,8 @@ const WeeklyPlannerCard: React.FC<WeeklyPlannerCardProps> = ({
           onNavigateDay={navigateDay}
           onViewModeChange={handleViewModeChange}
         />
-        
-        <CardContent className="p-6 bg-gradient-to-br from-purple-50/50 to-cyan-50/50">
+
+        <div className="p-6 md:p-10 bg-gradient-to-br from-purple-50/60 to-cyan-50/60">
           {viewMode === 'week' ? (
             <>
               <AccordionWeeklyGrid 
@@ -169,7 +167,6 @@ const WeeklyPlannerCard: React.FC<WeeklyPlannerCardProps> = ({
                 onToggleCompletion={toggleActivityCompletion} 
                 onActivityClick={handleActivityClick} 
               />
-
               <WeeklySummary 
                 completedActivities={completedActivities} 
                 totalActivities={totalActivities} 
@@ -183,8 +180,8 @@ const WeeklyPlannerCard: React.FC<WeeklyPlannerCardProps> = ({
               onActivityClick={handleActivityClick}
             />
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       <ActivityDetailModal 
         isOpen={isModalOpen} 
