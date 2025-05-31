@@ -4,7 +4,7 @@ import { DiscoveredActivity } from '@/types/discovery';
 import { useActivity } from '@/contexts/ActivityContext';
 import { useActivityFiltering } from '@/hooks/useActivityFiltering';
 import ActivityCard from '@/components/ActivityCard';
-import ActivityModal from '@/components/ActivityModal';
+import ActivityDetailModal from '@/components/weekly-planner/ActivityDetailModal';
 import PillarSelectionCards from '@/components/PillarSelectionCards';
 import ActivityLibraryContent from '@/components/ActivityLibraryContent';
 import ActivityLibraryDebug from '@/components/ActivityLibraryDebug';
@@ -146,13 +146,14 @@ const ActivityLibrary = () => {
 
       {/* Activity Detail Modal */}
       {selectedActivity && (
-  <ActivityModal
-    isOpen={!!selectedActivity}
-    onClose={handleActivityModalClose}
-    activity={null} // Pass null if you don't have a scheduled activity
-    activityDetails={selectedActivity} // Correct prop name as expected by your modal component
-  />
-)}
+        <ActivityDetailModal
+          isOpen={!!selectedActivity}
+          onClose={handleActivityModalClose}
+          activity={null}
+          activityDetails={selectedActivity}
+          onToggleCompletion={() => {}}
+        />
+      )}
     </div>
   );
 };
