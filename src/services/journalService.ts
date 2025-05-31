@@ -16,9 +16,52 @@ export interface DatabaseJournalEntry {
 }
 
 export class JournalService {
-  static async createOrUpdateEntry(dogId: string, entry: Omit<JournalEntry, 'id'>): Promise<JournalEntry> {
-    console.log('Creating or updating journal entry for dog:', dogId, 'entry:', entry);
+  // ✅ NEW METHOD: Always creates a new entry (allows multiple per day)
+  static async createNewEntry(dogId: string, entry: Omit<JournalEntry, 'id'>): Promise<JournalEntry> {
+    console.log('Creating new journal entry for dog:', dogId, 'entry:', entry);
 
+    try {
+      const { data, error } = await supabase
+        .from('journal_entries')
+        .insert({
+          dog_id: dogId,
+          date: entry.date,
+          prompt: entry.prompt,
+          response: entry.response,
+          mood: entry.mood,
+          behaviors: entry.behaviors,
+          notes: entry.notes,
+          entry_timestamp: new Date().toISOString()
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error inserting journal entry:', error);
+        throw new Error('Failed to create journal entry');
+      }
+
+      return this.mapToJournalEntry(data);
+    } catch (error) {
+      console.error('Error in createNewEntry:', error);
+      throw error;
+    }
+  }
+
+  // ✅ MODIFIED: Now creates new entries by default, with option to update existing
+  static async createOrUpdateEntry(
+    dogId: string, 
+    entry: Omit<JournalEntry, 'id'>, 
+    forceNew: boolean = true
+  ): Promise<JournalEntry> {
+    console.log('Creating or updating journal entry for dog:', dogId, 'entry:', entry, 'forceNew:', forceNew);
+
+    // If forceNew is true, always create a new entry
+    if (forceNew) {
+      return this.createNewEntry(dogId, entry);
+    }
+
+    // Original update-existing logic (kept for backward compatibility)
     try {
       const { data: existing, error: fetchError } = await supabase
         .from('journal_entries')
@@ -55,27 +98,7 @@ export class JournalService {
 
         return this.mapToJournalEntry(updated);
       } else {
-        const { data, error } = await supabase
-          .from('journal_entries')
-          .insert({
-            dog_id: dogId,
-            date: entry.date,
-            prompt: entry.prompt,
-            response: entry.response,
-            mood: entry.mood,
-            behaviors: entry.behaviors,
-            notes: entry.notes,
-            entry_timestamp: new Date().toISOString()
-          })
-          .select()
-          .single();
-
-        if (error) {
-          console.error('Error inserting journal entry:', error);
-          throw new Error('Failed to create journal entry');
-        }
-
-        return this.mapToJournalEntry(data);
+        return this.createNewEntry(dogId, entry);
       }
     } catch (error) {
       console.error('Error in createOrUpdateEntry:', error);
@@ -166,15 +189,21 @@ export class JournalService {
     }
   }
 
-  // ✅ Updated to use safe logic
+  // ✅ UPDATED: Now creates new entries by default
   static async saveEntry(dogId: string, entry: JournalEntry): Promise<void> {
-    console.log('saveEntry called - using createOrUpdateEntry');
-    await this.createOrUpdateEntry(dogId, entry);
+    console.log('saveEntry called - creating new entry');
+    await this.createNewEntry(dogId, entry);
   }
 
+  // ✅ UPDATED: Gets the most recent entry for a date (since there can be multiple)
   static async getEntry(dogId: string, date: string): Promise<JournalEntry | null> {
     const entries = await this.getEntriesForDate(dogId, date);
-    return entries.length > 0 ? entries[0] : null;
+    return entries.length > 0 ? entries[0] : null; // Returns most recent entry
+  }
+
+  // ✅ NEW METHOD: Get latest entry for a date
+  static async getLatestEntryForDate(dogId: string, date: string): Promise<JournalEntry | null> {
+    return this.getEntry(dogId, date);
   }
 
   private static mapToJournalEntry(dbEntry: DatabaseJournalEntry): JournalEntry {
