@@ -89,25 +89,28 @@ const WeeklyGrid: React.FC<WeeklyGridProps> = ({
               <p className="text-sm text-gray-400 italic">No activities scheduled for this day.</p>
             ) : (
               <div className="space-y-4">
-                {activities.map(activity => (
-                  <div
-                    key={activity.id}
-                    className="p-4 rounded-2xl bg-gradient-to-br from-white to-gray-50 border shadow-sm hover:shadow-md transition cursor-pointer"
-                    onClick={() => onActivityClick?.(activity)}
-                  >
-                    <ActivityCardHeader activity={activity} />
-                    <ActivityCardStats activity={activity} />
-
-                    <div className="flex justify-between items-center pt-2">
-                      <span className="text-sm text-gray-600">Mark as done</span>
-                      <input
-                        type="checkbox"
-                        checked={activity.completed}
-                        onChange={() => onToggleCompletion(activity.id)}
-                      />
+                {activities.map(activity => {
+                  const details = getActivityDetails(activity.activityId); // <--- The fix: resolve full details
+                  if (!details) return null;
+                  return (
+                    <div
+                      key={activity.id}
+                      className="p-4 rounded-2xl bg-gradient-to-br from-white to-gray-50 border shadow-sm hover:shadow-md transition cursor-pointer"
+                      onClick={() => onActivityClick?.(activity)}
+                    >
+                      <ActivityCardHeader activity={details} />
+                      <ActivityCardStats activity={details} />
+                      <div className="flex justify-between items-center pt-2">
+                        <span className="text-sm text-gray-600">Mark as done</span>
+                        <input
+                          type="checkbox"
+                          checked={activity.completed}
+                          onChange={() => onToggleCompletion(activity.id)}
+                        />
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
