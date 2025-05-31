@@ -1,10 +1,10 @@
-
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { ActivityLibraryItem } from '@/types/activity';
 import { DiscoveredActivity } from '@/types/discovery';
 import { useActivity } from '@/contexts/ActivityContext';
 import { useActivityFiltering } from '@/hooks/useActivityFiltering';
 import ActivityCard from '@/components/ActivityCard';
+import ActivityModal from '@/components/ActivityModal';
 import PillarSelectionCards from '@/components/PillarSelectionCards';
 import ActivityLibraryContent from '@/components/ActivityLibraryContent';
 import ActivityLibraryDebug from '@/components/ActivityLibraryDebug';
@@ -146,10 +146,10 @@ const ActivityLibrary = () => {
 
       {/* Activity Detail Modal */}
       {selectedActivity && (
-        <ActivityCard 
-          activity={selectedActivity}
+        <ActivityModal
           isOpen={!!selectedActivity}
           onClose={handleActivityModalClose}
+          selectedActivity={selectedActivity}
         />
       )}
     </div>
