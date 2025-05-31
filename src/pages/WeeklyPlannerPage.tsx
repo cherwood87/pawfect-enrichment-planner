@@ -1,7 +1,7 @@
-
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useWeeklyPlannerState } from '@/hooks/useWeeklyPlannerState';
 import { useWeeklyPlannerActions } from '@/hooks/useWeeklyPlannerActions';
+import { useActivityActions } from '@/hooks/core/useActivityActions';
 import { useActivity } from '@/contexts/ActivityContext';
 import { useDog } from '@/contexts/DogContext';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
@@ -17,6 +17,21 @@ const WeeklyPlannerPage: React.FC = () => {
   const [isAddDogModalOpen, setIsAddDogModalOpen] = useState(false);
   const [isEditDogModalOpen, setIsEditDogModalOpen] = useState(false);
   const [selectedDog, setSelectedDog] = useState<Dog | null>(null);
+
+  const { currentDog } = useDog();
+
+  // ⬇️ NEW: Get refresh function to pull latest activities from Supabase
+  const { refreshScheduledActivities } = useActivityActions(
+    () => {}, // dummy setScheduledActivities; handled inside context
+    () => {}, // dummy setUserActivities
+    currentDog
+  );
+
+  useEffect(() => {
+    if (currentDog?.id) {
+      refreshScheduledActivities();
+    }
+  }, [currentDog]);
 
   const {
     completedActivities,
@@ -52,24 +67,15 @@ const WeeklyPlannerPage: React.FC = () => {
     setLoadingStates
   );
 
-  // Navigation functions
   const handleNavigateWeek = useCallback((direction: 'prev' | 'next') => {
     const newDate = new Date(currentDate);
-    if (direction === 'next') {
-      newDate.setDate(currentDate.getDate() + 7);
-    } else {
-      newDate.setDate(currentDate.getDate() - 7);
-    }
+    newDate.setDate(currentDate.getDate() + (direction === 'next' ? 7 : -7));
     setCurrentDate(newDate);
   }, [currentDate, setCurrentDate]);
 
   const handleNavigateDay = useCallback((direction: 'prev' | 'next') => {
     const newDate = new Date(currentDate);
-    if (direction === 'next') {
-      newDate.setDate(currentDate.getDate() + 1);
-    } else {
-      newDate.setDate(currentDate.getDate() - 1);
-    }
+    newDate.setDate(currentDate.getDate() + (direction === 'next' ? 1 : -1));
     setCurrentDate(newDate);
   }, [currentDate, setCurrentDate]);
 
@@ -88,7 +94,6 @@ const WeeklyPlannerPage: React.FC = () => {
   }, [setIsModalOpen, setSelectedActivity]);
 
   const getActivityDetails = useCallback((activityId: string) => {
-    // Combine all possible activity sources
     const allActivities = [...getCombinedActivityLibrary(), ...userActivities, ...discoveredActivities];
     return allActivities.find(activity => activity.id === activityId);
   }, [getCombinedActivityLibrary, userActivities, discoveredActivities]);
@@ -103,7 +108,6 @@ const WeeklyPlannerPage: React.FC = () => {
     setSelectedPillar(null);
   }, []);
 
-  // Modal handlers for dashboard header
   const handleChatModalOpen = useCallback(() => {
     setIsChatModalOpen(true);
   }, []);
@@ -132,13 +136,11 @@ const WeeklyPlannerPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-cyan-50 to-amber-50 mobile-safe">
-      {/* Header */}
       <DashboardHeader 
         onChatOpen={handleChatModalOpen} 
         onAddDogOpen={handleAddDogModalOpen}
       />
 
-      {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-8">
@@ -179,7 +181,6 @@ const WeeklyPlannerPage: React.FC = () => {
         selectedPillar={selectedPillar}
       />
 
-      {/* Dashboard Modals */}
       <DashboardModals
         isActivityModalOpen={false}
         isChatModalOpen={isChatModalOpen}
