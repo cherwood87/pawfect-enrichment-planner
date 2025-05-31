@@ -5,7 +5,7 @@ import { DiscoveredActivity } from '@/types/discovery';
 import { useActivity } from '@/contexts/ActivityContext';
 import { useActivityFiltering } from '@/hooks/useActivityFiltering';
 import ActivityCard from '@/components/ActivityCard';
-import ActivityDetailModal from '@/components/weekly-planner/ActivityDetailModal';
+import ActivityLibraryModal from '@/components/ActivityLibraryModal';
 import PillarSelectionCards from '@/components/PillarSelectionCards';
 import ActivityLibraryContent from '@/components/ActivityLibraryContent';
 import ActivityLibraryDebug from '@/components/ActivityLibraryDebug';
@@ -97,19 +97,6 @@ const ActivityLibrary = () => {
     setSelectedPillar(pillar);
   }, []);
 
-  // Handle the "Need Help" functionality for activities
-  const handleNeedHelp = useCallback((activityContext: {
-    type: 'activity-help';
-    activityName: string;
-    activityPillar: string;
-    activityDifficulty: string;
-    activityDuration: number;
-  }) => {
-    console.log('Need help requested for activity:', activityContext);
-    // For now, just log the context. This could be expanded to open a chat modal
-    // or navigate to a help page with the activity context
-  }, []);
-
   // Memoize computed values
   const { autoApprovedCount, curatedCount } = useMemo(() => {
     const isDiscoveredActivity = (activity: ActivityLibraryItem | DiscoveredActivity): activity is DiscoveredActivity => {
@@ -160,13 +147,12 @@ const ActivityLibrary = () => {
 
       {/* Activity Detail Modal */}
       {selectedActivity && (
-        <ActivityDetailModal
+        <ActivityLibraryModal
           isOpen={!!selectedActivity}
           onClose={handleActivityModalClose}
           activity={null}
           activityDetails={selectedActivity}
           onToggleCompletion={() => {}}
-          onNeedHelp={handleNeedHelp}
           mode="library"
         />
       )}
