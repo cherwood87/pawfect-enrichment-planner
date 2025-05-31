@@ -1,4 +1,5 @@
 
+
 /**
  * Centralized import path configuration for consistent imports across the application.
  * This helps maintain clean and standardized import statements.
@@ -163,7 +164,7 @@ export const validateImportPath = (path: string): boolean => {
     DATA_PATHS.ACTIVITY_LIBRARY,
     DATA_PATHS.QUIZ_QUESTIONS,
     ICON_PATHS.LUCIDE
-  ];
+  ] as string[];
   
   return allPaths.includes(path);
 };
@@ -197,3 +198,4 @@ export const getCommonImports = () => ({
     UTILITY_PATHS.DATA_VALIDATION
   ]
 });
+

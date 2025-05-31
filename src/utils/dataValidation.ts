@@ -1,4 +1,3 @@
-
 import { ScheduledActivity, UserActivity, ActivityLibraryItem } from '@/types/activity';
 import { Dog } from '@/types/dog';
 import { DiscoveredActivity } from '@/types/discovery';
@@ -158,10 +157,10 @@ export class DataValidator {
       }
     }
 
-    if (dog.energyLevel) {
-      const validEnergyLevels = ['Low', 'Medium', 'High'];
-      if (!validEnergyLevels.includes(dog.energyLevel)) {
-        errors.push(`Invalid energy level: ${dog.energyLevel}. Must be one of: ${validEnergyLevels.join(', ')}`);
+    if (dog.activityLevel) {
+      const validActivityLevels = ['low', 'moderate', 'high'];
+      if (!validActivityLevels.includes(dog.activityLevel)) {
+        errors.push(`Invalid activity level: ${dog.activityLevel}. Must be one of: ${validActivityLevels.join(', ')}`);
       }
     }
 
