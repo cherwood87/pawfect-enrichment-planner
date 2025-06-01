@@ -5,13 +5,13 @@ export const quizQuestions: QuizQuestion[] = [
   // MENTAL PILLAR
   {
     id: 'mental_puzzles',
-    question: 'Does your dog enjoy puzzle toys or problem-solving games?',
+    question: 'Does your dog enjoy puzzle toys and learning new tricks?',
     pillar: 'mental',
     options: [
       { value: 'loves', label: 'Absolutely loves them!', weight: 3 },
       { value: 'likes', label: 'Enjoys them sometimes', weight: 2 },
       { value: 'neutral', label: 'Not particularly interested', weight: 1 },
-      { value: 'dislikes', label: 'Gets frustrated or ignores them', weight: 0 }
+      { value: 'dislikes', label: 'Gets frustrated or or walks away', weight: 0 }
     ]
   },
   {
@@ -54,7 +54,7 @@ export const quizQuestions: QuizQuestion[] = [
     question: 'What kind of physical activities does your dog enjoy the most?',
     pillar: 'physical',
     options: [
-      { value: 'running', label: 'Games with running or jumping', weight: 3 },
+      { value: 'running', label: 'Games with walking, running or jumping', weight: 3 },
       { value: 'roughhouse', label: 'Tug, wrestling, or roughhousing', weight: 2 },
       { value: 'obstacles', label: 'Climbing or crawling under things', weight: 1 },
       { value: 'minimal', label: 'Prefers minimal or no physical games', weight: 0 }
@@ -70,7 +70,7 @@ export const quizQuestions: QuizQuestion[] = [
       { value: 'excited', label: 'Runs over excitedly and wants to interact', weight: 3 },
       { value: 'friendly', label: 'Calm and friendly approach', weight: 2 },
       { value: 'cautious', label: 'Hesitant but curious', weight: 1 },
-      { value: 'avoidant', label: 'Avoids or hides', weight: 0 }
+      { value: 'avoidant', label: 'Avoids or becomes reactive', weight: 0 }
     ]
   },
   {
