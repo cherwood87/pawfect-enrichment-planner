@@ -5,13 +5,13 @@ export const quizQuestions: QuizQuestion[] = [
   // MENTAL PILLAR
   {
     id: 'mental_puzzles',
-    question: 'Does your dog enjoy puzzle toys and learning new tricks?',
+    question: 'Does your dog enjoy puzzle toys or learning new tricks?',
     pillar: 'mental',
     options: [
       { value: 'loves', label: 'Absolutely loves them!', weight: 3 },
       { value: 'likes', label: 'Enjoys them sometimes', weight: 2 },
       { value: 'neutral', label: 'Not particularly interested', weight: 1 },
-      { value: 'dislikes', label: 'Gets frustrated or or walks away', weight: 0 }
+      { value: 'dislikes', label: 'Gets frustrated or ignores them', weight: 0 }
     ]
   },
   {
