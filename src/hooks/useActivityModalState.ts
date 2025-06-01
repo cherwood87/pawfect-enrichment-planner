@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDog } from '@/contexts/DogContext';
@@ -6,7 +7,7 @@ import { useChat } from '@/contexts/ChatContext';
 import { toast } from '@/hooks/use-toast';
 import { ActivityLibraryItem, UserActivity } from '@/types/activity';
 import { DiscoveredActivity } from '@/types/discovery';
-import { useActivityStateHook } from '@/hooks/useActivityStateHook'; // make sure this path is correct
+import { useActivityStateHook } from '@/hooks/useActivityState'; // Fixed import path
 import { useActivityActions } from '@/hooks/useActivityActions';
 
 export const useActivityModalState = (
