@@ -1,13 +1,13 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDog } from '@/contexts/DogContext';
-import { useActivity } from '@/contexts/ActivityContext';
 import { useFavourites } from '@/hooks/useFavourites';
 import { useChat } from '@/contexts/ChatContext';
 import { toast } from '@/hooks/use-toast';
 import { ActivityLibraryItem, UserActivity } from '@/types/activity';
 import { DiscoveredActivity } from '@/types/discovery';
+import { useActivityStateHook } from '@/hooks/useActivityStateHook'; // make sure this path is correct
+import { useActivityActions } from '@/hooks/useActivityActions';
 
 export const useActivityModalState = (
   activityDetails: ActivityLibraryItem | UserActivity | DiscoveredActivity | null,
@@ -15,10 +15,16 @@ export const useActivityModalState = (
 ) => {
   const navigate = useNavigate();
   const { currentDog } = useDog();
-  const { addScheduledActivity } = useActivity();
   const { addToFavourites } = useFavourites(currentDog?.id || null);
   const { loadConversation } = useChat();
-  
+
+  const {
+    setScheduledActivities,
+    setUserActivities
+  } = useActivityStateHook(currentDog);
+
+  const { addScheduledActivity } = useActivityActions(setScheduledActivities, setUserActivities, currentDog);
+
   const [selectedDayOfWeek, setSelectedDayOfWeek] = useState<number>(new Date().getDay());
   const [isScheduling, setIsScheduling] = useState(false);
   const [isFavouriting, setIsFavouriting] = useState(false);
