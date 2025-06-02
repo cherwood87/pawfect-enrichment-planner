@@ -7,8 +7,8 @@ import { useChat } from '@/contexts/ChatContext';
 import { toast } from '@/hooks/use-toast';
 import { ActivityLibraryItem, UserActivity } from '@/types/activity';
 import { DiscoveredActivity } from '@/types/discovery';
-import { useActivityStateHook } from '@/hooks/useActivityState'; // Fixed import path
-import { useActivityActions } from '@/hooks/useActivityActions';
+import { useActivityStateHook } from '@/hooks/useActivityState';
+import { useActivityActions } from '@/hooks/core/useActivityActions'; // Use consolidated hook
 
 export const useActivityModalState = (
   activityDetails: ActivityLibraryItem | UserActivity | DiscoveredActivity | null,
@@ -20,11 +20,17 @@ export const useActivityModalState = (
   const { loadConversation } = useChat();
 
   const {
+    scheduledActivities,
     setScheduledActivities,
     setUserActivities
   } = useActivityStateHook(currentDog);
 
-  const { addScheduledActivity } = useActivityActions(setScheduledActivities, setUserActivities, currentDog);
+  const { addScheduledActivity } = useActivityActions(
+    setScheduledActivities, 
+    setUserActivities, 
+    currentDog,
+    scheduledActivities // Pass existing activities for duplicate checking
+  );
 
   const [selectedDayOfWeek, setSelectedDayOfWeek] = useState<number>(new Date().getDay());
   const [isScheduling, setIsScheduling] = useState(false);

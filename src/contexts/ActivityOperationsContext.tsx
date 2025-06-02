@@ -3,7 +3,7 @@ import React, { createContext, useContext } from 'react';
 import { ScheduledActivity, UserActivity, ActivityLibraryItem, StreakData, WeeklyProgress, PillarGoals } from '@/types/activity';
 import { DiscoveredActivity } from '@/types/discovery';
 import { useDog } from '@/contexts/DogContext';
-import { useActivityActions } from '@/hooks/core/useActivityActions';
+import { useActivityActions } from '@/hooks/core/useActivityActions'; // Use the consolidated hook
 import { useActivityOperations as useActivityOperationsCore } from '@/hooks/core/useActivityOperations';
 import { useActivityState } from './ActivityStateContext';
 
@@ -40,15 +40,15 @@ export const ActivityOperationsProvider: React.FC<{ children: React.ReactNode }>
     setUserActivities 
   } = useActivityState();
 
-  // Activity actions using the new organized hook
+  // Use the consolidated activity actions hook
   const {
     addScheduledActivity,
     toggleActivityCompletion,
     updateScheduledActivity,
     addUserActivity
-  } = useActivityActions(setScheduledActivities, setUserActivities, currentDog);
+  } = useActivityActions(setScheduledActivities, setUserActivities, currentDog, scheduledActivities);
 
-  // Activity operations using the new organized hook
+  // Activity operations using the existing hook
   const activityOps = useActivityOperationsCore(
     scheduledActivities,
     userActivities,
