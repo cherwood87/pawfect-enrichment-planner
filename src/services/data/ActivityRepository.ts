@@ -1,4 +1,3 @@
-
 import { ScheduledActivity, UserActivity } from '@/types/activity';
 import { SupabaseAdapter } from '../integration/SupabaseAdapter';
 import { LocalStorageAdapter } from '../integration/LocalStorageAdapter';
@@ -12,16 +11,21 @@ export class ActivityRepository {
         throw new AppError('Dog ID is required', 'INVALID_DOG_ID');
       }
 
-      return await SupabaseAdapter.getScheduledActivities(dogId);
+      console.log('🔍 [ActivityRepository] Fetching scheduled activities for dog:', dogId);
+      const activities = await SupabaseAdapter.getScheduledActivities(dogId);
+      console.log('✅ [ActivityRepository] Retrieved from Supabase:', activities.length, 'activities');
+      return activities;
     } catch (error) {
-      console.error('Failed to fetch from Supabase, falling back to localStorage:', error);
+      console.error('❌ [ActivityRepository] Failed to fetch from Supabase, falling back to localStorage:', error);
       handleError(error as Error, { operation: 'getScheduledActivities', dogId }, false);
       
       if (fallbackToLocalStorage) {
         try {
-          return LocalStorageAdapter.getScheduledActivities(dogId);
+          const localActivities = LocalStorageAdapter.getScheduledActivities(dogId);
+          console.log('📱 [ActivityRepository] Retrieved from localStorage:', localActivities.length, 'activities');
+          return localActivities;
         } catch (localError) {
-          console.error('LocalStorage fallback also failed:', localError);
+          console.error('❌ [ActivityRepository] LocalStorage fallback also failed:', localError);
           handleError(localError as Error, { operation: 'getScheduledActivities_localStorage', dogId }, false);
           return []; // Return empty array as last resort
         }
@@ -32,23 +36,40 @@ export class ActivityRepository {
 
   static async createScheduledActivity(activity: ScheduledActivity): Promise<ScheduledActivity> {
     try {
+      console.log('💾 [ActivityRepository] Creating scheduled activity:', {
+        activityId: activity.activityId,
+        dogId: activity.dogId,
+        scheduledDate: activity.scheduledDate,
+        weekNumber: activity.weekNumber,
+        dayOfWeek: activity.dayOfWeek
+      });
+      
       this.validateScheduledActivity(activity);
       
       const created = await SupabaseAdapter.createScheduledActivity(activity);
+      
+      console.log('✅ [ActivityRepository] Created in Supabase:', {
+        id: created.id,
+        activityId: created.activityId,
+        scheduledDate: created.scheduledDate,
+        weekNumber: created.weekNumber,
+        dayOfWeek: created.dayOfWeek
+      });
       
       // Update localStorage as backup
       if (activity.dogId) {
         try {
           const existing = LocalStorageAdapter.getScheduledActivities(activity.dogId);
           LocalStorageAdapter.saveScheduledActivities(activity.dogId, [...existing, created]);
+          console.log('📱 [ActivityRepository] Updated localStorage backup');
         } catch (localError) {
-          console.warn('Failed to update localStorage backup:', localError);
+          console.warn('⚠️ [ActivityRepository] Failed to update localStorage backup:', localError);
         }
       }
       
       return created;
     } catch (error) {
-      console.error('Failed to create in Supabase:', error);
+      console.error('❌ [ActivityRepository] Failed to create in Supabase:', error);
       handleError(error as Error, { operation: 'createScheduledActivity', activity });
       throw error;
     }

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -67,6 +66,13 @@ const ActivityModal: React.FC<ActivityModalProps> = ({
     const today = new Date();
     const currentDayOfWeek = today.getDay();
     
+    console.log('🗓️ [ActivityModal] Calculating scheduled date:', {
+      today: today.toDateString(),
+      currentDayOfWeek,
+      selectedDayOfWeek,
+      todayDate: today.getDate()
+    });
+    
     let daysUntilSelectedDay = selectedDayOfWeek - currentDayOfWeek;
     
     // If the selected day is today or in the past this week, schedule for next week
@@ -79,6 +85,13 @@ const ActivityModal: React.FC<ActivityModalProps> = ({
     
     const scheduledDateString = targetDate.toISOString().split('T')[0];
     
+    console.log('🗓️ [ActivityModal] Calculated target date:', {
+      daysUntilSelectedDay,
+      targetDate: targetDate.toDateString(),
+      scheduledDateString,
+      targetWeekNumber: getISOWeek(targetDate)
+    });
+    
     // Validate the calculated date
     const validation = SchedulingValidator.validateScheduledDate(scheduledDateString);
     
@@ -90,11 +103,15 @@ const ActivityModal: React.FC<ActivityModalProps> = ({
   }
 
   const handleActivitySelect = async (activity: any) => {
-    console.log('Selecting activity:', activity);
-    console.log('Selected day of week:', selectedDayOfWeek);
-    console.log('Current dog:', currentDog);
+    console.log('🎯 [ActivityModal] Activity selected for scheduling:', {
+      activityId: activity.id,
+      activityTitle: activity.title,
+      selectedDayOfWeek,
+      currentDog: currentDog?.name || 'None'
+    });
     
     if (!currentDog) {
+      console.error('❌ [ActivityModal] No dog selected');
       toast({
         title: "No dog selected",
         description: "Please select a dog first",
@@ -107,6 +124,7 @@ const ActivityModal: React.FC<ActivityModalProps> = ({
     const dateResult = calculateScheduledDate(selectedDayOfWeek);
     
     if (!dateResult.isValid) {
+      console.error('❌ [ActivityModal] Invalid date calculated:', dateResult.error);
       toast({
         title: "Invalid Date",
         description: dateResult.error || "Cannot schedule for the selected date",
@@ -117,22 +135,28 @@ const ActivityModal: React.FC<ActivityModalProps> = ({
     
     const currentWeek = getISOWeek(new Date(dateResult.date));
     
-    console.log('Calculated date:', dateResult.date);
-    console.log('Week number:', currentWeek);
+    const scheduledActivityData = {
+      dogId: currentDog.id,
+      activityId: activity.id,
+      scheduledDate: dateResult.date,
+      completed: false,
+      notes: '',
+      completionNotes: '',
+      reminderEnabled: false,
+      weekNumber: currentWeek,
+      dayOfWeek: selectedDayOfWeek
+    };
+    
+    console.log('📋 [ActivityModal] Preparing to schedule activity:', {
+      ...scheduledActivityData,
+      dogName: currentDog.name
+    });
     
     try {
-      await addScheduledActivity({
-        dogId: currentDog.id,
-        activityId: activity.id,
-        scheduledDate: dateResult.date,
-        completed: false,
-        notes: '',
-        completionNotes: '',
-        reminderEnabled: false,
-        weekNumber: currentWeek,
-        dayOfWeek: selectedDayOfWeek
-      });
+      console.log('⏳ [ActivityModal] Calling addScheduledActivity...');
+      await addScheduledActivity(scheduledActivityData);
       
+      console.log('✅ [ActivityModal] Activity scheduled successfully');
       toast({
         title: "Activity Scheduled!",
         description: "Activity has been added to your weekly plan."
@@ -141,7 +165,7 @@ const ActivityModal: React.FC<ActivityModalProps> = ({
       onClose();
       navigate('/dog-profile-dashboard/weekly-plan');
     } catch (error) {
-      console.error('Error scheduling activity:', error);
+      console.error('❌ [ActivityModal] Error scheduling activity:', error);
       // Don't show another toast here as the addScheduledActivity function already handles it
     }
   };

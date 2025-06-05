@@ -51,19 +51,72 @@ const WeeklyPlannerLogic: React.FC<WeeklyPlannerLogicProps> = ({ onPillarSelect,
 
   const currentWeekNumber = getISOWeek(currentWeekStartDate);
 
+  console.log('🏠 [WeeklyPlannerLogic] Component state:', {
+    currentDog: currentDog?.name || 'None',
+    currentWeekStartDate: currentWeekStartDate.toDateString(),
+    currentWeekNumber,
+    scheduledActivitiesCount: scheduledActivities.length,
+    weeklyActivitiesCount: weeklyActivities.length
+  });
+
   // Load activities for the current week
   useEffect(() => {
     if (currentDog) {
-      const filteredActivities = scheduledActivities.filter(activity =>
-        activity.dogId === currentDog.id && activity.weekNumber === currentWeekNumber
-      );
+      console.log('🔍 [WeeklyPlannerLogic] Filtering activities for current week:', {
+        dogId: currentDog.id,
+        dogName: currentDog.name,
+        targetWeekNumber: currentWeekNumber,
+        allScheduledActivities: scheduledActivities.map(a => ({
+          id: a.id,
+          activityId: a.activityId,
+          dogId: a.dogId,
+          weekNumber: a.weekNumber,
+          scheduledDate: a.scheduledDate
+        }))
+      });
+      
+      const filteredActivities = scheduledActivities.filter(activity => {
+        const matchesDog = activity.dogId === currentDog.id;
+        const matchesWeek = activity.weekNumber === currentWeekNumber;
+        
+        console.log(`🎯 [WeeklyPlannerLogic] Activity ${activity.id}:`, {
+          activityId: activity.activityId,
+          matchesDog,
+          matchesWeek,
+          activityWeek: activity.weekNumber,
+          activityDog: activity.dogId,
+          included: matchesDog && matchesWeek
+        });
+        
+        return matchesDog && matchesWeek;
+      });
+      
+      console.log('✅ [WeeklyPlannerLogic] Filtered activities result:', {
+        count: filteredActivities.length,
+        activities: filteredActivities.map(a => ({
+          id: a.id,
+          activityId: a.activityId,
+          dayOfWeek: a.dayOfWeek,
+          scheduledDate: a.scheduledDate
+        }))
+      });
+      
       setWeeklyActivities(filteredActivities);
+    } else {
+      console.log('⚠️ [WeeklyPlannerLogic] No current dog selected');
+      setWeeklyActivities([]);
     }
   }, [scheduledActivities, currentDog, currentWeekNumber]);
 
   // Calculate completion status for each day
   const getDayCompletionStatus = useCallback((dayIndex: number): { completed: boolean, activity: ScheduledActivity | undefined } => {
     const dayActivities = weeklyActivities.filter(activity => activity.dayOfWeek === dayIndex);
+    
+    console.log(`📅 [WeeklyPlannerLogic] Day ${dayIndex} status:`, {
+      dayActivities: dayActivities.map(a => ({ id: a.id, activityId: a.activityId, completed: a.completed })),
+      count: dayActivities.length
+    });
+    
     if (dayActivities.length === 0) return { completed: false, activity: undefined };
     const completed = dayActivities.every(activity => activity.completed);
     return { completed, activity: dayActivities[0] };

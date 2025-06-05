@@ -1,4 +1,3 @@
-
 import { useCallback } from 'react';
 import { ScheduledActivity, UserActivity } from '@/types/activity';
 import { Dog } from '@/types/dog';
@@ -23,24 +22,33 @@ export const useActivityActions = (
   // Refresh scheduled activities from the domain service
   const refreshScheduledActivities = useCallback(async () => {
     if (!currentDog) return;
+    console.log('🔄 [useActivityActions] Refreshing scheduled activities for dog:', currentDog.name);
     try {
       const activities = await ActivityDomainService.getScheduledActivitiesForDog(currentDog.id);
+      console.log('✅ [useActivityActions] Refreshed activities:', activities.length, 'activities found');
       setScheduledActivities(activities);
     } catch (error) {
-      console.error('Failed to refresh scheduled activities:', error);
+      console.error('❌ [useActivityActions] Failed to refresh scheduled activities:', error);
       handleError(error as Error, 'refreshScheduledActivities', false);
     }
   }, [currentDog, setScheduledActivities]);
 
   // Enhanced addScheduledActivity with comprehensive validation and duplicate prevention
   const addScheduledActivity = useCallback(async (activity: Omit<ScheduledActivity, 'id'>): Promise<void> => {
-    console.log('Adding scheduled activity:', activity);
-    console.log('Current dog:', currentDog);
-    console.log('Existing activities count:', existingScheduledActivities.length);
+    console.log('🎯 [useActivityActions] Starting addScheduledActivity with:', {
+      activityId: activity.activityId,
+      dogId: activity.dogId,
+      scheduledDate: activity.scheduledDate,
+      weekNumber: activity.weekNumber,
+      dayOfWeek: activity.dayOfWeek,
+      currentDog: currentDog?.name || 'None',
+      existingActivitiesCount: existingScheduledActivities.length
+    });
 
     // Validate dog context first
     const dogValidation = SchedulingValidator.validateDogContext(currentDog);
     if (!dogValidation.isValid) {
+      console.error('❌ [useActivityActions] Dog validation failed:', dogValidation.errors);
       toast({
         title: "No dog selected",
         description: dogValidation.errors[0] || "Please select a dog first",
@@ -55,12 +63,12 @@ export const useActivityActions = (
       dogId: currentDog!.id,
     });
 
-    console.log('Normalized activity:', normalizedActivity);
+    console.log('📋 [useActivityActions] Normalized activity data:', normalizedActivity);
 
     // Comprehensive validation
     const validation = SchedulingValidator.validateScheduledActivity(normalizedActivity, currentDog);
     if (!validation.isValid) {
-      console.error('Validation failed:', validation.errors);
+      console.error('❌ [useActivityActions] Activity validation failed:', validation.errors);
       toast({
         title: "Validation Error",
         description: validation.errors.join(', '),
@@ -71,7 +79,7 @@ export const useActivityActions = (
 
     // Show warnings if any
     if (validation.warnings.length > 0) {
-      console.warn('Activity validation warnings:', validation.warnings);
+      console.warn('⚠️ [useActivityActions] Activity validation warnings:', validation.warnings);
       toast({
         title: "Warning",
         description: validation.warnings[0],
@@ -87,7 +95,7 @@ export const useActivityActions = (
     );
 
     if (duplicateCheck.isDuplicate) {
-      console.warn('Duplicate activity detected:', duplicateCheck);
+      console.warn('⚠️ [useActivityActions] Duplicate activity detected:', duplicateCheck);
       toast({
         title: "Activity Already Scheduled",
         description: duplicateCheck.message || "This activity is already scheduled",
@@ -97,8 +105,8 @@ export const useActivityActions = (
     }
 
     try {
-      console.log('Creating scheduled activity in domain service...');
-      await ActivityDomainService.createScheduledActivity({
+      console.log('💾 [useActivityActions] Creating scheduled activity via domain service...');
+      const createdActivity = await ActivityDomainService.createScheduledActivity({
         ...normalizedActivity,
         dogId: currentDog!.id,
         notes: normalizedActivity.notes || '',
@@ -106,7 +114,15 @@ export const useActivityActions = (
         reminderEnabled: normalizedActivity.reminderEnabled ?? false,
       } as Omit<ScheduledActivity, 'id'>);
       
-      console.log('Activity created successfully, refreshing activities...');
+      console.log('✅ [useActivityActions] Activity created successfully:', {
+        createdId: createdActivity.id,
+        activityId: createdActivity.activityId,
+        scheduledDate: createdActivity.scheduledDate,
+        weekNumber: createdActivity.weekNumber,
+        dayOfWeek: createdActivity.dayOfWeek
+      });
+      
+      console.log('🔄 [useActivityActions] Refreshing activities list...');
       await refreshScheduledActivities();
       
       toast({
@@ -115,7 +131,7 @@ export const useActivityActions = (
         variant: "default"
       });
     } catch (error) {
-      console.error('Failed to create scheduled activity:', error);
+      console.error('❌ [useActivityActions] Failed to create scheduled activity:', error);
       const userMessage = getUserFriendlyMessage(error);
       
       toast({
