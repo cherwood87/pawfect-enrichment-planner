@@ -1,15 +1,14 @@
-import React, { useState } from 'react';
+
+import React from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Target } from 'lucide-react';
 import DaySelector from './DaySelector';
 import ActivityModalTabs from './ActivityModalTabs';
 import { useActivity } from '@/contexts/ActivityContext';
-import { useDog } from '@/contexts/DogContext';
 import { getPillarActivities } from '@/data/activityLibrary';
-import { useNavigate } from 'react-router-dom';
-import { SchedulingValidator } from '@/utils/schedulingValidation';
-import { toast } from '@/hooks/use-toast';
+import { useActivityModalState } from './ActivityModalState';
+import { useActivityModalHandlers } from './ActivityModalHandlers';
 
 interface ActivityModalProps {
   isOpen: boolean;
@@ -22,21 +21,47 @@ const ActivityModal: React.FC<ActivityModalProps> = ({
   onClose, 
   selectedPillar
 }) => {
-  const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('browse');
-  const { discoveredActivities, addScheduledActivity, addUserActivity } = useActivity();
-  const { currentDog } = useDog();
+  const { discoveredActivities } = useActivity();
   
-  // State for CreateCustomTab
-  const [activityName, setActivityName] = useState('');
-  const [pillar, setPillar] = useState(selectedPillar || '');
-  const [duration, setDuration] = useState('');
-  const [materials, setMaterials] = useState('');
-  const [instructions, setInstructions] = useState('');
-  const [description, setDescription] = useState('');
-  
-  // State for weekly scheduling
-  const [selectedDayOfWeek, setSelectedDayOfWeek] = useState<number>(new Date().getDay());
+  const {
+    activeTab,
+    setActiveTab,
+    activityName,
+    setActivityName,
+    pillar,
+    setPillar,
+    duration,
+    setDuration,
+    materials,
+    setMaterials,
+    instructions,
+    setInstructions,
+    description,
+    setDescription,
+    selectedDayOfWeek,
+    setSelectedDayOfWeek,
+    resetCustomActivityForm
+  } = useActivityModalState(selectedPillar);
+
+  const customActivityState = {
+    activityName,
+    pillar,
+    duration,
+    materials,
+    instructions,
+    description
+  };
+
+  const {
+    handleActivitySelect,
+    handleCreateCustomActivity,
+    handleCancelCustomActivity
+  } = useActivityModalHandlers(
+    selectedDayOfWeek,
+    onClose,
+    resetCustomActivityForm,
+    customActivityState
+  );
   
   const pendingActivities = discoveredActivities.filter(activity => 
     !activity.approved && !activity.rejected
@@ -47,191 +72,6 @@ const ActivityModal: React.FC<ActivityModalProps> = ({
   const filteredLibraryActivities = selectedPillar 
     ? allLibraryActivities.filter(activity => activity.pillar === selectedPillar)
     : allLibraryActivities;
-
-  // Enhanced ISO week calculation
-  function getISOWeek(date: Date): number {
-    const target = new Date(date.valueOf());
-    const dayNr = (date.getDay() + 6) % 7;
-    target.setDate(target.getDate() - dayNr + 3);
-    const firstThursday = target.valueOf();
-    target.setMonth(0, 1);
-    if (target.getDay() !== 4) {
-      target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
-    }
-    return 1 + Math.ceil((firstThursday - target.valueOf()) / 604800000);
-  }
-
-  // Enhanced date calculation with validation
-  function calculateScheduledDate(selectedDayOfWeek: number): { date: string; isValid: boolean; error?: string } {
-    const today = new Date();
-    const currentDayOfWeek = today.getDay();
-    
-    console.log('🗓️ [ActivityModal] Calculating scheduled date:', {
-      today: today.toDateString(),
-      currentDayOfWeek,
-      selectedDayOfWeek,
-      todayDate: today.getDate()
-    });
-    
-    let daysUntilSelectedDay = selectedDayOfWeek - currentDayOfWeek;
-    
-    // If the selected day is today or in the past this week, schedule for next week
-    if (daysUntilSelectedDay <= 0) {
-      daysUntilSelectedDay += 7;
-    }
-    
-    const targetDate = new Date(today);
-    targetDate.setDate(today.getDate() + daysUntilSelectedDay);
-    
-    const scheduledDateString = targetDate.toISOString().split('T')[0];
-    
-    console.log('🗓️ [ActivityModal] Calculated target date:', {
-      daysUntilSelectedDay,
-      targetDate: targetDate.toDateString(),
-      scheduledDateString,
-      targetWeekNumber: getISOWeek(targetDate)
-    });
-    
-    // Validate the calculated date
-    const validation = SchedulingValidator.validateScheduledDate(scheduledDateString);
-    
-    return {
-      date: scheduledDateString,
-      isValid: validation.isValid,
-      error: validation.errors[0]
-    };
-  }
-
-  const handleActivitySelect = async (activity: any) => {
-    console.log('🎯 [ActivityModal] Activity selected for scheduling:', {
-      activityId: activity.id,
-      activityTitle: activity.title,
-      selectedDayOfWeek,
-      currentDog: currentDog?.name || 'None'
-    });
-    
-    if (!currentDog) {
-      console.error('❌ [ActivityModal] No dog selected');
-      toast({
-        title: "No dog selected",
-        description: "Please select a dog first",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    // Calculate the scheduled date with validation
-    const dateResult = calculateScheduledDate(selectedDayOfWeek);
-    
-    if (!dateResult.isValid) {
-      console.error('❌ [ActivityModal] Invalid date calculated:', dateResult.error);
-      toast({
-        title: "Invalid Date",
-        description: dateResult.error || "Cannot schedule for the selected date",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    const currentWeek = getISOWeek(new Date(dateResult.date));
-    
-    const scheduledActivityData = {
-      dogId: currentDog.id,
-      activityId: activity.id,
-      scheduledDate: dateResult.date,
-      completed: false,
-      notes: '',
-      completionNotes: '',
-      reminderEnabled: false,
-      weekNumber: currentWeek,
-      dayOfWeek: selectedDayOfWeek
-    };
-    
-    console.log('📋 [ActivityModal] Preparing to schedule activity:', {
-      ...scheduledActivityData,
-      dogName: currentDog.name
-    });
-    
-    try {
-      console.log('⏳ [ActivityModal] Calling addScheduledActivity...');
-      await addScheduledActivity(scheduledActivityData);
-      
-      console.log('✅ [ActivityModal] Activity scheduled successfully');
-      toast({
-        title: "Activity Scheduled!",
-        description: "Activity has been added to your weekly plan."
-      });
-      
-      onClose();
-      navigate('/dog-profile-dashboard/weekly-plan');
-    } catch (error) {
-      console.error('❌ [ActivityModal] Error scheduling activity:', error);
-      // Don't show another toast here as the addScheduledActivity function already handles it
-    }
-  };
-
-  const handleCreateCustomActivity = async () => {
-    if (!activityName || !pillar || !duration) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill in all required fields",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (!currentDog) {
-      toast({
-        title: "No dog selected",
-        description: "Please select a dog first",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    const newActivity = {
-      title: activityName,
-      pillar: pillar as 'mental' | 'physical' | 'social' | 'environmental' | 'instinctual',
-      difficulty: 'Medium' as const,
-      duration: parseInt(duration),
-      materials: materials.split(',').map(m => m.trim()).filter(Boolean),
-      emotionalGoals: [],
-      instructions: instructions.split('\n').filter(Boolean),
-      benefits: description,
-      tags: [],
-      ageGroup: 'All Ages' as const,
-      energyLevel: 'Medium' as const,
-      isCustom: true
-    };
-
-    try {
-      await addUserActivity(newActivity);
-      
-      // Reset form
-      setActivityName('');
-      setPillar(selectedPillar || '');
-      setDuration('');
-      setMaterials('');
-      setInstructions('');
-      setDescription('');
-      
-      onClose();
-      navigate('/dog-profile-dashboard/weekly-plan');
-    } catch (error) {
-      console.error('Error creating custom activity:', error);
-      // Don't show another toast here as the addUserActivity function already handles it
-    }
-  };
-
-  const handleCancelCustomActivity = () => {
-    // Reset form
-    setActivityName('');
-    setPillar(selectedPillar || '');
-    setDuration('');
-    setMaterials('');
-    setInstructions('');
-    setDescription('');
-  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
