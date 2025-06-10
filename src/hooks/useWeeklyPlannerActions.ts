@@ -1,5 +1,5 @@
 
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useActivity } from '@/contexts/ActivityContext';
 import { ActivityLibraryItem, UserActivity } from '@/types/activity';
@@ -7,6 +7,7 @@ import { DiscoveredActivity } from '@/types/discovery';
 
 export const useWeeklyPlannerActions = () => {
   const { toast } = useToast();
+  const [isRetrying, setIsRetrying] = useState(false);
   const { 
     toggleActivityCompletion, 
     getCombinedActivityLibrary, 
@@ -20,7 +21,10 @@ export const useWeeklyPlannerActions = () => {
   }, [getCombinedActivityLibrary, userActivities, discoveredActivities]);
 
   const handleToggleCompletion = useCallback(async (activityId: string) => {
+    if (isRetrying) return; // Prevent multiple simultaneous requests
+    
     try {
+      setIsRetrying(true);
       await toggleActivityCompletion(activityId);
       toast({
         title: "Activity Updated!",
@@ -33,11 +37,14 @@ export const useWeeklyPlannerActions = () => {
         description: "Failed to update activity completion status. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsRetrying(false);
     }
-  }, [toggleActivityCompletion, toast]);
+  }, [toggleActivityCompletion, toast, isRetrying]);
 
   return {
     getActivityDetails,
-    handleToggleCompletion
+    handleToggleCompletion,
+    isRetrying
   };
 };

@@ -1,7 +1,8 @@
-import { useEffect } from 'react';
+
+import { useEffect, useMemo } from 'react';
+import { Dog } from '@/types/dog';
 import { ScheduledActivity, UserActivity } from '@/types/activity';
 import { DiscoveredActivity } from '@/types/discovery';
-import { Dog } from '@/types/dog';
 
 export const useActivityPersistence = (
   currentDog: Dog | null,
@@ -10,22 +11,32 @@ export const useActivityPersistence = (
   discoveredActivities: DiscoveredActivity[],
   isLoading: boolean
 ) => {
-  // Save to localStorage for backup (keeping existing behavior)
-  useEffect(() => {
-    if (currentDog && scheduledActivities.length >= 0 && !isLoading) {
-      localStorage.setItem(`scheduledActivities-${currentDog.id}`, JSON.stringify(scheduledActivities));
-    }
-  }, [scheduledActivities, currentDog, isLoading]);
+  // Memoize the persistence operations to avoid unnecessary re-runs
+  const persistenceKey = useMemo(() => 
+    currentDog ? `activities-${currentDog.id}` : null, 
+    [currentDog?.id]
+  );
 
+  // Debounced persistence - only save after data stabilizes
   useEffect(() => {
-    if (currentDog && userActivities.length >= 0 && !isLoading) {
-      localStorage.setItem(`userActivities-${currentDog.id}`, JSON.stringify(userActivities));
-    }
-  }, [userActivities, currentDog, isLoading]);
+    if (!persistenceKey || isLoading) return;
 
-  useEffect(() => {
-    if (currentDog && discoveredActivities.length >= 0) {
-      localStorage.setItem(`discoveredActivities-${currentDog.id}`, JSON.stringify(discoveredActivities));
-    }
-  }, [discoveredActivities, currentDog]);
+    const timeoutId = setTimeout(() => {
+      try {
+        // Only save to localStorage as backup, primary storage is Supabase
+        const data = {
+          scheduled: scheduledActivities,
+          user: userActivities,
+          discovered: discoveredActivities,
+          lastUpdated: new Date().toISOString()
+        };
+        
+        localStorage.setItem(persistenceKey, JSON.stringify(data));
+      } catch (error) {
+        console.warn('Failed to persist activities to localStorage:', error);
+      }
+    }, 1000); // Debounce by 1 second
+
+    return () => clearTimeout(timeoutId);
+  }, [persistenceKey, scheduledActivities, userActivities, discoveredActivities, isLoading]);
 };

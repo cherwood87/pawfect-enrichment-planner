@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { ScheduledActivity, UserActivity } from '@/types/activity';
 import { DiscoveredActivity, ContentDiscoveryConfig } from '@/types/discovery';
 import { getDiscoveredActivities } from '@/data/activityLibrary';
@@ -27,8 +27,15 @@ export const useActivityStateHook = (currentDog: Dog | null) => {
     migrateScheduledActivity
   );
 
-  // Use persistence hook
+  // Use persistence hook with debouncing
   useActivityPersistence(currentDog, scheduledActivities, userActivities, discoveredActivities, isLoading);
+
+  // Memoize expensive operations
+  const memoizedActivities = useMemo(() => ({
+    scheduled: scheduledActivities,
+    user: userActivities,
+    discovered: discoveredActivities
+  }), [scheduledActivities, userActivities, discoveredActivities]);
 
   // Load dog-specific data from Supabase with localStorage fallback
   useEffect(() => {
@@ -37,6 +44,11 @@ export const useActivityStateHook = (currentDog: Dog | null) => {
       setUserActivities([]);
       setDiscoveredActivities([]);
       setDataLoaded(false);
+      return;
+    }
+
+    // Skip loading if we already have data for this dog (optimization)
+    if (dataLoaded && scheduledActivities.length > 0 && scheduledActivities[0]?.dogId === currentDog.id) {
       return;
     }
 
@@ -61,13 +73,13 @@ export const useActivityStateHook = (currentDog: Dog | null) => {
       }
     };
 
-    loadData();
-  }, [currentDog]);
+    // Add a small delay to prevent race conditions
+    const timeoutId = setTimeout(loadData, 100);
+    return () => clearTimeout(timeoutId);
+  }, [currentDog?.id]); // Only depend on dog ID to prevent unnecessary reloads
 
   return {
-    scheduledActivities,
-    userActivities,
-    discoveredActivities,
+    ...memoizedActivities,
     discoveryConfig,
     setScheduledActivities,
     setUserActivities,
