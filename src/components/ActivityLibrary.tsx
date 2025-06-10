@@ -1,14 +1,15 @@
+
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { ActivityLibraryItem } from '@/types/activity';
 import { DiscoveredActivity } from '@/types/discovery';
 import { useActivity } from '@/contexts/ActivityContext';
 import { useActivityFiltering } from '@/hooks/useActivityFiltering';
-import ActivityCard from '@/components/ActivityCard';
 import ConsolidatedActivityModal from '@/components/modals/ConsolidatedActivityModal';
 import PillarSelectionCards from '@/components/PillarSelectionCards';
 import ActivityLibraryContent from '@/components/ActivityLibraryContent';
 import ActivityLibraryDebug from '@/components/ActivityLibraryDebug';
 import ActivityLibraryGrid from '@/components/ActivityLibraryGrid';
+import { useBundleAnalytics } from '@/hooks/useBundleAnalytics';
 
 // Energy level normalization function
 const normalizeEnergyLevel = (level: string): "Low" | "Medium" | "High" => {
@@ -24,6 +25,8 @@ const normalizeEnergyLevel = (level: string): "Low" | "Medium" | "High" => {
 };
 
 const ActivityLibrary = () => {
+  const { getMetrics } = useBundleAnalytics('ActivityLibrary');
+  
   const { 
     getCombinedActivityLibrary, 
     discoveredActivities, 
@@ -130,15 +133,18 @@ const ActivityLibrary = () => {
         setSelectedDifficulty={setSelectedDifficulty}
         filteredActivitiesCount={filteredActivities.length}
         curatedCount={curatedCount}
+        onManualSync={handleManualSync}
+        isSyncing={isSyncing}
+        lastSyncTime={lastSyncTime}
       />
 
-      {/* Weighted Shuffling Debug Component */}
+      {/* Performance Debug Component */}
       <ActivityLibraryDebug 
         activities={currentActivities}
         onActivitiesReorder={handleActivitiesReorder}
       />
 
-      {/* Activity Grid */}
+      {/* Optimized Activity Grid with Virtualization */}
       <ActivityLibraryGrid
         activities={filteredActivities}
         onActivitySelect={handleActivitySelect}
