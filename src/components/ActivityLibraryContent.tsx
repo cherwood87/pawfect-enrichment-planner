@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Sparkles, Search, Filter, Sync } from 'lucide-react';
+import { Sparkles, Search, Filter, RefreshCw } from 'lucide-react';
 import { useBundleAnalytics } from '@/hooks/useBundleAnalytics';
 
 interface ActivityLibraryContentProps {
@@ -97,7 +97,7 @@ const ActivityLibraryContent: React.FC<ActivityLibraryContentProps> = ({
                   disabled={isSyncing}
                   className="modern-button-outline"
                 >
-                  <Sync className={`w-4 h-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
+                  <RefreshCw className={`w-4 h-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
                   {isSyncing ? 'Syncing...' : 'Sync'}
                 </Button>
               )}

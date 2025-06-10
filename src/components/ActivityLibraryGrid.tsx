@@ -50,7 +50,7 @@ const ActivityLibraryGrid: React.FC<ActivityLibraryGridProps> = ({
 
   // Memoize grid configuration based on screen size
   const gridConfig = useMemo(() => {
-    const containerWidth = window.innerWidth - 64; // Account for padding
+    const containerWidth = Math.min(window.innerWidth - 64, 1200); // Max width with padding
     const isMobile = window.innerWidth < 768;
     const isTablet = window.innerWidth < 1024;
     
@@ -76,6 +76,7 @@ const ActivityLibraryGrid: React.FC<ActivityLibraryGridProps> = ({
       columnWidth,
       rowHeight,
       gridHeight,
+      gridWidth: containerWidth,
       rowCount: Math.ceil(activities.length / columnsPerRow)
     };
   }, [activities.length]);
@@ -104,6 +105,7 @@ const ActivityLibraryGrid: React.FC<ActivityLibraryGridProps> = ({
           columnCount={gridConfig.columnsPerRow}
           columnWidth={gridConfig.columnWidth}
           height={gridConfig.gridHeight}
+          width={gridConfig.gridWidth}
           rowCount={gridConfig.rowCount}
           rowHeight={gridConfig.rowHeight}
           itemData={itemData}

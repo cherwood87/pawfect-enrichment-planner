@@ -50,11 +50,12 @@ const BrowseLibraryTabOptimized: React.FC<BrowseLibraryTabOptimizedProps> = ({
     onActivitySelect
   }), [filteredLibraryActivities, onActivitySelect]);
 
-  // Memoized height calculation based on screen size
-  const { listHeight, itemHeight } = useMemo(() => {
+  // Memoized dimensions based on screen size
+  const { listHeight, listWidth, itemHeight } = useMemo(() => {
     const isMobile = window.innerWidth < 768;
     return {
       listHeight: isMobile ? 400 : 600,
+      listWidth: Math.min(window.innerWidth - 32, 800), // Max width with padding
       itemHeight: isMobile ? 120 : 140
     };
   }, []);
@@ -83,6 +84,7 @@ const BrowseLibraryTabOptimized: React.FC<BrowseLibraryTabOptimizedProps> = ({
         </div>
         <List
           height={listHeight}
+          width={listWidth}
           itemCount={filteredLibraryActivities.length}
           itemSize={itemHeight}
           itemData={itemData}
