@@ -152,6 +152,65 @@ export type Database = {
           },
         ]
       }
+      activity_feedback: {
+        Row: {
+          activity_id: string
+          activity_type: string
+          created_at: string
+          difficulty_rating: number | null
+          dog_id: string | null
+          engagement_rating: number | null
+          enjoyment_rating: number | null
+          feedback_text: string | null
+          id: string
+          rating: number | null
+          tags: string[] | null
+          updated_at: string
+          user_id: string | null
+          would_recommend: boolean | null
+        }
+        Insert: {
+          activity_id: string
+          activity_type: string
+          created_at?: string
+          difficulty_rating?: number | null
+          dog_id?: string | null
+          engagement_rating?: number | null
+          enjoyment_rating?: number | null
+          feedback_text?: string | null
+          id?: string
+          rating?: number | null
+          tags?: string[] | null
+          updated_at?: string
+          user_id?: string | null
+          would_recommend?: boolean | null
+        }
+        Update: {
+          activity_id?: string
+          activity_type?: string
+          created_at?: string
+          difficulty_rating?: number | null
+          dog_id?: string | null
+          engagement_rating?: number | null
+          enjoyment_rating?: number | null
+          feedback_text?: string | null
+          id?: string
+          rating?: number | null
+          tags?: string[] | null
+          updated_at?: string
+          user_id?: string | null
+          would_recommend?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_feedback_dog_id_fkey"
+            columns: ["dog_id"]
+            isOneToOne: false
+            referencedRelation: "dogs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       discovered_activities: {
         Row: {
           age_group: Database["public"]["Enums"]["age_group"] | null
@@ -425,6 +484,91 @@ export type Database = {
         }
         Relationships: []
       }
+      learning_metrics: {
+        Row: {
+          calculated_at: string
+          calculation_data: Json | null
+          confidence_level: number | null
+          dog_id: string | null
+          id: string
+          metric_type: string
+          metric_value: number
+          user_id: string | null
+        }
+        Insert: {
+          calculated_at?: string
+          calculation_data?: Json | null
+          confidence_level?: number | null
+          dog_id?: string | null
+          id?: string
+          metric_type: string
+          metric_value: number
+          user_id?: string | null
+        }
+        Update: {
+          calculated_at?: string
+          calculation_data?: Json | null
+          confidence_level?: number | null
+          dog_id?: string | null
+          id?: string
+          metric_type?: string
+          metric_value?: number
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_metrics_dog_id_fkey"
+            columns: ["dog_id"]
+            isOneToOne: false
+            referencedRelation: "dogs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recommendation_logs: {
+        Row: {
+          algorithm_version: string | null
+          context_data: Json | null
+          created_at: string
+          dog_id: string | null
+          id: string
+          recommendation_type: string
+          recommended_activities: string[]
+          user_action: string | null
+          user_id: string | null
+        }
+        Insert: {
+          algorithm_version?: string | null
+          context_data?: Json | null
+          created_at?: string
+          dog_id?: string | null
+          id?: string
+          recommendation_type: string
+          recommended_activities: string[]
+          user_action?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          algorithm_version?: string | null
+          context_data?: Json | null
+          created_at?: string
+          dog_id?: string | null
+          id?: string
+          recommendation_type?: string
+          recommended_activities?: string[]
+          user_action?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recommendation_logs_dog_id_fkey"
+            columns: ["dog_id"]
+            isOneToOne: false
+            referencedRelation: "dogs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       scheduled_activities: {
         Row: {
           activity_id: string
@@ -599,11 +743,117 @@ export type Database = {
           },
         ]
       }
+      user_interactions: {
+        Row: {
+          activity_id: string | null
+          activity_type: string | null
+          context_data: Json | null
+          created_at: string
+          dog_id: string | null
+          id: string
+          interaction_type: string
+          pillar: string | null
+          session_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          activity_id?: string | null
+          activity_type?: string | null
+          context_data?: Json | null
+          created_at?: string
+          dog_id?: string | null
+          id?: string
+          interaction_type: string
+          pillar?: string | null
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          activity_id?: string | null
+          activity_type?: string | null
+          context_data?: Json | null
+          created_at?: string
+          dog_id?: string | null
+          id?: string
+          interaction_type?: string
+          pillar?: string | null
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_interactions_dog_id_fkey"
+            columns: ["dog_id"]
+            isOneToOne: false
+            referencedRelation: "dogs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_preferences: {
+        Row: {
+          confidence_score: number | null
+          dog_id: string | null
+          id: string
+          last_updated: string
+          preference_data: Json
+          preference_type: string
+          user_id: string | null
+        }
+        Insert: {
+          confidence_score?: number | null
+          dog_id?: string | null
+          id?: string
+          last_updated?: string
+          preference_data?: Json
+          preference_type: string
+          user_id?: string | null
+        }
+        Update: {
+          confidence_score?: number | null
+          dog_id?: string | null
+          id?: string
+          last_updated?: string
+          preference_data?: Json
+          preference_type?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_preferences_dog_id_fkey"
+            columns: ["dog_id"]
+            isOneToOne: false
+            referencedRelation: "dogs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      calculate_pillar_preferences: {
+        Args: { p_user_id: string; p_dog_id: string }
+        Returns: {
+          pillar: string
+          preference_score: number
+          confidence: number
+        }[]
+      }
+      generate_smart_recommendations: {
+        Args: {
+          p_user_id: string
+          p_dog_id: string
+          p_recommendation_type?: string
+          p_limit?: number
+        }
+        Returns: {
+          activity_id: string
+          recommendation_score: number
+          reason: string
+        }[]
+      }
       resolve_scheduled_activity_duplicates: {
         Args: Record<PropertyKey, never>
         Returns: {
