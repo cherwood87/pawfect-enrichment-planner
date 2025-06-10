@@ -7,7 +7,7 @@ import { DiscoveredActivity } from '@/types/discovery';
 
 // Lazy load tab content components
 const BrowseLibraryTab = lazy(() => import('./BrowseLibraryTab'));
-const CreateCustomTab = lazy(() => import('./CreateCustomTab'));
+const CreateCustomTabOptimized = lazy(() => import('./CreateCustomTabOptimized'));
 const DiscoveryReview = lazy(() => import('./DiscoveryReview'));
 
 interface ActivityModalTabsProps {
@@ -65,6 +65,24 @@ const ActivityModalTabsOptimized = memo<ActivityModalTabsProps>(({
     [pendingActivities.length]
   );
 
+  // Map customTabProps to match CreateCustomTabOptimized interface
+  const createCustomTabProps = useMemo(() => ({
+    activityName: customTabProps.activityName,
+    setActivityName: customTabProps.setActivityName,
+    pillar: customTabProps.pillar,
+    setPillar: customTabProps.setPillar,
+    duration: customTabProps.duration,
+    setDuration: customTabProps.setDuration,
+    materials: customTabProps.materials,
+    setMaterials: customTabProps.setMaterials,
+    instructions: customTabProps.instructions,
+    setInstructions: customTabProps.setInstructions,
+    description: customTabProps.description,
+    setDescription: customTabProps.setDescription,
+    onSubmit: customTabProps.onCreateCustomActivity,
+    onCancel: customTabProps.onCancelCustomActivity
+  }), [customTabProps]);
+
   return (
     <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
       <TabManager 
@@ -84,7 +102,7 @@ const ActivityModalTabsOptimized = memo<ActivityModalTabsProps>(({
       <TabsContent value="create">
         {activeTab === "create" && (
           <Suspense fallback={<TabLoader />}>
-            <CreateCustomTab {...customTabProps} />
+            <CreateCustomTabOptimized {...createCustomTabProps} />
           </Suspense>
         )}
       </TabsContent>
