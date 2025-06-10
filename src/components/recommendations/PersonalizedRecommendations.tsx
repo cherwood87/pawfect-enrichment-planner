@@ -147,7 +147,7 @@ const PersonalizedRecommendations: React.FC<PersonalizedRecommendationsProps> = 
                       <Clock className="h-4 w-4" />
                       {activity.duration} min
                     </div>
-                    <Badge variant="secondary" size="sm">
+                    <Badge variant="secondary">
                       {activity.difficulty}
                     </Badge>
                   </div>

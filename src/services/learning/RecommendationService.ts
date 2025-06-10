@@ -31,7 +31,11 @@ export class RecommendationService {
       contextData: { limit, timestamp: new Date().toISOString() }
     });
 
-    return data || [];
+    return (data || []).map(item => ({
+      activityId: item.activity_id,
+      recommendationScore: item.recommendation_score,
+      reason: item.reason
+    }));
   }
 
   // Log recommendation for analytics

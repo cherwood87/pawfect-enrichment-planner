@@ -53,7 +53,7 @@ export class LearningService {
       userId: data.user_id,
       dogId: data.dog_id,
       activityId: data.activity_id,
-      activityType: data.activity_type,
+      activityType: data.activity_type as 'library' | 'user' | 'discovered',
       rating: data.rating,
       difficultyRating: data.difficulty_rating,
       engagementRating: data.engagement_rating,
@@ -87,7 +87,7 @@ export class LearningService {
       userId: item.user_id,
       dogId: item.dog_id,
       activityId: item.activity_id,
-      activityType: item.activity_type,
+      activityType: item.activity_type as 'library' | 'user' | 'discovered',
       rating: item.rating,
       difficultyRating: item.difficulty_rating,
       engagementRating: item.engagement_rating,
@@ -135,7 +135,7 @@ export class LearningService {
       id: item.id,
       userId: item.user_id,
       dogId: item.dog_id,
-      preferenceType: item.preference_type,
+      preferenceType: item.preference_type as 'pillar_weights' | 'difficulty_preference' | 'duration_preference' | 'material_preferences' | 'time_preferences' | 'weather_preferences',
       preferenceData: item.preference_data,
       confidenceScore: item.confidence_score,
       lastUpdated: item.last_updated
@@ -152,7 +152,11 @@ export class LearningService {
 
     if (error) throw error;
 
-    return data || [];
+    return (data || []).map(item => ({
+      pillar: item.pillar,
+      preferenceScore: item.preference_score,
+      confidence: item.confidence
+    }));
   }
 
   // Store learning metrics
@@ -191,7 +195,7 @@ export class LearningService {
       id: item.id,
       userId: item.user_id,
       dogId: item.dog_id,
-      metricType: item.metric_type,
+      metricType: item.metric_type as 'pillar_preference' | 'difficulty_adaptation' | 'engagement_score' | 'completion_rate' | 'discovery_success',
       metricValue: item.metric_value,
       confidenceLevel: item.confidence_level,
       calculationData: item.calculation_data,
