@@ -5,13 +5,13 @@ import './index.css'
 
 // Performance monitoring
 if (process.env.NODE_ENV === 'development') {
-  // Monitor Core Web Vitals
-  import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
-    getCLS(console.log);
-    getFID(console.log);
-    getFCP(console.log);
-    getLCP(console.log);
-    getTTFB(console.log);
+  // Monitor Core Web Vitals with correct import syntax
+  import('web-vitals').then((webVitals) => {
+    webVitals.onCLS(console.log);
+    webVitals.onFID?.(console.log); // FID is deprecated, so make it optional
+    webVitals.onFCP(console.log);
+    webVitals.onLCP(console.log);
+    webVitals.onTTFB(console.log);
   });
   
   // Log initial bundle information
