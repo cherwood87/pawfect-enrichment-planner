@@ -1,8 +1,8 @@
-
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Camera, Upload, X } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
+import OptimizedImage from '@/components/ui/optimized-image';
 
 interface ImageUploadProps {
   currentImage?: string;
@@ -40,30 +40,60 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
       setError(null);
       console.log('Processing image file:', file.name, file.size);
       
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const result = e.target?.result as string;
-          console.log('Image processed successfully');
-          onImageChange(result);
-          setIsProcessing(false);
-        } catch (error) {
-          console.error('Error processing image result:', error);
-          setError('Failed to process image');
-          setIsProcessing(false);
-        }
-      };
-      reader.onerror = (error) => {
-        console.error('Error reading file:', error);
-        setError('Failed to read image file');
-        setIsProcessing(false);
-      };
-      reader.readAsDataURL(file);
+      // Optimize image before uploading
+      const optimizedImage = await optimizeImage(file);
+      onImageChange(optimizedImage);
+      setIsProcessing(false);
     } catch (error) {
       console.error('Error processing image:', error);
       setError('Failed to process image');
       setIsProcessing(false);
     }
+  };
+
+  const optimizeImage = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+
+      img.onload = () => {
+        // Calculate optimal dimensions (max 400x400 for avatars)
+        const maxSize = 400;
+        let { width, height } = img;
+        
+        if (width > height) {
+          if (width > maxSize) {
+            height = (height * maxSize) / width;
+            width = maxSize;
+          }
+        } else {
+          if (height > maxSize) {
+            width = (width * maxSize) / height;
+            height = maxSize;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        // Draw and compress
+        ctx?.drawImage(img, 0, 0, width, height);
+        
+        // Convert to JPEG with compression
+        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+        resolve(compressedDataUrl);
+      };
+
+      img.onerror = () => reject(new Error('Failed to load image'));
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        img.src = e.target?.result as string;
+      };
+      reader.onerror = () => reject(new Error('Failed to read file'));
+      reader.readAsDataURL(file);
+    });
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -121,12 +151,13 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
       >
         {currentImage ? (
           <>
-            <img 
+            <OptimizedImage 
               src={currentImage} 
               alt="Dog" 
               className={`${avatarSize} rounded-full object-cover`}
-              onError={(e) => {
-                console.error('Error loading image:', e);
+              lazy={false}
+              onError={() => {
+                console.error('Error loading optimized image');
                 setError('Failed to load image');
                 onImageChange(undefined);
               }}
