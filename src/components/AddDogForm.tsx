@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
 import { useDog } from '@/contexts/DogContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import DogFormFields from './DogFormFields';
 
@@ -13,6 +14,7 @@ interface AddDogFormProps {
 
 const AddDogForm: React.FC<AddDogFormProps> = ({ onClose }) => {
   const { addDog } = useDog();
+  const { user } = useAuth();
   const isMobile = useIsMobile();
   const [formData, setFormData] = useState({
     name: '',
@@ -29,7 +31,7 @@ const AddDogForm: React.FC<AddDogFormProps> = ({ onClose }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name.trim() || isSubmitting) return;
+    if (!formData.name.trim() || isSubmitting || !user) return;
     
     try {
       setIsSubmitting(true);
@@ -46,7 +48,8 @@ const AddDogForm: React.FC<AddDogFormProps> = ({ onClose }) => {
         breedGroup: formData.breedGroup,
         mobilityIssues: formData.mobilityIssues,
         image: formData.image,
-        notes: formData.notes.trim()
+        notes: formData.notes.trim(),
+        userId: user.id // Add the required userId property
       });
       
       console.log('Dog added successfully');
@@ -80,7 +83,7 @@ const AddDogForm: React.FC<AddDogFormProps> = ({ onClose }) => {
           <Button 
             type="submit" 
             className="w-full bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600 touch-target"
-            disabled={!formData.name.trim() || isSubmitting}
+            disabled={!formData.name.trim() || isSubmitting || !user}
           >
             {isSubmitting ? 'Adding Dog...' : 'Add Dog'}
           </Button>

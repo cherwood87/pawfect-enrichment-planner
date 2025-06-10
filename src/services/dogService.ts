@@ -179,7 +179,8 @@ export class DogService {
       notes: dbDog.notes,
       quizResults: dbDog.quiz_results,
       dateAdded: dbDog.date_added,
-      lastUpdated: dbDog.last_updated
+      lastUpdated: dbDog.last_updated,
+      userId: dbDog.user_id // Add the missing userId property
     };
   }
 

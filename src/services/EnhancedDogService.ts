@@ -153,11 +153,3 @@ export class EnhancedDogService {
     }
   }
 }
-
-// Add missing methods to EnhancedSupabaseAdapter
-declare module './integration/EnhancedSupabaseAdapter' {
-  namespace EnhancedSupabaseAdapter {
-    function updateDog(dog: Dog): Promise<Dog>;
-    function deleteDog(id: string): Promise<void>;
-  }
-}
