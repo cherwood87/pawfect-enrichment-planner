@@ -43,13 +43,7 @@ const WeeklyPlannerPage: React.FC = () => {
   const {
     handleToggleCompletion,
     isRetrying
-  } = useWeeklyPlannerActions(
-    allWeekActivities,
-    optimisticUpdates,
-    loadingStates,
-    setOptimisticUpdates,
-    setLoadingStates
-  );
+  } = useWeeklyPlannerActions();
 
   // Navigation functions
   const handleNavigateWeek = useCallback((direction: 'prev' | 'next') => {

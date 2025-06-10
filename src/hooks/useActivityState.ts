@@ -30,13 +30,6 @@ export const useActivityStateHook = (currentDog: Dog | null) => {
   // Use persistence hook with debouncing
   useActivityPersistence(currentDog, scheduledActivities, userActivities, discoveredActivities, isLoading);
 
-  // Memoize expensive operations
-  const memoizedActivities = useMemo(() => ({
-    scheduled: scheduledActivities,
-    user: userActivities,
-    discovered: discoveredActivities
-  }), [scheduledActivities, userActivities, discoveredActivities]);
-
   // Load dog-specific data from Supabase with localStorage fallback
   useEffect(() => {
     if (!currentDog) {
@@ -79,7 +72,9 @@ export const useActivityStateHook = (currentDog: Dog | null) => {
   }, [currentDog?.id]); // Only depend on dog ID to prevent unnecessary reloads
 
   return {
-    ...memoizedActivities,
+    scheduledActivities,
+    userActivities,
+    discoveredActivities,
     discoveryConfig,
     setScheduledActivities,
     setUserActivities,

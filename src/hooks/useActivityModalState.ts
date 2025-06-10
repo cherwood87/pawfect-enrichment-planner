@@ -7,7 +7,7 @@ import { useChat } from '@/contexts/ChatContext';
 import { toast } from '@/hooks/use-toast';
 import { ActivityLibraryItem, UserActivity } from '@/types/activity';
 import { DiscoveredActivity } from '@/types/discovery';
-import { useActivityStateHook } from '@/hooks/useActivityState';
+import { useActivityState } from '@/contexts/ActivityStateContext';
 import { useActivityActions } from '@/hooks/core/useActivityActions'; // Use consolidated hook
 
 export const useActivityModalState = (
@@ -23,7 +23,7 @@ export const useActivityModalState = (
     scheduledActivities,
     setScheduledActivities,
     setUserActivities
-  } = useActivityStateHook(currentDog);
+  } = useActivityState();
 
   const { addScheduledActivity } = useActivityActions(
     setScheduledActivities, 
