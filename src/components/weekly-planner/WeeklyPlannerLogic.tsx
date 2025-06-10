@@ -12,6 +12,7 @@ import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import ConsolidatedActivityModal from '@/components/modals/ConsolidatedActivityModal';
+import { WeekUtils } from '@/utils/weekUtils';
 
 interface WeeklyPlannerLogicProps {
   onPillarSelect: (pillar: string) => void;
@@ -36,20 +37,7 @@ const WeeklyPlannerLogic: React.FC<WeeklyPlannerLogicProps> = ({ onPillarSelect,
     scheduledActivity: null,
   });
 
-  // Function to get the ISO week number
-  function getISOWeek(date: Date): number {
-    const target = new Date(date.valueOf());
-    const dayNr = (date.getDay() + 6) % 7;
-    target.setDate(target.getDate() - dayNr + 3);
-    const firstThursday = target.valueOf();
-    target.setMonth(0, 1);
-    if (target.getDay() !== 4) {
-      target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
-    }
-    return 1 + Math.ceil((firstThursday - target.valueOf()) / 604800000);
-  }
-
-  const currentWeekNumber = getISOWeek(currentWeekStartDate);
+  const currentWeekNumber = WeekUtils.getISOWeek(currentWeekStartDate);
 
   console.log('🏠 [WeeklyPlannerLogic] Component state:', {
     currentDog: currentDog?.name || 'None',
@@ -59,19 +47,21 @@ const WeeklyPlannerLogic: React.FC<WeeklyPlannerLogicProps> = ({ onPillarSelect,
     weeklyActivitiesCount: weeklyActivities.length
   });
 
-  // Load activities for the current week
+  // Load activities for the current week with enhanced filtering logic
   useEffect(() => {
     if (currentDog) {
       console.log('🔍 [WeeklyPlannerLogic] Filtering activities for current week:', {
         dogId: currentDog.id,
         dogName: currentDog.name,
         targetWeekNumber: currentWeekNumber,
+        currentWeekStartDate: currentWeekStartDate.toDateString(),
         allScheduledActivities: scheduledActivities.map(a => ({
           id: a.id,
           activityId: a.activityId,
           dogId: a.dogId,
           weekNumber: a.weekNumber,
-          scheduledDate: a.scheduledDate
+          scheduledDate: a.scheduledDate,
+          dayOfWeek: a.dayOfWeek
         }))
       });
       
@@ -79,16 +69,22 @@ const WeeklyPlannerLogic: React.FC<WeeklyPlannerLogicProps> = ({ onPillarSelect,
         const matchesDog = activity.dogId === currentDog.id;
         const matchesWeek = activity.weekNumber === currentWeekNumber;
         
+        // Additional validation: check if the scheduled date is actually in the current week
+        const activityDate = new Date(activity.scheduledDate);
+        const isInCurrentWeek = WeekUtils.isSameWeek(activityDate, currentWeekStartDate);
+        
         console.log(`🎯 [WeeklyPlannerLogic] Activity ${activity.id}:`, {
           activityId: activity.activityId,
+          scheduledDate: activity.scheduledDate,
+          dayOfWeek: activity.dayOfWeek,
           matchesDog,
-          matchesWeek,
-          activityWeek: activity.weekNumber,
+          matchesWeek: `${matchesWeek} (activity: ${activity.weekNumber}, current: ${currentWeekNumber})`,
+          isInCurrentWeek,
           activityDog: activity.dogId,
-          included: matchesDog && matchesWeek
+          included: matchesDog && matchesWeek && isInCurrentWeek
         });
         
-        return matchesDog && matchesWeek;
+        return matchesDog && matchesWeek && isInCurrentWeek;
       });
       
       console.log('✅ [WeeklyPlannerLogic] Filtered activities result:', {
@@ -97,7 +93,8 @@ const WeeklyPlannerLogic: React.FC<WeeklyPlannerLogicProps> = ({ onPillarSelect,
           id: a.id,
           activityId: a.activityId,
           dayOfWeek: a.dayOfWeek,
-          scheduledDate: a.scheduledDate
+          scheduledDate: a.scheduledDate,
+          weekNumber: a.weekNumber
         }))
       });
       
@@ -106,7 +103,7 @@ const WeeklyPlannerLogic: React.FC<WeeklyPlannerLogicProps> = ({ onPillarSelect,
       console.log('⚠️ [WeeklyPlannerLogic] No current dog selected');
       setWeeklyActivities([]);
     }
-  }, [scheduledActivities, currentDog, currentWeekNumber]);
+  }, [scheduledActivities, currentDog, currentWeekNumber, currentWeekStartDate]);
 
   // Calculate completion status for each day
   const getDayCompletionStatus = useCallback((dayIndex: number): { completed: boolean, activity: ScheduledActivity | undefined } => {

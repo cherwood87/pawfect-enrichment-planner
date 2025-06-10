@@ -1,9 +1,8 @@
-
 import { useNavigate } from 'react-router-dom';
 import { useActivity } from '@/contexts/ActivityContext';
 import { useDog } from '@/contexts/DogContext';
 import { toast } from '@/hooks/use-toast';
-import { calculateScheduledDate, getISOWeek } from './ActivityModalUtils';
+import { calculateScheduledDate } from './ActivityModalUtils';
 
 export const useActivityModalHandlers = (
   selectedDayOfWeek: number,
@@ -23,7 +22,7 @@ export const useActivityModalHandlers = (
   const { currentDog } = useDog();
 
   const handleActivitySelect = async (activity: any) => {
-    console.log('🎯 [ActivityModal] Activity selected for scheduling:', {
+    console.log('🎯 [ActivityModalHandlers] Activity selected for scheduling:', {
       activityId: activity.id,
       activityTitle: activity.title,
       selectedDayOfWeek,
@@ -31,7 +30,7 @@ export const useActivityModalHandlers = (
     });
     
     if (!currentDog) {
-      console.error('❌ [ActivityModal] No dog selected');
+      console.error('❌ [ActivityModalHandlers] No dog selected');
       toast({
         title: "No dog selected",
         description: "Please select a dog first",
@@ -40,11 +39,11 @@ export const useActivityModalHandlers = (
       return;
     }
     
-    // Calculate the scheduled date with validation
+    // Calculate the scheduled date with enhanced validation and week number
     const dateResult = calculateScheduledDate(selectedDayOfWeek);
     
     if (!dateResult.isValid) {
-      console.error('❌ [ActivityModal] Invalid date calculated:', dateResult.error);
+      console.error('❌ [ActivityModalHandlers] Invalid date calculated:', dateResult.error);
       toast({
         title: "Invalid Date",
         description: dateResult.error || "Cannot schedule for the selected date",
@@ -52,8 +51,6 @@ export const useActivityModalHandlers = (
       });
       return;
     }
-    
-    const currentWeek = getISOWeek(new Date(dateResult.date));
     
     const scheduledActivityData = {
       dogId: currentDog.id,
@@ -63,30 +60,31 @@ export const useActivityModalHandlers = (
       notes: '',
       completionNotes: '',
       reminderEnabled: false,
-      weekNumber: currentWeek,
+      weekNumber: dateResult.weekNumber,
       dayOfWeek: selectedDayOfWeek
     };
     
-    console.log('📋 [ActivityModal] Preparing to schedule activity:', {
+    console.log('📋 [ActivityModalHandlers] Preparing to schedule activity:', {
       ...scheduledActivityData,
-      dogName: currentDog.name
+      dogName: currentDog.name,
+      activityTitle: activity.title
     });
     
     try {
-      console.log('⏳ [ActivityModal] Calling addScheduledActivity...');
+      console.log('⏳ [ActivityModalHandlers] Calling addScheduledActivity...');
       await addScheduledActivity(scheduledActivityData);
       
-      console.log('✅ [ActivityModal] Activity scheduled successfully');
+      console.log('✅ [ActivityModalHandlers] Activity scheduled successfully');
       toast({
         title: "Activity Scheduled!",
-        description: "Activity has been added to your weekly plan."
+        description: `"${activity.title}" has been added to your weekly plan for ${['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][selectedDayOfWeek]}.`
       });
       
       onClose();
       navigate('/dog-profile-dashboard/weekly-plan');
     } catch (error) {
-      console.error('❌ [ActivityModal] Error scheduling activity:', error);
-      // Don't show another toast here as the addScheduledActivity function already handles it
+      console.error('❌ [ActivityModalHandlers] Error scheduling activity:', error);
+      // Error handling is already done in the addScheduledActivity function
     }
   };
 

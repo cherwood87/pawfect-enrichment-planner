@@ -1,8 +1,8 @@
-
 import { ScheduledActivity, UserActivity, ActivityLibraryItem, StreakData, WeeklyProgress, PillarGoals } from '@/types/activity';
 import { DiscoveredActivity } from '@/types/discovery';
 import { Dog } from '@/types/dog';
 import { getActivityById } from '@/data/activityLibrary';
+import { WeekUtils } from '@/utils/weekUtils';
 
 export class ActivityAnalyticsService {
   static getTodaysActivities(
@@ -13,13 +13,22 @@ export class ActivityAnalyticsService {
     
     const today = new Date();
     const currentDayOfWeek = today.getDay();
-    const currentWeek = this.getISOWeek(today);
+    const currentWeek = WeekUtils.getISOWeek(today);
     
-    return scheduledActivities.filter(activity => 
+    console.log('📅 [ActivityAnalyticsService] Getting today\'s activities:', {
+      currentDayOfWeek,
+      currentWeek,
+      dogId: currentDog.id
+    });
+    
+    const todaysActivities = scheduledActivities.filter(activity => 
       activity.dogId === currentDog.id &&
       activity.dayOfWeek === currentDayOfWeek &&
       activity.weekNumber === currentWeek
     );
+    
+    console.log('📋 [ActivityAnalyticsService] Found today\'s activities:', todaysActivities.length);
+    return todaysActivities;
   }
 
   static getActivityDetails(
@@ -28,18 +37,38 @@ export class ActivityAnalyticsService {
     discoveredActivities: DiscoveredActivity[],
     currentDog: Dog | null
   ): ActivityLibraryItem | UserActivity | DiscoveredActivity | undefined {
+    console.log('🔍 [ActivityAnalyticsService] Looking up activity details:', {
+      activityId,
+      userActivitiesCount: userActivities.length,
+      discoveredActivitiesCount: discoveredActivities.length,
+      currentDog: currentDog?.name || 'None'
+    });
+
     // First check library activities
     const libraryActivity = getActivityById(activityId);
-    if (libraryActivity) return libraryActivity;
+    if (libraryActivity) {
+      console.log('✅ [ActivityAnalyticsService] Found in library:', libraryActivity.title);
+      return libraryActivity;
+    }
     
     // Then check user activities for current dog
     const userActivity = userActivities.find(activity => 
       activity.id === activityId && activity.dogId === currentDog?.id
     );
-    if (userActivity) return userActivity;
+    if (userActivity) {
+      console.log('✅ [ActivityAnalyticsService] Found in user activities:', userActivity.title);
+      return userActivity;
+    }
 
     // Finally check discovered activities
-    return discoveredActivities.find(activity => activity.id === activityId);
+    const discoveredActivity = discoveredActivities.find(activity => activity.id === activityId);
+    if (discoveredActivity) {
+      console.log('✅ [ActivityAnalyticsService] Found in discovered activities:', discoveredActivity.title);
+      return discoveredActivity;
+    }
+
+    console.warn('❌ [ActivityAnalyticsService] Activity not found:', activityId);
+    return undefined;
   }
 
   static calculateStreakData(
@@ -162,37 +191,5 @@ export class ActivityAnalyticsService {
     }
     
     return goals;
-  }
-
-  private static getActivityDetails(
-    activityId: string,
-    userActivities: UserActivity[],
-    discoveredActivities: DiscoveredActivity[],
-    currentDog: Dog | null
-  ): ActivityLibraryItem | UserActivity | DiscoveredActivity | undefined {
-    // First check library activities
-    const libraryActivity = getActivityById(activityId);
-    if (libraryActivity) return libraryActivity;
-    
-    // Then check user activities for current dog
-    const userActivity = userActivities.find(activity => 
-      activity.id === activityId && activity.dogId === currentDog?.id
-    );
-    if (userActivity) return userActivity;
-
-    // Finally check discovered activities
-    return discoveredActivities.find(activity => activity.id === activityId);
-  }
-
-  private static getISOWeek(date: Date): number {
-    const target = new Date(date.valueOf());
-    const dayNr = (date.getDay() + 6) % 7;
-    target.setDate(target.getDate() - dayNr + 3);
-    const firstThursday = target.valueOf();
-    target.setMonth(0, 1);
-    if (target.getDay() !== 4) {
-      target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
-    }
-    return 1 + Math.ceil((firstThursday - target.valueOf()) / 604800000);
   }
 }

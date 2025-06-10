@@ -1,21 +1,9 @@
 
 import { SchedulingValidator } from '@/utils/schedulingValidation';
+import { WeekUtils } from '@/utils/weekUtils';
 
-// Enhanced ISO week calculation
-export function getISOWeek(date: Date): number {
-  const target = new Date(date.valueOf());
-  const dayNr = (date.getDay() + 6) % 7;
-  target.setDate(target.getDate() - dayNr + 3);
-  const firstThursday = target.valueOf();
-  target.setMonth(0, 1);
-  if (target.getDay() !== 4) {
-    target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
-  }
-  return 1 + Math.ceil((firstThursday - target.valueOf()) / 604800000);
-}
-
-// Enhanced date calculation with validation
-export function calculateScheduledDate(selectedDayOfWeek: number): { date: string; isValid: boolean; error?: string } {
+// Enhanced date calculation with validation and proper week scheduling
+export function calculateScheduledDate(selectedDayOfWeek: number): { date: string; isValid: boolean; error?: string; weekNumber: number } {
   const today = new Date();
   const currentDayOfWeek = today.getDay();
   
@@ -26,23 +14,28 @@ export function calculateScheduledDate(selectedDayOfWeek: number): { date: strin
     todayDate: today.getDate()
   });
   
+  // Calculate days until the selected day
   let daysUntilSelectedDay = selectedDayOfWeek - currentDayOfWeek;
   
-  // If the selected day is today or in the past this week, schedule for next week
+  // If the selected day is today or earlier in the week, schedule for next week
+  // This ensures we don't schedule activities in the past
   if (daysUntilSelectedDay <= 0) {
     daysUntilSelectedDay += 7;
   }
   
   const targetDate = new Date(today);
   targetDate.setDate(today.getDate() + daysUntilSelectedDay);
+  targetDate.setHours(0, 0, 0, 0); // Reset time to start of day
   
   const scheduledDateString = targetDate.toISOString().split('T')[0];
+  const weekNumber = WeekUtils.getISOWeek(targetDate);
   
   console.log('🗓️ [ActivityModal] Calculated target date:', {
     daysUntilSelectedDay,
     targetDate: targetDate.toDateString(),
     scheduledDateString,
-    targetWeekNumber: getISOWeek(targetDate)
+    weekNumber,
+    isNextWeek: daysUntilSelectedDay > 0
   });
   
   // Validate the calculated date
@@ -51,6 +44,10 @@ export function calculateScheduledDate(selectedDayOfWeek: number): { date: strin
   return {
     date: scheduledDateString,
     isValid: validation.isValid,
-    error: validation.errors[0]
+    error: validation.errors[0],
+    weekNumber
   };
 }
+
+// Export for backward compatibility
+export const getISOWeek = WeekUtils.getISOWeek;
