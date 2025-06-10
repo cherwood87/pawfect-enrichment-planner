@@ -11,15 +11,19 @@ import { ChatProvider } from "@/contexts/ChatContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import ErrorBoundary from "@/components/error/ErrorBoundary";
 import NetworkErrorBoundary from "@/components/error/NetworkErrorBoundary";
-import Index from "./pages/Index";
-import Landing from "./pages/Landing";
-import Auth from "./pages/Auth";
-import Coach from "./pages/Coach";
-import DogProfileQuizPage from "./pages/DogProfileQuiz";
-import ActivityLibraryPage from "./pages/ActivityLibraryPage";
-import WeeklyPlannerPage from "./pages/WeeklyPlannerPage";
-import AccountSettings from "./pages/AccountSettings";
-import NotFound from "./pages/NotFound";
+import { Suspense, lazy } from "react";
+import LoadingSpinner from "@/components/ui/loading-spinner";
+
+// Lazy load all route components
+const IndexOptimized = lazy(() => import("./pages/IndexOptimized"));
+const Landing = lazy(() => import("./pages/Landing"));
+const Auth = lazy(() => import("./pages/Auth"));
+const Coach = lazy(() => import("./pages/Coach"));
+const DogProfileQuizPage = lazy(() => import("./pages/DogProfileQuiz"));
+const ActivityLibraryPage = lazy(() => import("./pages/ActivityLibraryPage"));
+const WeeklyPlannerPage = lazy(() => import("./pages/WeeklyPlannerPage"));
+const AccountSettings = lazy(() => import("./pages/AccountSettings"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -47,6 +51,13 @@ const queryClient = new QueryClient({
   },
 });
 
+// Loading fallback component
+const PageLoader = () => (
+  <div className="min-h-screen bg-gradient-to-br from-blue-50 to-orange-50 flex items-center justify-center">
+    <LoadingSpinner size="lg" />
+  </div>
+);
+
 const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
@@ -59,68 +70,70 @@ const App = () => (
                   <Toaster />
                   <Sonner />
                   <BrowserRouter>
-                    <Routes>
-                      <Route path="/auth" element={<Auth />} />
-                      <Route path="/app" element={
-                        <ProtectedRoute>
+                    <Suspense fallback={<PageLoader />}>
+                      <Routes>
+                        <Route path="/auth" element={<Auth />} />
+                        <Route path="/app" element={
+                          <ProtectedRoute>
+                            <ErrorBoundary>
+                              <IndexOptimized />
+                            </ErrorBoundary>
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/coach" element={
+                          <ProtectedRoute>
+                            <ErrorBoundary>
+                              <Coach />
+                            </ErrorBoundary>
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/activity-library" element={
+                          <ProtectedRoute>
+                            <ErrorBoundary>
+                              <ActivityLibraryPage />
+                            </ErrorBoundary>
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/dog-profile-dashboard/activity-library" element={
+                          <ProtectedRoute>
+                            <ErrorBoundary>
+                              <ActivityLibraryPage />
+                            </ErrorBoundary>
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/dog-profile-dashboard/weekly-plan" element={
+                          <ProtectedRoute>
+                            <ErrorBoundary>
+                              <WeeklyPlannerPage />
+                            </ErrorBoundary>
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/dog-profile-quiz" element={
+                          <ProtectedRoute>
+                            <ErrorBoundary>
+                              <DogProfileQuizPage />
+                            </ErrorBoundary>
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/settings" element={
+                          <ProtectedRoute>
+                            <ErrorBoundary>
+                              <AccountSettings />
+                            </ErrorBoundary>
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/" element={
                           <ErrorBoundary>
-                            <Index />
+                            <Landing />
                           </ErrorBoundary>
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/coach" element={
-                        <ProtectedRoute>
+                        } />
+                        <Route path="*" element={
                           <ErrorBoundary>
-                            <Coach />
+                            <NotFound />
                           </ErrorBoundary>
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/activity-library" element={
-                        <ProtectedRoute>
-                          <ErrorBoundary>
-                            <ActivityLibraryPage />
-                          </ErrorBoundary>
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/dog-profile-dashboard/activity-library" element={
-                        <ProtectedRoute>
-                          <ErrorBoundary>
-                            <ActivityLibraryPage />
-                          </ErrorBoundary>
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/dog-profile-dashboard/weekly-plan" element={
-                        <ProtectedRoute>
-                          <ErrorBoundary>
-                            <WeeklyPlannerPage />
-                          </ErrorBoundary>
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/dog-profile-quiz" element={
-                        <ProtectedRoute>
-                          <ErrorBoundary>
-                            <DogProfileQuizPage />
-                          </ErrorBoundary>
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/settings" element={
-                        <ProtectedRoute>
-                          <ErrorBoundary>
-                            <AccountSettings />
-                          </ErrorBoundary>
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/" element={
-                        <ErrorBoundary>
-                          <Landing />
-                        </ErrorBoundary>
-                      } />
-                      <Route path="*" element={
-                        <ErrorBoundary>
-                          <NotFound />
-                        </ErrorBoundary>
-                      } />
-                    </Routes>
+                        } />
+                      </Routes>
+                    </Suspense>
                   </BrowserRouter>
                 </ChatProvider>
               </ActivityProvider>

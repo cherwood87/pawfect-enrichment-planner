@@ -4,7 +4,7 @@ import { useDog } from '@/contexts/DogContext';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import DashboardContent from '@/components/dashboard/DashboardContent';
 import FloatingChatButton from '@/components/dashboard/FloatingChatButton';
-import DashboardModals from '@/components/dashboard/DashboardModals';
+import DashboardModalsOptimized from '@/components/dashboard/DashboardModalsOptimized';
 import { Dog } from '@/types/dog';
 
 const IndexOptimized = () => {
@@ -91,22 +91,25 @@ const IndexOptimized = () => {
     handleChatModalOpen
   ]);
 
+  // Memoize header props
+  const headerProps = useMemo(() => ({
+    onChatOpen: handleChatModalOpen,
+    onAddDogOpen: handleAddDogModalOpen
+  }), [handleChatModalOpen, handleAddDogModalOpen]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-orange-50 mobile-safe">
       {/* Header */}
-      <DashboardHeader 
-        onChatOpen={handleChatModalOpen} 
-        onAddDogOpen={handleAddDogModalOpen}
-      />
+      <DashboardHeader {...headerProps} />
 
       {/* Main Content */}
       <DashboardContent {...dashboardContentProps} />
 
-      {/* Floating Chat Button */}
+      {/* Floating Chat Button - Only render when we have a dog */}
       {currentDog && <FloatingChatButton onChatOpen={handleChatModalOpen} />}
 
-      {/* Modals */}
-      <DashboardModals {...modalProps} />
+      {/* Modals - Use optimized version */}
+      <DashboardModalsOptimized {...modalProps} />
     </div>
   );
 };
