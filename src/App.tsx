@@ -11,83 +11,38 @@ import { ChatProvider } from "@/contexts/ChatContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import ErrorBoundary from "@/components/error/ErrorBoundary";
 import NetworkErrorBoundary from "@/components/error/NetworkErrorBoundary";
-import { Suspense, lazy, useEffect } from "react";
-import LoadingSpinner from "@/components/ui/loading-spinner";
-import { initializeCriticalPreloads } from "@/utils/preloadManager";
+import { Suspense, useEffect } from "react";
 import { useBundleAnalytics } from "@/hooks/useBundleAnalytics";
+import { registerProgressiveComponents } from "@/utils/progressiveLoader";
 
-// Lazy load all route components with better chunking
-const IndexOptimized = lazy(() => 
-  import("./pages/IndexOptimized").then(module => ({
-    default: module.default
-  }))
-);
-
-const Landing = lazy(() => 
-  import("./pages/Landing").then(module => ({
-    default: module.default
-  }))
-);
-
-const Auth = lazy(() => 
-  import("./pages/Auth").then(module => ({
-    default: module.default
-  }))
-);
-
-const Coach = lazy(() => 
-  import("./pages/Coach").then(module => ({
-    default: module.default
-  }))
-);
-
-const DogProfileQuizPage = lazy(() => 
-  import("./pages/DogProfileQuiz").then(module => ({
-    default: module.default
-  }))
-);
-
-const ActivityLibraryPage = lazy(() => 
-  import("./pages/ActivityLibraryPage").then(module => ({
-    default: module.default
-  }))
-);
-
-const WeeklyPlannerPage = lazy(() => 
-  import("./pages/WeeklyPlannerPage").then(module => ({
-    default: module.default
-  }))
-);
-
-const AccountSettings = lazy(() => 
-  import("./pages/AccountSettings").then(module => ({
-    default: module.default
-  }))
-);
-
-const NotFound = lazy(() => 
-  import("./pages/NotFound").then(module => ({
-    default: module.default
-  }))
-);
+// Use the new lazy loading system
+import {
+  LazyIndexOptimized,
+  LazyLanding,
+  LazyAuth,
+  LazyCoach,
+  LazyDogProfileQuizPage,
+  LazyActivityLibraryPage,
+  LazyWeeklyPlannerPage,
+  LazyAccountSettings,
+  LazyNotFound,
+  LazyLoadingFallback
+} from "@/components/lazy/LazyRouteComponents";
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: (failureCount, error: any) => {
-        // Don't retry on auth errors
         if (error?.message?.includes('auth') || error?.status === 401) {
           return false;
         }
-        // Retry up to 3 times for other errors
         return failureCount < 3;
       },
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes
+      staleTime: 5 * 60 * 1000,
+      gcTime: 10 * 60 * 1000,
     },
     mutations: {
       retry: (failureCount, error: any) => {
-        // Don't retry mutations on client errors
         if (error?.status >= 400 && error?.status < 500) {
           return false;
         }
@@ -97,29 +52,33 @@ const queryClient = new QueryClient({
   },
 });
 
-// Loading fallback component with bundle analytics
-const PageLoader = () => {
-  const { getMetrics } = useBundleAnalytics('PageLoader');
-  
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-orange-50 flex items-center justify-center">
-      <LoadingSpinner size="lg" />
-    </div>
-  );
-};
-
 const App = () => {
   const { getMetrics } = useBundleAnalytics('App');
 
   useEffect(() => {
-    // Initialize critical preloads as soon as the app starts
-    initializeCriticalPreloads();
+    // Register progressive loading components
+    registerProgressiveComponents();
 
-    // Preload critical route chunks after initial load
-    setTimeout(() => {
-      import("./pages/IndexOptimized");
-      import("./pages/Landing");
-    }, 1000);
+    // Preload critical route chunks based on current route
+    const currentPath = window.location.pathname;
+    
+    if (currentPath === '/' || currentPath === '/auth') {
+      // Preload app routes for faster navigation
+      setTimeout(() => {
+        (LazyIndexOptimized as any).preload?.();
+      }, 2000);
+    } else if (currentPath.includes('/app')) {
+      // Preload activity library and weekly planner
+      setTimeout(() => {
+        (LazyActivityLibraryPage as any).preload?.();
+        (LazyWeeklyPlannerPage as any).preload?.();
+      }, 1000);
+    }
+
+    // Log bundle metrics in development
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🚀 App initialized with advanced code splitting');
+    }
   }, []);
 
   return (
@@ -134,66 +93,66 @@ const App = () => {
                     <Toaster />
                     <Sonner />
                     <BrowserRouter>
-                      <Suspense fallback={<PageLoader />}>
+                      <Suspense fallback={<LazyLoadingFallback />}>
                         <Routes>
-                          <Route path="/auth" element={<Auth />} />
+                          <Route path="/auth" element={<LazyAuth />} />
                           <Route path="/app" element={
                             <ProtectedRoute>
                               <ErrorBoundary>
-                                <IndexOptimized />
+                                <LazyIndexOptimized />
                               </ErrorBoundary>
                             </ProtectedRoute>
                           } />
                           <Route path="/coach" element={
                             <ProtectedRoute>
                               <ErrorBoundary>
-                                <Coach />
+                                <LazyCoach />
                               </ErrorBoundary>
                             </ProtectedRoute>
                           } />
                           <Route path="/activity-library" element={
                             <ProtectedRoute>
                               <ErrorBoundary>
-                                <ActivityLibraryPage />
+                                <LazyActivityLibraryPage />
                               </ErrorBoundary>
                             </ProtectedRoute>
                           } />
                           <Route path="/dog-profile-dashboard/activity-library" element={
                             <ProtectedRoute>
                               <ErrorBoundary>
-                                <ActivityLibraryPage />
+                                <LazyActivityLibraryPage />
                               </ErrorBoundary>
                             </ProtectedRoute>
                           } />
                           <Route path="/dog-profile-dashboard/weekly-plan" element={
                             <ProtectedRoute>
                               <ErrorBoundary>
-                                <WeeklyPlannerPage />
+                                <LazyWeeklyPlannerPage />
                               </ErrorBoundary>
                             </ProtectedRoute>
                           } />
                           <Route path="/dog-profile-quiz" element={
                             <ProtectedRoute>
                               <ErrorBoundary>
-                                <DogProfileQuizPage />
+                                <LazyDogProfileQuizPage />
                               </ErrorBoundary>
                             </ProtectedRoute>
                           } />
                           <Route path="/settings" element={
                             <ProtectedRoute>
                               <ErrorBoundary>
-                                <AccountSettings />
+                                <LazyAccountSettings />
                               </ErrorBoundary>
                             </ProtectedRoute>
                           } />
                           <Route path="/" element={
                             <ErrorBoundary>
-                              <Landing />
+                              <LazyLanding />
                             </ErrorBoundary>
                           } />
                           <Route path="*" element={
                             <ErrorBoundary>
-                              <NotFound />
+                              <LazyNotFound />
                             </ErrorBoundary>
                           } />
                         </Routes>

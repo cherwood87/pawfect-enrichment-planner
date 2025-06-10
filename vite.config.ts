@@ -21,49 +21,89 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
-    // Optimize chunk splitting for better caching
+    // Optimize chunk splitting for better caching and loading
     rollupOptions: {
       output: {
-        manualChunks: {
-          // Vendor chunks
-          'react-vendor': ['react', 'react-dom'],
-          'router-vendor': ['react-router-dom'],
-          'ui-vendor': ['@radix-ui/react-dialog', '@radix-ui/react-tabs', '@radix-ui/react-accordion'],
-          'query-vendor': ['@tanstack/react-query'],
-          'form-vendor': ['react-hook-form', '@hookform/resolvers', 'zod'],
-          
-          // Feature chunks
-          'dashboard': [
-            './src/components/dashboard/DashboardContent.tsx',
-            './src/components/dashboard/DashboardHeader.tsx'
-          ],
-          'weekly-planner': [
-            './src/components/weekly-planner/WeeklyPlannerV2.tsx',
-            './src/hooks/useWeeklyPlannerLogic.ts'
-          ],
-          'activity-library': [
-            './src/components/ActivityLibrary.tsx',
-            './src/components/ActivityModal.tsx'
-          ],
-          'contexts': [
-            './src/contexts/ActivityStateContextV2.tsx',
-            './src/contexts/ActivityOperationsContextV2.tsx'
-          ]
+        manualChunks: (id) => {
+          // Vendor chunks - group by library
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom')) {
+              return 'react-vendor';
+            }
+            if (id.includes('react-router')) {
+              return 'router-vendor';
+            }
+            if (id.includes('@radix-ui')) {
+              return 'ui-vendor';
+            }
+            if (id.includes('@tanstack/react-query')) {
+              return 'query-vendor';
+            }
+            if (id.includes('react-hook-form') || id.includes('zod')) {
+              return 'form-vendor';
+            }
+            if (id.includes('react-window') || id.includes('react-virtualized')) {
+              return 'virtualization-vendor';
+            }
+            if (id.includes('date-fns') || id.includes('lucide-react')) {
+              return 'utils-vendor';
+            }
+            return 'vendor';
+          }
+
+          // Feature-based chunks
+          if (id.includes('/pages/')) {
+            const pageName = id.split('/pages/')[1].split('.')[0];
+            return `page-${pageName.toLowerCase()}`;
+          }
+
+          if (id.includes('/dashboard/')) {
+            return 'dashboard-feature';
+          }
+
+          if (id.includes('/weekly-planner/')) {
+            return 'weekly-planner-feature';
+          }
+
+          if (id.includes('/activity-library') || id.includes('ActivityLibrary')) {
+            return 'activity-library-feature';
+          }
+
+          if (id.includes('/chat/')) {
+            return 'chat-feature';
+          }
+
+          // Context and service chunks
+          if (id.includes('/contexts/')) {
+            return 'contexts';
+          }
+
+          if (id.includes('/services/')) {
+            return 'services';
+          }
+
+          if (id.includes('/hooks/')) {
+            return 'hooks';
+          }
+
+          // UI components
+          if (id.includes('/components/ui/')) {
+            return 'ui-components';
+          }
         }
       }
     },
     
-    // Compress and optimize assets
-    assetsInlineLimit: 4096, // Inline assets smaller than 4kb
-    
-    // Enable source maps for debugging in production
+    // Optimize for performance
+    assetsInlineLimit: 2048, // Inline smaller assets
     sourcemap: mode === 'development',
-    
-    // Optimize CSS
     cssCodeSplit: true,
+    target: 'es2020',
     
-    // Target modern browsers for smaller bundles
-    target: 'es2020'
+    // Advanced optimization settings
+    minify: mode === 'production' ? 'esbuild' : false,
+    reportCompressedSize: false, // Faster builds
+    chunkSizeWarningLimit: 1000, // Warn for chunks > 1MB
   },
   
   // Optimize dependencies
@@ -74,20 +114,23 @@ export default defineConfig(({ mode }) => ({
       'react-router-dom',
       '@tanstack/react-query',
       'date-fns',
-      'lucide-react'
+      'lucide-react',
+      'react-window'
     ],
     exclude: [
-      // Exclude large libraries that should be loaded on demand
+      // Large libraries loaded on demand
+      '@radix-ui/react-dialog',
+      '@radix-ui/react-tabs'
     ]
   },
   
-  // Enable experimental features for better performance
+  // Enhanced esbuild settings
   esbuild: {
-    // Enable tree shaking for unused exports
     treeShaking: true,
-    // Optimize for smaller bundle size
     minifyIdentifiers: mode === 'production',
     minifySyntax: mode === 'production',
-    minifyWhitespace: mode === 'production'
+    minifyWhitespace: mode === 'production',
+    // Remove console logs in production
+    drop: mode === 'production' ? ['console', 'debugger'] : [],
   }
 }));

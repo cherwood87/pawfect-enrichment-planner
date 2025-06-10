@@ -1,14 +1,13 @@
 
-import React, { useState, useCallback, lazy, Suspense } from 'react';
+import React, { useState, useCallback, Suspense } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Brain, BookOpen, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import EducationalContent from '@/components/EducationalContent';
 import FloatingChatButton from '@/components/dashboard/FloatingChatButton';
 import ChatModal from '@/components/chat/ChatModal';
-
-// Lazy load the heavy ActivityLibrary component
-const ActivityLibrary = lazy(() => import('@/components/ActivityLibrary'));
+import LoadingSpinner from '@/components/ui/loading-spinner';
+import { LazyActivityLibrary } from '@/components/lazy/LazyRouteComponents';
 
 const ActivityLibraryPage = () => {
   const navigate = useNavigate();
@@ -69,15 +68,23 @@ const ActivityLibraryPage = () => {
           </div>
         </div>
         
-        {/* Activity Library with Suspense for lazy loading */}
+        {/* Activity Library with improved Suspense boundary */}
         <Suspense 
           fallback={
-            <div className="flex items-center justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+            <div className="modern-card">
+              <div className="mobile-card flex items-center justify-center py-12">
+                <div className="text-center space-y-4">
+                  <LoadingSpinner size="lg" />
+                  <p className="text-gray-600">Loading activity library...</p>
+                  <div className="text-sm text-gray-500">
+                    Optimizing for better performance
+                  </div>
+                </div>
+              </div>
             </div>
           }
         >
-          <ActivityLibrary />
+          <LazyActivityLibrary />
         </Suspense>
       </div>
 
