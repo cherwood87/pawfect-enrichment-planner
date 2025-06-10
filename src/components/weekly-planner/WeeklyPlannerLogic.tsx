@@ -1,127 +1,32 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { CalendarDays, CheckCircle, Circle, Plus, Target } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { useDog } from '@/contexts/DogContext';
-import { useActivity } from '@/contexts/ActivityContext';
-import { ActivityLibraryItem, ScheduledActivity, UserActivity } from '@/types/activity';
-import { DiscoveredActivity } from '@/types/discovery';
-import { format } from 'date-fns';
+
+import React from 'react';
+import { CalendarDays } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
-import { useToast } from '@/hooks/use-toast';
+import { useWeeklyPlannerLogic } from '@/hooks/useWeeklyPlannerLogic';
+import WeeklyPlannerNavigation from './WeeklyPlannerNavigation';
+import WeeklyPlannerProgress from './WeeklyPlannerProgress';
+import WeeklyPlannerGrid from './WeeklyPlannerGrid';
 import ConsolidatedActivityModal from '@/components/modals/ConsolidatedActivityModal';
-import { WeekUtils } from '@/utils/weekUtils';
 
 interface WeeklyPlannerLogicProps {
   onPillarSelect: (pillar: string) => void;
   onChatOpen?: () => void;
 }
 
-interface ActivityModalState {
-  activity: ActivityLibraryItem | UserActivity | DiscoveredActivity | null;
-  scheduledActivity: ScheduledActivity | null;
-}
-
-const WeeklyPlannerLogic: React.FC<WeeklyPlannerLogicProps> = ({ onPillarSelect, onChatOpen }) => {
+const WeeklyPlannerLogic: React.FC<WeeklyPlannerLogicProps> = ({ onPillarSelect }) => {
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const { currentDog } = useDog();
-  const { scheduledActivities, toggleActivityCompletion, getCombinedActivityLibrary, userActivities, discoveredActivities } = useActivity();
-
-  const [currentWeekStartDate, setCurrentWeekStartDate] = useState(new Date());
-  const [weeklyActivities, setWeeklyActivities] = useState<ScheduledActivity[]>([]);
-  const [selectedActivityModal, setSelectedActivityModal] = useState<ActivityModalState>({
-    activity: null,
-    scheduledActivity: null,
-  });
-
-  const currentWeekNumber = WeekUtils.getISOWeek(currentWeekStartDate);
-
-  console.log('🏠 [WeeklyPlannerLogic] Component state:', {
-    currentDog: currentDog?.name || 'None',
-    currentWeekStartDate: currentWeekStartDate.toDateString(),
-    currentWeekNumber,
-    scheduledActivitiesCount: scheduledActivities.length,
-    weeklyActivitiesCount: weeklyActivities.length
-  });
-
-  // Load activities for the current week with enhanced filtering logic
-  useEffect(() => {
-    if (currentDog) {
-      console.log('🔍 [WeeklyPlannerLogic] Filtering activities for current week:', {
-        dogId: currentDog.id,
-        dogName: currentDog.name,
-        targetWeekNumber: currentWeekNumber,
-        currentWeekStartDate: currentWeekStartDate.toDateString(),
-        allScheduledActivities: scheduledActivities.map(a => ({
-          id: a.id,
-          activityId: a.activityId,
-          dogId: a.dogId,
-          weekNumber: a.weekNumber,
-          scheduledDate: a.scheduledDate,
-          dayOfWeek: a.dayOfWeek
-        }))
-      });
-      
-      const filteredActivities = scheduledActivities.filter(activity => {
-        const matchesDog = activity.dogId === currentDog.id;
-        const matchesWeek = activity.weekNumber === currentWeekNumber;
-        
-        // Additional validation: check if the scheduled date is actually in the current week
-        const activityDate = new Date(activity.scheduledDate);
-        const isInCurrentWeek = WeekUtils.isSameWeek(activityDate, currentWeekStartDate);
-        
-        console.log(`🎯 [WeeklyPlannerLogic] Activity ${activity.id}:`, {
-          activityId: activity.activityId,
-          scheduledDate: activity.scheduledDate,
-          dayOfWeek: activity.dayOfWeek,
-          matchesDog,
-          matchesWeek: `${matchesWeek} (activity: ${activity.weekNumber}, current: ${currentWeekNumber})`,
-          isInCurrentWeek,
-          activityDog: activity.dogId,
-          included: matchesDog && matchesWeek && isInCurrentWeek
-        });
-        
-        return matchesDog && matchesWeek && isInCurrentWeek;
-      });
-      
-      console.log('✅ [WeeklyPlannerLogic] Filtered activities result:', {
-        count: filteredActivities.length,
-        activities: filteredActivities.map(a => ({
-          id: a.id,
-          activityId: a.activityId,
-          dayOfWeek: a.dayOfWeek,
-          scheduledDate: a.scheduledDate,
-          weekNumber: a.weekNumber
-        }))
-      });
-      
-      setWeeklyActivities(filteredActivities);
-    } else {
-      console.log('⚠️ [WeeklyPlannerLogic] No current dog selected');
-      setWeeklyActivities([]);
-    }
-  }, [scheduledActivities, currentDog, currentWeekNumber, currentWeekStartDate]);
-
-  // Calculate completion status for each day
-  const getDayCompletionStatus = useCallback((dayIndex: number): { completed: boolean, activity: ScheduledActivity | undefined } => {
-    const dayActivities = weeklyActivities.filter(activity => activity.dayOfWeek === dayIndex);
-    
-    console.log(`📅 [WeeklyPlannerLogic] Day ${dayIndex} status:`, {
-      dayActivities: dayActivities.map(a => ({ id: a.id, activityId: a.activityId, completed: a.completed })),
-      count: dayActivities.length
-    });
-    
-    if (dayActivities.length === 0) return { completed: false, activity: undefined };
-    const completed = dayActivities.every(activity => activity.completed);
-    return { completed, activity: dayActivities[0] };
-  }, [weeklyActivities]);
-
-  // Get the current date
-  const today = new Date();
-  const currentDayIndex = today.getDay();
+  
+  const {
+    currentWeekStartDate,
+    setCurrentWeekStartDate,
+    weeklyActivities,
+    selectedActivityModal,
+    setSelectedActivityModal,
+    getDayCompletionStatus,
+    getActivityDetails,
+    handleToggleCompletion
+  } = useWeeklyPlannerLogic();
 
   // Handle navigation to the next week
   const goToNextWeek = () => {
@@ -142,65 +47,22 @@ const WeeklyPlannerLogic: React.FC<WeeklyPlannerLogicProps> = ({ onPillarSelect,
     setCurrentWeekStartDate(new Date());
   };
 
-  // Handle activity completion toggle
-  const handleToggleCompletion = async (activityId: string) => {
-    try {
-      await toggleActivityCompletion(activityId);
-      toast({
-        title: "Activity Updated!",
-        description: "Activity completion status has been updated.",
-      });
-    } catch (error) {
-      console.error("Error toggling activity completion:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update activity completion status. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
   const handleDayCardClick = (dayIndex: number) => {
     const dayActivities = weeklyActivities.filter(activity => activity.dayOfWeek === dayIndex);
     if (dayActivities.length > 0) {
-      const activity = scheduledActivities.find(sa => sa.id === dayActivities[0].id);
-      if (activity) {
-        // Fetch activity details based on activityId
-        const activityDetails = getActivityDetails(activity.activityId);
-        if (activityDetails) {
-          setSelectedActivityModal({ activity: activityDetails, scheduledActivity: activity });
-        } else {
-          console.error("Activity details not found for activityId:", activity.activityId);
-        }
+      const activity = dayActivities[0];
+      // Fetch activity details based on activityId
+      const activityDetails = getActivityDetails(activity.activityId);
+      if (activityDetails) {
+        setSelectedActivityModal({ activity: activityDetails, scheduledActivity: activity });
+      } else {
+        console.error("Activity details not found for activityId:", activity.activityId);
       }
     } else {
       // Navigate to activity library with selected pillar - updated path
       onPillarSelect('all');
       navigate('/activity-library');
     }
-  };
-
-  const getActivityDetails = (activityId: string): ActivityLibraryItem | UserActivity | DiscoveredActivity | undefined => {
-    // Combine all possible activity sources
-    const allActivities = [...getCombinedActivityLibrary(), ...userActivities, ...discoveredActivities];
-    return allActivities.find(activity => activity.id === activityId);
-  };
-
-  const getDayName = (dayIndex: number): string => {
-    const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-    return days[dayIndex];
-  };
-
-  const getFullDayName = (dayIndex: number): string => {
-    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-    return days[dayIndex];
-  };
-
-  const getDayDate = (dayIndex: number): string => {
-    const date = new Date(currentWeekStartDate);
-    const diff = dayIndex - date.getDay();
-    date.setDate(date.getDate() + diff);
-    return format(date, 'MM/dd');
   };
 
   const calculateWeekCompletion = (): number => {
@@ -226,58 +88,19 @@ const WeeklyPlannerLogic: React.FC<WeeklyPlannerLogicProps> = ({ onPillarSelect,
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-4">
-        <div className="flex items-center justify-between">
-          <Button variant="outline" size="sm" onClick={goToPreviousWeek}>
-            Previous Week
-          </Button>
-          <Button variant="secondary" size="sm" onClick={goToTodayWeek}>
-            Current Week
-          </Button>
-          <Button variant="outline" size="sm" onClick={goToNextWeek}>
-            Next Week
-          </Button>
-        </div>
-        <Progress value={weekCompletion} className="h-4 rounded-xl bg-purple-200" />
-        <div className="grid grid-cols-7 gap-4">
-          {[0, 1, 2, 3, 4, 5, 6].map((dayIndex) => {
-            const { completed, activity } = getDayCompletionStatus(dayIndex);
-            const isToday = dayIndex === currentDayIndex;
-            return (
-              <Card
-                key={dayIndex}
-                className={`shadow-md rounded-xl cursor-pointer transition-colors duration-200 ${isToday ? 'ring-2 ring-blue-500' : ''
-                  } hover:bg-purple-50`}
-                onClick={() => handleDayCardClick(dayIndex)}
-              >
-                <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                  <CardTitle className="text-base font-semibold">{getDayName(dayIndex)}</CardTitle>
-                  <Target className="w-4 h-4 text-gray-500" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-sm opacity-70">{getDayDate(dayIndex)}</div>
-                </CardContent>
-                <CardFooter className="text-sm justify-between">
-                  {completed ? (
-                    <Badge variant="outline" className="gap-2">
-                      <CheckCircle className="h-4 w-4" />
-                      Complete
-                    </Badge>
-                  ) : activity ? (
-                    <Badge className="gap-2">
-                      <Circle className="h-4 w-4" />
-                      Scheduled
-                    </Badge>
-                  ) : (
-                    <Button size="sm" variant="secondary">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add Activity
-                    </Button>
-                  )}
-                </CardFooter>
-              </Card>
-            );
-          })}
-        </div>
+        <WeeklyPlannerNavigation
+          onPreviousWeek={goToPreviousWeek}
+          onCurrentWeek={goToTodayWeek}
+          onNextWeek={goToNextWeek}
+        />
+        
+        <WeeklyPlannerProgress weekCompletion={weekCompletion} />
+        
+        <WeeklyPlannerGrid
+          weeklyActivities={weeklyActivities}
+          getDayCompletionStatus={getDayCompletionStatus}
+          onDayCardClick={handleDayCardClick}
+        />
       </CardContent>
 
       {/* Activity Detail Modal */}
