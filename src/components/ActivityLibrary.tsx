@@ -3,29 +3,24 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { ActivityLibraryItem } from '@/types/activity';
 import { DiscoveredActivity } from '@/types/discovery';
 import { useActivity } from '@/contexts/ActivityContext';
-import { useActivityFiltering } from '@/hooks/useActivityFiltering';
+import { useSimpleFiltering } from '@/hooks/useSimpleFiltering';
+import { useLightweightMonitor } from '@/hooks/useLightweightMonitor';
 import ConsolidatedActivityModal from '@/components/modals/ConsolidatedActivityModal';
 import PillarSelectionCards from '@/components/PillarSelectionCards';
 import ActivityLibraryContent from '@/components/ActivityLibraryContent';
-import ActivityLibraryDebug from '@/components/ActivityLibraryDebug';
-import ActivityLibraryGrid from '@/components/ActivityLibraryGrid';
-import { useBundleAnalytics } from '@/hooks/useBundleAnalytics';
+import ActivityCard from '@/components/ActivityCard';
 
-// Energy level normalization function
+// Simple energy level normalization
 const normalizeEnergyLevel = (level: string): "Low" | "Medium" | "High" => {
   if (!level) return "Medium";
   const l = level.toLowerCase();
-  if (l.includes("very low")) return "Low";
-  if (l.includes("low") && l.includes("moderate")) return "Medium";
   if (l.includes("low")) return "Low";
-  if (l.includes("moderate") && l.includes("high")) return "High";
-  if (l.includes("moderate")) return "Medium";
   if (l.includes("high")) return "High";
   return "Medium";
 };
 
 const ActivityLibrary = () => {
-  const { getMetrics } = useBundleAnalytics('ActivityLibrary');
+  useLightweightMonitor('ActivityLibrary');
   
   const { 
     getCombinedActivityLibrary, 
@@ -42,9 +37,8 @@ const ActivityLibrary = () => {
   const [selectedPillar, setSelectedPillar] = useState<string>('all');
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all');
   const [selectedActivity, setSelectedActivity] = useState<ActivityLibraryItem | DiscoveredActivity | null>(null);
-  const [currentActivities, setCurrentActivities] = useState<(ActivityLibraryItem | DiscoveredActivity)[]>([]);
 
-  // Memoize normalized activities to prevent unnecessary recalculations
+  // Get normalized activities
   const normalizedActivities = useMemo(() => {
     return getCombinedActivityLibrary().map(activity =>
       activity && typeof activity.energyLevel === 'string'
@@ -53,32 +47,22 @@ const ActivityLibrary = () => {
     );
   }, [getCombinedActivityLibrary]);
 
-  // Initialize activities with weighted shuffling
-  useEffect(() => {
-    setCurrentActivities(normalizedActivities);
-  }, [normalizedActivities]);
+  // Use simple filtering instead of complex caching
+  const filteredActivities = useSimpleFiltering(
+    searchQuery,
+    selectedPillar,
+    selectedDifficulty,
+    normalizedActivities
+  );
 
-  // Check for auto-discovery on component mount
+  // Check for auto-discovery on mount
   useEffect(() => {
     if (checkAndRunAutoDiscovery) {
       checkAndRunAutoDiscovery();
     }
   }, [checkAndRunAutoDiscovery]);
 
-  // Use the filtering hook
-  const filteredActivities = useActivityFiltering(
-    searchQuery,
-    selectedPillar,
-    selectedDifficulty,
-    currentActivities,
-    discoveredActivities
-  );
-
-  // Memoize callback functions to prevent unnecessary re-renders
-  const handleActivitiesReorder = useCallback((reorderedActivities: (ActivityLibraryItem | DiscoveredActivity)[]) => {
-    setCurrentActivities(reorderedActivities);
-  }, []);
-
+  // Callback functions
   const handleDiscoverMore = useCallback(async () => {
     await discoverNewActivities();
   }, [discoverNewActivities]);
@@ -99,7 +83,7 @@ const ActivityLibrary = () => {
     setSelectedPillar(pillar);
   }, []);
 
-  // Memoize computed values
+  // Compute stats
   const { autoApprovedCount, curatedCount } = useMemo(() => {
     const isDiscoveredActivity = (activity: ActivityLibraryItem | DiscoveredActivity): activity is DiscoveredActivity => {
       return 'source' in activity && activity.source === 'discovered';
@@ -107,9 +91,9 @@ const ActivityLibrary = () => {
 
     return {
       autoApprovedCount: discoveredActivities.filter(a => a.approved).length,
-      curatedCount: currentActivities.filter(a => !isDiscoveredActivity(a)).length
+      curatedCount: normalizedActivities.filter(a => !isDiscoveredActivity(a)).length
     };
-  }, [discoveredActivities, currentActivities]);
+  }, [discoveredActivities, normalizedActivities]);
 
   return (
     <div className="mobile-space-y">
@@ -138,17 +122,26 @@ const ActivityLibrary = () => {
         lastSyncTime={lastSyncTime}
       />
 
-      {/* Performance Debug Component */}
-      <ActivityLibraryDebug 
-        activities={currentActivities}
-        onActivitiesReorder={handleActivitiesReorder}
-      />
-
-      {/* Optimized Activity Grid with Virtualization */}
-      <ActivityLibraryGrid
-        activities={filteredActivities}
-        onActivitySelect={handleActivitySelect}
-      />
+      {/* Simple activity grid without virtualization for better reliability */}
+      <div className="modern-card">
+        <div className="mobile-card">
+          {filteredActivities.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-500">No activities found</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredActivities.map((activity) => (
+                <ActivityCard
+                  key={activity.id}
+                  activity={activity}
+                  onSelect={() => handleActivitySelect(activity)}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* Activity Detail Modal */}
       {selectedActivity && (

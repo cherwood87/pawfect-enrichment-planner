@@ -1,41 +1,16 @@
 
 import { useEffect } from 'react';
-import { useBundleAnalytics } from '@/hooks/useBundleAnalytics';
-import { registerProgressiveComponents } from '@/utils/progressiveLoader';
-import {
-  LazyIndexOptimized,
-  LazyActivityLibraryPage,
-  LazyWeeklyPlannerPage
-} from '@/components/lazy/LazyRouteComponents';
+import { useLightweightMonitor } from '@/hooks/useLightweightMonitor';
 
 export const useAppInitialization = () => {
-  const { getMetrics } = useBundleAnalytics('App');
+  useLightweightMonitor('App');
 
   useEffect(() => {
-    // Register progressive loading components
-    registerProgressiveComponents();
-
-    // Preload critical route chunks based on current route
-    const currentPath = window.location.pathname;
-    
-    if (currentPath === '/' || currentPath === '/auth') {
-      // Preload app routes for faster navigation
-      setTimeout(() => {
-        (LazyIndexOptimized as any).preload?.();
-      }, 2000);
-    } else if (currentPath.includes('/app')) {
-      // Preload activity library and weekly planner
-      setTimeout(() => {
-        (LazyActivityLibraryPage as any).preload?.();
-        (LazyWeeklyPlannerPage as any).preload?.();
-      }, 1000);
-    }
-
-    // Log bundle metrics in development
+    // Simple initialization without complex preloading
     if (process.env.NODE_ENV === 'development') {
-      console.log('🚀 App initialized with advanced code splitting');
+      console.log('🚀 App initialized with optimized performance');
     }
   }, []);
 
-  return { getMetrics };
+  return {};
 };

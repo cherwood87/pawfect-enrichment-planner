@@ -1,6 +1,6 @@
 
 import React, { memo } from 'react';
-import { useBundleAnalytics } from '@/hooks/useBundleAnalytics';
+import { useLightweightMonitor } from '@/hooks/useLightweightMonitor';
 import AIDiscoverySection from '@/components/activity-library/AIDiscoverySection';
 import SearchAndFilterSection from '@/components/activity-library/SearchAndFilterSection';
 
@@ -37,7 +37,7 @@ const ActivityLibraryContent: React.FC<ActivityLibraryContentProps> = ({
   isSyncing = false,
   lastSyncTime
 }) => {
-  const { getMetrics } = useBundleAnalytics('ActivityLibraryContent');
+  useLightweightMonitor('ActivityLibraryContent');
 
   return (
     <div className="space-y-6">

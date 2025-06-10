@@ -1,15 +1,17 @@
 
-import React, { useState, useCallback, Suspense } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Brain, BookOpen, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import EducationalContent from '@/components/EducationalContent';
 import FloatingChatButton from '@/components/dashboard/FloatingChatButton';
 import ChatModal from '@/components/chat/ChatModal';
-import LoadingSpinner from '@/components/ui/loading-spinner';
-import { LazyActivityLibrary } from '@/components/lazy/LazyRouteComponents';
+import ActivityLibrary from '@/components/ActivityLibrary';
+import { useLightweightMonitor } from '@/hooks/useLightweightMonitor';
 
 const ActivityLibraryPage = () => {
+  useLightweightMonitor('ActivityLibraryPage');
+  
   const navigate = useNavigate();
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
 
@@ -27,7 +29,7 @@ const ActivityLibraryPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-cyan-50 to-amber-50">
-      {/* Enhanced Header */}
+      {/* Header */}
       <div className="bg-white/80 backdrop-blur-lg shadow-lg border-b-2 border-purple-200">
         <div className="max-w-screen-lg mx-auto mobile-container py-4">
           <div className="flex items-center justify-between">
@@ -58,7 +60,7 @@ const ActivityLibraryPage = () => {
       </div>
 
       <div className="max-w-screen-lg mx-auto mobile-container py-8 mobile-space-y pb-20 sm:pb-8">
-        {/* Enhanced Educational Content */}
+        {/* Educational Content */}
         <div className="modern-card bg-gradient-to-r from-purple-50 via-cyan-50 to-amber-50 border-2 border-purple-200">
           <div className="mobile-card text-center space-y-4">
             <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-cyan-500 rounded-2xl flex items-center justify-center mx-auto shadow-lg">
@@ -68,24 +70,8 @@ const ActivityLibraryPage = () => {
           </div>
         </div>
         
-        {/* Activity Library with improved Suspense boundary */}
-        <Suspense 
-          fallback={
-            <div className="modern-card">
-              <div className="mobile-card flex items-center justify-center py-12">
-                <div className="text-center space-y-4">
-                  <LoadingSpinner size="lg" />
-                  <p className="text-gray-600">Loading activity library...</p>
-                  <div className="text-sm text-gray-500">
-                    Optimizing for better performance
-                  </div>
-                </div>
-              </div>
-            </div>
-          }
-        >
-          <LazyActivityLibrary />
-        </Suspense>
+        {/* Activity Library - Direct import for better performance */}
+        <ActivityLibrary />
       </div>
 
       {/* Floating Chat Button */}
