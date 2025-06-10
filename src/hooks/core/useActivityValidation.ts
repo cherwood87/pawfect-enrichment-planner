@@ -135,7 +135,7 @@ export const useActivityValidation = () => {
     };
 
     return { isValid: true, sanitizedActivity };
-  }, [currentDog, toast]);
+  }, [toast]);
 
   const validateActivityUpdate = useCallback((
     updates: Partial<ScheduledActivity>,
@@ -164,7 +164,7 @@ export const useActivityValidation = () => {
     }
 
     return true;
-  }, [currentDog, toast]);
+  }, [toast]);
 
   const validateCompletionNotes = useCallback((completionNotes?: string): boolean => {
     if (completionNotes) {
