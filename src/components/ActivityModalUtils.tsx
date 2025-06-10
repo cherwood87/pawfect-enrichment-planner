@@ -17,12 +17,13 @@ export function calculateScheduledDate(selectedDayOfWeek: number): { date: strin
   // Calculate days until the selected day
   let daysUntilSelectedDay = selectedDayOfWeek - currentDayOfWeek;
   
-  // If the selected day is today or earlier in the week, schedule for next week
-  // This ensures we don't schedule activities in the past
+  // If the selected day is today or has already passed this week, schedule for next week
+  // This ensures we don't schedule activities in the past or for today (since it might be late)
   if (daysUntilSelectedDay <= 0) {
     daysUntilSelectedDay += 7;
   }
   
+  // Create target date by adding the calculated days to today
   const targetDate = new Date(today);
   targetDate.setDate(today.getDate() + daysUntilSelectedDay);
   targetDate.setHours(0, 0, 0, 0); // Reset time to start of day
@@ -35,10 +36,27 @@ export function calculateScheduledDate(selectedDayOfWeek: number): { date: strin
     targetDate: targetDate.toDateString(),
     scheduledDateString,
     weekNumber,
-    isNextWeek: daysUntilSelectedDay > 0
+    isNextWeek: daysUntilSelectedDay > 0,
+    targetDayOfWeek: targetDate.getDay()
   });
   
-  // Validate the calculated date
+  // Validate that the calculated date actually falls on the selected day of week
+  if (targetDate.getDay() !== selectedDayOfWeek) {
+    console.error('❌ [ActivityModal] Date calculation error: target day mismatch', {
+      expectedDay: selectedDayOfWeek,
+      actualDay: targetDate.getDay(),
+      targetDate: targetDate.toDateString()
+    });
+    
+    return {
+      date: scheduledDateString,
+      isValid: false,
+      error: `Date calculation error: expected ${['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][selectedDayOfWeek]} but got ${['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][targetDate.getDay()]}`,
+      weekNumber
+    };
+  }
+  
+  // Validate the calculated date using existing validation
   const validation = SchedulingValidator.validateScheduledDate(scheduledDateString);
   
   return {
