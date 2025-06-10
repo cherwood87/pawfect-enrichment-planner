@@ -136,7 +136,7 @@ export class LearningService {
       userId: item.user_id,
       dogId: item.dog_id,
       preferenceType: item.preference_type as 'pillar_weights' | 'difficulty_preference' | 'duration_preference' | 'material_preferences' | 'time_preferences' | 'weather_preferences',
-      preferenceData: item.preference_data,
+      preferenceData: (item.preference_data || {}) as Record<string, any>,
       confidenceScore: item.confidence_score,
       lastUpdated: item.last_updated
     }));
@@ -198,7 +198,7 @@ export class LearningService {
       metricType: item.metric_type as 'pillar_preference' | 'difficulty_adaptation' | 'engagement_score' | 'completion_rate' | 'discovery_success',
       metricValue: item.metric_value,
       confidenceLevel: item.confidence_level,
-      calculationData: item.calculation_data,
+      calculationData: (item.calculation_data || {}) as Record<string, any>,
       calculatedAt: item.calculated_at
     }));
   }
