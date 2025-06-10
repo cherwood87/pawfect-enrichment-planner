@@ -23,13 +23,13 @@ export const useBundleSize = () => {
 
     // Monitor chunk loading
     const observeChunks = () => {
-      const scripts = Array.from(document.querySelectorAll('script[src*="chunk"]'));
+      const scripts = Array.from(document.querySelectorAll('script[src*="chunk"]')) as HTMLScriptElement[];
       const loadedChunks = scripts
-        .filter(script => (script as HTMLScriptElement).complete)
-        .map(script => (script as HTMLScriptElement).src);
+        .filter(script => script.readyState === 'complete' || !script.readyState)
+        .map(script => script.src);
 
       const totalSize = scripts.reduce((total, script) => {
-        const src = (script as HTMLScriptElement).src;
+        const src = script.src;
         // Estimate size based on URL or use performance API
         return total + (src.length * 100); // Rough estimation
       }, 0);
@@ -38,8 +38,8 @@ export const useBundleSize = () => {
         totalSize,
         loadedChunks,
         pendingChunks: scripts
-          .filter(script => !(script as HTMLScriptElement).complete)
-          .map(script => (script as HTMLScriptElement).src),
+          .filter(script => script.readyState !== 'complete' && script.readyState)
+          .map(script => script.src),
         loadTime: performance.now() - startTime
       });
     };
