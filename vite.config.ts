@@ -9,6 +9,9 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    hmr: {
+      timeout: 5000 // Reduced HMR timeout
+    }
   },
   plugins: [
     react(),
@@ -21,11 +24,11 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
-    // Simplified chunk splitting for better performance
+    // Optimized chunk splitting for better performance
     rollupOptions: {
       output: {
         manualChunks: (id) => {
-          // Vendor chunks - simplified grouping
+          // Vendor chunks - more granular splitting
           if (id.includes('node_modules')) {
             if (id.includes('react') || id.includes('react-dom')) {
               return 'react-vendor';
@@ -35,6 +38,9 @@ export default defineConfig(({ mode }) => ({
             }
             if (id.includes('@tanstack/react-query')) {
               return 'query-vendor';
+            }
+            if (id.includes('@supabase')) {
+              return 'supabase-vendor';
             }
             return 'vendor';
           }
@@ -47,19 +53,23 @@ export default defineConfig(({ mode }) => ({
           if (id.includes('/components/ui/')) {
             return 'ui-components';
           }
+          
+          if (id.includes('/contexts/')) {
+            return 'contexts';
+          }
         }
       }
     },
     
     // Optimize for performance and reliability
-    assetsInlineLimit: 4096,
+    assetsInlineLimit: 2048, // Reduced from 4096 for smaller bundles
     sourcemap: mode === 'development',
-    cssCodeSplit: false, // Keep CSS together for faster loading
+    cssCodeSplit: true, // Re-enabled for better loading performance
     target: 'es2020',
     
     minify: mode === 'production' ? 'esbuild' : false,
     reportCompressedSize: false,
-    chunkSizeWarningLimit: 2000, // More lenient chunk size
+    chunkSizeWarningLimit: 1500, // Reduced from 2000 for better performance
   },
   
   // Optimize dependencies
@@ -69,9 +79,11 @@ export default defineConfig(({ mode }) => ({
       'react-dom',
       'react-router-dom',
       '@tanstack/react-query',
+      '@supabase/supabase-js',
       'date-fns',
       'lucide-react'
-    ]
+    ],
+    exclude: ['@vite/client', '@vite/env']
   },
   
   esbuild: {
@@ -80,5 +92,8 @@ export default defineConfig(({ mode }) => ({
     minifySyntax: mode === 'production',
     minifyWhitespace: mode === 'production',
     drop: mode === 'production' ? ['console', 'debugger'] : [],
+    logOverride: {
+      'this-is-undefined-in-esm': 'silent'
+    }
   }
 }));
