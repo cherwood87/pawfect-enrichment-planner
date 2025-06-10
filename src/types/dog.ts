@@ -15,6 +15,7 @@ export interface Dog {
   quizResults?: QuizResults;
   journalEntries?: JournalEntry[]; // Kept for backward compatibility and local backup
   // New properties that were missing
+  userId: string; // Added missing userId property
   gender?: 'Male' | 'Female' | 'Unknown';
   image?: string;
   breedGroup?: string;

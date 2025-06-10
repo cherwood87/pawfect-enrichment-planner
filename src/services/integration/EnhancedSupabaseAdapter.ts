@@ -40,7 +40,7 @@ export class EnhancedSupabaseAdapter {
           throw new Error(`Failed to fetch dogs: ${error.message}`);
         }
 
-        return data || [];
+        return (data || []).map(this.mapToDog);
       },
       {
         maxAttempts: 3,
@@ -118,7 +118,7 @@ export class EnhancedSupabaseAdapter {
     // Check cache first
     if (useCache) {
       const cached = CacheService.get(`user_activities_${dogId}`);
-      if (cached) {
+      if (cached && Array.isArray(cached)) {
         console.log('📋 Returning cached user activities:', cached.length);
         return cached;
       }
@@ -153,7 +153,7 @@ export class EnhancedSupabaseAdapter {
 
     // Cache successful result  
     if (activities.length >= 0) { // Cache even empty results
-      CacheService.set(`user_activities_${dogId}`, activities, {
+      CacheService.set(`user_activities_${dogId}`, activities.map(this.mapToUserActivity), {
         ttl: 8 * 60 * 1000, // 8 min TTL
         persistent: true
       });
@@ -172,7 +172,19 @@ export class EnhancedSupabaseAdapter {
         const { data, error } = await supabase
           .from('dogs')
           .insert([{
-            ...dogData,
+            name: dogData.name,
+            breed: dogData.breed,
+            age: dogData.age,
+            weight: dogData.weight,
+            activity_level: dogData.activityLevel,
+            special_needs: dogData.specialNeeds || '',
+            gender: dogData.gender || 'Unknown',
+            breed_group: dogData.breedGroup || 'Unknown',
+            mobility_issues: dogData.mobilityIssues || [],
+            image: dogData.image || dogData.photo || '',
+            notes: dogData.notes || '',
+            quiz_results: dogData.quizResults ? JSON.parse(JSON.stringify(dogData.quizResults)) : null,
+            user_id: dogData.userId,
             date_added: new Date().toISOString(),
             last_updated: new Date().toISOString()
           }])
@@ -203,6 +215,87 @@ export class EnhancedSupabaseAdapter {
 
     console.log('✅ Enhanced dog created:', dog.id);
     return this.mapToDog(dog);
+  }
+
+  // Update dog operation
+  static async updateDog(dog: Dog): Promise<Dog> {
+    console.log('✏️ Updating dog with enhanced adapter:', dog.name);
+
+    const updatedDog = await RetryService.executeWithRetry(
+      async () => {
+        const { data, error } = await supabase
+          .from('dogs')
+          .update({
+            name: dog.name,
+            breed: dog.breed,
+            age: dog.age,
+            weight: dog.weight,
+            activity_level: dog.activityLevel,
+            special_needs: dog.specialNeeds || '',
+            gender: dog.gender || 'Unknown',
+            breed_group: dog.breedGroup || 'Unknown',
+            mobility_issues: dog.mobilityIssues || [],
+            image: dog.image || dog.photo || '',
+            notes: dog.notes || '',
+            quiz_results: dog.quizResults ? JSON.parse(JSON.stringify(dog.quizResults)) : null,
+            last_updated: new Date().toISOString()
+          })
+          .eq('id', dog.id)
+          .eq('user_id', dog.userId)
+          .select()
+          .single();
+
+        if (error) {
+          console.error('❌ Dog update error:', error);
+          throw new Error(`Failed to update dog: ${error.message}`);
+        }
+
+        return data;
+      },
+      {
+        maxAttempts: 2,
+        baseDelay: 1000,
+        maxDelay: 3000,
+        backoffFactor: 2,
+        timeout: 10000
+      },
+      'dog_update'
+    );
+
+    // Invalidate dogs cache for this user
+    CacheService.delete(`dogs_${dog.userId}`);
+
+    console.log('✅ Enhanced dog updated:', updatedDog.id);
+    return this.mapToDog(updatedDog);
+  }
+
+  // Delete dog operation
+  static async deleteDog(id: string): Promise<void> {
+    console.log('🗑️ Deleting dog with enhanced adapter:', id);
+
+    await RetryService.executeWithRetry(
+      async () => {
+        const { error } = await supabase
+          .from('dogs')
+          .delete()
+          .eq('id', id);
+
+        if (error) {
+          console.error('❌ Dog deletion error:', error);
+          throw new Error(`Failed to delete dog: ${error.message}`);
+        }
+      },
+      {
+        maxAttempts: 2,
+        baseDelay: 1000,
+        maxDelay: 3000,
+        backoffFactor: 2,
+        timeout: 8000
+      },
+      'dog_delete'
+    );
+
+    console.log('✅ Enhanced dog deleted:', id);
   }
 
   // Enhanced scheduled activity creation with safe upsert
