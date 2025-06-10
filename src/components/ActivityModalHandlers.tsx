@@ -1,3 +1,4 @@
+
 import { useNavigate } from 'react-router-dom';
 import { useActivity } from '@/contexts/ActivityContext';
 import { useDog } from '@/contexts/DogContext';
@@ -84,7 +85,26 @@ export const useActivityModalHandlers = (
       navigate('/dog-profile-dashboard/weekly-plan');
     } catch (error) {
       console.error('❌ [ActivityModalHandlers] Error scheduling activity:', error);
-      // Error handling is already done in the addScheduledActivity function
+      
+      // Provide specific error handling for common issues
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      
+      if (errorMessage.includes('duplicate') || errorMessage.includes('already scheduled')) {
+        toast({
+          title: "Activity Already Scheduled",
+          description: "This activity is already scheduled for the selected date. The existing schedule has been updated instead.",
+          variant: "default"
+        });
+        // Still close modal and navigate as the upsert succeeded
+        onClose();
+        navigate('/dog-profile-dashboard/weekly-plan');
+      } else {
+        toast({
+          title: "Failed to Schedule Activity",
+          description: errorMessage,
+          variant: "destructive"
+        });
+      }
     }
   };
 

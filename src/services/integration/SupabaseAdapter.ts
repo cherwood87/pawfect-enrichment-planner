@@ -5,12 +5,13 @@ import { DiscoveredActivity, ContentDiscoveryConfig } from '@/types/discovery';
 import { ActivityMappers } from '../mappers/activityMappers';
 
 export class SupabaseAdapter {
-  // Scheduled Activities
+  // Scheduled Activities - Enhanced with safe upsert functionality
   static async getScheduledActivities(dogId: string): Promise<ScheduledActivity[]> {
     const { data, error } = await supabase
       .from('scheduled_activities')
       .select('*')
       .eq('dog_id', dogId)
+      .eq('status', 'scheduled') // Only get active scheduled activities
       .order('scheduled_date', { ascending: false });
 
     if (error) {
@@ -22,24 +23,56 @@ export class SupabaseAdapter {
   }
 
   static async createScheduledActivity(activity: Omit<ScheduledActivity, 'id'>): Promise<ScheduledActivity> {
-    const { data, error } = await supabase
-      .from('scheduled_activities')
-      .insert(ActivityMappers.fromScheduledActivity(activity))
-      .select()
-      .single();
+    console.log('🔧 [SupabaseAdapter] Using safe upsert function for activity creation:', {
+      dogId: activity.dogId,
+      activityId: activity.activityId,
+      scheduledDate: activity.scheduledDate,
+      weekNumber: activity.weekNumber,
+      dayOfWeek: activity.dayOfWeek
+    });
+
+    // Use the new safe upsert function to handle duplicates gracefully
+    const { data, error } = await supabase.rpc('safe_upsert_scheduled_activity', {
+      p_dog_id: activity.dogId,
+      p_activity_id: activity.activityId,
+      p_scheduled_date: activity.scheduledDate,
+      p_week_number: activity.weekNumber || null,
+      p_day_of_week: activity.dayOfWeek || null,
+      p_notes: activity.notes || '',
+      p_completion_notes: activity.completionNotes || '',
+      p_reminder_enabled: activity.reminderEnabled || false,
+      p_source: 'manual'
+    });
 
     if (error) {
-      console.error('Error creating scheduled activity:', error);
-      throw new Error('Failed to create scheduled activity');
+      console.error('Error upserting scheduled activity:', error);
+      throw new Error(`Failed to schedule activity: ${error.message}`);
     }
 
-    return ActivityMappers.toScheduledActivity(data);
+    console.log('✅ [SupabaseAdapter] Safe upsert successful, ID:', data);
+
+    // Fetch the created/updated record
+    const { data: createdActivity, error: fetchError } = await supabase
+      .from('scheduled_activities')
+      .select('*')
+      .eq('id', data)
+      .single();
+
+    if (fetchError || !createdActivity) {
+      console.error('Error fetching created activity:', fetchError);
+      throw new Error('Failed to retrieve scheduled activity after creation');
+    }
+
+    return ActivityMappers.toScheduledActivity(createdActivity);
   }
 
   static async updateScheduledActivity(activity: ScheduledActivity): Promise<ScheduledActivity> {
     const { data, error } = await supabase
       .from('scheduled_activities')
-      .update(ActivityMappers.fromScheduledActivity(activity))
+      .update({
+        ...ActivityMappers.fromScheduledActivity(activity),
+        status: 'scheduled' // Ensure status remains scheduled for updates
+      })
       .eq('id', activity.id)
       .select()
       .single();

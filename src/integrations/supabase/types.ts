@@ -439,6 +439,8 @@ export type Database = {
           reminder_enabled: boolean | null
           scheduled_date: string
           scheduled_time: string | null
+          source: string | null
+          status: string | null
           updated_at: string
           user_selected_time: string | null
           week_number: number | null
@@ -456,6 +458,8 @@ export type Database = {
           reminder_enabled?: boolean | null
           scheduled_date: string
           scheduled_time?: string | null
+          source?: string | null
+          status?: string | null
           updated_at?: string
           user_selected_time?: string | null
           week_number?: number | null
@@ -473,6 +477,8 @@ export type Database = {
           reminder_enabled?: boolean | null
           scheduled_date?: string
           scheduled_time?: string | null
+          source?: string | null
+          status?: string | null
           updated_at?: string
           user_selected_time?: string | null
           week_number?: number | null
@@ -483,6 +489,47 @@ export type Database = {
             columns: ["dog_id"]
             isOneToOne: false
             referencedRelation: "dogs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scheduled_activity_audit_log: {
+        Row: {
+          id: string
+          new_values: Json | null
+          notes: string | null
+          old_values: Json | null
+          operation: string
+          performed_at: string | null
+          performed_by: string | null
+          scheduled_activity_id: string | null
+        }
+        Insert: {
+          id?: string
+          new_values?: Json | null
+          notes?: string | null
+          old_values?: Json | null
+          operation: string
+          performed_at?: string | null
+          performed_by?: string | null
+          scheduled_activity_id?: string | null
+        }
+        Update: {
+          id?: string
+          new_values?: Json | null
+          notes?: string | null
+          old_values?: Json | null
+          operation?: string
+          performed_at?: string | null
+          performed_by?: string | null
+          scheduled_activity_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scheduled_activity_audit_log_scheduled_activity_id_fkey"
+            columns: ["scheduled_activity_id"]
+            isOneToOne: false
+            referencedRelation: "scheduled_activities"
             referencedColumns: ["id"]
           },
         ]
@@ -557,7 +604,27 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      resolve_scheduled_activity_duplicates: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          resolved_count: number
+          details: Json
+        }[]
+      }
+      safe_upsert_scheduled_activity: {
+        Args: {
+          p_dog_id: string
+          p_activity_id: string
+          p_scheduled_date: string
+          p_week_number?: number
+          p_day_of_week?: number
+          p_notes?: string
+          p_completion_notes?: string
+          p_reminder_enabled?: boolean
+          p_source?: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       activity_level: "low" | "moderate" | "high"

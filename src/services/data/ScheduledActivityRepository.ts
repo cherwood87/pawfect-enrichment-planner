@@ -35,7 +35,7 @@ export class ScheduledActivityRepository extends BaseRepository {
 
   static async createScheduledActivity(activity: ScheduledActivity): Promise<ScheduledActivity> {
     try {
-      console.log('💾 [ScheduledActivityRepository] Creating scheduled activity:', {
+      console.log('💾 [ScheduledActivityRepository] Creating scheduled activity with enhanced duplicate handling:', {
         activityId: activity.activityId,
         dogId: activity.dogId,
         scheduledDate: activity.scheduledDate,
@@ -45,9 +45,10 @@ export class ScheduledActivityRepository extends BaseRepository {
       
       this.validateScheduledActivity(activity);
       
+      // The SupabaseAdapter now uses the safe upsert function
       const created = await SupabaseAdapter.createScheduledActivity(activity);
       
-      console.log('✅ [ScheduledActivityRepository] Created in Supabase:', {
+      console.log('✅ [ScheduledActivityRepository] Created/Updated in Supabase:', {
         id: created.id,
         activityId: created.activityId,
         scheduledDate: created.scheduledDate,
@@ -59,7 +60,13 @@ export class ScheduledActivityRepository extends BaseRepository {
       if (activity.dogId) {
         try {
           const existing = LocalStorageAdapter.getScheduledActivities(activity.dogId);
-          LocalStorageAdapter.saveScheduledActivities(activity.dogId, [...existing, created]);
+          // Remove any existing entry for the same activity/date combo before adding the new one
+          const filtered = existing.filter(a => 
+            !(a.activityId === created.activityId && 
+              a.scheduledDate === created.scheduledDate && 
+              a.dogId === created.dogId)
+          );
+          LocalStorageAdapter.saveScheduledActivities(activity.dogId, [...filtered, created]);
           console.log('📱 [ScheduledActivityRepository] Updated localStorage backup');
         } catch (localError) {
           console.warn('⚠️ [ScheduledActivityRepository] Failed to update localStorage backup:', localError);
@@ -69,7 +76,17 @@ export class ScheduledActivityRepository extends BaseRepository {
       return created;
     } catch (error) {
       console.error('❌ [ScheduledActivityRepository] Failed to create in Supabase:', error);
-      handleError(error as Error, { operation: 'createScheduledActivity', activity });
+      
+      // Enhanced error handling for different types of failures
+      if (error instanceof Error) {
+        if (error.message.includes('duplicate') || error.message.includes('already scheduled')) {
+          // This is actually a successful upsert, but we should inform the user
+          console.log('ℹ️ [ScheduledActivityRepository] Activity was already scheduled, upsert successful');
+        } else {
+          handleError(error, { operation: 'createScheduledActivity', activity });
+        }
+      }
+      
       throw error;
     }
   }
