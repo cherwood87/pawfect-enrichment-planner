@@ -1,9 +1,10 @@
 
 import React from 'react';
-import { CalendarDays } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useNavigate } from 'react-router-dom';
 import { useWeeklyPlannerLogic } from '@/hooks/useWeeklyPlannerLogic';
+import { useWeeklyPlannerNavigation } from '@/hooks/useWeeklyPlannerNavigation';
+import { useWeeklyPlannerModal } from '@/hooks/useWeeklyPlannerModal';
+import { useWeeklyPlannerActions } from '@/hooks/useWeeklyPlannerActions';
 import WeeklyPlannerNavigation from './WeeklyPlannerNavigation';
 import WeeklyPlannerProgress from './WeeklyPlannerProgress';
 import WeeklyPlannerGrid from './WeeklyPlannerGrid';
@@ -15,53 +16,36 @@ interface WeeklyPlannerLogicProps {
 }
 
 const WeeklyPlannerLogic: React.FC<WeeklyPlannerLogicProps> = ({ onPillarSelect }) => {
-  const navigate = useNavigate();
-  
   const {
     currentWeekStartDate,
     setCurrentWeekStartDate,
+    goToNextWeek,
+    goToPreviousWeek,
+    goToTodayWeek,
+    navigateToActivityLibrary
+  } = useWeeklyPlannerNavigation();
+
+  const { selectedActivityModal, openModal, closeModal } = useWeeklyPlannerModal();
+  const { getActivityDetails, handleToggleCompletion } = useWeeklyPlannerActions();
+
+  const {
     weeklyActivities,
-    selectedActivityModal,
-    setSelectedActivityModal,
-    getDayCompletionStatus,
-    getActivityDetails,
-    handleToggleCompletion
-  } = useWeeklyPlannerLogic();
-
-  // Handle navigation to the next week
-  const goToNextWeek = () => {
-    const nextWeekStartDate = new Date(currentWeekStartDate);
-    nextWeekStartDate.setDate(currentWeekStartDate.getDate() + 7);
-    setCurrentWeekStartDate(nextWeekStartDate);
-  };
-
-  // Handle navigation to the previous week
-  const goToPreviousWeek = () => {
-    const previousWeekStartDate = new Date(currentWeekStartDate);
-    previousWeekStartDate.setDate(currentWeekStartDate.getDate() - 7);
-    setCurrentWeekStartDate(previousWeekStartDate);
-  };
-
-  // Handle navigation to today's week
-  const goToTodayWeek = () => {
-    setCurrentWeekStartDate(new Date());
-  };
+    getDayCompletionStatus
+  } = useWeeklyPlannerLogic(currentWeekStartDate);
 
   const handleDayCardClick = (dayIndex: number) => {
     const dayActivities = weeklyActivities.filter(activity => activity.dayOfWeek === dayIndex);
     if (dayActivities.length > 0) {
       const activity = dayActivities[0];
-      // Fetch activity details based on activityId
       const activityDetails = getActivityDetails(activity.activityId);
       if (activityDetails) {
-        setSelectedActivityModal({ activity: activityDetails, scheduledActivity: activity });
+        openModal(activityDetails, activity);
       } else {
         console.error("Activity details not found for activityId:", activity.activityId);
       }
     } else {
-      // Navigate to activity library with selected pillar - updated path
       onPillarSelect('all');
-      navigate('/activity-library');
+      navigateToActivityLibrary('all');
     }
   };
 
@@ -103,10 +87,9 @@ const WeeklyPlannerLogic: React.FC<WeeklyPlannerLogicProps> = ({ onPillarSelect 
         />
       </CardContent>
 
-      {/* Activity Detail Modal */}
       <ConsolidatedActivityModal
         isOpen={!!selectedActivityModal.activity}
-        onClose={() => setSelectedActivityModal({ activity: null, scheduledActivity: null })}
+        onClose={closeModal}
         activityDetails={selectedActivityModal.activity}
         scheduledActivity={selectedActivityModal.scheduledActivity}
         onToggleCompletion={handleToggleCompletion}

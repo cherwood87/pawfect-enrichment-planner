@@ -1,28 +1,14 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { ScheduledActivity, ActivityLibraryItem, UserActivity } from '@/types/activity';
-import { DiscoveredActivity } from '@/types/discovery';
+import { ScheduledActivity } from '@/types/activity';
 import { useDog } from '@/contexts/DogContext';
 import { useActivity } from '@/contexts/ActivityContext';
-import { useToast } from '@/hooks/use-toast';
 import { WeekUtils } from '@/utils/weekUtils';
 
-interface ActivityModalState {
-  activity: ActivityLibraryItem | UserActivity | DiscoveredActivity | null;
-  scheduledActivity: ScheduledActivity | null;
-}
-
-export const useWeeklyPlannerLogic = () => {
-  const { toast } = useToast();
+export const useWeeklyPlannerLogic = (currentWeekStartDate: Date) => {
   const { currentDog } = useDog();
-  const { scheduledActivities, toggleActivityCompletion, getCombinedActivityLibrary, userActivities, discoveredActivities } = useActivity();
-
-  const [currentWeekStartDate, setCurrentWeekStartDate] = useState(new Date());
+  const { scheduledActivities } = useActivity();
   const [weeklyActivities, setWeeklyActivities] = useState<ScheduledActivity[]>([]);
-  const [selectedActivityModal, setSelectedActivityModal] = useState<ActivityModalState>({
-    activity: null,
-    scheduledActivity: null,
-  });
 
   const currentWeekNumber = WeekUtils.getISOWeek(currentWeekStartDate);
 
@@ -98,39 +84,9 @@ export const useWeeklyPlannerLogic = () => {
     return { completed, activity: dayActivities[0] };
   }, [weeklyActivities]);
 
-  const getActivityDetails = useCallback((activityId: string): ActivityLibraryItem | UserActivity | DiscoveredActivity | undefined => {
-    // Combine all possible activity sources
-    const allActivities = [...getCombinedActivityLibrary(), ...userActivities, ...discoveredActivities];
-    return allActivities.find(activity => activity.id === activityId);
-  }, [getCombinedActivityLibrary, userActivities, discoveredActivities]);
-
-  // Handle activity completion toggle
-  const handleToggleCompletion = useCallback(async (activityId: string) => {
-    try {
-      await toggleActivityCompletion(activityId);
-      toast({
-        title: "Activity Updated!",
-        description: "Activity completion status has been updated.",
-      });
-    } catch (error) {
-      console.error("Error toggling activity completion:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update activity completion status. Please try again.",
-        variant: "destructive",
-      });
-    }
-  }, [toggleActivityCompletion, toast]);
-
   return {
-    currentWeekStartDate,
-    setCurrentWeekStartDate,
     weeklyActivities,
-    selectedActivityModal,
-    setSelectedActivityModal,
     currentWeekNumber,
-    getDayCompletionStatus,
-    getActivityDetails,
-    handleToggleCompletion
+    getDayCompletionStatus
   };
 };
