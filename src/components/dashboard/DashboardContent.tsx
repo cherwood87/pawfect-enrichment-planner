@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useActivity } from '@/contexts/ActivityContext';
 import { useDog } from '@/contexts/DogContext';
 import { useFavourites } from '@/hooks/useFavourites';
