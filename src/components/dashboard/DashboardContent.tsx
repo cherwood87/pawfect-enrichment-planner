@@ -1,5 +1,4 @@
-
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useActivity } from '@/contexts/ActivityContext';
 import { useDog } from '@/contexts/DogContext';
 import { useFavourites } from '@/hooks/useFavourites';
@@ -17,12 +16,8 @@ interface DashboardContentProps {
   onChatOpen?: () => void;
 }
 
-const DashboardContent: React.FC<DashboardContentProps> = ({
-  onAddDogOpen,
-  onEditDogOpen,
-  onPillarSelect,
-  onChatOpen
-}) => {
+const DashboardContent = (props) => {
+  console.log('[DashboardContent] Rendering');
   const {
     addScheduledActivity
   } = useActivity();
@@ -89,7 +84,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
   };
 
   if (!currentDog) {
-    return <EmptyDashboard onAddDogOpen={onAddDogOpen} />;
+    return <EmptyDashboard onAddDogOpen={props.onAddDogOpen} />;
   }
 
   return (
@@ -98,7 +93,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
         {/* Main Dashboard Content */}
         <div className="mobile-space-y bg-slate-100">
           {/* Today's Enrichment Summary */}
-          <TodaysEnrichmentSummary onChatOpen={onChatOpen} />
+          <TodaysEnrichmentSummary onChatOpen={props.onChatOpen} />
         </div>
 
         {/* Enhanced Favourites Section */}

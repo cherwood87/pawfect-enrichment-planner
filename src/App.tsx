@@ -3,7 +3,8 @@ import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 import { Toaster as Sonner } from '@/components/ui/sonner';
-import ErrorBoundary from '@/components/error/ErrorBoundary';
+// Replace ErrorBoundary with EnhancedErrorBoundary for better diagnostics
+import EnhancedErrorBoundary from '@/components/error/EnhancedErrorBoundary';
 import AppProviders from '@/components/app/AppProviders';
 import AppRoutes from '@/components/app/AppRoutes';
 import { createQueryClient } from '@/config/queryClientConfig';
@@ -14,8 +15,12 @@ const queryClient = createQueryClient();
 const AppContent: React.FC = () => {
   useAppInitialization();
 
+  React.useEffect(() => {
+    console.log('[App] Mounting AppContent...');
+  }, []);
+
   return (
-    <ErrorBoundary>
+    <EnhancedErrorBoundary showDetails>
       <AppProviders queryClient={queryClient}>
         <Toaster />
         <Sonner />
@@ -23,11 +28,15 @@ const AppContent: React.FC = () => {
           <AppRoutes />
         </BrowserRouter>
       </AppProviders>
-    </ErrorBoundary>
+    </EnhancedErrorBoundary>
   );
 };
 
 const App: React.FC = () => {
+  React.useEffect(() => {
+    console.log('[App] Mounting App...');
+  }, []);
+
   return <AppContent />;
 };
 
