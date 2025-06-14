@@ -217,7 +217,7 @@ export class EnhancedSupabaseAdapter {
     return this.mapToDog(dog);
   }
 
-  // Update dog operation
+  // Update dog operation - SINGLE DEFINITION
   static async updateDog(dog: Dog): Promise<Dog> {
     console.log('✏️ Updating dog with enhanced adapter:', dog.name);
 
@@ -269,7 +269,7 @@ export class EnhancedSupabaseAdapter {
     return this.mapToDog(updatedDog);
   }
 
-  // Delete dog operation
+  // Delete dog operation - SINGLE DEFINITION
   static async deleteDog(id: string): Promise<void> {
     console.log('🗑️ Deleting dog with enhanced adapter:', id);
 
