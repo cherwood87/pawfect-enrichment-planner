@@ -7,13 +7,13 @@ interface LoadableComponentOptions {
   timeout?: number;
 }
 
-// Enhanced lazy loading with better error handling and preloading
+// Enhanced lazy loading with better error handling and reasonable timeouts
 export const createLoadableComponent = <T extends ComponentType<any>>(
   importFn: () => Promise<{ default: T }>,
   options: LoadableComponentOptions = {}
 ) => {
   const LazyComponent = lazy(() => {
-    const { delay = 0, timeout = 10000 } = options;
+    const { delay = 0, timeout = 3000 } = options; // Reduced from 10000 to 3000ms
     
     return Promise.race([
       // Add artificial delay if specified (useful for testing)
@@ -21,7 +21,7 @@ export const createLoadableComponent = <T extends ComponentType<any>>(
         ? new Promise(resolve => setTimeout(resolve, delay)).then(() => importFn())
         : importFn(),
       
-      // Add timeout to prevent infinite loading
+      // Reasonable timeout to prevent infinite loading
       new Promise((_, reject) =>
         setTimeout(() => reject(new Error('Component load timeout')), timeout)
       )
