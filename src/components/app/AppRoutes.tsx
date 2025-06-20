@@ -17,27 +17,18 @@ import {
 import IndexOptimized from '@/pages/IndexOptimized';
 import ActivityLibraryPage from '@/pages/ActivityLibraryPage';
 import WeeklyPlannerPage from '@/pages/WeeklyPlannerPage';
-import DiagnosticsPage from '@/pages/DiagnosticsPage';
 
-const SimpleLoadingFallback = () => {
-  console.log('[AppRoutes] 📱 Loading fallback displayed');
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-orange-50 flex items-center justify-center">
-      <LoadingSpinner size="lg" />
-    </div>
-  );
-};
+const SimpleLoadingFallback = () => (
+  <div className="min-h-screen bg-gradient-to-br from-blue-50 to-orange-50 flex items-center justify-center">
+    <LoadingSpinner size="lg" />
+  </div>
+);
 
 const AppRoutes: React.FC = () => {
-  console.log('[AppRoutes] 🗺️ Rendering routes...');
-
   return (
     <Suspense fallback={<SimpleLoadingFallback />}>
       <Routes>
         <Route path="/auth" element={<LazyAuth />} />
-        
-        {/* Add diagnostics page for debugging */}
-        <Route path="/diagnostics" element={<DiagnosticsPage />} />
         
         {/* Direct imports for critical routes */}
         <Route path="/app" element={
