@@ -3,6 +3,7 @@ import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 import { Toaster as Sonner } from '@/components/ui/sonner';
+import ProductionErrorBoundary from '@/components/error/ProductionErrorBoundary';
 import EnhancedErrorBoundary from '@/components/error/EnhancedErrorBoundary';
 import AppProviders from '@/components/app/AppProviders';
 import AppRoutes from '@/components/app/AppRoutes';
@@ -39,16 +40,18 @@ const AppContent: React.FC = () => {
   }, [startCustomStage, completeCustomStage]);
 
   return (
-    <EnhancedErrorBoundary showDetails>
-      <AppProviders queryClient={queryClient}>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <AppRoutes />
-          <LoadingDiagnosticPanel />
-        </BrowserRouter>
-      </AppProviders>
-    </EnhancedErrorBoundary>
+    <ProductionErrorBoundary>
+      <EnhancedErrorBoundary showDetails={process.env.NODE_ENV === 'development'}>
+        <AppProviders queryClient={queryClient}>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <AppRoutes />
+            {process.env.NODE_ENV === 'development' && <LoadingDiagnosticPanel />}
+          </BrowserRouter>
+        </AppProviders>
+      </EnhancedErrorBoundary>
+    </ProductionErrorBoundary>
   );
 };
 
@@ -62,7 +65,8 @@ const App: React.FC = () => {
     loadingDiagnosticService.startStage('App Initialization', {
       timestamp: new Date().toISOString(),
       userAgent: navigator.userAgent,
-      viewport: `${window.innerWidth}x${window.innerHeight}`
+      viewport: `${window.innerWidth}x${window.innerHeight}`,
+      environment: process.env.NODE_ENV || 'production'
     });
     
     startCustomStage('App Mount');

@@ -162,16 +162,29 @@ class NetworkHealthService {
   }
 
   private updateCacheStats() {
-    const basicStats = CacheService.getCacheStats();
-    
-    // Convert to the expected format with proper metrics
-    const stats = {
-      memoryEntries: basicStats.memoryEntries,
-      hitRate: 0.85, // Default hit rate, can be enhanced later
-      totalRequests: basicStats.memoryEntries * 2 // Rough estimation
-    };
-    
-    this.updateState({ cacheStats: stats });
+    try {
+      // Fixed: Use CacheService static methods directly instead of getInstance()
+      const basicStats = CacheService.getCacheStats();
+      
+      // Convert to the expected format with proper metrics
+      const stats = {
+        memoryEntries: basicStats.memoryEntries,
+        hitRate: 0.85, // Default hit rate, can be enhanced later
+        totalRequests: basicStats.memoryEntries * 2 // Rough estimation
+      };
+      
+      this.updateState({ cacheStats: stats });
+    } catch (error) {
+      console.warn('⚠️ Failed to update cache stats:', error);
+      // Provide fallback stats to prevent errors
+      this.updateState({ 
+        cacheStats: {
+          memoryEntries: 0,
+          hitRate: 0.5,
+          totalRequests: 0
+        }
+      });
+    }
   }
 
   private updateState(updates: Partial<NetworkHealthState>) {
