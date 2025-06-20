@@ -1,10 +1,10 @@
 
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNetworkResilience } from '@/hooks/useNetworkResilience';
 import { LoadingSkeleton } from '@/components/ui/loading-skeleton';
-import { AlertCircle, Wifi, WifiOff } from 'lucide-react';
+import { AlertCircle, Wifi, WifiOff, Bug } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface ProtectedRouteProps {
@@ -14,6 +14,19 @@ interface ProtectedRouteProps {
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { user, session, loading, isConnected } = useAuth();
   const { isOnline, isSupabaseConnected, retryConnection } = useNetworkResilience();
+  const location = useLocation();
+
+  React.useEffect(() => {
+    console.log('[ProtectedRoute] 🛡️ Auth state check:', {
+      loading,
+      hasUser: !!user,
+      hasSession: !!session,
+      isConnected,
+      isOnline,
+      isSupabaseConnected,
+      currentPath: location.pathname
+    });
+  }, [loading, user, session, isConnected, isOnline, isSupabaseConnected, location.pathname]);
 
   // Show loading only while auth is determining state
   if (loading) {
@@ -46,13 +59,23 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
               : 'Unable to connect to our services. Please try again.'
             }
           </p>
-          <Button 
-            onClick={retryConnection}
-            className="bg-purple-600 hover:bg-purple-700 text-white"
-          >
-            <Wifi className="w-4 h-4 mr-2" />
-            Try Again
-          </Button>
+          <div className="space-y-2">
+            <Button 
+              onClick={retryConnection}
+              className="bg-purple-600 hover:bg-purple-700 text-white w-full"
+            >
+              <Wifi className="w-4 h-4 mr-2" />
+              Try Again
+            </Button>
+            <Button 
+              variant="outline"
+              onClick={() => window.location.href = '/diagnostics'}
+              className="w-full"
+            >
+              <Bug className="w-4 h-4 mr-2" />
+              Run Diagnostics
+            </Button>
+          </div>
         </div>
       </div>
     );

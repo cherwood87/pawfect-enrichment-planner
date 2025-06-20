@@ -211,6 +211,30 @@ export type Database = {
           },
         ]
       }
+      content_templates: {
+        Row: {
+          content_type: string
+          created_at: string
+          id: string
+          template: string
+          updated_at: string
+        }
+        Insert: {
+          content_type: string
+          created_at?: string
+          id?: string
+          template: string
+          updated_at?: string
+        }
+        Update: {
+          content_type?: string
+          created_at?: string
+          id?: string
+          template?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       discovered_activities: {
         Row: {
           age_group: Database["public"]["Enums"]["age_group"] | null
@@ -442,6 +466,36 @@ export type Database = {
           },
         ]
       }
+      generated_content: {
+        Row: {
+          content_type: string
+          created_at: string
+          generated_text: string
+          id: string
+          topic: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          content_type: string
+          created_at?: string
+          generated_text: string
+          id?: string
+          topic: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          content_type?: string
+          created_at?: string
+          generated_text?: string
+          id?: string
+          topic?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       journal_entries: {
         Row: {
           behaviors: string[]
@@ -481,6 +535,102 @@ export type Database = {
           prompt?: string
           response?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      kajabi_courses: {
+        Row: {
+          course_description: string | null
+          course_name: string
+          created_at: string
+          id: string
+          kajabi_course_id: string
+          last_synced_at: string | null
+          lessons_count: number | null
+          modules_count: number | null
+          sync_status: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          course_description?: string | null
+          course_name: string
+          created_at?: string
+          id?: string
+          kajabi_course_id: string
+          last_synced_at?: string | null
+          lessons_count?: number | null
+          modules_count?: number | null
+          sync_status?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          course_description?: string | null
+          course_name?: string
+          created_at?: string
+          id?: string
+          kajabi_course_id?: string
+          last_synced_at?: string | null
+          lessons_count?: number | null
+          modules_count?: number | null
+          sync_status?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      knowledge_base_files: {
+        Row: {
+          content_extracted: string
+          course_reference: string | null
+          created_at: string
+          file_name: string
+          file_size: number | null
+          file_type: string
+          id: string
+          kajabi_course_id: string | null
+          kajabi_lesson_id: string | null
+          kajabi_module_id: string | null
+          source: string | null
+          storage_path: string
+          tags: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content_extracted: string
+          course_reference?: string | null
+          created_at?: string
+          file_name: string
+          file_size?: number | null
+          file_type: string
+          id?: string
+          kajabi_course_id?: string | null
+          kajabi_lesson_id?: string | null
+          kajabi_module_id?: string | null
+          source?: string | null
+          storage_path: string
+          tags?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content_extracted?: string
+          course_reference?: string | null
+          created_at?: string
+          file_name?: string
+          file_size?: number | null
+          file_type?: string
+          id?: string
+          kajabi_course_id?: string | null
+          kajabi_lesson_id?: string | null
+          kajabi_module_id?: string | null
+          source?: string | null
+          storage_path?: string
+          tags?: string[] | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -828,6 +978,33 @@ export type Database = {
           },
         ]
       }
+      user_settings: {
+        Row: {
+          created_at: string
+          id: string
+          setting_data: Json
+          setting_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          setting_data?: Json
+          setting_type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          setting_data?: Json
+          setting_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -854,6 +1031,10 @@ export type Database = {
           reason: string
         }[]
       }
+      get_kajabi_settings: {
+        Args: { p_user_id: string }
+        Returns: Json
+      }
       resolve_scheduled_activity_duplicates: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -874,6 +1055,35 @@ export type Database = {
           p_source?: string
         }
         Returns: string
+      }
+      search_knowledge_base_files: {
+        Args: { p_user_id: string; p_search_terms: string; p_limit?: number }
+        Returns: {
+          id: string
+          file_name: string
+          file_type: string
+          content_excerpt: string
+          relevance_score: number
+          tags: string[]
+        }[]
+      }
+      search_knowledge_base_with_courses: {
+        Args: {
+          p_user_id: string
+          p_search_terms: string
+          p_content_type?: string
+          p_limit?: number
+        }
+        Returns: {
+          id: string
+          file_name: string
+          file_type: string
+          content_excerpt: string
+          relevance_score: number
+          tags: string[]
+          source: string
+          course_reference: string
+        }[]
       }
     }
     Enums: {
