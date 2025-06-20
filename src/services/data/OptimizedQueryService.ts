@@ -14,6 +14,13 @@ export interface QueryOptions {
   priority?: 'low' | 'normal' | 'high';
 }
 
+interface DashboardData {
+  dog: Dog | null;
+  scheduledActivities: ScheduledActivity[];
+  userActivities: UserActivity[];
+  recentCompletions: any[];
+}
+
 class OptimizedQueryService {
   private static instance: OptimizedQueryService;
   
@@ -27,24 +34,19 @@ class OptimizedQueryService {
   }
 
   // Optimized batch query for dashboard data
-  async getDashboardData(dogId: string, options: QueryOptions = {}): Promise<{
-    dog: Dog | null;
-    scheduledActivities: ScheduledActivity[];
-    userActivities: UserActivity[];
-    recentCompletions: any[];
-  }> {
+  async getDashboardData(dogId: string, options: QueryOptions = {}): Promise<DashboardData> {
     const cacheKey = `dashboard_${dogId}`;
     
     if (options.useCache !== false) {
-      const cached = CacheService.get(cacheKey);
-      if (cached) {
+      const cached = CacheService.get<DashboardData>(cacheKey);
+      if (cached && this.isValidDashboardData(cached)) {
         console.log('📊 Using cached dashboard data');
         return cached;
       }
     }
 
     // Initialize default response structure
-    const defaultResponse = {
+    const defaultResponse: DashboardData = {
       dog: null,
       scheduledActivities: [],
       userActivities: [],
@@ -110,7 +112,7 @@ class OptimizedQueryService {
         )
       ]);
 
-      const result = {
+      const result: DashboardData = {
         dog: dogResult.status === 'fulfilled' && dogResult.value ? DogDataMapper.mapToDog(dogResult.value) : null,
         scheduledActivities: scheduledResult.status === 'fulfilled' && scheduledResult.value ? 
           scheduledResult.value.map(ActivityDataMapper.mapToScheduledActivity) : [],
@@ -136,8 +138,8 @@ class OptimizedQueryService {
     const cacheKey = `weekly_${dogId}_${startDate.toISOString().split('T')[0]}_${endDate.toISOString().split('T')[0]}`;
     
     if (options.useCache !== false) {
-      const cached = CacheService.get(cacheKey);
-      if (cached) {
+      const cached = CacheService.get<ScheduledActivity[]>(cacheKey);
+      if (cached && Array.isArray(cached)) {
         console.log('📅 Using cached weekly planner data');
         return cached;
       }
@@ -250,10 +252,12 @@ class OptimizedQueryService {
     const { pillar, difficulty, searchTerm, limit = 20, offset = 0 } = options;
     const cacheKey = `library_${pillar || 'all'}_${difficulty || 'all'}_${searchTerm || 'none'}_${limit}_${offset}`;
     
-    const cached = CacheService.get(cacheKey);
-    if (cached) {
-      console.log('📚 Using cached activity library data');
-      return cached;
+    if (options.useCache !== false) {
+      const cached = CacheService.get<{ data: any[]; total: number }>(cacheKey);
+      if (cached && this.isValidLibraryData(cached)) {
+        console.log('📚 Using cached activity library data');
+        return cached;
+      }
     }
 
     // Initialize default response
@@ -305,6 +309,28 @@ class OptimizedQueryService {
       console.error('❌ Failed to fetch activity library:', error);
       return defaultResponse;
     }
+  }
+
+  // Helper methods for validation
+  private isValidDashboardData(data: any): data is DashboardData {
+    return data && 
+           typeof data === 'object' &&
+           'dog' in data &&
+           'scheduledActivities' in data &&
+           'userActivities' in data &&
+           'recentCompletions' in data &&
+           Array.isArray(data.scheduledActivities) &&
+           Array.isArray(data.userActivities) &&
+           Array.isArray(data.recentCompletions);
+  }
+
+  private isValidLibraryData(data: any): data is { data: any[]; total: number } {
+    return data && 
+           typeof data === 'object' &&
+           'data' in data &&
+           'total' in data &&
+           Array.isArray(data.data) &&
+           typeof data.total === 'number';
   }
 
   // Clear cache for specific dog
