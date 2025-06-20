@@ -1,19 +1,35 @@
-
 import { ScheduledActivity } from '@/types/activity';
 import { SupabaseAdapter } from '../integration/SupabaseAdapter';
 import { LocalStorageAdapter } from '../integration/LocalStorageAdapter';
+import { OptimizedQueryService } from './OptimizedQueryService';
 import { AppError, handleError } from '@/utils/errorUtils';
 import { BaseRepository } from './BaseRepository';
 
 export class ScheduledActivityRepository extends BaseRepository {
+  private static optimizedQuery = OptimizedQueryService.getInstance();
+
   static async getScheduledActivities(dogId: string, fallbackToLocalStorage = true): Promise<ScheduledActivity[]> {
     try {
       this.validateDogId(dogId);
 
       console.log('🔍 [ScheduledActivityRepository] Fetching scheduled activities for dog:', dogId);
-      const activities = await SupabaseAdapter.getScheduledActivities(dogId);
-      console.log('✅ [ScheduledActivityRepository] Retrieved from Supabase:', activities.length, 'activities');
-      return activities;
+      
+      // Try optimized query service first for better performance
+      const today = new Date();
+      const oneMonthFromNow = new Date();
+      oneMonthFromNow.setMonth(today.getMonth() + 1);
+      
+      try {
+        const activities = await this.optimizedQuery.getWeeklyPlannerData(dogId, today, oneMonthFromNow);
+        console.log('✅ [ScheduledActivityRepository] Retrieved via optimized query:', activities.length, 'activities');
+        return activities;
+      } catch (optimizedError) {
+        console.warn('⚠️ [ScheduledActivityRepository] Optimized query failed, falling back to standard adapter:', optimizedError);
+        // Fall back to standard adapter
+        const activities = await SupabaseAdapter.getScheduledActivities(dogId);
+        console.log('✅ [ScheduledActivityRepository] Retrieved via standard adapter:', activities.length, 'activities');
+        return activities;
+      }
     } catch (error) {
       console.error('❌ [ScheduledActivityRepository] Failed to fetch from Supabase, falling back to localStorage:', error);
       handleError(error as Error, { operation: 'getScheduledActivities', dogId }, false);
@@ -56,6 +72,9 @@ export class ScheduledActivityRepository extends BaseRepository {
         dayOfWeek: created.dayOfWeek
       });
       
+      // Clear optimized query cache for this dog
+      this.optimizedQuery.clearDogCache(activity.dogId);
+      
       // Update localStorage as backup
       if (activity.dogId) {
         try {
@@ -91,11 +110,34 @@ export class ScheduledActivityRepository extends BaseRepository {
     }
   }
 
+  // Batch creation using optimized service
+  static async createScheduledActivitiesBatch(activities: Omit<ScheduledActivity, 'id' | 'created_at' | 'updated_at'>[]): Promise<ScheduledActivity[]> {
+    try {
+      console.log('💾 [ScheduledActivityRepository] Creating batch of', activities.length, 'scheduled activities');
+      
+      // Validate all activities
+      activities.forEach(activity => this.validateScheduledActivityForBatch(activity));
+      
+      // Use optimized query service for batch operations
+      const created = await this.optimizedQuery.createScheduledActivitiesBatch(activities);
+      
+      console.log('✅ [ScheduledActivityRepository] Batch created successfully:', created.length, 'activities');
+      return created;
+    } catch (error) {
+      console.error('❌ [ScheduledActivityRepository] Failed to create batch:', error);
+      handleError(error as Error, { operation: 'createScheduledActivitiesBatch', count: activities.length });
+      throw error;
+    }
+  }
+
   static async updateScheduledActivity(activity: ScheduledActivity): Promise<ScheduledActivity> {
     try {
       this.validateScheduledActivity(activity);
       
       const updated = await SupabaseAdapter.updateScheduledActivity(activity);
+      
+      // Clear optimized query cache for this dog
+      this.optimizedQuery.clearDogCache(activity.dogId);
       
       // Update localStorage as backup
       try {
@@ -121,6 +163,9 @@ export class ScheduledActivityRepository extends BaseRepository {
 
       await SupabaseAdapter.deleteScheduledActivity(id);
       
+      // Clear optimized query cache for this dog
+      this.optimizedQuery.clearDogCache(dogId);
+      
       // Update localStorage as backup
       try {
         const existing = LocalStorageAdapter.getScheduledActivities(dogId);
@@ -138,6 +183,17 @@ export class ScheduledActivityRepository extends BaseRepository {
 
   private static validateScheduledActivity(activity: ScheduledActivity): void {
     this.validateId(activity.id, 'Activity ID');
+    this.validateRequiredString(activity.activityId, 'Activity reference ID');
+    this.validateDogId(activity.dogId);
+    
+    if (!activity.scheduledDate) {
+      throw new AppError('Scheduled date is required', 'VALIDATION_ERROR');
+    }
+
+    this.validateDate(activity.scheduledDate, 'Scheduled date');
+  }
+
+  private static validateScheduledActivityForBatch(activity: Omit<ScheduledActivity, 'id' | 'created_at' | 'updated_at'>): void {
     this.validateRequiredString(activity.activityId, 'Activity reference ID');
     this.validateDogId(activity.dogId);
     
