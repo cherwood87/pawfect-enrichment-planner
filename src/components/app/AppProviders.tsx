@@ -1,12 +1,8 @@
 
 import React from 'react';
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { AuthProvider } from "@/contexts/AuthContext";
-import { DogProvider } from "@/contexts/DogContext";
-import { ActivityProvider } from "@/contexts/ActivityContext";
-import { ChatProvider } from "@/contexts/ChatContext";
+import { QueryClient } from "@tanstack/react-query";
 import NetworkErrorBoundary from "@/components/error/NetworkErrorBoundary";
+import ConditionalProviders from './ConditionalProviders';
 
 interface AppProvidersProps {
   children: React.ReactNode;
@@ -15,21 +11,11 @@ interface AppProvidersProps {
 
 const AppProviders: React.FC<AppProvidersProps> = ({ children, queryClient }) => {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <NetworkErrorBoundary>
-          <AuthProvider>
-            <DogProvider>
-              <ActivityProvider>
-                <ChatProvider>
-                  {children}
-                </ChatProvider>
-              </ActivityProvider>
-            </DogProvider>
-          </AuthProvider>
-        </NetworkErrorBoundary>
-      </TooltipProvider>
-    </QueryClientProvider>
+    <NetworkErrorBoundary>
+      <ConditionalProviders queryClient={queryClient}>
+        {children}
+      </ConditionalProviders>
+    </NetworkErrorBoundary>
   );
 };
 
