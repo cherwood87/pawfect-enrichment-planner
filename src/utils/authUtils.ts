@@ -3,7 +3,6 @@ import { supabase } from '@/integrations/supabase/client';
 
 /**
  * Comprehensive auth state cleanup utility
- * Removes all Supabase auth-related keys from localStorage and sessionStorage
  */
 export const cleanupAuthState = () => {
   console.log('🧹 Starting auth state cleanup...');
@@ -37,36 +36,26 @@ export const cleanupAuthState = () => {
 };
 
 /**
- * Enhanced sign-in function with aggressive timeout for better performance
+ * Simplified sign-in function with reasonable timeout
  */
 export const robustSignIn = async (email: string, password: string) => {
-  console.log('🔐 Starting robust sign-in process...');
+  console.log('🔐 Starting simplified sign-in process...');
   
   try {
     // Step 1: Clean up existing state first
     cleanupAuthState();
     
-    // Step 2: Attempt global sign out to clear any lingering sessions
-    try {
-      await Promise.race([
-        supabase.auth.signOut({ scope: 'global' }),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Pre-signin cleanup timeout')), 2000))
-      ]);
-    } catch (err) {
-      console.warn('⚠️ Pre-signin cleanup failed (continuing):', err);
-    }
-    
-    // Step 3: Sign in with email/password with aggressive timeout
-    console.log('📧 Attempting sign in with 10-second timeout...');
+    // Step 2: Sign in with email/password (with reasonable timeout)
+    console.log('📧 Attempting sign in...');
     
     const signInPromise = supabase.auth.signInWithPassword({
       email,
       password,
     });
 
-    // Reduced timeout from 15s to 10s for better UX
+    // Reasonable timeout - 15 seconds instead of 10
     const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Sign in timeout after 10 seconds')), 10000)
+      setTimeout(() => reject(new Error('Sign in took too long - please check your connection')), 15000)
     );
 
     const { data, error } = await Promise.race([signInPromise, timeoutPromise]) as any;
@@ -83,35 +72,31 @@ export const robustSignIn = async (email: string, password: string) => {
     
     return { data, error: null };
   } catch (error) {
-    console.error('❌ Robust sign-in failed:', error);
+    console.error('❌ Sign-in failed:', error);
     return { data: null, error };
   }
 };
 
 /**
- * Enhanced sign-up function with timeout
+ * Simplified sign-up function
  */
 export const robustSignUp = async (email: string, password: string) => {
-  console.log('🔐 Starting robust sign-up process...');
+  console.log('🔐 Starting simplified sign-up process...');
   
   try {
     // Step 1: Clean up existing state first
     cleanupAuthState();
     
-    // Step 2: Sign up with email/password with timeout
-    console.log('📧 Attempting sign up with 10-second timeout...');
+    // Step 2: Sign up with email/password
+    console.log('📧 Attempting sign up...');
     
-    const signUpPromise = supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/`
+      }
     });
-
-    // Reduced timeout for better performance
-    const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Sign up timeout after 10 seconds')), 10000)
-    );
-
-    const { data, error } = await Promise.race([signUpPromise, timeoutPromise]) as any;
     
     if (error) {
       console.error('❌ Sign up error:', error);
@@ -121,28 +106,28 @@ export const robustSignUp = async (email: string, password: string) => {
     console.log('✅ Sign up successful');
     return { data, error: null };
   } catch (error) {
-    console.error('❌ Robust sign-up failed:', error);
+    console.error('❌ Sign-up failed:', error);
     return { data: null, error };
   }
 };
 
 /**
- * Robust sign-out function with shorter timeout for better performance
+ * Simplified sign-out function
  */
 export const robustSignOut = async () => {
-  console.log('🔐 Starting robust sign-out process...');
+  console.log('🔐 Starting simplified sign-out process...');
   
   try {
     // Step 1: Clean up auth state first
     cleanupAuthState();
     
-    // Step 2: Attempt global sign out with shorter timeout
+    // Step 2: Attempt Supabase sign out (with reasonable timeout)
     try {
-      console.log('📤 Attempting Supabase sign out with 3-second timeout...');
+      console.log('📤 Attempting Supabase sign out...');
       
       const signOutPromise = supabase.auth.signOut({ scope: 'global' });
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Sign out timeout')), 3000)
+        setTimeout(() => reject(new Error('Sign out timeout')), 5000)
       );
 
       await Promise.race([signOutPromise, timeoutPromise]);
@@ -156,7 +141,7 @@ export const robustSignOut = async () => {
     window.location.href = '/auth';
     
   } catch (error) {
-    console.error('❌ Error during robust sign-out:', error);
+    console.error('❌ Error during sign-out:', error);
     // Even if everything fails, force redirect to auth page
     window.location.href = '/auth';
   }
@@ -180,38 +165,6 @@ export const checkNetworkConnectivity = async (): Promise<boolean> => {
     return response.ok;
   } catch (error) {
     console.warn('Network connectivity check failed:', error);
-    return false;
-  }
-};
-
-/**
- * Enhanced auth state validator
- */
-export const validateAuthState = async () => {
-  console.log('🔍 Validating auth state...');
-  
-  try {
-    const { data: { session }, error } = await Promise.race([
-      supabase.auth.getSession(),
-      new Promise((_, reject) => setTimeout(() => reject(new Error('Session check timeout')), 5000))
-    ]) as any;
-    
-    if (error) {
-      console.error('❌ Auth state validation failed:', error);
-      cleanupAuthState();
-      return false;
-    }
-    
-    if (!session) {
-      console.log('ℹ️ No active session found');
-      return false;
-    }
-    
-    console.log('✅ Valid auth state confirmed');
-    return true;
-  } catch (error) {
-    console.error('❌ Auth state validation timeout:', error);
-    cleanupAuthState();
     return false;
   }
 };

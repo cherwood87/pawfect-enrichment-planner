@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase, checkSupabaseConnection } from '@/integrations/supabase/client';
-import { cleanupAuthState, robustSignOut, robustSignIn, robustSignUp, validateAuthState } from '@/utils/authUtils';
+import { cleanupAuthState, robustSignOut, robustSignIn, robustSignUp } from '@/utils/authUtils';
 
 interface AuthContextType {
   user: User | null;
@@ -28,107 +28,70 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const clearError = () => setError(null);
 
   useEffect(() => {
-    console.log('🔐 Initializing optimized auth state...');
+    console.log('🔐 Initializing simplified auth state...');
     
     let mounted = true;
     let authSubscription: any = null;
     
     const initializeAuth = async () => {
       try {
-        // Step 1: Check network connectivity first
-        const connectionOk = await checkSupabaseConnection();
-        if (mounted) {
-          setIsConnected(connectionOk);
-        }
-        
-        if (!connectionOk) {
-          console.warn('⚠️ Supabase connection failed, working offline');
-          if (mounted) {
-            setLoading(false);
-          }
-          return;
-        }
-        
-        // Step 2: Set up auth state listener with error handling
+        // Step 1: Set up auth state listener first (no blocking)
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
-          async (event, session) => {
+          (event, session) => {
             if (!mounted) return;
             
             console.log('🔄 Auth state change:', event, session?.user?.email || 'no user');
             
-            try {
-              // Update state synchronously to prevent race conditions
-              setSession(session);
-              setUser(session?.user ?? null);
-              setError(null);
-              
-              // Handle specific auth events
-              if (event === 'SIGNED_OUT') {
-                console.log('👋 User signed out - cleaning up');
-                cleanupAuthState();
-              }
-              
-              if (event === 'SIGNED_IN' && session?.user) {
-                console.log('👋 User signed in:', session.user.email);
-              }
-              
-              if (event === 'TOKEN_REFRESHED') {
-                console.log('🔄 Token refreshed for user:', session?.user?.email);
-              }
-              
-            } catch (stateError) {
-              console.error('❌ Error handling auth state change:', stateError);
-              if (mounted) {
-                setError('Authentication state error');
-              }
-            } finally {
-              if (mounted) {
-                setLoading(false);
-              }
+            // Update state immediately
+            setSession(session);
+            setUser(session?.user ?? null);
+            setError(null);
+            setLoading(false); // Always set loading to false on auth state change
+            
+            // Handle specific events
+            if (event === 'SIGNED_OUT') {
+              console.log('👋 User signed out - cleaning up');
+              cleanupAuthState();
             }
           }
         );
         
         authSubscription = subscription;
         
-        // Step 3: Check for existing session with timeout and validation
-        const sessionTimeout = setTimeout(() => {
-          if (mounted) {
-            console.log('⏰ Session check timeout, proceeding without session');
-            setLoading(false);
-          }
-        }, 2000); // Reduced from 3s to 2s for better performance
-
-        try {
-          const isValidAuth = await validateAuthState();
-          
-          if (isValidAuth) {
-            const { data: { session }, error } = await supabase.auth.getSession();
-            
+        // Step 2: Check connectivity without blocking (progressive loading)
+        checkSupabaseConnection()
+          .then(connectionOk => {
             if (mounted) {
-              clearTimeout(sessionTimeout);
-              
-              if (error) {
-                console.error('❌ Error getting session:', error);
-                cleanupAuthState();
-                setError('Failed to restore your session. Please sign in again.');
-              } else {
-                console.log('📱 Initial session restored:', session?.user?.email || 'no session');
-                setSession(session);
-                setUser(session?.user ?? null);
-              }
-              
-              setLoading(false);
+              setIsConnected(connectionOk);
+              console.log('🌐 Connection status:', connectionOk ? 'connected' : 'offline');
             }
-          } else if (mounted) {
-            clearTimeout(sessionTimeout);
+          })
+          .catch(() => {
+            if (mounted) {
+              setIsConnected(false);
+              console.warn('⚠️ Connection check failed, working offline');
+            }
+          });
+        
+        // Step 3: Get initial session (with simple fallback, no aggressive timeout)
+        try {
+          const { data: { session }, error } = await supabase.auth.getSession();
+          
+          if (mounted) {
+            if (error) {
+              console.error('❌ Error getting session:', error);
+              setError('Failed to restore session');
+            } else {
+              console.log('📱 Initial session:', session?.user?.email || 'no session');
+              setSession(session);
+              setUser(session?.user ?? null);
+            }
             setLoading(false);
           }
         } catch (sessionError) {
           if (mounted) {
-            clearTimeout(sessionTimeout);
-            console.error('❌ Session validation failed:', sessionError);
-            setLoading(false);
+            console.error('❌ Session check failed:', sessionError);
+            setLoading(false); // Always stop loading on error
           }
         }
         

@@ -15,7 +15,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { user, session, loading, isConnected } = useAuth();
   const { isOnline, isSupabaseConnected, retryConnection } = useNetworkResilience();
 
-  // Show loading only while auth is determining state
+  // Show loading with a maximum time limit to prevent infinite loading
   if (loading) {
     console.log('⏳ ProtectedRoute: Auth loading, showing skeleton');
     return (
@@ -25,33 +25,63 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     );
   }
 
-  // Handle network issues
-  if (!isOnline || !isSupabaseConnected) {
+  // Handle offline mode gracefully - still allow access if user was previously authenticated
+  if (!isOnline) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-orange-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full text-center">
           <div className="mb-4">
-            {!isOnline ? (
-              <WifiOff className="w-16 h-16 text-red-500 mx-auto" />
-            ) : (
-              <AlertCircle className="w-16 h-16 text-orange-500 mx-auto" />
-            )}
+            <WifiOff className="w-16 h-16 text-yellow-500 mx-auto" />
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            {!isOnline ? 'No Internet Connection' : 'Service Unavailable'}
+            You're Offline
           </h2>
           <p className="text-gray-600 mb-6">
-            {!isOnline 
-              ? 'Please check your internet connection and try again.'
-              : 'Unable to connect to our services. Please try again.'
-            }
+            You can still browse your enrichment activities, but some features may be limited.
+          </p>
+          <div className="space-y-3">
+            <Button 
+              onClick={retryConnection}
+              className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+            >
+              <Wifi className="w-4 h-4 mr-2" />
+              Try to Reconnect
+            </Button>
+            {user && (
+              <Button 
+                onClick={() => window.location.href = '/app'}
+                variant="outline"
+                className="w-full"
+              >
+                Continue Offline
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Handle Supabase connection issues with graceful degradation
+  if (!isSupabaseConnected && isConnected) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full text-center">
+          <div className="mb-4">
+            <AlertCircle className="w-16 h-16 text-orange-500 mx-auto" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            Service Temporarily Unavailable
+          </h2>
+          <p className="text-gray-600 mb-6">
+            We're having trouble connecting to our services. Please try again in a moment.
           </p>
           <Button 
             onClick={retryConnection}
-            className="bg-purple-600 hover:bg-purple-700 text-white"
+            className="w-full bg-purple-600 hover:bg-purple-700 text-white"
           >
             <Wifi className="w-4 h-4 mr-2" />
-            Try Again
+            Retry Connection
           </Button>
         </div>
       </div>

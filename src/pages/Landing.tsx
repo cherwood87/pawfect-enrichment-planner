@@ -21,14 +21,15 @@ const Landing: React.FC = () => {
     console.log('⏳ Loading:', loading);
   }, [user, session, loading]);
 
-  // Show loading spinner while auth is initializing
+  // Show a simple loading state with a maximum time limit
   if (loading) {
     console.log('⏳ Landing: Showing loading state');
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-cyan-50 to-amber-50">
-        <div className="text-center modern-card p-8">
+        <div className="text-center modern-card p-8 max-w-md">
           <div className="animate-spin rounded-full h-12 w-12 border-4 border-purple-200 border-t-purple-500 mx-auto mb-4"></div>
           <p className="text-purple-700 font-medium">Loading your enrichment journey...</p>
+          <p className="text-sm text-gray-600 mt-2">This is taking longer than usual. Please check your connection.</p>
         </div>
       </div>
     );
