@@ -1,3 +1,4 @@
+
 import type React from "react";
 import {
 	createContext,
@@ -5,6 +6,7 @@ import {
 	useContext,
 	useEffect,
 	useReducer,
+	useCallback,
 } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -91,27 +93,33 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({
 	const { toast } = useToast();
 	const { user, loading: authLoading } = useAuth();
 
-	// Optimized data loading with timeout and parallel operations
-	useEffect(() => {
-		if (authLoading) {
-			console.log("🔐 Auth still loading, waiting...");
-			return;
+	// Move checkLocalStorageForDogs function up and make it a useCallback
+	const checkLocalStorageForDogs = useCallback(async (): Promise<Dog[]> => {
+		try {
+			const savedDogs = localStorage.getItem("dogs");
+			const savedCurrentDogId = localStorage.getItem("currentDogId");
+
+			if (savedDogs) {
+				const dogs = JSON.parse(savedDogs);
+				if (
+					savedCurrentDogId &&
+					dogs.find((dog: Dog) => dog.id === savedCurrentDogId)
+				) {
+					dispatch({ type: "SET_CURRENT_DOG", payload: savedCurrentDogId });
+				} else if (dogs.length > 0) {
+					dispatch({ type: "SET_CURRENT_DOG", payload: dogs[0].id });
+				}
+				return dogs;
+			}
+			return [];
+		} catch (error) {
+			console.error("❌ Error loading dogs from localStorage:", error);
+			return [];
 		}
+	}, []);
 
-		if (!user) {
-			console.log("👤 No authenticated user, clearing dogs state");
-			dispatch({ type: "SET_DOGS", payload: [] });
-			dispatch({ type: "SET_CURRENT_DOG", payload: "" });
-			dispatch({ type: "SET_LOADING", payload: false });
-			DogService.clearUserCache(); // Clear user cache
-			return;
-		}
-
-		console.log("👤 User authenticated, loading dogs for:", user.email);
-		loadDogsWithTimeout();
-	}, [user, authLoading, loadDogsWithTimeout]);
-
-	const loadDogsWithTimeout = async () => {
+	// Move loadDogsWithTimeout function up and make it a useCallback
+	const loadDogsWithTimeout = useCallback(async () => {
 		if (!user) {
 			console.log("❌ Cannot load dogs: no authenticated user");
 			return;
@@ -187,31 +195,27 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({
 		} finally {
 			dispatch({ type: "SET_LOADING", payload: false });
 		}
-	};
+	}, [user, checkLocalStorageForDogs]);
 
-	const checkLocalStorageForDogs = async (): Promise<Dog[]> => {
-		try {
-			const savedDogs = localStorage.getItem("dogs");
-			const savedCurrentDogId = localStorage.getItem("currentDogId");
-
-			if (savedDogs) {
-				const dogs = JSON.parse(savedDogs);
-				if (
-					savedCurrentDogId &&
-					dogs.find((dog: Dog) => dog.id === savedCurrentDogId)
-				) {
-					dispatch({ type: "SET_CURRENT_DOG", payload: savedCurrentDogId });
-				} else if (dogs.length > 0) {
-					dispatch({ type: "SET_CURRENT_DOG", payload: dogs[0].id });
-				}
-				return dogs;
-			}
-			return [];
-		} catch (error) {
-			console.error("❌ Error loading dogs from localStorage:", error);
-			return [];
+	// Optimized data loading with timeout and parallel operations
+	useEffect(() => {
+		if (authLoading) {
+			console.log("🔐 Auth still loading, waiting...");
+			return;
 		}
-	};
+
+		if (!user) {
+			console.log("👤 No authenticated user, clearing dogs state");
+			dispatch({ type: "SET_DOGS", payload: [] });
+			dispatch({ type: "SET_CURRENT_DOG", payload: "" });
+			dispatch({ type: "SET_LOADING", payload: false });
+			DogService.clearUserCache(); // Clear user cache
+			return;
+		}
+
+		console.log("👤 User authenticated, loading dogs for:", user.email);
+		loadDogsWithTimeout();
+	}, [user, authLoading, loadDogsWithTimeout]);
 
 	// Save current dog to localStorage whenever it changes
 	useEffect(() => {
