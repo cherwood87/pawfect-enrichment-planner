@@ -18,6 +18,28 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Timeout wrapper for session retrieval
+const getSessionWithTimeout = async (timeoutMs: number = 5000) => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  
+  try {
+    const sessionPromise = supabase.auth.getSession();
+    const result = await Promise.race([
+      sessionPromise,
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Session timeout')), timeoutMs)
+      )
+    ]) as any;
+    
+    clearTimeout(timeoutId);
+    return result;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    throw error;
+  }
+};
+
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -28,14 +50,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const clearError = () => setError(null);
 
   useEffect(() => {
-    console.log('🔐 Initializing simplified auth state...');
+    console.log('🔐 Initializing Phase 2 optimized auth state...');
     
     let mounted = true;
     let authSubscription: any = null;
     
     const initializeAuth = async () => {
       try {
-        // Step 1: Set up auth state listener first (no blocking)
+        // Step 1: Set up auth state listener first (immediate, non-blocking)
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
           (event, session) => {
             if (!mounted) return;
@@ -46,7 +68,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             setSession(session);
             setUser(session?.user ?? null);
             setError(null);
-            setLoading(false); // Always set loading to false on auth state change
+            
+            // Always resolve loading state on auth change
+            if (loading) {
+              setLoading(false);
+            }
             
             // Handle specific events
             if (event === 'SIGNED_OUT') {
@@ -58,7 +84,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         
         authSubscription = subscription;
         
-        // Step 2: Check connectivity without blocking (progressive loading)
+        // Step 2: Non-blocking connection check
         checkSupabaseConnection()
           .then(connectionOk => {
             if (mounted) {
@@ -73,9 +99,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             }
           });
         
-        // Step 3: Get initial session (with simple fallback, no aggressive timeout)
+        // Step 3: Get initial session with timeout
         try {
-          const { data: { session }, error } = await supabase.auth.getSession();
+          const { data: { session }, error } = await getSessionWithTimeout(5000);
           
           if (mounted) {
             if (error) {
@@ -86,12 +112,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
               setSession(session);
               setUser(session?.user ?? null);
             }
-            setLoading(false);
           }
         } catch (sessionError) {
           if (mounted) {
-            console.error('❌ Session check failed:', sessionError);
-            setLoading(false); // Always stop loading on error
+            console.warn('⚠️ Session check timeout or failed:', sessionError);
+            // Don't set error for timeout - just continue without session
+          }
+        } finally {
+          // Always resolve loading state
+          if (mounted) {
+            setLoading(false);
           }
         }
         
@@ -106,8 +136,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     initializeAuth();
 
+    // Failsafe: Always resolve loading after maximum wait time
+    const failsafeTimeout = setTimeout(() => {
+      if (mounted && loading) {
+        console.warn('⚠️ Auth initialization taking too long, resolving loading state');
+        setLoading(false);
+      }
+    }, 8000);
+
     return () => {
       mounted = false;
+      clearTimeout(failsafeTimeout);
       if (authSubscription) {
         console.log('🧹 Cleaning up auth subscription');
         authSubscription.unsubscribe();

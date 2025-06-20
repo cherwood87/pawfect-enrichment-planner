@@ -30,15 +30,11 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
   }
 });
 
-// Add connection monitoring
-let connectionRetries = 0;
-const maxRetries = 3;
-
-// Enhanced connection checker with retry logic
+// Simple connection checker without recursive retry logic
 export const checkSupabaseConnection = async (): Promise<boolean> => {
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    const timeoutId = setTimeout(() => controller.abort(), 3000); // Reduced timeout
     
     const { error } = await supabase
       .from('dogs')
@@ -49,36 +45,32 @@ export const checkSupabaseConnection = async (): Promise<boolean> => {
     clearTimeout(timeoutId);
     
     if (error) {
-      console.warn('Supabase connection check failed:', error);
+      console.warn('Supabase connection check failed:', error.message);
       return false;
     }
     
-    connectionRetries = 0; // Reset on success
     return true;
   } catch (error) {
-    connectionRetries++;
-    console.error(`Supabase connection attempt ${connectionRetries}/${maxRetries} failed:`, error);
-    
-    if (connectionRetries >= maxRetries) {
-      console.error('Maximum Supabase connection retries reached');
-      return false;
-    }
-    
-    // Wait before retry
-    await new Promise(resolve => setTimeout(resolve, 1000 * connectionRetries));
-    return checkSupabaseConnection();
+    console.warn('Supabase connection check error:', error);
+    return false;
   }
 };
 
-// Initialize connection monitoring
+// Initialize connection monitoring with non-blocking approach
 if (typeof window !== 'undefined') {
-  // Check connection on visibility change
+  // Check connection on visibility change (non-blocking)
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden) {
-      checkSupabaseConnection();
+      checkSupabaseConnection().catch(() => {
+        // Silently fail - connection status will be updated elsewhere
+      });
     }
   });
   
-  // Periodic connection check
-  setInterval(checkSupabaseConnection, 30000); // Every 30 seconds
+  // Periodic connection check (non-blocking, reduced frequency)
+  setInterval(() => {
+    checkSupabaseConnection().catch(() => {
+      // Silently fail - this is just for monitoring
+    });
+  }, 60000); // Every 60 seconds instead of 30
 }

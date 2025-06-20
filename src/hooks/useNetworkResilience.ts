@@ -46,7 +46,7 @@ export const useNetworkResilience = () => {
   }, [checkConnectivity]);
 
   useEffect(() => {
-    // Initial connectivity check
+    // Initial connectivity check (non-blocking)
     checkConnectivity();
 
     // Listen for online/offline events
@@ -68,12 +68,12 @@ export const useNetworkResilience = () => {
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
-    // Periodic connectivity check
+    // Periodic connectivity check with limited retries
     const interval = setInterval(() => {
-      if (networkState.retryCount < 5) { // Limit retry attempts
+      if (networkState.retryCount < 3) { // Reduced retry limit
         checkConnectivity();
       }
-    }, 15000); // Check every 15 seconds
+    }, 30000); // Check every 30 seconds
 
     return () => {
       window.removeEventListener('online', handleOnline);

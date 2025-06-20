@@ -15,7 +15,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { user, session, loading, isConnected } = useAuth();
   const { isOnline, isSupabaseConnected, retryConnection } = useNetworkResilience();
 
-  // Show loading with a maximum time limit to prevent infinite loading
+  // Show loading with improved timeout handling
   if (loading) {
     console.log('⏳ ProtectedRoute: Auth loading, showing skeleton');
     return (
@@ -25,7 +25,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     );
   }
 
-  // Handle offline mode gracefully - still allow access if user was previously authenticated
+  // Handle offline mode gracefully - allow access if user was previously authenticated
   if (!isOnline) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-orange-50 flex items-center justify-center p-4">
@@ -88,7 +88,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     );
   }
 
-  // Redirect unauthenticated users
+  // Improved fallback for unauthenticated states
   if (!user || !session) {
     console.log('🚫 ProtectedRoute: No auth, redirecting to /auth');
     return <Navigate to="/auth" replace />;
