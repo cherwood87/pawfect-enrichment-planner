@@ -14,13 +14,8 @@ export interface QueryOptions {
 
 class OptimizedQueryService {
   private static instance: OptimizedQueryService;
-  private cache: CacheService;
-  private retryService: RetryService;
   
-  private constructor() {
-    this.cache = CacheService.getInstance();
-    this.retryService = RetryService.getInstance();
-  }
+  private constructor() {}
 
   static getInstance(): OptimizedQueryService {
     if (!OptimizedQueryService.instance) {
@@ -39,7 +34,7 @@ class OptimizedQueryService {
     const cacheKey = `dashboard_${dogId}`;
     
     if (options.useCache !== false) {
-      const cached = this.cache.get(cacheKey);
+      const cached = CacheService.get(cacheKey);
       if (cached) {
         console.log('📊 Using cached dashboard data');
         return cached;
@@ -51,11 +46,12 @@ class OptimizedQueryService {
       
       // Use Promise.allSettled for parallel queries with error tolerance
       const [dogResult, scheduledResult, userActivitiesResult, completionsResult] = await Promise.allSettled([
-        this.retryService.executeWithRetry(
+        RetryService.executeWithRetry(
           () => supabase.from('dogs').select('*').eq('id', dogId).single(),
+          { maxAttempts: 3, baseDelay: 1000, maxDelay: 5000, backoffFactor: 2 },
           'dogs_query'
         ),
-        this.retryService.executeWithRetry(
+        RetryService.executeWithRetry(
           () => supabase
             .from('scheduled_activities')
             .select('*')
@@ -63,24 +59,27 @@ class OptimizedQueryService {
             .eq('status', 'scheduled')
             .order('scheduled_date', { ascending: true })
             .limit(50),
+          { maxAttempts: 3, baseDelay: 1000, maxDelay: 5000, backoffFactor: 2 },
           'scheduled_activities_query'
         ),
-        this.retryService.executeWithRetry(
+        RetryService.executeWithRetry(
           () => supabase
             .from('user_activities')
             .select('*')
             .eq('dog_id', dogId)
             .order('created_at', { ascending: false })
             .limit(20),
+          { maxAttempts: 3, baseDelay: 1000, maxDelay: 5000, backoffFactor: 2 },
           'user_activities_query'
         ),
-        this.retryService.executeWithRetry(
+        RetryService.executeWithRetry(
           () => supabase
             .from('activity_completions')
             .select('*')
             .eq('dog_id', dogId)
             .order('completion_time', { ascending: false })
             .limit(10),
+          { maxAttempts: 3, baseDelay: 1000, maxDelay: 5000, backoffFactor: 2 },
           'activity_completions_query'
         )
       ]);
@@ -93,7 +92,7 @@ class OptimizedQueryService {
       };
 
       // Cache for 5 minutes
-      this.cache.set(cacheKey, result, 5 * 60 * 1000);
+      CacheService.set(cacheKey, result, { ttl: 5 * 60 * 1000 });
       
       console.log('✅ Dashboard data fetched successfully');
       return result;
@@ -108,7 +107,7 @@ class OptimizedQueryService {
     const cacheKey = `weekly_${dogId}_${startDate.toISOString().split('T')[0]}_${endDate.toISOString().split('T')[0]}`;
     
     if (options.useCache !== false) {
-      const cached = this.cache.get(cacheKey);
+      const cached = CacheService.get(cacheKey);
       if (cached) {
         console.log('📅 Using cached weekly planner data');
         return cached;
@@ -118,7 +117,7 @@ class OptimizedQueryService {
     try {
       console.log('🔍 Fetching weekly planner data for:', dogId, startDate, endDate);
       
-      const { data, error } = await this.retryService.executeWithRetry(
+      const { data, error } = await RetryService.executeWithRetry(
         () => supabase
           .from('scheduled_activities')
           .select(`
@@ -140,6 +139,7 @@ class OptimizedQueryService {
           .lte('scheduled_date', endDate.toISOString().split('T')[0])
           .in('status', ['scheduled', 'completed'])
           .order('scheduled_date', { ascending: true }),
+        { maxAttempts: 3, baseDelay: 1000, maxDelay: 5000, backoffFactor: 2 },
         'weekly_planner_query'
       );
 
@@ -150,7 +150,7 @@ class OptimizedQueryService {
       const activities = data || [];
       
       // Cache for 2 minutes (shorter for planner data)
-      this.cache.set(cacheKey, activities, 2 * 60 * 1000);
+      CacheService.set(cacheKey, activities, { ttl: 2 * 60 * 1000 });
       
       console.log('✅ Weekly planner data fetched:', activities.length, 'activities');
       return activities;
@@ -165,12 +165,28 @@ class OptimizedQueryService {
     try {
       console.log('💾 Creating scheduled activities batch:', activities.length, 'activities');
       
+      // Transform the activities to match the database schema (camelCase to snake_case)
+      const transformedActivities = activities.map(activity => ({
+        activity_id: activity.activityId,
+        dog_id: activity.dogId,
+        scheduled_date: activity.scheduledDate,
+        week_number: activity.weekNumber,
+        day_of_week: activity.dayOfWeek,
+        completed: activity.completed || false,
+        status: activity.status || 'scheduled',
+        notes: activity.notes || '',
+        completion_notes: activity.completionNotes || '',
+        reminder_enabled: activity.reminderEnabled || false,
+        source: activity.source || 'manual'
+      }));
+      
       // Use batch insert for better performance
-      const { data, error } = await this.retryService.executeWithRetry(
+      const { data, error } = await RetryService.executeWithRetry(
         () => supabase
           .from('scheduled_activities')
-          .insert(activities)
+          .insert(transformedActivities)
           .select(),
+        { maxAttempts: 3, baseDelay: 1000, maxDelay: 5000, backoffFactor: 2 },
         'batch_create_activities'
       );
 
@@ -178,11 +194,10 @@ class OptimizedQueryService {
         throw error;
       }
 
-      // Invalidate related cache entries
+      // Clear related cache entries
       const dogIds = [...new Set(activities.map(a => a.dogId))];
       dogIds.forEach(dogId => {
-        this.cache.invalidatePattern(`dashboard_${dogId}`);
-        this.cache.invalidatePattern(`weekly_${dogId}`);
+        this.clearDogCache(dogId);
       });
 
       console.log('✅ Batch activities created successfully:', data?.length || 0);
@@ -204,7 +219,7 @@ class OptimizedQueryService {
     const { pillar, difficulty, searchTerm, limit = 20, offset = 0 } = options;
     const cacheKey = `library_${pillar || 'all'}_${difficulty || 'all'}_${searchTerm || 'none'}_${limit}_${offset}`;
     
-    const cached = this.cache.get(cacheKey);
+    const cached = CacheService.get(cacheKey);
     if (cached) {
       console.log('📚 Using cached activity library data');
       return cached;
@@ -232,8 +247,9 @@ class OptimizedQueryService {
         query = query.or(`title.ilike.%${searchTerm}%,benefits.ilike.%${searchTerm}%`);
       }
 
-      const { data, error, count } = await this.retryService.executeWithRetry(
+      const { data, error, count } = await RetryService.executeWithRetry(
         () => query,
+        { maxAttempts: 3, baseDelay: 1000, maxDelay: 5000, backoffFactor: 2 },
         'activity_library_query'
       );
 
@@ -247,7 +263,7 @@ class OptimizedQueryService {
       };
 
       // Cache for 10 minutes (library data doesn't change often)
-      this.cache.set(cacheKey, result, 10 * 60 * 1000);
+      CacheService.set(cacheKey, result, { ttl: 10 * 60 * 1000 });
       
       console.log('✅ Activity library fetched:', result.data.length, 'activities, total:', result.total);
       return result;
@@ -259,20 +275,29 @@ class OptimizedQueryService {
 
   // Clear cache for specific dog
   clearDogCache(dogId: string) {
-    this.cache.invalidatePattern(`dashboard_${dogId}`);
-    this.cache.invalidatePattern(`weekly_${dogId}`);
+    // Clear dashboard cache
+    CacheService.delete(`dashboard_${dogId}`);
+    
+    // Clear weekly cache entries (we'll need to implement a pattern-based clear or track keys)
+    const stats = CacheService.getCacheStats();
+    stats.memoryKeys.forEach(key => {
+      if (key.startsWith(`weekly_${dogId}`)) {
+        CacheService.delete(key);
+      }
+    });
+    
     console.log('🧹 Cleared cache for dog:', dogId);
   }
 
   // Get query performance metrics
   getPerformanceMetrics() {
     return {
-      cacheStats: this.cache.getCacheStats(),
+      cacheStats: CacheService.getCacheStats(),
       circuitBreakerStats: {
-        dogs: this.retryService.getStats('dogs_query'),
-        scheduledActivities: this.retryService.getStats('scheduled_activities_query'),
-        userActivities: this.retryService.getStats('user_activities_query'),
-        library: this.retryService.getStats('activity_library_query')
+        dogs: RetryService.getCircuitBreakerState('dogs_query'),
+        scheduledActivities: RetryService.getCircuitBreakerState('scheduled_activities_query'),
+        userActivities: RetryService.getCircuitBreakerState('user_activities_query'),
+        library: RetryService.getCircuitBreakerState('activity_library_query')
       }
     };
   }

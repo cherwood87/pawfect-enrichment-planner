@@ -162,8 +162,7 @@ class NetworkHealthService {
   }
 
   private updateCacheStats() {
-    const cacheService = CacheService.getInstance();
-    const basicStats = cacheService.getCacheStats();
+    const basicStats = CacheService.getCacheStats();
     
     // Convert to the expected format with proper metrics
     const stats = {
