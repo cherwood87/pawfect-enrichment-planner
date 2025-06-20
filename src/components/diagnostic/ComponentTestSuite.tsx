@@ -9,7 +9,8 @@ interface ComponentTest {
   name: string;
   status: 'idle' | 'testing' | 'success' | 'error';
   error?: Error;
-  component: React.ComponentType;
+  component: React.ComponentType<any>;
+  props?: Record<string, any>;
 }
 
 const ComponentTestSuite: React.FC = () => {
@@ -17,22 +18,31 @@ const ComponentTestSuite: React.FC = () => {
     {
       name: 'ModeToggle',
       status: 'idle',
-      component: React.lazy(() => import('@/components/ModeToggle'))
+      component: React.lazy(() => import('@/components/ModeToggle')),
+      props: {} // ModeToggle doesn't need props
     },
     {
       name: 'DashboardHeader',
       status: 'idle',
-      component: React.lazy(() => import('@/components/dashboard/DashboardHeader'))
+      component: React.lazy(() => import('@/components/dashboard/DashboardHeader')),
+      props: { onChatOpen: () => {}, onAddDogOpen: () => {} }
     },
     {
       name: 'DashboardContent',
       status: 'idle',
-      component: React.lazy(() => import('@/components/dashboard/DashboardContent'))
+      component: React.lazy(() => import('@/components/dashboard/DashboardContent')),
+      props: { 
+        onAddDogOpen: () => {}, 
+        onEditDogOpen: () => {}, 
+        onPillarSelect: () => {}, 
+        onChatOpen: () => {} 
+      }
     },
     {
       name: 'FloatingChatButton',
       status: 'idle',
-      component: React.lazy(() => import('@/components/dashboard/FloatingChatButton'))
+      component: React.lazy(() => import('@/components/dashboard/FloatingChatButton')),
+      props: { onChatOpen: () => {} }
     }
   ]);
 
@@ -94,7 +104,7 @@ const ComponentTestSuite: React.FC = () => {
           <h4 className="font-medium mb-2">Component Preview: {test.name}</h4>
           <div className="border rounded p-2 bg-gray-50">
             <React.Suspense fallback={<div>Loading component...</div>}>
-              <Component onChatOpen={() => {}} onAddDogOpen={() => {}} />
+              <Component {...(test.props || {})} />
             </React.Suspense>
           </div>
         </div>
