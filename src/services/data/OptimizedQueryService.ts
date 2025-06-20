@@ -47,48 +47,64 @@ class OptimizedQueryService {
       // Use Promise.allSettled for parallel queries with error tolerance
       const [dogResult, scheduledResult, userActivitiesResult, completionsResult] = await Promise.allSettled([
         RetryService.executeWithRetry(
-          () => supabase.from('dogs').select('*').eq('id', dogId).single(),
+          async () => {
+            const { data, error } = await supabase.from('dogs').select('*').eq('id', dogId).single();
+            if (error) throw error;
+            return { data, error };
+          },
           { maxAttempts: 3, baseDelay: 1000, maxDelay: 5000, backoffFactor: 2 },
           'dogs_query'
         ),
         RetryService.executeWithRetry(
-          () => supabase
-            .from('scheduled_activities')
-            .select('*')
-            .eq('dog_id', dogId)
-            .eq('status', 'scheduled')
-            .order('scheduled_date', { ascending: true })
-            .limit(50),
+          async () => {
+            const { data, error } = await supabase
+              .from('scheduled_activities')
+              .select('*')
+              .eq('dog_id', dogId)
+              .eq('status', 'scheduled')
+              .order('scheduled_date', { ascending: true })
+              .limit(50);
+            if (error) throw error;
+            return { data, error };
+          },
           { maxAttempts: 3, baseDelay: 1000, maxDelay: 5000, backoffFactor: 2 },
           'scheduled_activities_query'
         ),
         RetryService.executeWithRetry(
-          () => supabase
-            .from('user_activities')
-            .select('*')
-            .eq('dog_id', dogId)
-            .order('created_at', { ascending: false })
-            .limit(20),
+          async () => {
+            const { data, error } = await supabase
+              .from('user_activities')
+              .select('*')
+              .eq('dog_id', dogId)
+              .order('created_at', { ascending: false })
+              .limit(20);
+            if (error) throw error;
+            return { data, error };
+          },
           { maxAttempts: 3, baseDelay: 1000, maxDelay: 5000, backoffFactor: 2 },
           'user_activities_query'
         ),
         RetryService.executeWithRetry(
-          () => supabase
-            .from('activity_completions')
-            .select('*')
-            .eq('dog_id', dogId)
-            .order('completion_time', { ascending: false })
-            .limit(10),
+          async () => {
+            const { data, error } = await supabase
+              .from('activity_completions')
+              .select('*')
+              .eq('dog_id', dogId)
+              .order('completion_time', { ascending: false })
+              .limit(10);
+            if (error) throw error;
+            return { data, error };
+          },
           { maxAttempts: 3, baseDelay: 1000, maxDelay: 5000, backoffFactor: 2 },
           'activity_completions_query'
         )
       ]);
 
       const result = {
-        dog: dogResult.status === 'fulfilled' ? dogResult.value.data : null,
-        scheduledActivities: scheduledResult.status === 'fulfilled' ? (scheduledResult.value.data || []) : [],
-        userActivities: userActivitiesResult.status === 'fulfilled' ? (userActivitiesResult.value.data || []) : [],
-        recentCompletions: completionsResult.status === 'fulfilled' ? (completionsResult.value.data || []) : []
+        dog: dogResult.status === 'fulfilled' && dogResult.value?.data ? dogResult.value.data : null,
+        scheduledActivities: scheduledResult.status === 'fulfilled' && scheduledResult.value?.data ? scheduledResult.value.data : [],
+        userActivities: userActivitiesResult.status === 'fulfilled' && userActivitiesResult.value?.data ? userActivitiesResult.value.data : [],
+        recentCompletions: completionsResult.status === 'fulfilled' && completionsResult.value?.data ? completionsResult.value.data : []
       };
 
       // Cache for 5 minutes
@@ -117,37 +133,38 @@ class OptimizedQueryService {
     try {
       console.log('🔍 Fetching weekly planner data for:', dogId, startDate, endDate);
       
-      const { data, error } = await RetryService.executeWithRetry(
-        () => supabase
-          .from('scheduled_activities')
-          .select(`
-            id,
-            activity_id,
-            dog_id,
-            scheduled_date,
-            week_number,
-            day_of_week,
-            completed,
-            status,
-            notes,
-            completion_notes,
-            created_at,
-            updated_at
-          `)
-          .eq('dog_id', dogId)
-          .gte('scheduled_date', startDate.toISOString().split('T')[0])
-          .lte('scheduled_date', endDate.toISOString().split('T')[0])
-          .in('status', ['scheduled', 'completed'])
-          .order('scheduled_date', { ascending: true }),
+      const result = await RetryService.executeWithRetry(
+        async () => {
+          const { data, error } = await supabase
+            .from('scheduled_activities')
+            .select(`
+              id,
+              activity_id,
+              dog_id,
+              scheduled_date,
+              week_number,
+              day_of_week,
+              completed,
+              status,
+              notes,
+              completion_notes,
+              created_at,
+              updated_at
+            `)
+            .eq('dog_id', dogId)
+            .gte('scheduled_date', startDate.toISOString().split('T')[0])
+            .lte('scheduled_date', endDate.toISOString().split('T')[0])
+            .in('status', ['scheduled', 'completed'])
+            .order('scheduled_date', { ascending: true });
+
+          if (error) throw error;
+          return { data, error };
+        },
         { maxAttempts: 3, baseDelay: 1000, maxDelay: 5000, backoffFactor: 2 },
         'weekly_planner_query'
       );
 
-      if (error) {
-        throw error;
-      }
-
-      const activities = data || [];
+      const activities = result?.data || [];
       
       // Cache for 2 minutes (shorter for planner data)
       CacheService.set(cacheKey, activities, { ttl: 2 * 60 * 1000 });
@@ -181,18 +198,18 @@ class OptimizedQueryService {
       }));
       
       // Use batch insert for better performance
-      const { data, error } = await RetryService.executeWithRetry(
-        () => supabase
-          .from('scheduled_activities')
-          .insert(transformedActivities)
-          .select(),
+      const result = await RetryService.executeWithRetry(
+        async () => {
+          const { data, error } = await supabase
+            .from('scheduled_activities')
+            .insert(transformedActivities)
+            .select();
+          if (error) throw error;
+          return { data, error };
+        },
         { maxAttempts: 3, baseDelay: 1000, maxDelay: 5000, backoffFactor: 2 },
         'batch_create_activities'
       );
-
-      if (error) {
-        throw error;
-      }
 
       // Clear related cache entries
       const dogIds = [...new Set(activities.map(a => a.dogId))];
@@ -200,8 +217,9 @@ class OptimizedQueryService {
         this.clearDogCache(dogId);
       });
 
-      console.log('✅ Batch activities created successfully:', data?.length || 0);
-      return data || [];
+      const createdActivities = result?.data || [];
+      console.log('✅ Batch activities created successfully:', createdActivities.length);
+      return createdActivities;
     } catch (error) {
       console.error('❌ Failed to create activities batch:', error);
       throw error;
@@ -228,45 +246,45 @@ class OptimizedQueryService {
     try {
       console.log('🔍 Fetching activity library with filters:', options);
       
-      let query = supabase
-        .from('activities')
-        .select('*', { count: 'exact' })
-        .eq('approved', true)
-        .order('title', { ascending: true })
-        .range(offset, offset + limit - 1);
+      const result = await RetryService.executeWithRetry(
+        async () => {
+          let query = supabase
+            .from('activities')
+            .select('*', { count: 'exact' })
+            .eq('approved', true)
+            .order('title', { ascending: true })
+            .range(offset, offset + limit - 1);
 
-      if (pillar) {
-        query = query.eq('pillar', pillar);
-      }
+          if (pillar) {
+            query = query.eq('pillar', pillar);
+          }
 
-      if (difficulty) {
-        query = query.eq('difficulty', difficulty);
-      }
+          if (difficulty) {
+            query = query.eq('difficulty', difficulty);
+          }
 
-      if (searchTerm) {
-        query = query.or(`title.ilike.%${searchTerm}%,benefits.ilike.%${searchTerm}%`);
-      }
+          if (searchTerm) {
+            query = query.or(`title.ilike.%${searchTerm}%,benefits.ilike.%${searchTerm}%`);
+          }
 
-      const { data, error, count } = await RetryService.executeWithRetry(
-        () => query,
+          const { data, error, count } = await query;
+          if (error) throw error;
+          return { data, error, count };
+        },
         { maxAttempts: 3, baseDelay: 1000, maxDelay: 5000, backoffFactor: 2 },
         'activity_library_query'
       );
 
-      if (error) {
-        throw error;
-      }
-
-      const result = {
-        data: data || [],
-        total: count || 0
+      const libraryResult = {
+        data: result?.data || [],
+        total: result?.count || 0
       };
 
       // Cache for 10 minutes (library data doesn't change often)
-      CacheService.set(cacheKey, result, { ttl: 10 * 60 * 1000 });
+      CacheService.set(cacheKey, libraryResult, { ttl: 10 * 60 * 1000 });
       
-      console.log('✅ Activity library fetched:', result.data.length, 'activities, total:', result.total);
-      return result;
+      console.log('✅ Activity library fetched:', libraryResult.data.length, 'activities, total:', libraryResult.total);
+      return libraryResult;
     } catch (error) {
       console.error('❌ Failed to fetch activity library:', error);
       throw error;
