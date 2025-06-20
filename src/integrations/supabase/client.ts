@@ -6,7 +6,7 @@ import type { Database } from './types';
 const SUPABASE_URL = "https://wdqdvvsygjgrhmafovjb.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndkcWR2dnN5Z2pncmhtYWZvdmpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgwMjM1MTgsImV4cCI6MjA2MzU5OTUxOH0.ai68XvoLXEbk5d6EG_UzbN2QdJOP8dl87Xv4cjdLjJ0";
 
-// Streamlined Supabase client configuration
+// Optimized Supabase client configuration for better reliability
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
     storage: localStorage,
@@ -30,12 +30,13 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
   }
 });
 
-// Lightweight connection checker for NetworkResilience hook
+// Enhanced connection checker with better error handling
 export const checkSupabaseConnection = async (): Promise<boolean> => {
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    const timeoutId = setTimeout(() => controller.abort(), 3000); // Reduced from 5s to 3s
     
+    // Use a simple query that should work regardless of RLS
     const { error } = await supabase
       .from('dogs')
       .select('id')
@@ -44,14 +45,54 @@ export const checkSupabaseConnection = async (): Promise<boolean> => {
     
     clearTimeout(timeoutId);
     
+    // If we get an RLS error, that means we're connected but not authenticated
+    // This is actually a successful connection test
     if (error) {
+      if (error.message.includes('row-level security') || 
+          error.message.includes('RLS') ||
+          error.message.includes('permission denied')) {
+        console.log('🔐 Connection verified (RLS working as expected)');
+        return true;
+      }
       console.warn('🌐 Connection check failed:', error.message);
       return false;
     }
     
+    console.log('✅ Connection check successful');
     return true;
-  } catch (error) {
-    console.warn('🌐 Connection check error:', error);
+  } catch (error: any) {
+    if (error?.name === 'AbortError') {
+      console.warn('🌐 Connection check timeout');
+    } else {
+      console.warn('🌐 Connection check error:', error);
+    }
     return false;
+  }
+};
+
+// Health check function for monitoring
+export const performHealthCheck = async (): Promise<{
+  connected: boolean;
+  authenticated: boolean;
+  latency: number;
+}> => {
+  const startTime = Date.now();
+  
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    const connected = await checkSupabaseConnection();
+    const latency = Date.now() - startTime;
+    
+    return {
+      connected,
+      authenticated: !!user,
+      latency
+    };
+  } catch (error) {
+    return {
+      connected: false,
+      authenticated: false,
+      latency: Date.now() - startTime
+    };
   }
 };

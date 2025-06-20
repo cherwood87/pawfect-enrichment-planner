@@ -19,7 +19,7 @@ export interface ConnectionRecoveryOptions {
 export const useNetworkResilience = (options: ConnectionRecoveryOptions = {}) => {
   const {
     maxRetries = 3,
-    retryInterval = 30000, // 30 seconds
+    retryInterval = 15000, // Reduced from 30s to 15s
     exponentialBackoff = true
   } = options;
 
@@ -91,7 +91,7 @@ export const useNetworkResilience = (options: ConnectionRecoveryOptions = {}) =>
           if (networkState.retryCount < maxRetries) {
             initiateRecovery();
           }
-        }, Math.min(delay, 300000)); // Max 5 minutes
+        }, Math.min(delay, 120000)); // Max 2 minutes instead of 5
       } else {
         console.log('✅ Connection recovery successful');
       }
@@ -120,13 +120,13 @@ export const useNetworkResilience = (options: ConnectionRecoveryOptions = {}) =>
   }, [networkState.connectionHistory]);
 
   useEffect(() => {
-    // Initial connectivity check
-    checkConnectivity();
+    // Initial connectivity check with debounce
+    const initialCheckTimeout = setTimeout(checkConnectivity, 100);
 
     // Network event handlers
     const handleOnline = () => {
       console.log('🌐 Network back online');
-      checkConnectivity();
+      setTimeout(checkConnectivity, 500); // Small delay to ensure connection is stable
     };
 
     const handleOffline = () => {
@@ -144,7 +144,7 @@ export const useNetworkResilience = (options: ConnectionRecoveryOptions = {}) =>
     const handleVisibilityChange = () => {
       if (!document.hidden && navigator.onLine) {
         console.log('👁️ App became visible, checking connection');
-        checkConnectivity();
+        setTimeout(checkConnectivity, 300);
       }
     };
 
@@ -152,23 +152,24 @@ export const useNetworkResilience = (options: ConnectionRecoveryOptions = {}) =>
     window.addEventListener('offline', handleOffline);
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
-    // Periodic connectivity check
+    // More frequent but less aggressive connectivity checks
     intervalRef.current = setInterval(() => {
-      if (networkState.retryCount < maxRetries) {
+      if (networkState.retryCount < maxRetries && navigator.onLine) {
         checkConnectivity();
       }
     }, retryInterval);
 
-    // Auto-recovery for failed connections
+    // Auto-recovery for failed connections with shorter delays
     if (!networkState.isSupabaseConnected && networkState.retryCount < maxRetries && !isRecovering) {
       const recoveryDelay = exponentialBackoff 
-        ? 5000 * Math.pow(2, networkState.retryCount)
-        : 5000;
+        ? 3000 * Math.pow(1.5, networkState.retryCount) // Less aggressive backoff
+        : 3000;
       
-      recoveryTimeoutRef.current = setTimeout(initiateRecovery, Math.min(recoveryDelay, 60000));
+      recoveryTimeoutRef.current = setTimeout(initiateRecovery, Math.min(recoveryDelay, 30000));
     }
 
     return () => {
+      clearTimeout(initialCheckTimeout);
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
       document.removeEventListener('visibilitychange', handleVisibilityChange);

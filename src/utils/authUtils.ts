@@ -1,12 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 
-/**
- * Comprehensive auth state cleanup utility
- */
 export const cleanupAuthState = () => {
-  console.log('🧹 Starting auth state cleanup...');
-  
   try {
     // Remove standard auth tokens
     localStorage.removeItem('supabase.auth.token');
@@ -14,157 +9,130 @@ export const cleanupAuthState = () => {
     // Remove all Supabase auth keys from localStorage
     Object.keys(localStorage).forEach((key) => {
       if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-        console.log(`🗑️ Removing localStorage key: ${key}`);
         localStorage.removeItem(key);
       }
     });
     
-    // Remove from sessionStorage if it exists
-    if (typeof sessionStorage !== 'undefined') {
-      Object.keys(sessionStorage).forEach((key) => {
-        if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-          console.log(`🗑️ Removing sessionStorage key: ${key}`);
-          sessionStorage.removeItem(key);
-        }
-      });
-    }
-    
-    console.log('✅ Auth state cleanup completed');
-  } catch (error) {
-    console.error('❌ Error during auth state cleanup:', error);
-  }
-};
-
-/**
- * Simplified sign-in function with reasonable timeout
- */
-export const robustSignIn = async (email: string, password: string) => {
-  console.log('🔐 Starting simplified sign-in process...');
-  
-  try {
-    // Step 1: Clean up existing state first
-    cleanupAuthState();
-    
-    // Step 2: Sign in with email/password (with reasonable timeout)
-    console.log('📧 Attempting sign in...');
-    
-    const signInPromise = supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    // Reasonable timeout - 15 seconds instead of 10
-    const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Sign in took too long - please check your connection')), 15000)
-    );
-
-    const { data, error } = await Promise.race([signInPromise, timeoutPromise]) as any;
-    
-    if (error) {
-      console.error('❌ Sign in error:', error);
-      throw error;
-    }
-    
-    if (data.user) {
-      console.log('✅ Sign in successful, user:', data.user.email);
-      return { data, error: null };
-    }
-    
-    return { data, error: null };
-  } catch (error) {
-    console.error('❌ Sign-in failed:', error);
-    return { data: null, error };
-  }
-};
-
-/**
- * Simplified sign-up function
- */
-export const robustSignUp = async (email: string, password: string) => {
-  console.log('🔐 Starting simplified sign-up process...');
-  
-  try {
-    // Step 1: Clean up existing state first
-    cleanupAuthState();
-    
-    // Step 2: Sign up with email/password
-    console.log('📧 Attempting sign up...');
-    
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/`
+    // Remove from sessionStorage if in use
+    Object.keys(sessionStorage || {}).forEach((key) => {
+      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+        sessionStorage.removeItem(key);
       }
     });
     
-    if (error) {
-      console.error('❌ Sign up error:', error);
-      throw error;
+    console.log('🧹 Auth state cleaned up');
+  } catch (error) {
+    console.warn('⚠️ Error cleaning auth state:', error);
+  }
+};
+
+export const robustSignOut = async (): Promise<{ error: any }> => {
+  try {
+    console.log('👋 Starting robust sign out process');
+    
+    // Clean up first
+    cleanupAuthState();
+    
+    // Attempt global sign out with timeout
+    const signOutPromise = supabase.auth.signOut({ scope: 'global' });
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Sign out timeout')), 5000)
+    );
+    
+    try {
+      await Promise.race([signOutPromise, timeoutPromise]);
+      console.log('✅ Sign out completed successfully');
+    } catch (error) {
+      console.warn('⚠️ Sign out timeout or error, but continuing:', error);
+      // Continue even if sign out fails - cleanup is more important
+    }
+    
+    return { error: null };
+  } catch (error) {
+    console.error('❌ Robust sign out failed:', error);
+    return { error };
+  }
+};
+
+export const robustSignIn = async (email: string, password: string): Promise<{ data?: any; error: any }> => {
+  try {
+    console.log('🔑 Starting robust sign in process for:', email);
+    
+    // Clean up existing state first
+    cleanupAuthState();
+    
+    // Attempt to sign out any existing sessions
+    try {
+      await supabase.auth.signOut({ scope: 'global' });
+    } catch (err) {
+      console.warn('⚠️ Pre-signin cleanup failed, continuing:', err);
+    }
+    
+    // Sign in with timeout
+    const signInPromise = supabase.auth.signInWithPassword({ email, password });
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Sign in timeout')), 10000)
+    );
+    
+    const result = await Promise.race([signInPromise, timeoutPromise]) as any;
+    
+    if (result.error) {
+      console.error('❌ Sign in error:', result.error);
+      return { error: result.error };
+    }
+    
+    console.log('✅ Sign in successful');
+    return { data: result.data, error: null };
+  } catch (error) {
+    console.error('❌ Robust sign in failed:', error);
+    return { error };
+  }
+};
+
+export const robustSignUp = async (email: string, password: string): Promise<{ data?: any; error: any }> => {
+  try {
+    console.log('📝 Starting robust sign up process for:', email);
+    
+    // Clean up existing state first
+    cleanupAuthState();
+    
+    // Sign up with timeout
+    const signUpPromise = supabase.auth.signUp({ email, password });
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Sign up timeout')), 10000)
+    );
+    
+    const result = await Promise.race([signUpPromise, timeoutPromise]) as any;
+    
+    if (result.error) {
+      console.error('❌ Sign up error:', result.error);
+      return { error: result.error };
     }
     
     console.log('✅ Sign up successful');
-    return { data, error: null };
+    return { data: result.data, error: null };
   } catch (error) {
-    console.error('❌ Sign-up failed:', error);
-    return { data: null, error };
+    console.error('❌ Robust sign up failed:', error);
+    return { error };
   }
 };
 
-/**
- * Simplified sign-out function
- */
-export const robustSignOut = async () => {
-  console.log('🔐 Starting simplified sign-out process...');
-  
+// Enhanced connection validation
+export const validateConnection = async (): Promise<boolean> => {
   try {
-    // Step 1: Clean up auth state first
-    cleanupAuthState();
+    const { data, error } = await supabase
+      .from('dogs')
+      .select('id')
+      .limit(1);
     
-    // Step 2: Attempt Supabase sign out (with reasonable timeout)
-    try {
-      console.log('📤 Attempting Supabase sign out...');
-      
-      const signOutPromise = supabase.auth.signOut({ scope: 'global' });
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Sign out timeout')), 5000)
-      );
-
-      await Promise.race([signOutPromise, timeoutPromise]);
-      console.log('✅ Supabase sign out successful');
-    } catch (signOutError) {
-      console.warn('⚠️ Supabase sign out failed or timed out (continuing anyway):', signOutError);
+    if (error && error.message.includes('row-level security')) {
+      // RLS error means we're connected but not authenticated
+      return true;
     }
     
-    // Step 3: Navigate to auth page
-    console.log('🔄 Navigating to auth page...');
-    window.location.href = '/auth';
-    
+    return !error;
   } catch (error) {
-    console.error('❌ Error during sign-out:', error);
-    // Even if everything fails, force redirect to auth page
-    window.location.href = '/auth';
-  }
-};
-
-/**
- * Network connectivity checker
- */
-export const checkNetworkConnectivity = async (): Promise<boolean> => {
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3000);
-    
-    const response = await fetch('https://httpbin.org/status/200', {
-      method: 'HEAD',
-      signal: controller.signal,
-      cache: 'no-cache'
-    });
-    
-    clearTimeout(timeoutId);
-    return response.ok;
-  } catch (error) {
-    console.warn('Network connectivity check failed:', error);
+    console.warn('🌐 Connection validation failed:', error);
     return false;
   }
 };

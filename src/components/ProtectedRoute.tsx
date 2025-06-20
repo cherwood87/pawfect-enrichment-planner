@@ -12,7 +12,7 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { user, session, loading } = useAuth();
+  const { user, session, loading, error } = useAuth();
   const { 
     isOnline, 
     isSupabaseConnected, 
@@ -22,7 +22,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     canRetry
   } = useNetworkResilience({
     maxRetries: 3,
-    retryInterval: 30000,
+    retryInterval: 15000, // Reduced from 30s to 15s for better UX
     exponentialBackoff: true
   });
 
@@ -32,6 +32,31 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-orange-50">
         <LoadingSkeleton type="dashboard" />
+      </div>
+    );
+  }
+
+  // Handle auth errors with better UX
+  if (error && !error.includes('offline')) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full text-center">
+          <div className="mb-4">
+            <AlertCircle className="w-16 h-16 text-red-500 mx-auto" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            Authentication Error
+          </h2>
+          <p className="text-gray-600 mb-6">
+            {error}
+          </p>
+          <Button 
+            onClick={() => window.location.href = '/auth'}
+            className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+          >
+            Go to Sign In
+          </Button>
+        </div>
       </div>
     );
   }
@@ -121,7 +146,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     );
   }
 
-  // Improved fallback for unauthenticated states
+  // Optimized fallback for unauthenticated states
   if (!user || !session) {
     console.log('🚫 ProtectedRoute: No auth, redirecting to /auth');
     return <Navigate to="/auth" replace />;
