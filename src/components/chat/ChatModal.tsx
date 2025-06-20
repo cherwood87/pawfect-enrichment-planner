@@ -1,22 +1,26 @@
-
-import React, { useState, useRef, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Loader2, MessageCircle } from 'lucide-react';
-import { useChat } from '@/contexts/ChatContext';
+import React, { useState, useRef, useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Send, Loader2, MessageCircle } from "lucide-react";
+import { useChat } from "@/contexts/ChatContext";
 
 interface ChatMessage {
   id: string;
-  role: 'user' | 'assistant';
+  role: "user" | "assistant";
   content: string;
   timestamp: Date;
   activities?: any[];
 }
 
 interface ActivityHelpContext {
-  type: 'activity-help';
+  type: "activity-help";
   activityName: string;
   activityPillar: string;
   activityDifficulty: string;
@@ -31,23 +35,35 @@ interface ChatModalProps {
 
 function stripJsonBlocks(text: string): string {
   return text
-    .replace(/(\{[\s\S]*?"title":\s*".+?[\s\S]*?"energyLevel":\s*".+?"[\s\S]*?\})/g, '')
-    .replace(/\*\*(.*?)\*\*/g, '$1')
-    .replace(/\*(.*?)\*/g, '$1')
-    .replace(/^#+\s*/gm, '')
+    .replace(
+      /(\{[\s\S]*?"title":\s*".+?[\s\S]*?"energyLevel":\s*".+?"[\s\S]*?\})/g,
+      "",
+    )
+    .replace(/\*\*(.*?)\*\*/g, "$1")
+    .replace(/\*(.*?)\*/g, "$1")
+    .replace(/^#+\s*/gm, "")
     .trim();
 }
 
-const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, chatContext }) => {
-  const [input, setInput] = useState('');
+const ChatModal: React.FC<ChatModalProps> = ({
+  isOpen,
+  onClose,
+  chatContext,
+}) => {
+  const [input, setInput] = useState("");
   const { currentConversation, isLoading, sendMessage } = useChat();
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Send initial message with activity context when modal opens
   useEffect(() => {
-    if (isOpen && chatContext && currentConversation && currentConversation.messages.length === 0) {
+    if (
+      isOpen &&
+      chatContext &&
+      currentConversation &&
+      currentConversation.messages.length === 0
+    ) {
       const initialMessage = `I need help with the "${chatContext.activityName}" activity. It's a ${chatContext.activityDifficulty} difficulty ${chatContext.activityPillar} activity that takes ${chatContext.activityDuration} minutes. Can you give me some tips and guidance?`;
-      
+
       // Send the message with activity context
       sendMessage(initialMessage, chatContext);
     }
@@ -56,16 +72,16 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, chatContext }) =
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
     const messageContent = input.trim();
-    setInput('');
+    setInput("");
     try {
       await sendMessage(messageContent, chatContext);
     } catch (error) {
-      console.error('Send message failed:', error);
+      console.error("Send message failed:", error);
     }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
@@ -84,7 +100,7 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, chatContext }) =
           <DialogTitle className="flex items-center space-x-2">
             <MessageCircle className="w-5 h-5 text-blue-500" />
             <span>
-              {chatContext ? `Help with ${chatContext.activityName}` : 'Chat'}
+              {chatContext ? `Help with ${chatContext.activityName}` : "Chat"}
             </span>
           </DialogTitle>
         </DialogHeader>
@@ -95,17 +111,17 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, chatContext }) =
               {currentConversation?.messages.map((message) => (
                 <div
                   key={message.id}
-                  className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                  className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
                 >
                   <div
                     className={`max-w-[80%] p-3 rounded-lg ${
-                      message.role === 'user'
-                        ? 'bg-blue-500 text-white rounded-br-sm'
-                        : 'bg-gray-100 text-gray-800 rounded-bl-sm'
+                      message.role === "user"
+                        ? "bg-blue-500 text-white rounded-br-sm"
+                        : "bg-gray-100 text-gray-800 rounded-bl-sm"
                     }`}
                   >
                     <p className="text-sm whitespace-pre-wrap">
-                      {message.role === 'assistant'
+                      {message.role === "assistant"
                         ? stripJsonBlocks(message.content)
                         : message.content}
                     </p>

@@ -1,16 +1,18 @@
-
-import { useState, useEffect } from 'react';
-import { NetworkHealthService, NetworkHealthState } from '@/services/network/NetworkHealthService';
+import { useState, useEffect } from "react";
+import {
+  NetworkHealthService,
+  NetworkHealthState,
+} from "@/services/network/NetworkHealthService";
 
 export const useNetworkHealth = () => {
-  const [healthState, setHealthState] = useState<NetworkHealthState>(() => 
-    NetworkHealthService.getInstance().getHealthState()
+  const [healthState, setHealthState] = useState<NetworkHealthState>(() =>
+    NetworkHealthService.getInstance().getHealthState(),
   );
   const [isRecovering, setIsRecovering] = useState(false);
 
   useEffect(() => {
     const service = NetworkHealthService.getInstance();
-    
+
     const unsubscribe = service.subscribe((state) => {
       setHealthState(state);
     });
@@ -31,7 +33,8 @@ export const useNetworkHealth = () => {
   const initiateRecovery = async () => {
     setIsRecovering(true);
     try {
-      const result = await NetworkHealthService.getInstance().initiateRecovery();
+      const result =
+        await NetworkHealthService.getInstance().initiateRecovery();
       return result;
     } finally {
       setIsRecovering(false);
@@ -43,6 +46,6 @@ export const useNetworkHealth = () => {
     isRecovering,
     retryConnection,
     initiateRecovery,
-    canRetry: healthState.connectionStability > 0.3 // Allow retry if stability is reasonable
+    canRetry: healthState.connectionStability > 0.3, // Allow retry if stability is reasonable
   };
 };

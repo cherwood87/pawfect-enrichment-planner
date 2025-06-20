@@ -1,8 +1,14 @@
-import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
-import { Dog } from '@/types/dog';
-import { DogService } from '@/services/dogService';
-import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/contexts/AuthContext';
+import React, {
+  createContext,
+  useContext,
+  useReducer,
+  useEffect,
+  ReactNode,
+} from "react";
+import { Dog } from "@/types/dog";
+import { DogService } from "@/services/dogService";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface DogState {
   dogs: Dog[];
@@ -13,20 +19,20 @@ interface DogState {
 }
 
 type DogAction =
-  | { type: 'SET_DOGS'; payload: Dog[] }
-  | { type: 'ADD_DOG'; payload: Dog }
-  | { type: 'UPDATE_DOG'; payload: Dog }
-  | { type: 'DELETE_DOG'; payload: string }
-  | { type: 'SET_CURRENT_DOG'; payload: string }
-  | { type: 'SET_LOADING'; payload: boolean }
-  | { type: 'SET_SYNCING'; payload: boolean }
-  | { type: 'SET_ERROR'; payload: string | null };
+  | { type: "SET_DOGS"; payload: Dog[] }
+  | { type: "ADD_DOG"; payload: Dog }
+  | { type: "UPDATE_DOG"; payload: Dog }
+  | { type: "DELETE_DOG"; payload: string }
+  | { type: "SET_CURRENT_DOG"; payload: string }
+  | { type: "SET_LOADING"; payload: boolean }
+  | { type: "SET_SYNCING"; payload: boolean }
+  | { type: "SET_ERROR"; payload: string | null };
 
 interface DogContextType {
   state: DogState;
   dispatch: React.Dispatch<DogAction>;
   currentDog: Dog | null;
-  addDog: (dog: Omit<Dog, 'id' | 'dateAdded' | 'lastUpdated'>) => Promise<void>;
+  addDog: (dog: Omit<Dog, "id" | "dateAdded" | "lastUpdated">) => Promise<void>;
   updateDog: (dog: Dog) => Promise<void>;
   deleteDog: (id: string) => Promise<void>;
   setCurrentDog: (id: string) => void;
@@ -37,45 +43,48 @@ const DogContext = createContext<DogContextType | undefined>(undefined);
 
 const dogReducer = (state: DogState, action: DogAction): DogState => {
   switch (action.type) {
-    case 'SET_DOGS':
+    case "SET_DOGS":
       return { ...state, dogs: action.payload, error: null };
-    case 'ADD_DOG':
+    case "ADD_DOG":
       return { ...state, dogs: [...state.dogs, action.payload], error: null };
-    case 'UPDATE_DOG':
+    case "UPDATE_DOG":
       return {
         ...state,
-        dogs: state.dogs.map(dog =>
-          dog.id === action.payload.id ? action.payload : dog
+        dogs: state.dogs.map((dog) =>
+          dog.id === action.payload.id ? action.payload : dog,
         ),
-        error: null
+        error: null,
       };
-    case 'DELETE_DOG':
+    case "DELETE_DOG":
       return {
         ...state,
-        dogs: state.dogs.filter(dog => dog.id !== action.payload),
-        currentDogId: state.currentDogId === action.payload ? null : state.currentDogId,
-        error: null
+        dogs: state.dogs.filter((dog) => dog.id !== action.payload),
+        currentDogId:
+          state.currentDogId === action.payload ? null : state.currentDogId,
+        error: null,
       };
-    case 'SET_CURRENT_DOG':
+    case "SET_CURRENT_DOG":
       return { ...state, currentDogId: action.payload };
-    case 'SET_LOADING':
+    case "SET_LOADING":
       return { ...state, isLoading: action.payload };
-    case 'SET_SYNCING':
+    case "SET_SYNCING":
       return { ...state, isSyncing: action.payload };
-    case 'SET_ERROR':
+    case "SET_ERROR":
       return { ...state, error: action.payload };
     default:
       return state;
   }
 };
 
-export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const DogProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const [state, dispatch] = useReducer(dogReducer, {
     dogs: [],
     currentDogId: null,
     isLoading: true,
     isSyncing: false,
-    error: null
+    error: null,
   });
 
   const { toast } = useToast();
@@ -84,99 +93,121 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // Optimized data loading with timeout and parallel operations
   useEffect(() => {
     if (authLoading) {
-      console.log('🔐 Auth still loading, waiting...');
+      console.log("🔐 Auth still loading, waiting...");
       return;
     }
-    
+
     if (!user) {
-      console.log('👤 No authenticated user, clearing dogs state');
-      dispatch({ type: 'SET_DOGS', payload: [] });
-      dispatch({ type: 'SET_CURRENT_DOG', payload: '' });
-      dispatch({ type: 'SET_LOADING', payload: false });
+      console.log("👤 No authenticated user, clearing dogs state");
+      dispatch({ type: "SET_DOGS", payload: [] });
+      dispatch({ type: "SET_CURRENT_DOG", payload: "" });
+      dispatch({ type: "SET_LOADING", payload: false });
       DogService.clearUserCache(); // Clear user cache
       return;
     }
 
-    console.log('👤 User authenticated, loading dogs for:', user.email);
+    console.log("👤 User authenticated, loading dogs for:", user.email);
     loadDogsWithTimeout();
   }, [user, authLoading]);
 
   const loadDogsWithTimeout = async () => {
     if (!user) {
-      console.log('❌ Cannot load dogs: no authenticated user');
+      console.log("❌ Cannot load dogs: no authenticated user");
       return;
     }
 
     try {
-      dispatch({ type: 'SET_LOADING', payload: true });
-      dispatch({ type: 'SET_ERROR', payload: null });
-      console.log('📋 Loading dogs for user:', user.email);
-      
+      dispatch({ type: "SET_LOADING", payload: true });
+      dispatch({ type: "SET_ERROR", payload: null });
+      console.log("📋 Loading dogs for user:", user.email);
+
       // Add timeout for better UX
       const loadingTimeout = setTimeout(() => {
-        console.log('⏰ Dog loading timeout, showing fallback');
-        dispatch({ type: 'SET_ERROR', payload: 'Loading is taking longer than expected. Please refresh the page.' });
+        console.log("⏰ Dog loading timeout, showing fallback");
+        dispatch({
+          type: "SET_ERROR",
+          payload:
+            "Loading is taking longer than expected. Please refresh the page.",
+        });
       }, 10000); // 10 second timeout
 
       // Load dogs with parallel localStorage check
       const [supabaseDogs, localStorageCheck] = await Promise.allSettled([
         DogService.getAllDogs(),
-        checkLocalStorageForDogs()
+        checkLocalStorageForDogs(),
       ]);
 
       clearTimeout(loadingTimeout);
 
-      if (supabaseDogs.status === 'fulfilled') {
+      if (supabaseDogs.status === "fulfilled") {
         const dogs = supabaseDogs.value;
-        console.log('📋 Loaded dogs from Supabase:', dogs.length);
-        
-        dispatch({ type: 'SET_DOGS', payload: dogs });
-        
+        console.log("📋 Loaded dogs from Supabase:", dogs.length);
+
+        dispatch({ type: "SET_DOGS", payload: dogs });
+
         // Set current dog from localStorage or first dog
-        const savedCurrentDogId = localStorage.getItem('currentDogId');
-        if (savedCurrentDogId && dogs.find(dog => dog.id === savedCurrentDogId)) {
-          dispatch({ type: 'SET_CURRENT_DOG', payload: savedCurrentDogId });
+        const savedCurrentDogId = localStorage.getItem("currentDogId");
+        if (
+          savedCurrentDogId &&
+          dogs.find((dog) => dog.id === savedCurrentDogId)
+        ) {
+          dispatch({ type: "SET_CURRENT_DOG", payload: savedCurrentDogId });
         } else if (dogs.length > 0) {
-          dispatch({ type: 'SET_CURRENT_DOG', payload: dogs[0].id });
+          dispatch({ type: "SET_CURRENT_DOG", payload: dogs[0].id });
         }
       } else {
-        console.error('❌ Error loading dogs from Supabase:', supabaseDogs.reason);
-        dispatch({ type: 'SET_ERROR', payload: 'Failed to load your dogs. Please try refreshing the page.' });
-        
+        console.error(
+          "❌ Error loading dogs from Supabase:",
+          supabaseDogs.reason,
+        );
+        dispatch({
+          type: "SET_ERROR",
+          payload: "Failed to load your dogs. Please try refreshing the page.",
+        });
+
         // Fallback to localStorage
-        if (localStorageCheck.status === 'fulfilled') {
+        if (localStorageCheck.status === "fulfilled") {
           const localDogs = localStorageCheck.value;
           if (localDogs.length > 0) {
-            dispatch({ type: 'SET_DOGS', payload: localDogs });
-            console.log('📋 Loaded dogs from localStorage fallback:', localDogs.length);
+            dispatch({ type: "SET_DOGS", payload: localDogs });
+            console.log(
+              "📋 Loaded dogs from localStorage fallback:",
+              localDogs.length,
+            );
           }
         }
       }
     } catch (error) {
-      console.error('❌ Critical error loading dogs:', error);
-      dispatch({ type: 'SET_ERROR', payload: 'Failed to load your dogs. Please try refreshing the page.' });
+      console.error("❌ Critical error loading dogs:", error);
+      dispatch({
+        type: "SET_ERROR",
+        payload: "Failed to load your dogs. Please try refreshing the page.",
+      });
     } finally {
-      dispatch({ type: 'SET_LOADING', payload: false });
+      dispatch({ type: "SET_LOADING", payload: false });
     }
   };
 
   const checkLocalStorageForDogs = async (): Promise<Dog[]> => {
     try {
-      const savedDogs = localStorage.getItem('dogs');
-      const savedCurrentDogId = localStorage.getItem('currentDogId');
-      
+      const savedDogs = localStorage.getItem("dogs");
+      const savedCurrentDogId = localStorage.getItem("currentDogId");
+
       if (savedDogs) {
         const dogs = JSON.parse(savedDogs);
-        if (savedCurrentDogId && dogs.find((dog: Dog) => dog.id === savedCurrentDogId)) {
-          dispatch({ type: 'SET_CURRENT_DOG', payload: savedCurrentDogId });
+        if (
+          savedCurrentDogId &&
+          dogs.find((dog: Dog) => dog.id === savedCurrentDogId)
+        ) {
+          dispatch({ type: "SET_CURRENT_DOG", payload: savedCurrentDogId });
         } else if (dogs.length > 0) {
-          dispatch({ type: 'SET_CURRENT_DOG', payload: dogs[0].id });
+          dispatch({ type: "SET_CURRENT_DOG", payload: dogs[0].id });
         }
         return dogs;
       }
       return [];
     } catch (error) {
-      console.error('❌ Error loading dogs from localStorage:', error);
+      console.error("❌ Error loading dogs from localStorage:", error);
       return [];
     }
   };
@@ -184,11 +215,13 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // Save current dog to localStorage whenever it changes
   useEffect(() => {
     if (!state.isLoading && state.currentDogId) {
-      localStorage.setItem('currentDogId', state.currentDogId);
+      localStorage.setItem("currentDogId", state.currentDogId);
     }
   }, [state.currentDogId, state.isLoading]);
 
-  const addDog = async (dogData: Omit<Dog, 'id' | 'dateAdded' | 'lastUpdated'>) => {
+  const addDog = async (
+    dogData: Omit<Dog, "id" | "dateAdded" | "lastUpdated">,
+  ) => {
     if (!user) {
       toast({
         title: "Authentication Required",
@@ -199,20 +232,23 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
 
     try {
-      console.log('Adding new dog for user:', user.email, dogData.name);
+      console.log("Adding new dog for user:", user.email, dogData.name);
       const newDog = await DogService.createDog(dogData);
-      dispatch({ type: 'ADD_DOG', payload: newDog });
-      dispatch({ type: 'SET_CURRENT_DOG', payload: newDog.id });
-      
+      dispatch({ type: "ADD_DOG", payload: newDog });
+      dispatch({ type: "SET_CURRENT_DOG", payload: newDog.id });
+
       toast({
         title: "Dog Added",
         description: `${newDog.name} has been added to your profile.`,
       });
     } catch (error) {
-      console.error('❌ Error adding dog:', error);
+      console.error("❌ Error adding dog:", error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to add dog. Please try again.",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to add dog. Please try again.",
         variant: "destructive",
       });
     }
@@ -229,19 +265,22 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
 
     try {
-      console.log('Updating dog for user:', user.email, dog.name);
+      console.log("Updating dog for user:", user.email, dog.name);
       const updatedDog = await DogService.updateDog(dog);
-      dispatch({ type: 'UPDATE_DOG', payload: updatedDog });
-      
+      dispatch({ type: "UPDATE_DOG", payload: updatedDog });
+
       toast({
         title: "Dog Updated",
         description: `${updatedDog.name}'s profile has been updated.`,
       });
     } catch (error) {
-      console.error('❌ Error updating dog:', error);
+      console.error("❌ Error updating dog:", error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to update dog. Please try again.",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to update dog. Please try again.",
         variant: "destructive",
       });
     }
@@ -258,20 +297,23 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
 
     try {
-      const dogToDelete = state.dogs.find(dog => dog.id === id);
-      console.log('Deleting dog for user:', user.email, 'dog id:', id);
+      const dogToDelete = state.dogs.find((dog) => dog.id === id);
+      console.log("Deleting dog for user:", user.email, "dog id:", id);
       await DogService.deleteDog(id);
-      dispatch({ type: 'DELETE_DOG', payload: id });
-      
+      dispatch({ type: "DELETE_DOG", payload: id });
+
       toast({
         title: "Dog Removed",
-        description: `${dogToDelete?.name || 'Dog'} has been removed from your profile.`,
+        description: `${dogToDelete?.name || "Dog"} has been removed from your profile.`,
       });
     } catch (error) {
-      console.error('❌ Error deleting dog:', error);
+      console.error("❌ Error deleting dog:", error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to delete dog. Please try again.",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to delete dog. Please try again.",
         variant: "destructive",
       });
     }
@@ -279,10 +321,10 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const setCurrentDog = (id: string) => {
     try {
-      console.log('Setting current dog to:', id);
-      dispatch({ type: 'SET_CURRENT_DOG', payload: id });
+      console.log("Setting current dog to:", id);
+      dispatch({ type: "SET_CURRENT_DOG", payload: id });
     } catch (error) {
-      console.error('❌ Error setting current dog:', error);
+      console.error("❌ Error setting current dog:", error);
     }
   };
 
@@ -297,8 +339,8 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
 
     try {
-      dispatch({ type: 'SET_SYNCING', payload: true });
-      
+      dispatch({ type: "SET_SYNCING", payload: true });
+
       toast({
         title: "Migration Started",
         description: "Syncing your data to the cloud...",
@@ -312,18 +354,22 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         description: "Your data has been successfully synced to the cloud!",
       });
     } catch (error) {
-      console.error('❌ Error during migration:', error);
+      console.error("❌ Error during migration:", error);
       toast({
         title: "Migration Failed",
-        description: error instanceof Error ? error.message : "Failed to sync data to the cloud. Please try again.",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to sync data to the cloud. Please try again.",
         variant: "destructive",
       });
     } finally {
-      dispatch({ type: 'SET_SYNCING', payload: false });
+      dispatch({ type: "SET_SYNCING", payload: false });
     }
   };
 
-  const currentDog = state.dogs.find(dog => dog.id === state.currentDogId) || null;
+  const currentDog =
+    state.dogs.find((dog) => dog.id === state.currentDogId) || null;
 
   const value: DogContextType = {
     state,
@@ -333,7 +379,7 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     updateDog,
     deleteDog,
     setCurrentDog,
-    migrateFromLocalStorage
+    migrateFromLocalStorage,
   };
 
   return <DogContext.Provider value={value}>{children}</DogContext.Provider>;
@@ -342,7 +388,7 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 export const useDog = () => {
   const context = useContext(DogContext);
   if (context === undefined) {
-    throw new Error('useDog must be used within a DogProvider');
+    throw new Error("useDog must be used within a DogProvider");
   }
   return context;
 };

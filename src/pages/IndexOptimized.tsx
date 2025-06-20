@@ -1,11 +1,10 @@
-
-import React, { useState, useCallback, useMemo } from 'react';
-import { useDog } from '@/contexts/DogContext';
-import DashboardHeader from '@/components/dashboard/DashboardHeader';
-import DashboardContent from '@/components/dashboard/DashboardContent';
-import FloatingChatButton from '@/components/dashboard/FloatingChatButton';
-import DashboardModalsOptimized from '@/components/dashboard/DashboardModalsOptimized';
-import { Dog } from '@/types/dog';
+import React, { useState, useCallback, useMemo } from "react";
+import { useDog } from "@/contexts/DogContext";
+import DashboardHeader from "@/components/dashboard/DashboardHeader";
+import DashboardContent from "@/components/dashboard/DashboardContent";
+import FloatingChatButton from "@/components/dashboard/FloatingChatButton";
+import DashboardModalsOptimized from "@/components/dashboard/DashboardModalsOptimized";
+import { Dog } from "@/types/dog";
 
 const IndexOptimized = () => {
   const { currentDog } = useDog();
@@ -54,48 +53,57 @@ const IndexOptimized = () => {
   }, []);
 
   // Memoize modal props to prevent unnecessary re-renders
-  const modalProps = useMemo(() => ({
-    isActivityModalOpen,
-    isChatModalOpen,
-    isAddDogModalOpen,
-    isEditDogModalOpen,
-    selectedPillar,
-    selectedDog,
-    onActivityModalClose: handleActivityModalClose,
-    onChatModalClose: handleChatModalClose,
-    onAddDogModalClose: handleAddDogModalClose,
-    onEditDogModalClose: handleEditDogModalClose
-  }), [
-    isActivityModalOpen,
-    isChatModalOpen,
-    isAddDogModalOpen,
-    isEditDogModalOpen,
-    selectedPillar,
-    selectedDog,
-    handleActivityModalClose,
-    handleChatModalClose,
-    handleAddDogModalClose,
-    handleEditDogModalClose
-  ]);
+  const modalProps = useMemo(
+    () => ({
+      isActivityModalOpen,
+      isChatModalOpen,
+      isAddDogModalOpen,
+      isEditDogModalOpen,
+      selectedPillar,
+      selectedDog,
+      onActivityModalClose: handleActivityModalClose,
+      onChatModalClose: handleChatModalClose,
+      onAddDogModalClose: handleAddDogModalClose,
+      onEditDogModalClose: handleEditDogModalClose,
+    }),
+    [
+      isActivityModalOpen,
+      isChatModalOpen,
+      isAddDogModalOpen,
+      isEditDogModalOpen,
+      selectedPillar,
+      selectedDog,
+      handleActivityModalClose,
+      handleChatModalClose,
+      handleAddDogModalClose,
+      handleEditDogModalClose,
+    ],
+  );
 
   // Memoize dashboard content props
-  const dashboardContentProps = useMemo(() => ({
-    onAddDogOpen: handleAddDogModalOpen,
-    onEditDogOpen: handleEditDogModalOpen,
-    onPillarSelect: handlePillarSelect,
-    onChatOpen: handleChatModalOpen
-  }), [
-    handleAddDogModalOpen,
-    handleEditDogModalOpen,
-    handlePillarSelect,
-    handleChatModalOpen
-  ]);
+  const dashboardContentProps = useMemo(
+    () => ({
+      onAddDogOpen: handleAddDogModalOpen,
+      onEditDogOpen: handleEditDogModalOpen,
+      onPillarSelect: handlePillarSelect,
+      onChatOpen: handleChatModalOpen,
+    }),
+    [
+      handleAddDogModalOpen,
+      handleEditDogModalOpen,
+      handlePillarSelect,
+      handleChatModalOpen,
+    ],
+  );
 
   // Memoize header props
-  const headerProps = useMemo(() => ({
-    onChatOpen: handleChatModalOpen,
-    onAddDogOpen: handleAddDogModalOpen
-  }), [handleChatModalOpen, handleAddDogModalOpen]);
+  const headerProps = useMemo(
+    () => ({
+      onChatOpen: handleChatModalOpen,
+      onAddDogOpen: handleAddDogModalOpen,
+    }),
+    [handleChatModalOpen, handleAddDogModalOpen],
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-orange-50 mobile-safe">

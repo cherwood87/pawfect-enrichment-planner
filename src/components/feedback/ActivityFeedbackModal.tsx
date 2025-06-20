@@ -1,25 +1,24 @@
-
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Star, Heart, Zap, Trophy } from 'lucide-react';
-import { useLearningSystem } from '@/hooks/useLearningSystem';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Star, Heart, Zap, Trophy } from "lucide-react";
+import { useLearningSystem } from "@/hooks/useLearningSystem";
 
 interface ActivityFeedbackModalProps {
   isOpen: boolean;
   onClose: () => void;
   activityId: string;
   activityTitle: string;
-  activityType: 'library' | 'user' | 'discovered';
+  activityType: "library" | "user" | "discovered";
 }
 
 const ActivityFeedbackModal: React.FC<ActivityFeedbackModalProps> = ({
@@ -27,23 +26,31 @@ const ActivityFeedbackModal: React.FC<ActivityFeedbackModalProps> = ({
   onClose,
   activityId,
   activityTitle,
-  activityType
+  activityType,
 }) => {
   const [rating, setRating] = useState(0);
   const [difficultyRating, setDifficultyRating] = useState(0);
   const [engagementRating, setEngagementRating] = useState(0);
   const [enjoymentRating, setEnjoymentRating] = useState(0);
-  const [feedbackText, setFeedbackText] = useState('');
+  const [feedbackText, setFeedbackText] = useState("");
   const [wouldRecommend, setWouldRecommend] = useState<boolean | null>(null);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   const { submitFeedback, isLoading } = useLearningSystem();
 
   const availableTags = [
-    'Too Easy', 'Too Hard', 'Perfect Difficulty',
-    'Very Engaging', 'Somewhat Boring', 'Dog Loved It',
-    'Good for Rainy Days', 'Outdoor Activity', 'Quick Setup',
-    'Needs More Materials', 'Great Exercise', 'Mental Challenge'
+    "Too Easy",
+    "Too Hard",
+    "Perfect Difficulty",
+    "Very Engaging",
+    "Somewhat Boring",
+    "Dog Loved It",
+    "Good for Rainy Days",
+    "Outdoor Activity",
+    "Quick Setup",
+    "Needs More Materials",
+    "Great Exercise",
+    "Mental Challenge",
   ];
 
   const handleSubmit = async () => {
@@ -54,7 +61,7 @@ const ActivityFeedbackModal: React.FC<ActivityFeedbackModalProps> = ({
       enjoymentRating: enjoymentRating || undefined,
       feedbackText: feedbackText || undefined,
       wouldRecommend: wouldRecommend || undefined,
-      tags: selectedTags.length > 0 ? selectedTags : undefined
+      tags: selectedTags.length > 0 ? selectedTags : undefined,
     });
 
     // Reset form
@@ -62,27 +69,25 @@ const ActivityFeedbackModal: React.FC<ActivityFeedbackModalProps> = ({
     setDifficultyRating(0);
     setEngagementRating(0);
     setEnjoymentRating(0);
-    setFeedbackText('');
+    setFeedbackText("");
     setWouldRecommend(null);
     setSelectedTags([]);
-    
+
     onClose();
   };
 
   const toggleTag = (tag: string) => {
-    setSelectedTags(prev => 
-      prev.includes(tag) 
-        ? prev.filter(t => t !== tag)
-        : [...prev, tag]
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
     );
   };
 
-  const StarRating = ({ 
-    label, 
-    icon: Icon, 
-    value, 
-    onChange, 
-    color = "text-yellow-500" 
+  const StarRating = ({
+    label,
+    icon: Icon,
+    value,
+    onChange,
+    color = "text-yellow-500",
   }: {
     label: string;
     icon: any;
@@ -102,12 +107,15 @@ const ActivityFeedbackModal: React.FC<ActivityFeedbackModalProps> = ({
             type="button"
             onClick={() => onChange(star)}
             className={`h-8 w-8 rounded-full border-2 transition-all ${
-              star <= value 
-                ? 'border-yellow-500 bg-yellow-500 text-white' 
-                : 'border-gray-300 hover:border-yellow-400'
+              star <= value
+                ? "border-yellow-500 bg-yellow-500 text-white"
+                : "border-gray-300 hover:border-yellow-400"
             }`}
           >
-            <Star className="h-4 w-4 mx-auto" fill={star <= value ? 'currentColor' : 'none'} />
+            <Star
+              className="h-4 w-4 mx-auto"
+              fill={star <= value ? "currentColor" : "none"}
+            />
           </button>
         ))}
       </div>
@@ -120,7 +128,8 @@ const ActivityFeedbackModal: React.FC<ActivityFeedbackModalProps> = ({
         <DialogHeader>
           <DialogTitle>Share Your Experience</DialogTitle>
           <DialogDescription>
-            How did "{activityTitle}" go? Your feedback helps us improve recommendations for you and your dog.
+            How did "{activityTitle}" go? Your feedback helps us improve
+            recommendations for you and your dog.
           </DialogDescription>
         </DialogHeader>
 
@@ -160,7 +169,9 @@ const ActivityFeedbackModal: React.FC<ActivityFeedbackModalProps> = ({
 
           {/* Would Recommend */}
           <div className="space-y-2">
-            <Label>Would you recommend this activity to other dog owners?</Label>
+            <Label>
+              Would you recommend this activity to other dog owners?
+            </Label>
             <div className="flex gap-3">
               <Button
                 type="button"
@@ -215,12 +226,12 @@ const ActivityFeedbackModal: React.FC<ActivityFeedbackModalProps> = ({
             <Button variant="outline" onClick={onClose}>
               Skip
             </Button>
-            <Button 
-              onClick={handleSubmit} 
+            <Button
+              onClick={handleSubmit}
               disabled={isLoading}
               className="bg-purple-600 hover:bg-purple-700"
             >
-              {isLoading ? 'Submitting...' : 'Submit Feedback'}
+              {isLoading ? "Submitting..." : "Submit Feedback"}
             </Button>
           </div>
         </div>

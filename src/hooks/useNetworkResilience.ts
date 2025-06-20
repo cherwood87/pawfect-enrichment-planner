@@ -1,23 +1,24 @@
-
-import { useNetworkHealth } from '@/hooks/useNetworkHealth';
+import { useNetworkHealth } from "@/hooks/useNetworkHealth";
 
 /**
  * @deprecated Use useNetworkHealth instead for better performance and consolidated monitoring
  * This hook is maintained for backwards compatibility only
  */
 export const useNetworkResilience = (options?: any) => {
-  console.warn('useNetworkResilience is deprecated. Please use useNetworkHealth instead.');
-  
+  console.warn(
+    "useNetworkResilience is deprecated. Please use useNetworkHealth instead.",
+  );
+
   const healthState = useNetworkHealth();
-  
+
   // Map new API to old API for backwards compatibility
   return {
     ...healthState,
     checkConnectivity: async () => {
       const result = await healthState.retryConnection();
-      return { 
-        isOnline: healthState.isOnline, 
-        isSupabaseConnected: result 
+      return {
+        isOnline: healthState.isOnline,
+        isSupabaseConnected: result,
       };
     },
     networkState: {
@@ -25,8 +26,8 @@ export const useNetworkResilience = (options?: any) => {
       isSupabaseConnected: healthState.isSupabaseConnected,
       lastChecked: healthState.lastChecked,
       retryCount: 0, // Not tracked in new system
-      connectionHistory: healthState.connectionHistory
-    }
+      connectionHistory: healthState.connectionHistory,
+    },
   };
 };
 

@@ -1,22 +1,29 @@
-
-import React from 'react';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { ScheduledActivity, ActivityLibraryItem, UserActivity } from '@/types/activity';
-import { DiscoveredActivity } from '@/types/discovery';
-import { ActivityHelpContext } from '@/types/activityContext';
-import { useActivityModalState } from '@/hooks/useActivityModalState';
-import ActivityModalHeader from '@/components/modals/ActivityModalHeader';
-import ActivityModalContent from '@/components/modals/ActivityModalContent';
-import ActivityModalActions from '@/components/modals/ActivityModalActions';
-import ChatModal from '@/components/chat/ChatModal';
+import React from "react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import {
+  ScheduledActivity,
+  ActivityLibraryItem,
+  UserActivity,
+} from "@/types/activity";
+import { DiscoveredActivity } from "@/types/discovery";
+import { ActivityHelpContext } from "@/types/activityContext";
+import { useActivityModalState } from "@/hooks/useActivityModalState";
+import ActivityModalHeader from "@/components/modals/ActivityModalHeader";
+import ActivityModalContent from "@/components/modals/ActivityModalContent";
+import ActivityModalActions from "@/components/modals/ActivityModalActions";
+import ChatModal from "@/components/chat/ChatModal";
 
 interface ConsolidatedActivityModalProps {
   isOpen: boolean;
   onClose: () => void;
-  activityDetails: ActivityLibraryItem | UserActivity | DiscoveredActivity | null;
+  activityDetails:
+    | ActivityLibraryItem
+    | UserActivity
+    | DiscoveredActivity
+    | null;
   scheduledActivity?: ScheduledActivity | null;
   onToggleCompletion?: (activityId: string, completionNotes?: string) => void;
-  mode?: 'scheduled' | 'library';
+  mode?: "scheduled" | "library";
 }
 
 const ConsolidatedActivityModal: React.FC<ConsolidatedActivityModalProps> = ({
@@ -25,7 +32,7 @@ const ConsolidatedActivityModal: React.FC<ConsolidatedActivityModalProps> = ({
   activityDetails,
   scheduledActivity = null,
   onToggleCompletion,
-  mode = 'library'
+  mode = "library",
 }) => {
   const {
     selectedDayOfWeek,
@@ -36,17 +43,17 @@ const ConsolidatedActivityModal: React.FC<ConsolidatedActivityModalProps> = ({
     setIsChatOpen,
     handleNeedHelp,
     handleScheduleActivity,
-    handleAddToFavourites
+    handleAddToFavourites,
   } = useActivityModalState(activityDetails, onClose);
 
   if (!activityDetails) return null;
 
   const chatContext: ActivityHelpContext = {
-    type: 'activity-help',
+    type: "activity-help",
     activityName: activityDetails.title,
     activityPillar: activityDetails.pillar,
     activityDifficulty: activityDetails.difficulty,
-    activityDuration: activityDetails.duration
+    activityDuration: activityDetails.duration,
   };
 
   return (

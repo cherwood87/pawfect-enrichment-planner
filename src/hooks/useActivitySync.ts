@@ -1,9 +1,8 @@
-
-import { useState } from 'react';
-import { DiscoveredActivity } from '@/types/discovery';
-import { UserActivity } from '@/types/activity';
-import { useToast } from '@/components/ui/use-toast';
-import { SyncDomainService } from '@/services/domain/SyncDomainService';
+import { useState } from "react";
+import { DiscoveredActivity } from "@/types/discovery";
+import { UserActivity } from "@/types/activity";
+import { useToast } from "@/components/ui/use-toast";
+import { SyncDomainService } from "@/services/domain/SyncDomainService";
 
 export const useActivitySync = () => {
   const [isSyncing, setIsSyncing] = useState(false);
@@ -13,40 +12,45 @@ export const useActivitySync = () => {
   const performSync = async (
     discoveredActivities: DiscoveredActivity[],
     userActivities: UserActivity[],
-    dogId?: string
+    dogId?: string,
   ) => {
     setIsSyncing(true);
-    
+
     try {
       const result = await SyncDomainService.performFullSync(
         discoveredActivities,
         userActivities,
-        dogId
+        dogId,
       );
 
       if (result.success) {
         setLastSyncTime(new Date());
         toast({
           title: "Sync Complete",
-          description: `Successfully synced ${result.totalSynced} activities to Supabase.`
+          description: `Successfully synced ${result.totalSynced} activities to Supabase.`,
         });
       } else {
         toast({
           title: "Sync Failed",
           description: result.error || "Failed to sync activities.",
-          variant: "destructive"
+          variant: "destructive",
         });
       }
 
       return result;
     } catch (error) {
-      console.error('Sync error:', error);
+      console.error("Sync error:", error);
       toast({
         title: "Sync Error",
         description: "An unexpected error occurred during sync.",
-        variant: "destructive"
+        variant: "destructive",
       });
-      return { success: false, error: 'Unexpected error', totalSynced: 0, details: {} };
+      return {
+        success: false,
+        error: "Unexpected error",
+        totalSynced: 0,
+        details: {},
+      };
     } finally {
       setIsSyncing(false);
     }
@@ -55,6 +59,6 @@ export const useActivitySync = () => {
   return {
     isSyncing,
     lastSyncTime,
-    performSync
+    performSync,
   };
 };

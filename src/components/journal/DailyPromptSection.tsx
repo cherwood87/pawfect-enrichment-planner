@@ -1,7 +1,6 @@
-
-import React from 'react';
-import { Textarea } from '@/components/ui/textarea';
-import { JournalEntry } from '@/types/journal';
+import React from "react";
+import { Textarea } from "@/components/ui/textarea";
+import { JournalEntry } from "@/types/journal";
 
 interface DailyPromptSectionProps {
   currentEntry: JournalEntry;
@@ -10,7 +9,7 @@ interface DailyPromptSectionProps {
 
 const DailyPromptSection: React.FC<DailyPromptSectionProps> = ({
   currentEntry,
-  onResponseChange
+  onResponseChange,
 }) => {
   return (
     <div className="space-y-3">

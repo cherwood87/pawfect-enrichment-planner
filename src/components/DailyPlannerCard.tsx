@@ -1,48 +1,74 @@
-
-import React, { useState, useRef, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { 
-  Clock, CheckCircle, Circle, Plus, Calendar, Edit3, StickyNote, Save, X 
-} from 'lucide-react';
-import { useActivity } from '@/contexts/ActivityContext';
-import { useNavigate } from 'react-router-dom';
-import { useDog } from '@/contexts/DogContext';
-import { useIsMobile } from '@/hooks/use-mobile';
-import ActivityCompletionModal from '@/components/ActivityCompletionModal';
-import { convertTo24Hour, convertTo12Hour, validateTimeFormat } from '@/utils/timeUtils';
-import { toast } from '@/components/ui/use-toast';
+import React, { useState, useRef, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Clock,
+  CheckCircle,
+  Circle,
+  Plus,
+  Calendar,
+  Edit3,
+  StickyNote,
+  Save,
+  X,
+} from "lucide-react";
+import { useActivity } from "@/contexts/ActivityContext";
+import { useNavigate } from "react-router-dom";
+import { useDog } from "@/contexts/DogContext";
+import { useIsMobile } from "@/hooks/use-mobile";
+import ActivityCompletionModal from "@/components/ActivityCompletionModal";
+import {
+  convertTo24Hour,
+  convertTo12Hour,
+  validateTimeFormat,
+} from "@/utils/timeUtils";
+import { toast } from "@/components/ui/use-toast";
 
 // --- Helper: Pillar color ---
 const PILLAR_COLORS: Record<string, { bg: string; text: string }> = {
-  mental:        { bg: 'bg-purple-100',       text: 'text-purple-700' },
-  physical:      { bg: 'bg-green-100',        text: 'text-green-700' },
-  social:        { bg: 'bg-blue-100',         text: 'text-blue-700' },
-  environmental: { bg: 'bg-teal-100',         text: 'text-teal-700' },
-  instinctual:   { bg: 'bg-orange-100',       text: 'text-orange-700' }
+  mental: { bg: "bg-purple-100", text: "text-purple-700" },
+  physical: { bg: "bg-green-100", text: "text-green-700" },
+  social: { bg: "bg-blue-100", text: "text-blue-700" },
+  environmental: { bg: "bg-teal-100", text: "text-teal-700" },
+  instinctual: { bg: "bg-orange-100", text: "text-orange-700" },
 };
-const getPillarColor = (pillar: string) => PILLAR_COLORS[pillar] || { bg: 'bg-gray-100', text: 'text-gray-700' };
+const getPillarColor = (pillar: string) =>
+  PILLAR_COLORS[pillar] || { bg: "bg-gray-100", text: "text-gray-700" };
 
 // --- Subcomponent: Progress Bar ---
-const ProgressBar = ({ completed, total }: { completed: number; total: number }) => (
+const ProgressBar = ({
+  completed,
+  total,
+}: {
+  completed: number;
+  total: number;
+}) => (
   <div className="mt-3">
     <div className="w-full bg-white rounded-full h-2">
-      <div 
-        className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-300" 
-        style={{width: `${total > 0 ? (completed / total) * 100 : 0}%`}}
+      <div
+        className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-300"
+        style={{ width: `${total > 0 ? (completed / total) * 100 : 0}%` }}
       />
     </div>
   </div>
 );
 
 // --- Subcomponent: Empty State ---
-const EmptyState = ({ onAdd, isMobile }: { onAdd: () => void; isMobile: boolean }) => (
+const EmptyState = ({
+  onAdd,
+  isMobile,
+}: {
+  onAdd: () => void;
+  isMobile: boolean;
+}) => (
   <Card className="overflow-hidden">
     <CardHeader className="mobile-card bg-gradient-to-r from-blue-50 to-purple-50">
       <CardTitle className="font-bold text-gray-800 flex items-center space-x-2">
-        <Calendar className={`${isMobile ? 'w-4 h-4' : 'w-5 h-5'} text-blue-600`} />
+        <Calendar
+          className={`${isMobile ? "w-4 h-4" : "w-5 h-5"} text-blue-600`}
+        />
         <span>Today's Activities</span>
       </CardTitle>
     </CardHeader>
@@ -50,9 +76,11 @@ const EmptyState = ({ onAdd, isMobile }: { onAdd: () => void; isMobile: boolean 
       <div className="text-gray-500 mb-4">
         <Calendar className="w-12 h-12 mx-auto mb-2 opacity-50" />
         <p className="text-lg font-medium">No activities scheduled for today</p>
-        <p className="text-sm">Add activities to your weekly plan to get started!</p>
+        <p className="text-sm">
+          Add activities to your weekly plan to get started!
+        </p>
       </div>
-      <Button 
+      <Button
         onClick={onAdd}
         className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
       >
@@ -82,12 +110,12 @@ const ActivityRow = ({
 }: any) => {
   const pillarColor = getPillarColor(activityDetails.pillar);
   return (
-    <div 
-      key={scheduledActivity.id} 
+    <div
+      key={scheduledActivity.id}
       className={`bg-white rounded-lg border transition-all duration-200 ${
-        scheduledActivity.completed 
-          ? 'border-green-200 bg-green-50' 
-          : 'border-gray-200 hover:border-blue-200 hover:shadow-sm'
+        scheduledActivity.completed
+          ? "border-green-200 bg-green-50"
+          : "border-gray-200 hover:border-blue-200 hover:shadow-sm"
       }`}
     >
       {/* Main Activity Row */}
@@ -104,14 +132,16 @@ const ActivityRow = ({
             <Circle className="w-5 h-5 text-gray-400" />
           )}
         </Button>
-        
+
         <div className="flex-1">
           <div className="flex items-center justify-between">
-            <h3 className={`font-medium transition-all ${
-              scheduledActivity.completed 
-                ? 'text-gray-500 line-through' 
-                : 'text-gray-800'
-            }`}>
+            <h3
+              className={`font-medium transition-all ${
+                scheduledActivity.completed
+                  ? "text-gray-500 line-through"
+                  : "text-gray-800"
+              }`}
+            >
               {activityDetails.title}
             </h3>
             <div className="flex items-center space-x-1">
@@ -129,15 +159,17 @@ const ActivityRow = ({
               </Button>
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-2 mt-1">
-            <Badge 
-              variant="secondary" 
+            <Badge
+              variant="secondary"
               className={`text-xs ${pillarColor.bg} ${pillarColor.text}`}
             >
               {activityDetails.pillar}
             </Badge>
-            <span className="text-xs text-gray-500">{activityDetails.duration} min</span>
+            <span className="text-xs text-gray-500">
+              {activityDetails.duration} min
+            </span>
             <Badge variant="outline" className="text-xs">
               {activityDetails.difficulty}
             </Badge>
@@ -156,7 +188,9 @@ const ActivityRow = ({
             {/* Remove scheduledTime/userSelectedTime editing */}
             {/* You can re-add a new time scheduling feature here if you wish in the future */}
             <div>
-              <p className="text-xs font-medium text-gray-700 mb-2">Scheduled Time:</p>
+              <p className="text-xs font-medium text-gray-700 mb-2">
+                Scheduled Time:
+              </p>
               <div className="flex items-center space-x-2">
                 <div className="flex items-center space-x-1 text-xs bg-white px-2 py-1 rounded border">
                   <Clock className="w-3 h-3 text-gray-500" />
@@ -165,23 +199,32 @@ const ActivityRow = ({
               </div>
             </div>
             <div>
-              <p className="text-xs font-medium text-gray-700 mb-1">Benefits:</p>
-              <p className="text-xs text-gray-600">{activityDetails.benefits}</p>
+              <p className="text-xs font-medium text-gray-700 mb-1">
+                Benefits:
+              </p>
+              <p className="text-xs text-gray-600">
+                {activityDetails.benefits}
+              </p>
             </div>
             {scheduledActivity.notes && (
               <div>
                 <p className="text-xs font-medium text-gray-700 mb-1">Notes:</p>
-                <p className="text-xs text-gray-600">{scheduledActivity.notes}</p>
-              </div>
-            )}
-            {scheduledActivity.completionNotes && scheduledActivity.completed && (
-              <div>
-                <p className="text-xs font-medium text-gray-700 mb-1">Completion Notes:</p>
-                <p className="text-xs text-gray-600 bg-green-50 p-2 rounded border border-green-200">
-                  {scheduledActivity.completionNotes}
+                <p className="text-xs text-gray-600">
+                  {scheduledActivity.notes}
                 </p>
               </div>
             )}
+            {scheduledActivity.completionNotes &&
+              scheduledActivity.completed && (
+                <div>
+                  <p className="text-xs font-medium text-gray-700 mb-1">
+                    Completion Notes:
+                  </p>
+                  <p className="text-xs text-gray-600 bg-green-50 p-2 rounded border border-green-200">
+                    {scheduledActivity.completionNotes}
+                  </p>
+                </div>
+              )}
           </div>
         </div>
       )}
@@ -190,12 +233,22 @@ const ActivityRow = ({
 };
 
 // --- Subcomponent: Banner ---
-const Banner = ({ type, count, dogName }: { type: 'complete' | 'progress', count?: number, dogName?: string }) => {
-  if (type === 'complete') {
+const Banner = ({
+  type,
+  count,
+  dogName,
+}: {
+  type: "complete" | "progress";
+  count?: number;
+  dogName?: string;
+}) => {
+  if (type === "complete") {
     return (
       <div className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg mobile-card text-center">
         <CheckCircle className="w-6 h-6 text-green-500 mx-auto mb-1" />
-        <p className="text-sm font-medium text-green-800">Perfect Day Complete!</p>
+        <p className="text-sm font-medium text-green-800">
+          Perfect Day Complete!
+        </p>
         <p className="text-xs text-green-600">
           {dogName} had an amazing enrichment day!
         </p>
@@ -207,7 +260,7 @@ const Banner = ({ type, count, dogName }: { type: 'complete' | 'progress', count
       <Calendar className="w-6 h-6 text-blue-500 mx-auto mb-1" />
       <p className="text-sm font-medium text-blue-800">Great Progress!</p>
       <p className="text-xs text-blue-600">
-        {count} more activit{count === 1 ? 'y' : 'ies'} to complete today
+        {count} more activit{count === 1 ? "y" : "ies"} to complete today
       </p>
     </div>
   );
@@ -228,16 +281,20 @@ const EnhancedHeader = ({
   <CardHeader className="mobile-card bg-gradient-to-r from-blue-50 to-purple-50 shadow-sm rounded-b-xl">
     <div className="flex items-center justify-between">
       <div className="flex items-center space-x-2">
-        <Calendar className={`${isMobile ? 'w-4 h-4' : 'w-5 h-5'} text-blue-600`} />
-        <CardTitle className="font-bold text-gray-800">Today's Activities</CardTitle>
+        <Calendar
+          className={`${isMobile ? "w-4 h-4" : "w-5 h-5"} text-blue-600`}
+        />
+        <CardTitle className="font-bold text-gray-800">
+          Today's Activities
+        </CardTitle>
       </div>
       <div className="flex items-center space-x-3">
-        <Badge 
-          variant="secondary" 
+        <Badge
+          variant="secondary"
           className={`${
-            completedCount === totalCount 
-              ? 'bg-green-100 text-green-700' 
-              : 'bg-blue-100 text-blue-700'
+            completedCount === totalCount
+              ? "bg-green-100 text-green-700"
+              : "bg-blue-100 text-blue-700"
           }`}
         >
           {completedCount}/{totalCount}
@@ -248,7 +305,7 @@ const EnhancedHeader = ({
           className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
         >
           <Plus className="w-4 h-4 mr-1" />
-          {isMobile ? 'Add' : 'Add Activity'}
+          {isMobile ? "Add" : "Add Activity"}
         </Button>
       </div>
     </div>
@@ -260,37 +317,39 @@ const EnhancedHeader = ({
 const DailyPlannerCard = () => {
   const navigate = useNavigate();
   const { currentDog } = useDog();
-  const { 
-    getTodaysActivities, 
-    getActivityDetails, 
+  const {
+    getTodaysActivities,
+    getActivityDetails,
     toggleActivityCompletion,
-    updateScheduledActivity 
+    updateScheduledActivity,
   } = useActivity();
   const isMobile = useIsMobile();
-  
+
   const [expandedActivity, setExpandedActivity] = useState<string | null>(null);
   const [editingTimeId, setEditingTimeId] = useState<string | null>(null);
-  const [tempTime, setTempTime] = useState('');
-  const [timeError, setTimeError] = useState('');
+  const [tempTime, setTempTime] = useState("");
+  const [timeError, setTimeError] = useState("");
   const [selectedActivity, setSelectedActivity] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const todaysActivities = getTodaysActivities();
-  const completedCount = todaysActivities.filter(activity => activity.completed).length;
+  const completedCount = todaysActivities.filter(
+    (activity) => activity.completed,
+  ).length;
   const totalCount = todaysActivities.length;
 
   const handleAddActivity = () => {
-    navigate('/dog-profile-dashboard/weekly-plan');
+    navigate("/dog-profile-dashboard/weekly-plan");
   };
 
   const handleToggleExpanded = (activityId: string) => {
     setExpandedActivity(expandedActivity === activityId ? null : activityId);
     setEditingTimeId(null);
-    setTimeError('');
+    setTimeError("");
   };
 
   const handleToggleActivity = (activityId: string) => {
-    const activity = todaysActivities.find(a => a.id === activityId);
+    const activity = todaysActivities.find((a) => a.id === activityId);
     if (!activity) return;
 
     if (!activity.completed) {
@@ -298,7 +357,7 @@ const DailyPlannerCard = () => {
       setSelectedActivity({ ...activity, activityDetails });
       setIsModalOpen(true);
     } else {
-      toggleActivityCompletion(activityId, '');
+      toggleActivityCompletion(activityId, "");
     }
   };
 
@@ -323,13 +382,13 @@ const DailyPlannerCard = () => {
   return (
     <>
       <Card className="overflow-hidden">
-        <EnhancedHeader 
+        <EnhancedHeader
           completedCount={completedCount}
           totalCount={totalCount}
           isMobile={isMobile}
           onAddActivity={handleAddActivity}
         />
-        
+
         <CardContent className="mobile-card">
           {/* Success/Progress Banner */}
           {completedCount === totalCount ? (
@@ -341,7 +400,9 @@ const DailyPlannerCard = () => {
           {/* Activity List */}
           <div className="space-y-3 mt-4">
             {todaysActivities.map((scheduledActivity) => {
-              const activityDetails = getActivityDetails(scheduledActivity.activityId);
+              const activityDetails = getActivityDetails(
+                scheduledActivity.activityId,
+              );
               if (!activityDetails) return null;
 
               const displayTime = "All day";
@@ -374,7 +435,7 @@ const DailyPlannerCard = () => {
           isOpen={isModalOpen}
           onClose={handleModalCancel}
           onComplete={handleModalComplete}
-          activityTitle={selectedActivity.activityDetails?.title || ''}
+          activityTitle={selectedActivity.activityDetails?.title || ""}
         />
       )}
     </>

@@ -1,34 +1,50 @@
-
-import { useState, useEffect, useMemo } from 'react';
-import { ScheduledActivity, UserActivity } from '@/types/activity';
-import { DiscoveredActivity, ContentDiscoveryConfig } from '@/types/discovery';
-import { getDiscoveredActivities } from '@/data/activityLibrary';
-import { ContentDiscoveryService } from '@/services/ContentDiscoveryService';
-import { Dog } from '@/types/dog';
-import { useActivityLoader } from './useActivityLoader';
-import { useActivityMigration } from './useActivityMigration';
-import { useActivityPersistence } from './useActivityPersistence';
+import { useState, useEffect, useMemo } from "react";
+import { ScheduledActivity, UserActivity } from "@/types/activity";
+import { DiscoveredActivity, ContentDiscoveryConfig } from "@/types/discovery";
+import { getDiscoveredActivities } from "@/data/activityLibrary";
+import { ContentDiscoveryService } from "@/services/ContentDiscoveryService";
+import { Dog } from "@/types/dog";
+import { useActivityLoader } from "./useActivityLoader";
+import { useActivityMigration } from "./useActivityMigration";
+import { useActivityPersistence } from "./useActivityPersistence";
 
 export const useActivityStateHook = (currentDog: Dog | null) => {
-  const [scheduledActivities, setScheduledActivities] = useState<ScheduledActivity[]>([]);
+  const [scheduledActivities, setScheduledActivities] = useState<
+    ScheduledActivity[]
+  >([]);
   const [userActivities, setUserActivities] = useState<UserActivity[]>([]);
-  const [discoveredActivities, setDiscoveredActivities] = useState<DiscoveredActivity[]>([]);
-  const [discoveryConfig, setDiscoveryConfig] = useState<ContentDiscoveryConfig>(
-    ContentDiscoveryService.getDefaultConfig()
-  );
+  const [discoveredActivities, setDiscoveredActivities] = useState<
+    DiscoveredActivity[]
+  >([]);
+  const [discoveryConfig, setDiscoveryConfig] =
+    useState<ContentDiscoveryConfig>(
+      ContentDiscoveryService.getDefaultConfig(),
+    );
   const [dataLoaded, setDataLoaded] = useState(false);
 
-  const { isLoading, setIsLoading, loadActivitiesFromSupabase, migrateScheduledActivity } = useActivityLoader(currentDog);
-  
-  const { loadAndMigrateScheduledActivities, loadAndMigrateUserActivities } = useActivityMigration(
-    currentDog,
-    setScheduledActivities,
-    setUserActivities,
-    migrateScheduledActivity
-  );
+  const {
+    isLoading,
+    setIsLoading,
+    loadActivitiesFromSupabase,
+    migrateScheduledActivity,
+  } = useActivityLoader(currentDog);
+
+  const { loadAndMigrateScheduledActivities, loadAndMigrateUserActivities } =
+    useActivityMigration(
+      currentDog,
+      setScheduledActivities,
+      setUserActivities,
+      migrateScheduledActivity,
+    );
 
   // Use persistence hook with debouncing
-  useActivityPersistence(currentDog, scheduledActivities, userActivities, discoveredActivities, isLoading);
+  useActivityPersistence(
+    currentDog,
+    scheduledActivities,
+    userActivities,
+    discoveredActivities,
+    isLoading,
+  );
 
   // Load dog-specific data from Supabase with localStorage fallback
   useEffect(() => {
@@ -41,11 +57,15 @@ export const useActivityStateHook = (currentDog: Dog | null) => {
     }
 
     // Skip loading if we already have data for this dog (optimization)
-    if (dataLoaded && scheduledActivities.length > 0 && scheduledActivities[0]?.dogId === currentDog.id) {
+    if (
+      dataLoaded &&
+      scheduledActivities.length > 0 &&
+      scheduledActivities[0]?.dogId === currentDog.id
+    ) {
       return;
     }
 
-    console.log('🔄 Loading activities for dog:', currentDog.name);
+    console.log("🔄 Loading activities for dog:", currentDog.name);
     setDataLoaded(false);
 
     const loadData = async () => {
@@ -56,12 +76,15 @@ export const useActivityStateHook = (currentDog: Dog | null) => {
           setDiscoveredActivities,
           setDiscoveryConfig,
           loadAndMigrateScheduledActivities,
-          loadAndMigrateUserActivities
+          loadAndMigrateUserActivities,
         );
         setDataLoaded(true);
-        console.log('✅ Activities loaded successfully for dog:', currentDog.name);
+        console.log(
+          "✅ Activities loaded successfully for dog:",
+          currentDog.name,
+        );
       } catch (error) {
-        console.error('❌ Error loading activities:', error);
+        console.error("❌ Error loading activities:", error);
         setDataLoaded(true); // Set to true even on error to prevent infinite loading
       }
     };
@@ -80,6 +103,6 @@ export const useActivityStateHook = (currentDog: Dog | null) => {
     setUserActivities,
     setDiscoveredActivities,
     setDiscoveryConfig,
-    isLoading: isLoading || !dataLoaded
+    isLoading: isLoading || !dataLoaded,
   };
 };

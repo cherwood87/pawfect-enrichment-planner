@@ -1,8 +1,7 @@
-
-import React from 'react';
-import { ScheduledActivity } from '@/types/activity';
-import { useActivity } from '@/contexts/ActivityContext';
-import { Calendar, Target } from 'lucide-react';
+import React from "react";
+import { ScheduledActivity } from "@/types/activity";
+import { useActivity } from "@/contexts/ActivityContext";
+import { Calendar, Target } from "lucide-react";
 
 interface AccordionWeeklyGridProps {
   weekActivities: ScheduledActivity[];
@@ -13,33 +12,38 @@ interface AccordionWeeklyGridProps {
 const AccordionWeeklyGrid: React.FC<AccordionWeeklyGridProps> = ({
   weekActivities,
   onToggleCompletion,
-  onActivityClick
+  onActivityClick,
 }) => {
   const { getActivityDetails } = useActivity();
 
   const dayNames = [
-    { short: 'Sun', full: 'Sunday' },
-    { short: 'Mon', full: 'Monday' },
-    { short: 'Tue', full: 'Tuesday' },
-    { short: 'Wed', full: 'Wednesday' },
-    { short: 'Thu', full: 'Thursday' },
-    { short: 'Fri', full: 'Friday' },
-    { short: 'Sat', full: 'Saturday' }
+    { short: "Sun", full: "Sunday" },
+    { short: "Mon", full: "Monday" },
+    { short: "Tue", full: "Tuesday" },
+    { short: "Wed", full: "Wednesday" },
+    { short: "Thu", full: "Thursday" },
+    { short: "Fri", full: "Friday" },
+    { short: "Sat", full: "Saturday" },
   ];
 
   const currentDayIndex = new Date().getDay();
 
-  const activitiesByDay = dayNames.reduce((acc, _, dayIndex) => {
-    acc[dayIndex] = weekActivities.filter(activity => activity.dayOfWeek === dayIndex);
-    return acc;
-  }, {} as Record<number, ScheduledActivity[]>);
+  const activitiesByDay = dayNames.reduce(
+    (acc, _, dayIndex) => {
+      acc[dayIndex] = weekActivities.filter(
+        (activity) => activity.dayOfWeek === dayIndex,
+      );
+      return acc;
+    },
+    {} as Record<number, ScheduledActivity[]>,
+  );
 
   const reorderedDays = [
     ...dayNames.slice(currentDayIndex),
-    ...dayNames.slice(0, currentDayIndex)
+    ...dayNames.slice(0, currentDayIndex),
   ].map((day, index) => ({
     ...day,
-    originalIndex: (currentDayIndex + index) % 7
+    originalIndex: (currentDayIndex + index) % 7,
   }));
 
   const totalActivities = weekActivities.length;
@@ -50,8 +54,12 @@ const AccordionWeeklyGrid: React.FC<AccordionWeeklyGridProps> = ({
         <div className="bg-gradient-to-r from-purple-500 to-cyan-500 p-3 rounded-2xl w-16 h-16 mx-auto mb-4">
           <Calendar className="w-10 h-10 text-white mx-auto" />
         </div>
-        <h3 className="text-lg font-bold text-purple-800 mb-2">No Activities This Week</h3>
-        <p className="text-purple-600 mb-4">Start planning your dog's enrichment journey!</p>
+        <h3 className="text-lg font-bold text-purple-800 mb-2">
+          No Activities This Week
+        </h3>
+        <p className="text-purple-600 mb-4">
+          Start planning your dog's enrichment journey!
+        </p>
         <div className="inline-flex items-center space-x-2 bg-purple-100 text-purple-700 px-4 py-2 rounded-xl border border-purple-200">
           <Target className="w-4 h-4" />
           <span className="font-medium">Add activities to get started</span>
@@ -65,7 +73,7 @@ const AccordionWeeklyGrid: React.FC<AccordionWeeklyGridProps> = ({
       {reorderedDays.map((day) => {
         const dayIndex = day.originalIndex;
         const dayActivities = activitiesByDay[dayIndex] || [];
-        const completedCount = dayActivities.filter(a => a.completed).length;
+        const completedCount = dayActivities.filter((a) => a.completed).length;
         const isToday = currentDayIndex === dayIndex;
 
         return (
@@ -77,14 +85,16 @@ const AccordionWeeklyGrid: React.FC<AccordionWeeklyGridProps> = ({
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-xl font-bold text-purple-800">
-                  {day.full}{' '}
+                  {day.full}{" "}
                   {isToday && (
                     <span className="ml-2 text-xs bg-blue-500 text-white px-3 py-1 rounded-full font-medium">
                       Today
                     </span>
                   )}
                 </h2>
-                <p className="text-sm text-gray-500">{completedCount}/{dayActivities.length} completed</p>
+                <p className="text-sm text-gray-500">
+                  {completedCount}/{dayActivities.length} completed
+                </p>
               </div>
               <div className="w-10 h-10 rounded-full bg-gray-100 text-gray-700 flex items-center justify-center font-bold">
                 {day.short}
@@ -93,7 +103,9 @@ const AccordionWeeklyGrid: React.FC<AccordionWeeklyGridProps> = ({
 
             {/* Activities List */}
             {dayActivities.length === 0 ? (
-              <p className="text-sm text-gray-400 italic">No activities scheduled.</p>
+              <p className="text-sm text-gray-400 italic">
+                No activities scheduled.
+              </p>
             ) : (
               <div className="space-y-4">
                 {dayActivities.map((activity) => {
@@ -107,7 +119,9 @@ const AccordionWeeklyGrid: React.FC<AccordionWeeklyGridProps> = ({
                       onClick={() => onActivityClick?.(activity)}
                     >
                       <div className="flex justify-between items-start mb-2">
-                        <h3 className="font-semibold text-gray-800">{details.title}</h3>
+                        <h3 className="font-semibold text-gray-800">
+                          {details.title}
+                        </h3>
                         <input
                           type="checkbox"
                           checked={activity.completed}
@@ -119,9 +133,12 @@ const AccordionWeeklyGrid: React.FC<AccordionWeeklyGridProps> = ({
                         />
                       </div>
                       <p className="text-sm text-gray-600 mb-1">
-                        <span className="capitalize">{details.pillar}</span> • {details.duration} min • {details.difficulty}
+                        <span className="capitalize">{details.pillar}</span> •{" "}
+                        {details.duration} min • {details.difficulty}
                       </p>
-                      <p className="text-xs text-gray-500">{details.benefits}</p>
+                      <p className="text-xs text-gray-500">
+                        {details.benefits}
+                      </p>
                     </div>
                   );
                 })}

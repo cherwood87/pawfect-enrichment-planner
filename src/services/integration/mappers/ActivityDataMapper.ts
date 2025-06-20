@@ -1,5 +1,4 @@
-
-import { ScheduledActivity, UserActivity } from '@/types/activity';
+import { ScheduledActivity, UserActivity } from "@/types/activity";
 
 export class ActivityDataMapper {
   static mapToScheduledActivity(dbActivity: any): ScheduledActivity {
@@ -9,11 +8,11 @@ export class ActivityDataMapper {
       activityId: dbActivity.activity_id,
       scheduledDate: dbActivity.scheduled_date,
       completed: dbActivity.completed,
-      notes: dbActivity.notes || '',
-      completionNotes: dbActivity.completion_notes || '',
+      notes: dbActivity.notes || "",
+      completionNotes: dbActivity.completion_notes || "",
       reminderEnabled: dbActivity.reminder_enabled || false,
       weekNumber: dbActivity.week_number,
-      dayOfWeek: dbActivity.day_of_week
+      dayOfWeek: dbActivity.day_of_week,
     };
   }
 
@@ -28,12 +27,12 @@ export class ActivityDataMapper {
       materials: dbActivity.materials || [],
       emotionalGoals: dbActivity.emotional_goals || [],
       instructions: dbActivity.instructions || [],
-      benefits: dbActivity.benefits || '',
+      benefits: dbActivity.benefits || "",
       tags: dbActivity.tags || [],
       ageGroup: dbActivity.age_group,
       energyLevel: dbActivity.energy_level,
       isCustom: dbActivity.is_custom,
-      createdAt: dbActivity.created_at
+      createdAt: dbActivity.created_at,
     };
   }
 }

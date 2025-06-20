@@ -1,17 +1,16 @@
-
-import React, { useState, useCallback } from 'react';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft, Brain, BookOpen, Sparkles } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import EducationalContent from '@/components/EducationalContent';
-import FloatingChatButton from '@/components/dashboard/FloatingChatButton';
-import ChatModal from '@/components/chat/ChatModal';
-import ActivityLibrary from '@/components/ActivityLibrary';
-import { useLightweightMonitor } from '@/hooks/useLightweightMonitor';
+import React, { useState, useCallback } from "react";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, Brain, BookOpen, Sparkles } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import EducationalContent from "@/components/EducationalContent";
+import FloatingChatButton from "@/components/dashboard/FloatingChatButton";
+import ChatModal from "@/components/chat/ChatModal";
+import ActivityLibrary from "@/components/ActivityLibrary";
+import { useLightweightMonitor } from "@/hooks/useLightweightMonitor";
 
 const ActivityLibraryPage = () => {
-  useLightweightMonitor('ActivityLibraryPage');
-  
+  useLightweightMonitor("ActivityLibraryPage");
+
   const navigate = useNavigate();
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
 
@@ -24,7 +23,7 @@ const ActivityLibraryPage = () => {
   }, []);
 
   const handleBackClick = useCallback(() => {
-    navigate('/app');
+    navigate("/app");
   }, [navigate]);
 
   return (
@@ -34,8 +33,8 @@ const ActivityLibraryPage = () => {
         <div className="max-w-screen-lg mx-auto mobile-container py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 size="sm"
                 onClick={handleBackClick}
                 className="modern-button-outline"
@@ -47,13 +46,17 @@ const ActivityLibraryPage = () => {
                 <BookOpen className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-purple-800">Activity Library</h1>
+                <h1 className="text-xl font-bold text-purple-800">
+                  Activity Library
+                </h1>
                 <p className="text-purple-600">Discover enriching activities</p>
               </div>
             </div>
             <div className="hidden sm:flex items-center space-x-2 bg-white/60 backdrop-blur-sm rounded-2xl px-4 py-2 border border-purple-200">
               <Sparkles className="w-4 h-4 text-purple-500" />
-              <span className="text-sm font-medium text-purple-700">Beyond Busy</span>
+              <span className="text-sm font-medium text-purple-700">
+                Beyond Busy
+              </span>
             </div>
           </div>
         </div>
@@ -69,7 +72,7 @@ const ActivityLibraryPage = () => {
             <EducationalContent />
           </div>
         </div>
-        
+
         {/* Activity Library - Direct import for better performance */}
         <ActivityLibrary />
       </div>
@@ -78,10 +81,7 @@ const ActivityLibraryPage = () => {
       <FloatingChatButton onChatOpen={handleChatModalOpen} />
 
       {/* Chat Modal */}
-      <ChatModal 
-        isOpen={isChatModalOpen}
-        onClose={handleChatModalClose}
-      />
+      <ChatModal isOpen={isChatModalOpen} onClose={handleChatModalClose} />
     </div>
   );
 };

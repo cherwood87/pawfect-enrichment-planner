@@ -1,15 +1,14 @@
-
-import React from 'react';
-import { Skeleton } from '@/components/ui/skeleton';
+import React from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface LoadingSkeletonProps {
-  type?: 'dashboard' | 'header' | 'card' | 'list';
+  type?: "dashboard" | "header" | "card" | "list";
   count?: number;
 }
 
-export const LoadingSkeleton: React.FC<LoadingSkeletonProps> = ({ 
-  type = 'dashboard', 
-  count = 1 
+export const LoadingSkeleton: React.FC<LoadingSkeletonProps> = ({
+  type = "dashboard",
+  count = 1,
 }) => {
   const renderDashboardSkeleton = () => (
     <div className="space-y-6 animate-fade-in">
@@ -24,7 +23,7 @@ export const LoadingSkeleton: React.FC<LoadingSkeletonProps> = ({
         </div>
         <Skeleton className="w-10 h-10 rounded-full" />
       </div>
-      
+
       {/* Content skeleton */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 p-4">
         {[...Array(6)].map((_, i) => (
@@ -74,11 +73,11 @@ export const LoadingSkeleton: React.FC<LoadingSkeletonProps> = ({
   );
 
   switch (type) {
-    case 'header':
+    case "header":
       return renderHeaderSkeleton();
-    case 'card':
+    case "card":
       return renderCardSkeleton();
-    case 'list':
+    case "list":
       return renderListSkeleton();
     default:
       return renderDashboardSkeleton();

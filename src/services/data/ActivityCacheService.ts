@@ -1,6 +1,5 @@
-
-import { ActivityLibraryItem } from '@/types/activity';
-import { DiscoveredActivity } from '@/types/discovery';
+import { ActivityLibraryItem } from "@/types/activity";
+import { DiscoveredActivity } from "@/types/discovery";
 
 interface CacheEntry<T> {
   data: T;
@@ -29,32 +28,39 @@ export class ActivityCacheService {
   }
 
   // Cache activity library data
-  cacheActivities(key: string, activities: (ActivityLibraryItem | DiscoveredActivity)[]): void {
+  cacheActivities(
+    key: string,
+    activities: (ActivityLibraryItem | DiscoveredActivity)[],
+  ): void {
     this.set(key, activities);
   }
 
   // Get cached activities
-  getCachedActivities(key: string): (ActivityLibraryItem | DiscoveredActivity)[] | null {
+  getCachedActivities(
+    key: string,
+  ): (ActivityLibraryItem | DiscoveredActivity)[] | null {
     return this.get(key);
   }
 
   // Cache filtered results
   cacheFilteredResults(
     filterKey: string,
-    results: (ActivityLibraryItem | DiscoveredActivity)[]
+    results: (ActivityLibraryItem | DiscoveredActivity)[],
   ): void {
     this.set(`filter:${filterKey}`, results);
   }
 
   // Get cached filtered results
-  getCachedFilteredResults(filterKey: string): (ActivityLibraryItem | DiscoveredActivity)[] | null {
+  getCachedFilteredResults(
+    filterKey: string,
+  ): (ActivityLibraryItem | DiscoveredActivity)[] | null {
     return this.get(`filter:${filterKey}`);
   }
 
   // Generic cache methods
   private set<T>(key: string, data: T): void {
     const now = Date.now();
-    
+
     // Remove oldest entries if cache is full
     if (this.cache.size >= this.MAX_CACHE_SIZE) {
       this.evictOldest();
@@ -65,15 +71,15 @@ export class ActivityCacheService {
       timestamp: now,
       expiresAt: now + this.CACHE_DURATION,
       accessCount: 1,
-      lastAccessed: now
+      lastAccessed: now,
     });
   }
 
   private get<T>(key: string): T | null {
     const entry = this.cache.get(key);
-    
+
     if (!entry) return null;
-    
+
     if (Date.now() > entry.expiresAt) {
       this.cache.delete(key);
       return null;
@@ -82,24 +88,24 @@ export class ActivityCacheService {
     // Update access statistics
     entry.accessCount++;
     entry.lastAccessed = Date.now();
-    
+
     return entry.data;
   }
 
   // Cache eviction strategies
   private evictOldest(): void {
     if (this.cache.size === 0) return;
-    
-    let oldestKey = '';
+
+    let oldestKey = "";
     let oldestTime = Date.now();
-    
+
     for (const [key, entry] of this.cache) {
       if (entry.lastAccessed < oldestTime) {
         oldestTime = entry.lastAccessed;
         oldestKey = key;
       }
     }
-    
+
     if (oldestKey) {
       this.cache.delete(oldestKey);
     }
@@ -108,14 +114,14 @@ export class ActivityCacheService {
   private evictExpired(): void {
     const now = Date.now();
     const keysToDelete: string[] = [];
-    
+
     for (const [key, entry] of this.cache) {
       if (now > entry.expiresAt) {
         keysToDelete.push(key);
       }
     }
-    
-    keysToDelete.forEach(key => this.cache.delete(key));
+
+    keysToDelete.forEach((key) => this.cache.delete(key));
   }
 
   private startCleanupInterval(): void {
@@ -131,12 +137,15 @@ export class ActivityCacheService {
     averageAccessCount: number;
   } {
     const entries = Array.from(this.cache.values());
-    const totalAccess = entries.reduce((sum, entry) => sum + entry.accessCount, 0);
-    
+    const totalAccess = entries.reduce(
+      (sum, entry) => sum + entry.accessCount,
+      0,
+    );
+
     return {
       size: this.cache.size,
       hitRate: entries.length > 0 ? totalAccess / entries.length : 0,
-      averageAccessCount: entries.length > 0 ? totalAccess / entries.length : 0
+      averageAccessCount: entries.length > 0 ? totalAccess / entries.length : 0,
     };
   }
 
@@ -146,19 +155,29 @@ export class ActivityCacheService {
   }
 
   // Prefetch activities based on usage patterns
-  prefetchPopularActivities(activities: (ActivityLibraryItem | DiscoveredActivity)[]): void {
+  prefetchPopularActivities(
+    activities: (ActivityLibraryItem | DiscoveredActivity)[],
+  ): void {
     // Cache popular pillar combinations
-    const pillars = ['mental', 'physical', 'social', 'environmental', 'instinctual'];
-    
-    pillars.forEach(pillar => {
-      const pillarActivities = activities.filter(a => a.pillar === pillar);
+    const pillars = [
+      "mental",
+      "physical",
+      "social",
+      "environmental",
+      "instinctual",
+    ];
+
+    pillars.forEach((pillar) => {
+      const pillarActivities = activities.filter((a) => a.pillar === pillar);
       this.cacheFilteredResults(`all|${pillar}|all`, pillarActivities);
     });
-    
+
     // Cache common difficulty filters
-    const difficulties = ['Easy', 'Medium', 'Hard'];
-    difficulties.forEach(difficulty => {
-      const difficultyActivities = activities.filter(a => a.difficulty === difficulty);
+    const difficulties = ["Easy", "Medium", "Hard"];
+    difficulties.forEach((difficulty) => {
+      const difficultyActivities = activities.filter(
+        (a) => a.difficulty === difficulty,
+      );
       this.cacheFilteredResults(`all|all|${difficulty}`, difficultyActivities);
     });
   }

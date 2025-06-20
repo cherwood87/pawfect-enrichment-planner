@@ -1,17 +1,18 @@
-
-import React, { Suspense, lazy } from 'react';
-import LoadingSpinner from '@/components/ui/loading-spinner';
-import LazyLoadErrorBoundary from '@/components/error/LazyLoadErrorBoundary';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import React, { Suspense, lazy } from "react";
+import LoadingSpinner from "@/components/ui/loading-spinner";
+import LazyLoadErrorBoundary from "@/components/error/LazyLoadErrorBoundary";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 // Lazy load with shorter timeout
 const ActivityModal = lazy(() => {
-  const importPromise = import('@/components/ActivityModal');
+  const importPromise = import("@/components/ActivityModal");
   const timeoutPromise = new Promise((_, reject) =>
-    setTimeout(() => reject(new Error('Component load timeout')), 3000)
+    setTimeout(() => reject(new Error("Component load timeout")), 3000),
   );
-  
-  return Promise.race([importPromise, timeoutPromise]) as Promise<typeof import('@/components/ActivityModal')>;
+
+  return Promise.race([importPromise, timeoutPromise]) as Promise<
+    typeof import("@/components/ActivityModal")
+  >;
 });
 
 interface ActivityModalLazyProps {
@@ -32,7 +33,7 @@ const ActivityModalLoader = () => (
 const ActivityModalLazy: React.FC<ActivityModalLazyProps> = ({
   isOpen,
   onClose,
-  selectedPillar
+  selectedPillar,
 }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

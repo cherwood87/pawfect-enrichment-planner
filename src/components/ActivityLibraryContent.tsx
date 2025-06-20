@@ -1,8 +1,7 @@
-
-import React, { memo } from 'react';
-import { useLightweightMonitor } from '@/hooks/useLightweightMonitor';
-import AIDiscoverySection from '@/components/activity-library/AIDiscoverySection';
-import SearchAndFilterSection from '@/components/activity-library/SearchAndFilterSection';
+import React, { memo } from "react";
+import { useLightweightMonitor } from "@/hooks/useLightweightMonitor";
+import AIDiscoverySection from "@/components/activity-library/AIDiscoverySection";
+import SearchAndFilterSection from "@/components/activity-library/SearchAndFilterSection";
 
 interface ActivityLibraryContentProps {
   autoApprovedCount: number;
@@ -35,9 +34,9 @@ const ActivityLibraryContent: React.FC<ActivityLibraryContentProps> = ({
   curatedCount,
   onManualSync,
   isSyncing = false,
-  lastSyncTime
+  lastSyncTime,
 }) => {
-  useLightweightMonitor('ActivityLibraryContent');
+  useLightweightMonitor("ActivityLibraryContent");
 
   return (
     <div className="space-y-6">

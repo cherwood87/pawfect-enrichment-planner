@@ -1,9 +1,8 @@
-
 interface PreloadResource {
   href: string;
-  as: 'script' | 'style' | 'image' | 'font';
+  as: "script" | "style" | "image" | "font";
   type?: string;
-  crossorigin?: 'anonymous' | 'use-credentials';
+  crossorigin?: "anonymous" | "use-credentials";
 }
 
 class PreloadManager {
@@ -16,39 +15,39 @@ class PreloadManager {
       return;
     }
 
-    const link = document.createElement('link');
-    link.rel = 'preload';
+    const link = document.createElement("link");
+    link.rel = "preload";
     link.href = resource.href;
     link.as = resource.as;
-    
+
     if (resource.type) {
       link.type = resource.type;
     }
-    
+
     if (resource.crossorigin) {
       link.crossOrigin = resource.crossorigin;
     }
 
     document.head.appendChild(link);
     this.preloadedResources.add(resource.href);
-    
-    console.log('🚀 Preloaded resource:', resource.href);
+
+    console.log("🚀 Preloaded resource:", resource.href);
   }
 
   // Preload critical images (like dog avatars that are likely to be viewed)
-  preloadImage(src: string, priority: 'high' | 'low' = 'low') {
+  preloadImage(src: string, priority: "high" | "low" = "low") {
     if (this.criticalImages.has(src)) {
       return;
     }
 
-    if (priority === 'high') {
+    if (priority === "high") {
       this.preloadResource({
         href: src,
-        as: 'image'
+        as: "image",
       });
     } else {
       // Use requestIdleCallback for low priority preloading
-      if ('requestIdleCallback' in window) {
+      if ("requestIdleCallback" in window) {
         requestIdleCallback(() => {
           const img = new Image();
           img.src = src;
@@ -67,12 +66,12 @@ class PreloadManager {
       // '/fonts/inter-var.woff2'
     ];
 
-    criticalFonts.forEach(font => {
+    criticalFonts.forEach((font) => {
       this.preloadResource({
         href: font,
-        as: 'font',
-        type: 'font/woff2',
-        crossorigin: 'anonymous'
+        as: "font",
+        type: "font/woff2",
+        crossorigin: "anonymous",
       });
     });
   }
@@ -89,9 +88,9 @@ export const preloadManager = new PreloadManager();
 // Initialize critical preloads
 export const initializeCriticalPreloads = () => {
   preloadManager.preloadFonts();
-  
+
   // Preload placeholder image
-  preloadManager.preloadImage('/placeholder.svg', 'high');
-  
-  console.log('✅ Critical resources preloaded');
+  preloadManager.preloadImage("/placeholder.svg", "high");
+
+  console.log("✅ Critical resources preloaded");
 };

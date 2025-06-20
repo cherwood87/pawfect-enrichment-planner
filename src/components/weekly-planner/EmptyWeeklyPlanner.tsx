@@ -1,23 +1,28 @@
-
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Calendar, Plus, Sparkles } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Calendar, Plus, Sparkles } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface EmptyWeeklyPlannerProps {
   onPillarSelect?: (pillar: string) => void;
 }
 
-const EmptyWeeklyPlanner: React.FC<EmptyWeeklyPlannerProps> = ({ onPillarSelect }) => {
+const EmptyWeeklyPlanner: React.FC<EmptyWeeklyPlannerProps> = ({
+  onPillarSelect,
+}) => {
   const navigate = useNavigate();
 
   const pillarButtons = [
-    { name: 'mental', color: 'from-purple-400 to-purple-500', emoji: '🧠' },
-    { name: 'physical', color: 'from-green-400 to-green-500', emoji: '🏃' },
-    { name: 'social', color: 'from-blue-400 to-blue-500', emoji: '👥' },
-    { name: 'environmental', color: 'from-teal-400 to-teal-500', emoji: '🌿' },
-    { name: 'instinctual', color: 'from-orange-400 to-orange-500', emoji: '🐕' }
+    { name: "mental", color: "from-purple-400 to-purple-500", emoji: "🧠" },
+    { name: "physical", color: "from-green-400 to-green-500", emoji: "🏃" },
+    { name: "social", color: "from-blue-400 to-blue-500", emoji: "👥" },
+    { name: "environmental", color: "from-teal-400 to-teal-500", emoji: "🌿" },
+    {
+      name: "instinctual",
+      color: "from-orange-400 to-orange-500",
+      emoji: "🐕",
+    },
   ];
 
   return (
@@ -34,7 +39,7 @@ const EmptyWeeklyPlanner: React.FC<EmptyWeeklyPlannerProps> = ({ onPillarSelect 
           </div>
 
           <button
-            onClick={() => navigate('/activity-library')}
+            onClick={() => navigate("/activity-library")}
             aria-label="Add activity"
             className="
               w-10 h-10 flex items-center justify-center
@@ -63,13 +68,14 @@ const EmptyWeeklyPlanner: React.FC<EmptyWeeklyPlannerProps> = ({ onPillarSelect 
           Ready to Plan an Amazing Week?
         </h3>
         <p className="text-gray-600 max-w-md mb-8 leading-relaxed">
-          Create the perfect enrichment schedule for your dog with activities tailored to their personality and needs.
+          Create the perfect enrichment schedule for your dog with activities
+          tailored to their personality and needs.
         </p>
 
         {/* Primary Action */}
         <div className="w-full max-w-md space-y-4">
-          <Button 
-            onClick={() => navigate('/activity-library')} 
+          <Button
+            onClick={() => navigate("/activity-library")}
             className="w-full py-3 text-base font-semibold bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 shadow-lg hover:shadow-xl transition-all"
           >
             <Sparkles className="w-5 h-5 mr-2" />
@@ -79,12 +85,14 @@ const EmptyWeeklyPlanner: React.FC<EmptyWeeklyPlannerProps> = ({ onPillarSelect 
           {/* Quick Pillar Selection */}
           {onPillarSelect && (
             <div className="space-y-3">
-              <p className="text-sm text-gray-500 font-medium">Or start with a specific focus:</p>
+              <p className="text-sm text-gray-500 font-medium">
+                Or start with a specific focus:
+              </p>
               <div className="grid grid-cols-2 gap-2">
                 {pillarButtons.slice(0, 4).map((pillar) => (
-                  <Button 
+                  <Button
                     key={pillar.name}
-                    variant="outline" 
+                    variant="outline"
                     size="sm"
                     onClick={() => onPillarSelect(pillar.name)}
                     className="text-xs font-medium border-2 hover:shadow-md transition-all"
@@ -105,23 +113,29 @@ const EmptyWeeklyPlanner: React.FC<EmptyWeeklyPlannerProps> = ({ onPillarSelect 
               <span className="text-white text-xs">📅</span>
             </div>
             <span className="font-medium text-blue-800">Smart Scheduling</span>
-            <span className="text-blue-600 text-xs text-center">Plan activities by day and time</span>
+            <span className="text-blue-600 text-xs text-center">
+              Plan activities by day and time
+            </span>
           </div>
-          
+
           <div className="flex flex-col items-center p-3 bg-purple-50 rounded-lg">
             <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center mb-2">
               <span className="text-white text-xs">🎯</span>
             </div>
             <span className="font-medium text-purple-800">Pillar Balance</span>
-            <span className="text-purple-600 text-xs text-center">Cover all enrichment areas</span>
+            <span className="text-purple-600 text-xs text-center">
+              Cover all enrichment areas
+            </span>
           </div>
-          
+
           <div className="flex flex-col items-center p-3 bg-green-50 rounded-lg">
             <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center mb-2">
               <span className="text-white text-xs">📈</span>
             </div>
             <span className="font-medium text-green-800">Track Progress</span>
-            <span className="text-green-600 text-xs text-center">See completion rates</span>
+            <span className="text-green-600 text-xs text-center">
+              See completion rates
+            </span>
           </div>
         </div>
       </CardContent>

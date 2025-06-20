@@ -1,6 +1,5 @@
-
-import React from 'react';
-import BrowseLibraryTabOptimized from './BrowseLibraryTabOptimized';
+import React from "react";
+import BrowseLibraryTabOptimized from "./BrowseLibraryTabOptimized";
 
 interface BrowseLibraryTabProps {
   selectedPillar?: string | null;

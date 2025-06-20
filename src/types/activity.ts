@@ -1,17 +1,16 @@
-
 export interface ActivityLibraryItem {
   id: string;
   title: string;
-  pillar: 'mental' | 'physical' | 'social' | 'environmental' | 'instinctual';
-  difficulty: 'Easy' | 'Medium' | 'Hard';
+  pillar: "mental" | "physical" | "social" | "environmental" | "instinctual";
+  difficulty: "Easy" | "Medium" | "Hard";
   duration: number; // in minutes
   materials: string[];
   emotionalGoals: string[];
   instructions: string[];
   benefits: string;
   tags: string[];
-  ageGroup: 'Puppy' | 'Adult' | 'Senior' | 'All Ages';
-  energyLevel: 'Low' | 'Medium' | 'High';
+  ageGroup: "Puppy" | "Adult" | "Senior" | "All Ages";
+  energyLevel: "Low" | "Medium" | "High";
 }
 
 export interface ScheduledActivity {
@@ -28,8 +27,8 @@ export interface ScheduledActivity {
   completedAt?: string;
   weekNumber?: number; // ISO week number for weekly planning
   dayOfWeek?: number; // Day of week (0=Sunday, 6=Saturday)
-  status?: 'scheduled' | 'completed' | 'cancelled' | 'rescheduled'; // New status field
-  source?: 'manual' | 'migration' | 'bulk_import' | 'api'; // New source tracking
+  status?: "scheduled" | "completed" | "cancelled" | "rescheduled"; // New status field
+  source?: "manual" | "migration" | "bulk_import" | "api"; // New source tracking
 }
 
 export interface UserActivity extends ActivityLibraryItem {

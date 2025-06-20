@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,11 +9,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import { useDog } from '@/contexts/DogContext';
-import { ModeToggle } from '@/components/ModeToggle';
-import { PlusCircle, MessageSquare } from 'lucide-react';
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { useDog } from "@/contexts/DogContext";
+import { ModeToggle } from "@/components/ModeToggle";
+import { PlusCircle, MessageSquare } from "lucide-react";
 
 interface DashboardHeaderProps {
   onChatOpen: () => void;
@@ -22,7 +22,7 @@ interface DashboardHeaderProps {
 
 // Add a console log for debug
 const DashboardHeader = (props: DashboardHeaderProps) => {
-  console.log('[DashboardHeader] Rendering');
+  console.log("[DashboardHeader] Rendering");
   const { user, signOut } = useAuth();
   const { currentDog } = useDog();
   const navigate = useNavigate();
@@ -30,7 +30,7 @@ const DashboardHeader = (props: DashboardHeaderProps) => {
   const handleSignOut = async () => {
     try {
       await signOut();
-      navigate('/auth');
+      navigate("/auth");
     } catch (error) {
       console.error("Sign out failed:", error);
     }
@@ -58,16 +58,25 @@ const DashboardHeader = (props: DashboardHeaderProps) => {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="h-8 w-8 p-0">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src={user?.user_metadata?.avatar_url as string} alt={user?.email as string} />
-                  <AvatarFallback>{user?.email?.[0].toUpperCase()}</AvatarFallback>
+                  <AvatarImage
+                    src={user?.user_metadata?.avatar_url as string}
+                    alt={user?.email as string}
+                  />
+                  <AvatarFallback>
+                    {user?.email?.[0].toUpperCase()}
+                  </AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => navigate('/settings')}>Settings</DropdownMenuItem>
-              <DropdownMenuItem onClick={handleSignOut}>Logout</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/settings")}>
+                Settings
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleSignOut}>
+                Logout
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

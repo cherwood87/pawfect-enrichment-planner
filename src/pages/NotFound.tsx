@@ -1,10 +1,9 @@
-
-import React from 'react';
+import React from "react";
 import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Home, Search, ArrowLeft } from 'lucide-react';
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Home, Search, ArrowLeft } from "lucide-react";
 
 const NotFound = () => {
   const location = useLocation();
@@ -12,7 +11,7 @@ const NotFound = () => {
   useEffect(() => {
     console.error(
       "404 Error: User attempted to access non-existent route:",
-      location.pathname
+      location.pathname,
     );
   }, [location.pathname]);
 
@@ -42,7 +41,8 @@ const NotFound = () => {
                 Oops! Page Not Found
               </h2>
               <p className="text-xl text-gray-600 mb-6 max-w-md mx-auto">
-                It looks like this page went on its own enrichment adventure and got lost!
+                It looks like this page went on its own enrichment adventure and
+                got lost!
               </p>
               <p className="text-sm text-purple-600 bg-purple-50 rounded-full px-4 py-2 inline-block">
                 Path: <code className="font-mono">{location.pathname}</code>
@@ -57,7 +57,7 @@ const NotFound = () => {
                   Return Home
                 </Button>
               </Link>
-              
+
               <Link to="/app">
                 <Button className="modern-button-outline px-8 py-3">
                   <Search className="w-5 h-5 mr-2" />
@@ -72,20 +72,20 @@ const NotFound = () => {
                 Looking for something specific?
               </p>
               <div className="flex flex-wrap justify-center gap-4 text-sm">
-                <Link 
-                  to="/app" 
+                <Link
+                  to="/app"
                   className="text-purple-600 hover:text-purple-800 underline underline-offset-4 hover:underline-offset-2 transition-all"
                 >
                   Dashboard
                 </Link>
-                <Link 
-                  to="/activity-library" 
+                <Link
+                  to="/activity-library"
                   className="text-cyan-600 hover:text-cyan-800 underline underline-offset-4 hover:underline-offset-2 transition-all"
                 >
                   Activity Library
                 </Link>
-                <Link 
-                  to="/coach" 
+                <Link
+                  to="/coach"
                   className="text-amber-600 hover:text-amber-800 underline underline-offset-4 hover:underline-offset-2 transition-all"
                 >
                   AI Coach
@@ -97,7 +97,7 @@ const NotFound = () => {
 
         {/* Back Button */}
         <div className="mt-6">
-          <Button 
+          <Button
             onClick={() => window.history.back()}
             variant="ghost"
             className="text-purple-600 hover:text-purple-800 hover:bg-purple-50"

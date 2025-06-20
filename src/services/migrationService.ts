@@ -1,16 +1,21 @@
-
-import { ScheduledActivity, UserActivity } from '@/types/activity';
-import { ScheduledActivityService } from './scheduledActivityService';
-import { UserActivityService } from './userActivityService';
+import { ScheduledActivity, UserActivity } from "@/types/activity";
+import { ScheduledActivityService } from "./scheduledActivityService";
+import { UserActivityService } from "./userActivityService";
 
 export class MigrationService {
-  static async migrateScheduledActivitiesFromLocalStorage(dogId: string): Promise<void> {
+  static async migrateScheduledActivitiesFromLocalStorage(
+    dogId: string,
+  ): Promise<void> {
     try {
-      const localActivities = localStorage.getItem(`scheduledActivities-${dogId}`);
+      const localActivities = localStorage.getItem(
+        `scheduledActivities-${dogId}`,
+      );
       if (!localActivities) return;
 
       const activities: ScheduledActivity[] = JSON.parse(localActivities);
-      console.log(`Migrating ${activities.length} scheduled activities for dog ${dogId}...`);
+      console.log(
+        `Migrating ${activities.length} scheduled activities for dog ${dogId}...`,
+      );
 
       for (const activity of activities) {
         try {
@@ -20,19 +25,23 @@ export class MigrationService {
         }
       }
 
-      console.log('Scheduled activities migration completed');
+      console.log("Scheduled activities migration completed");
     } catch (error) {
-      console.error('Error during scheduled activities migration:', error);
+      console.error("Error during scheduled activities migration:", error);
     }
   }
 
-  static async migrateUserActivitiesFromLocalStorage(dogId: string): Promise<void> {
+  static async migrateUserActivitiesFromLocalStorage(
+    dogId: string,
+  ): Promise<void> {
     try {
       const localActivities = localStorage.getItem(`userActivities-${dogId}`);
       if (!localActivities) return;
 
       const activities: UserActivity[] = JSON.parse(localActivities);
-      console.log(`Migrating ${activities.length} user activities for dog ${dogId}...`);
+      console.log(
+        `Migrating ${activities.length} user activities for dog ${dogId}...`,
+      );
 
       for (const activity of activities) {
         try {
@@ -42,9 +51,9 @@ export class MigrationService {
         }
       }
 
-      console.log('User activities migration completed');
+      console.log("User activities migration completed");
     } catch (error) {
-      console.error('Error during user activities migration:', error);
+      console.error("Error during user activities migration:", error);
     }
   }
 }

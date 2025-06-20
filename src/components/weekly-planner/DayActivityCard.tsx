@@ -1,12 +1,19 @@
-
-import React from 'react';
-import { ScheduledActivity, ActivityLibraryItem, UserActivity } from '@/types/activity';
-import { DiscoveredActivity } from '@/types/discovery';
-import { Loader2 } from 'lucide-react';
+import React from "react";
+import {
+  ScheduledActivity,
+  ActivityLibraryItem,
+  UserActivity,
+} from "@/types/activity";
+import { DiscoveredActivity } from "@/types/discovery";
+import { Loader2 } from "lucide-react";
 
 interface DayActivityCardProps {
   activity: ScheduledActivity;
-  activityDetails: ActivityLibraryItem | UserActivity | DiscoveredActivity | null;
+  activityDetails:
+    | ActivityLibraryItem
+    | UserActivity
+    | DiscoveredActivity
+    | null;
   onToggleCompletion: (activityId: string, completionNotes?: string) => void;
   onActivityClick: (activity: ScheduledActivity) => void;
   isLoading?: boolean;
@@ -17,7 +24,7 @@ const DayActivityCard: React.FC<DayActivityCardProps> = ({
   activityDetails,
   onToggleCompletion,
   onActivityClick,
-  isLoading = false
+  isLoading = false,
 }) => {
   if (!activityDetails) {
     return (
@@ -43,35 +50,44 @@ const DayActivityCard: React.FC<DayActivityCardProps> = ({
   return (
     <div
       className={`p-4 rounded-2xl bg-gradient-to-br from-white to-purple-50 border shadow-sm hover:shadow-md transition-all cursor-pointer ${
-        isLoading ? 'opacity-60 cursor-wait' : 'hover:scale-[1.02]'
-      } ${activity.completed ? 'border-green-200 bg-gradient-to-br from-green-50 to-purple-50' : ''}`}
+        isLoading ? "opacity-60 cursor-wait" : "hover:scale-[1.02]"
+      } ${activity.completed ? "border-green-200 bg-gradient-to-br from-green-50 to-purple-50" : ""}`}
       onClick={handleCardClick}
     >
       <div className="flex justify-between items-start mb-2">
-        <h3 className={`font-semibold text-gray-800 ${activity.completed ? 'line-through text-gray-600' : ''}`}>
+        <h3
+          className={`font-semibold text-gray-800 ${activity.completed ? "line-through text-gray-600" : ""}`}
+        >
           {activityDetails.title}
         </h3>
         <div className="flex items-center gap-2 ml-2">
-          {isLoading && <Loader2 className="w-4 h-4 animate-spin text-blue-500" />}
+          {isLoading && (
+            <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
+          )}
           <input
             type="checkbox"
             checked={activity.completed}
             onChange={handleCheckboxChange}
             disabled={isLoading}
-            className={`${isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} transition-opacity`}
-            aria-label={`Mark ${activityDetails.title} as ${activity.completed ? 'incomplete' : 'complete'}`}
+            className={`${isLoading ? "opacity-50 cursor-not-allowed" : "cursor-pointer"} transition-opacity`}
+            aria-label={`Mark ${activityDetails.title} as ${activity.completed ? "incomplete" : "complete"}`}
           />
         </div>
       </div>
       <p className="text-sm text-gray-600 mb-1">
-        <span className="capitalize">{activityDetails.pillar}</span> • {activityDetails.duration} min • {activityDetails.difficulty}
+        <span className="capitalize">{activityDetails.pillar}</span> •{" "}
+        {activityDetails.duration} min • {activityDetails.difficulty}
       </p>
       <p className="text-xs text-gray-500">{activityDetails.benefits}</p>
       {activity.notes && (
-        <p className="text-xs text-purple-600 mt-2 italic">Note: {activity.notes}</p>
+        <p className="text-xs text-purple-600 mt-2 italic">
+          Note: {activity.notes}
+        </p>
       )}
       {activity.completed && activity.completionNotes && (
-        <p className="text-xs text-green-600 mt-2">✓ {activity.completionNotes}</p>
+        <p className="text-xs text-green-600 mt-2">
+          ✓ {activity.completionNotes}
+        </p>
       )}
     </div>
   );

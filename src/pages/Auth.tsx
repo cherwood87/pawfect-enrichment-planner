@@ -1,22 +1,27 @@
-
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useAuth } from '@/contexts/AuthContext';
-import { toast } from '@/hooks/use-toast';
-import { Heart, Mail, Lock, User, AlertCircle } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import ErrorBoundary from '@/components/error/ErrorBoundary';
-import { useRetry } from '@/hooks/useRetry';
-import { handleError, getUserFriendlyMessage } from '@/utils/errorUtils';
-import { supabase } from '@/integrations/supabase/client';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "@/hooks/use-toast";
+import { Heart, Mail, Lock, User, AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import ErrorBoundary from "@/components/error/ErrorBoundary";
+import { useRetry } from "@/hooks/useRetry";
+import { handleError, getUserFriendlyMessage } from "@/utils/errorUtils";
+import { supabase } from "@/integrations/supabase/client";
 
 const Auth: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { signIn, signUp, user, session } = useAuth();
@@ -32,27 +37,31 @@ const Auth: React.FC = () => {
 
   useEffect(() => {
     if (user && session) {
-      console.log('[Auth] 🎯 Detected active session, redirecting to dog tab:', new Date());
-      navigate('/activity-library', { replace: true });
+      console.log(
+        "[Auth] 🎯 Detected active session, redirecting to dog tab:",
+        new Date(),
+      );
+      navigate("/activity-library", { replace: true });
     }
   }, [user, session, navigate]);
 
   const validateForm = (): string | null => {
-    if (!email || !password) return 'Please fill in all fields';
-    if (!email.includes('@')) return 'Please enter a valid email address';
-    if (password.length < 6) return 'Password must be at least 6 characters long';
+    if (!email || !password) return "Please fill in all fields";
+    if (!email.includes("@")) return "Please enter a valid email address";
+    if (password.length < 6)
+      return "Password must be at least 6 characters long";
     return null;
   };
 
   const preloadUserData = async () => {
     try {
-      console.time('🐶 preloadUserData()');
-      const { data, error } = await supabase.from('dogs').select('*').limit(1);
+      console.time("🐶 preloadUserData()");
+      const { data, error } = await supabase.from("dogs").select("*").limit(1);
       if (error) throw error;
-      console.log('[Preload] 🐾 Dog data fetched:', data);
-      console.timeEnd('🐶 preloadUserData()');
+      console.log("[Preload] 🐾 Dog data fetched:", data);
+      console.timeEnd("🐶 preloadUserData()");
     } catch (err) {
-      console.warn('[Preload] ⚠️ Failed to fetch user data:', err);
+      console.warn("[Preload] ⚠️ Failed to fetch user data:", err);
     }
   };
 
@@ -65,15 +74,18 @@ const Auth: React.FC = () => {
     }
     setLoading(true);
     setError(null);
-    console.time('🔐 Total signIn flow');
-    console.log('[Auth] ⏳ SignIn clicked at:', new Date());
+    console.time("🔐 Total signIn flow");
+    console.log("[Auth] ⏳ SignIn clicked at:", new Date());
 
     try {
       await retry(async () => {
-        console.time('🔑 signIn()');
+        console.time("🔑 signIn()");
         await signIn(email, password);
-        console.timeEnd('🔑 signIn()');
-        toast({ title: 'Welcome back!', description: 'You have successfully signed in.' });
+        console.timeEnd("🔑 signIn()");
+        toast({
+          title: "Welcome back!",
+          description: "You have successfully signed in.",
+        });
       });
       await preloadUserData();
 
@@ -82,16 +94,24 @@ const Auth: React.FC = () => {
         await new Promise((res) => setTimeout(res, 250));
         waitCount++;
       }
-      console.log('[Auth] ✅ Ready to redirect at:', new Date());
-      navigate('/activity-library', { replace: true });
+      console.log("[Auth] ✅ Ready to redirect at:", new Date());
+      navigate("/activity-library", { replace: true });
     } catch (error: any) {
       const friendlyMessage = getUserFriendlyMessage(error);
       setError(friendlyMessage);
-      handleError(error, { component: 'Auth', action: 'signIn', metadata: { email, attempt } }, false);
-      toast({ title: 'Sign In Error', description: friendlyMessage, variant: 'destructive' });
+      handleError(
+        error,
+        { component: "Auth", action: "signIn", metadata: { email, attempt } },
+        false,
+      );
+      toast({
+        title: "Sign In Error",
+        description: friendlyMessage,
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
-      console.timeEnd('🔐 Total signIn flow');
+      console.timeEnd("🔐 Total signIn flow");
     }
   };
 
@@ -108,13 +128,25 @@ const Auth: React.FC = () => {
     try {
       await retry(async () => {
         await signUp(email, password);
-        toast({ title: 'Account Created!', description: 'Please check your email to verify your account, then sign in.' });
+        toast({
+          title: "Account Created!",
+          description:
+            "Please check your email to verify your account, then sign in.",
+        });
       });
     } catch (error: any) {
       const friendlyMessage = getUserFriendlyMessage(error);
       setError(friendlyMessage);
-      handleError(error, { component: 'Auth', action: 'signUp', metadata: { email, attempt } }, false);
-      toast({ title: 'Sign Up Error', description: friendlyMessage, variant: 'destructive' });
+      handleError(
+        error,
+        { component: "Auth", action: "signUp", metadata: { email, attempt } },
+        false,
+      );
+      toast({
+        title: "Sign Up Error",
+        description: friendlyMessage,
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -206,7 +238,7 @@ const Auth: React.FC = () => {
                       className="w-full bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600"
                       disabled={loading || isRetrying}
                     >
-                      {loading || isRetrying ? 'Signing In...' : 'Sign In'}
+                      {loading || isRetrying ? "Signing In..." : "Sign In"}
                     </Button>
                   </form>
                 </TabsContent>
@@ -246,7 +278,9 @@ const Auth: React.FC = () => {
                       className="w-full bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600"
                       disabled={loading || isRetrying}
                     >
-                      {loading || isRetrying ? 'Creating Account...' : 'Sign Up'}
+                      {loading || isRetrying
+                        ? "Creating Account..."
+                        : "Sign Up"}
                     </Button>
                   </form>
                 </TabsContent>

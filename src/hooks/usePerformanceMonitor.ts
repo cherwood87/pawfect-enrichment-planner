@@ -1,5 +1,4 @@
-
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef } from "react";
 
 interface PerformanceMetrics {
   componentName: string;
@@ -16,21 +15,24 @@ export const usePerformanceMonitor = (componentName: string, props: any) => {
   useEffect(() => {
     renderCountRef.current += 1;
     const renderTime = performance.now() - renderStartRef.current;
-    const propsChanged = JSON.stringify(previousPropsRef.current) !== JSON.stringify(props);
+    const propsChanged =
+      JSON.stringify(previousPropsRef.current) !== JSON.stringify(props);
 
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === "development") {
       const metrics: PerformanceMetrics = {
         componentName,
         renderTime,
         propsChanged,
-        renderCount: renderCountRef.current
+        renderCount: renderCountRef.current,
       };
 
-      if (renderTime > 16) { // Log if render took longer than 16ms (60fps)
+      if (renderTime > 16) {
+        // Log if render took longer than 16ms (60fps)
         console.warn(`🐌 Slow render detected in ${componentName}:`, metrics);
       }
 
-      if (renderCountRef.current % 10 === 0) { // Log every 10th render
+      if (renderCountRef.current % 10 === 0) {
+        // Log every 10th render
         console.log(`📊 ${componentName} performance:`, metrics);
       }
     }
@@ -40,6 +42,6 @@ export const usePerformanceMonitor = (componentName: string, props: any) => {
   });
 
   return {
-    renderCount: renderCountRef.current
+    renderCount: renderCountRef.current,
   };
 };

@@ -1,12 +1,17 @@
-
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Sparkles, RefreshCw } from 'lucide-react';
-import PersonalizedRecommendations from '@/components/recommendations/PersonalizedRecommendations';
-import { useActivity } from '@/contexts/ActivityContext';
-import { useDog } from '@/contexts/DogContext';
-import { toast } from '@/hooks/use-toast';
+import React, { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Sparkles, RefreshCw } from "lucide-react";
+import PersonalizedRecommendations from "@/components/recommendations/PersonalizedRecommendations";
+import { useActivity } from "@/contexts/ActivityContext";
+import { useDog } from "@/contexts/DogContext";
+import { toast } from "@/hooks/use-toast";
 
 const SmartRecommendationsCard: React.FC = () => {
   const [refreshKey, setRefreshKey] = useState(0);
@@ -22,29 +27,30 @@ const SmartRecommendationsCard: React.FC = () => {
       await addScheduledActivity({
         dogId: currentDog.id,
         activityId,
-        scheduledDate: today.toISOString().split('T')[0],
+        scheduledDate: today.toISOString().split("T")[0],
         completed: false,
-        notes: 'Added from personalized recommendations',
-        completionNotes: '',
-        reminderEnabled: false
+        notes: "Added from personalized recommendations",
+        completionNotes: "",
+        reminderEnabled: false,
       });
 
       toast({
         title: "Activity Added!",
-        description: "The recommended activity has been added to your schedule.",
+        description:
+          "The recommended activity has been added to your schedule.",
       });
     } catch (error) {
-      console.error('Failed to add recommended activity:', error);
+      console.error("Failed to add recommended activity:", error);
       toast({
         title: "Error",
         description: "Failed to add activity to schedule. Please try again.",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
 
   const handleRefresh = () => {
-    setRefreshKey(prev => prev + 1);
+    setRefreshKey((prev) => prev + 1);
   };
 
   return (
@@ -70,7 +76,7 @@ const SmartRecommendationsCard: React.FC = () => {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <PersonalizedRecommendations 
+        <PersonalizedRecommendations
           key={refreshKey}
           type="daily"
           limit={3}

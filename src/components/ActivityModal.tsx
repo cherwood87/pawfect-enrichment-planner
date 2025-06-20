@@ -1,14 +1,13 @@
-
-import React from 'react';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Target } from 'lucide-react';
-import DaySelector from './DaySelector';
-import ActivityModalTabs from './ActivityModalTabs';
-import { useActivity } from '@/contexts/ActivityContext';
-import { getPillarActivities } from '@/data/activityLibrary';
-import { useActivityModalState } from './ActivityModalState';
-import { useActivityModalHandlers } from './ActivityModalHandlers';
+import React from "react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Target } from "lucide-react";
+import DaySelector from "./DaySelector";
+import ActivityModalTabs from "./ActivityModalTabs";
+import { useActivity } from "@/contexts/ActivityContext";
+import { getPillarActivities } from "@/data/activityLibrary";
+import { useActivityModalState } from "./ActivityModalState";
+import { useActivityModalHandlers } from "./ActivityModalHandlers";
 
 interface ActivityModalProps {
   isOpen: boolean;
@@ -16,13 +15,13 @@ interface ActivityModalProps {
   selectedPillar?: string | null;
 }
 
-const ActivityModal: React.FC<ActivityModalProps> = ({ 
-  isOpen, 
-  onClose, 
-  selectedPillar
+const ActivityModal: React.FC<ActivityModalProps> = ({
+  isOpen,
+  onClose,
+  selectedPillar,
 }) => {
   const { discoveredActivities } = useActivity();
-  
+
   const {
     activeTab,
     setActiveTab,
@@ -40,7 +39,7 @@ const ActivityModal: React.FC<ActivityModalProps> = ({
     setDescription,
     selectedDayOfWeek,
     setSelectedDayOfWeek,
-    resetCustomActivityForm
+    resetCustomActivityForm,
   } = useActivityModalState(selectedPillar);
 
   const customActivityState = {
@@ -49,28 +48,30 @@ const ActivityModal: React.FC<ActivityModalProps> = ({
     duration,
     materials,
     instructions,
-    description
+    description,
   };
 
   const {
     handleActivitySelect,
     handleCreateCustomActivity,
-    handleCancelCustomActivity
+    handleCancelCustomActivity,
   } = useActivityModalHandlers(
     selectedDayOfWeek,
     onClose,
     resetCustomActivityForm,
-    customActivityState
+    customActivityState,
   );
-  
-  const pendingActivities = discoveredActivities.filter(activity => 
-    !activity.approved && !activity.rejected
+
+  const pendingActivities = discoveredActivities.filter(
+    (activity) => !activity.approved && !activity.rejected,
   );
-  
+
   // Get filtered library activities based on selected pillar
-  const allLibraryActivities = getPillarActivities(selectedPillar || '');
-  const filteredLibraryActivities = selectedPillar 
-    ? allLibraryActivities.filter(activity => activity.pillar === selectedPillar)
+  const allLibraryActivities = getPillarActivities(selectedPillar || "");
+  const filteredLibraryActivities = selectedPillar
+    ? allLibraryActivities.filter(
+        (activity) => activity.pillar === selectedPillar,
+      )
     : allLibraryActivities;
 
   return (
@@ -85,11 +86,11 @@ const ActivityModal: React.FC<ActivityModalProps> = ({
           </DialogTitle>
         </DialogHeader>
 
-        <DaySelector 
+        <DaySelector
           selectedDayOfWeek={selectedDayOfWeek}
           onDaySelect={setSelectedDayOfWeek}
         />
-        
+
         <ActivityModalTabs
           activeTab={activeTab}
           onTabChange={setActiveTab}

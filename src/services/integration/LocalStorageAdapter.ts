@@ -1,6 +1,5 @@
-
-import { ScheduledActivity, UserActivity } from '@/types/activity';
-import { DiscoveredActivity, ContentDiscoveryConfig } from '@/types/discovery';
+import { ScheduledActivity, UserActivity } from "@/types/activity";
+import { DiscoveredActivity, ContentDiscoveryConfig } from "@/types/discovery";
 
 export class LocalStorageAdapter {
   // Scheduled Activities
@@ -9,8 +8,14 @@ export class LocalStorageAdapter {
     return saved ? JSON.parse(saved) : [];
   }
 
-  static saveScheduledActivities(dogId: string, activities: ScheduledActivity[]): void {
-    localStorage.setItem(`scheduledActivities-${dogId}`, JSON.stringify(activities));
+  static saveScheduledActivities(
+    dogId: string,
+    activities: ScheduledActivity[],
+  ): void {
+    localStorage.setItem(
+      `scheduledActivities-${dogId}`,
+      JSON.stringify(activities),
+    );
   }
 
   static clearScheduledActivities(dogId: string): void {
@@ -37,8 +42,14 @@ export class LocalStorageAdapter {
     return saved ? JSON.parse(saved) : [];
   }
 
-  static saveDiscoveredActivities(dogId: string, activities: DiscoveredActivity[]): void {
-    localStorage.setItem(`discoveredActivities-${dogId}`, JSON.stringify(activities));
+  static saveDiscoveredActivities(
+    dogId: string,
+    activities: DiscoveredActivity[],
+  ): void {
+    localStorage.setItem(
+      `discoveredActivities-${dogId}`,
+      JSON.stringify(activities),
+    );
   }
 
   static clearDiscoveredActivities(dogId: string): void {
@@ -51,7 +62,10 @@ export class LocalStorageAdapter {
     return saved ? JSON.parse(saved) : null;
   }
 
-  static saveDiscoveryConfig(dogId: string, config: ContentDiscoveryConfig): void {
+  static saveDiscoveryConfig(
+    dogId: string,
+    config: ContentDiscoveryConfig,
+  ): void {
     localStorage.setItem(`discoveryConfig-${dogId}`, JSON.stringify(config));
   }
 

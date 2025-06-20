@@ -1,10 +1,9 @@
-
-import React, { useState, useEffect } from 'react';
-import { useOptimizedQueries } from '@/hooks/useOptimizedQueries';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Activity, Database, Zap, Clock, TrendingUp } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { useOptimizedQueries } from "@/hooks/useOptimizedQueries";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Activity, Database, Zap, Clock, TrendingUp } from "lucide-react";
 
 export const QueryPerformanceMonitor: React.FC = () => {
   const { getPerformanceMetrics } = useOptimizedQueries();
@@ -74,7 +73,9 @@ export const QueryPerformanceMonitor: React.FC = () => {
               <div>
                 <div className="text-gray-600">Hit Rate</div>
                 <Badge variant="outline" className="text-xs">
-                  {metrics?.cacheStats?.hitRate ? `${(metrics.cacheStats.hitRate * 100).toFixed(1)}%` : 'N/A'}
+                  {metrics?.cacheStats?.hitRate
+                    ? `${(metrics.cacheStats.hitRate * 100).toFixed(1)}%`
+                    : "N/A"}
                 </Badge>
               </div>
               <div>
@@ -93,17 +94,27 @@ export const QueryPerformanceMonitor: React.FC = () => {
               Circuit Breakers
             </div>
             <div className="space-y-1">
-              {metrics?.circuitBreakerStats && Object.entries(metrics.circuitBreakerStats).map(([key, stats]: [string, any]) => (
-                <div key={key} className="flex items-center justify-between text-xs">
-                  <span className="capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
-                  <Badge 
-                    variant={stats?.state === 'CLOSED' ? 'default' : 'destructive'} 
-                    className="text-xs"
-                  >
-                    {stats?.state || 'Unknown'}
-                  </Badge>
-                </div>
-              ))}
+              {metrics?.circuitBreakerStats &&
+                Object.entries(metrics.circuitBreakerStats).map(
+                  ([key, stats]: [string, any]) => (
+                    <div
+                      key={key}
+                      className="flex items-center justify-between text-xs"
+                    >
+                      <span className="capitalize">
+                        {key.replace(/([A-Z])/g, " $1").trim()}
+                      </span>
+                      <Badge
+                        variant={
+                          stats?.state === "CLOSED" ? "default" : "destructive"
+                        }
+                        className="text-xs"
+                      >
+                        {stats?.state || "Unknown"}
+                      </Badge>
+                    </div>
+                  ),
+                )}
             </div>
           </div>
 

@@ -1,7 +1,10 @@
-
-import { useState } from 'react';
-import { ActivityLibraryItem, UserActivity, ScheduledActivity } from '@/types/activity';
-import { DiscoveredActivity } from '@/types/discovery';
+import { useState } from "react";
+import {
+  ActivityLibraryItem,
+  UserActivity,
+  ScheduledActivity,
+} from "@/types/activity";
+import { DiscoveredActivity } from "@/types/discovery";
 
 interface ActivityModalState {
   activity: ActivityLibraryItem | UserActivity | DiscoveredActivity | null;
@@ -9,12 +12,16 @@ interface ActivityModalState {
 }
 
 export const useWeeklyPlannerModal = () => {
-  const [selectedActivityModal, setSelectedActivityModal] = useState<ActivityModalState>({
-    activity: null,
-    scheduledActivity: null,
-  });
+  const [selectedActivityModal, setSelectedActivityModal] =
+    useState<ActivityModalState>({
+      activity: null,
+      scheduledActivity: null,
+    });
 
-  const openModal = (activity: ActivityLibraryItem | UserActivity | DiscoveredActivity, scheduledActivity: ScheduledActivity) => {
+  const openModal = (
+    activity: ActivityLibraryItem | UserActivity | DiscoveredActivity,
+    scheduledActivity: ScheduledActivity,
+  ) => {
     setSelectedActivityModal({ activity, scheduledActivity });
   };
 
@@ -25,6 +32,6 @@ export const useWeeklyPlannerModal = () => {
   return {
     selectedActivityModal,
     openModal,
-    closeModal
+    closeModal,
   };
 };

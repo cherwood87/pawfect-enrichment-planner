@@ -1,9 +1,8 @@
-
-import React from 'react';
-import DogPersonalityQuiz from '@/components/DogPersonalityQuiz';
-import QuizResultsComponent from '@/components/DogProfileQuiz';
-import { QuizResults } from '@/types/quiz';
-import { Dog } from '@/types/dog';
+import React from "react";
+import DogPersonalityQuiz from "@/components/DogPersonalityQuiz";
+import QuizResultsComponent from "@/components/DogProfileQuiz";
+import { QuizResults } from "@/types/quiz";
+import { Dog } from "@/types/dog";
 
 interface DogProfileDialogsProps {
   showQuiz: boolean;
@@ -26,7 +25,7 @@ const DogProfileDialogs: React.FC<DogProfileDialogsProps> = ({
   onCloseQuiz,
   onCloseResults,
   setShowQuiz,
-  setShowResults
+  setShowResults,
 }) => {
   if (showQuiz) {
     return (

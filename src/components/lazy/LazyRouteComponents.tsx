@@ -1,67 +1,66 @@
-
-import { createLoadableComponent } from '@/utils/componentLoader';
-import LoadingSpinner from '@/components/ui/loading-spinner';
+import { createLoadableComponent } from "@/utils/componentLoader";
+import LoadingSpinner from "@/components/ui/loading-spinner";
 
 // Route-level lazy loading with reduced timeouts (3-5 seconds)
 export const LazyIndexOptimized = createLoadableComponent(
-  () => import('@/pages/IndexOptimized'),
-  { timeout: 4000 } // Reduced from 15000
+  () => import("@/pages/IndexOptimized"),
+  { timeout: 4000 }, // Reduced from 15000
 );
 
 export const LazyLanding = createLoadableComponent(
-  () => import('@/pages/Landing'),
-  { timeout: 3000 } // Reduced from 10000
+  () => import("@/pages/Landing"),
+  { timeout: 3000 }, // Reduced from 10000
 );
 
 export const LazyAuth = createLoadableComponent(
-  () => import('@/pages/Auth'),
-  { timeout: 3000 } // Reduced from 8000
+  () => import("@/pages/Auth"),
+  { timeout: 3000 }, // Reduced from 8000
 );
 
 export const LazyCoach = createLoadableComponent(
-  () => import('@/pages/Coach'),
-  { timeout: 4000 } // Reduced from 12000
+  () => import("@/pages/Coach"),
+  { timeout: 4000 }, // Reduced from 12000
 );
 
 export const LazyDogProfileQuizPage = createLoadableComponent(
-  () => import('@/pages/DogProfileQuiz'),
-  { timeout: 3000 } // Reduced from 10000
+  () => import("@/pages/DogProfileQuiz"),
+  { timeout: 3000 }, // Reduced from 10000
 );
 
 export const LazyActivityLibraryPage = createLoadableComponent(
-  () => import('@/pages/ActivityLibraryPage'),
-  { timeout: 5000 } // Reduced from 15000
+  () => import("@/pages/ActivityLibraryPage"),
+  { timeout: 5000 }, // Reduced from 15000
 );
 
 export const LazyWeeklyPlannerPage = createLoadableComponent(
-  () => import('@/pages/WeeklyPlannerPage'),
-  { timeout: 5000 } // Reduced from 15000
+  () => import("@/pages/WeeklyPlannerPage"),
+  { timeout: 5000 }, // Reduced from 15000
 );
 
 export const LazyAccountSettings = createLoadableComponent(
-  () => import('@/pages/AccountSettings'),
-  { timeout: 3000 } // Reduced from 8000
+  () => import("@/pages/AccountSettings"),
+  { timeout: 3000 }, // Reduced from 8000
 );
 
 export const LazyNotFound = createLoadableComponent(
-  () => import('@/pages/NotFound'),
-  { timeout: 2000 } // Reduced from 5000
+  () => import("@/pages/NotFound"),
+  { timeout: 2000 }, // Reduced from 5000
 );
 
 // Heavy component lazy loading with shorter timeouts
 export const LazyActivityLibrary = createLoadableComponent(
-  () => import('@/components/ActivityLibrary'),
-  { timeout: 4000 } // Reduced from 12000
+  () => import("@/components/ActivityLibrary"),
+  { timeout: 4000 }, // Reduced from 12000
 );
 
 export const LazyWeeklyPlannerV2 = createLoadableComponent(
-  () => import('@/components/weekly-planner/WeeklyPlannerV2'),
-  { timeout: 4000 } // Reduced from 12000
+  () => import("@/components/weekly-planner/WeeklyPlannerV2"),
+  { timeout: 4000 }, // Reduced from 12000
 );
 
 export const LazyDashboardContent = createLoadableComponent(
-  () => import('@/components/dashboard/DashboardContent'),
-  { timeout: 3000 } // Reduced from 10000
+  () => import("@/components/dashboard/DashboardContent"),
+  { timeout: 3000 }, // Reduced from 10000
 );
 
 // Improved fallback component for lazy loading

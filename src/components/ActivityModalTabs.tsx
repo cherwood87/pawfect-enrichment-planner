@@ -1,10 +1,9 @@
-
-import React from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import BrowseLibraryTab from './BrowseLibraryTab';
-import CreateCustomTab from './CreateCustomTab';
-import DiscoveryReview from './DiscoveryReview';
-import { DiscoveredActivity } from '@/types/discovery';
+import React from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import BrowseLibraryTab from "./BrowseLibraryTab";
+import CreateCustomTab from "./CreateCustomTab";
+import DiscoveryReview from "./DiscoveryReview";
+import { DiscoveredActivity } from "@/types/discovery";
 
 interface ActivityModalTabsProps {
   activeTab: string;
@@ -52,7 +51,7 @@ const ActivityModalTabs: React.FC<ActivityModalTabsProps> = ({
   description,
   setDescription,
   onCreateCustomActivity,
-  onCancelCustomActivity
+  onCancelCustomActivity,
 }) => {
   return (
     <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
@@ -68,17 +67,17 @@ const ActivityModalTabs: React.FC<ActivityModalTabsProps> = ({
           )}
         </TabsTrigger>
       </TabsList>
-      
+
       <TabsContent value="browse">
-        <BrowseLibraryTab 
+        <BrowseLibraryTab
           selectedPillar={selectedPillar}
           filteredLibraryActivities={filteredLibraryActivities}
           onActivitySelect={onActivitySelect}
         />
       </TabsContent>
-      
+
       <TabsContent value="create">
-        <CreateCustomTab 
+        <CreateCustomTab
           activityName={activityName}
           setActivityName={setActivityName}
           pillar={pillar}
@@ -95,11 +94,9 @@ const ActivityModalTabs: React.FC<ActivityModalTabsProps> = ({
           onCancel={onCancelCustomActivity}
         />
       </TabsContent>
-      
+
       <TabsContent value="review">
-        <DiscoveryReview 
-          activities={discoveredActivities}
-        />
+        <DiscoveryReview activities={discoveredActivities} />
       </TabsContent>
     </Tabs>
   );

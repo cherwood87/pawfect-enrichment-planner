@@ -1,9 +1,8 @@
-
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const DashboardBanner: React.FC = () => {
   const { user } = useAuth();
@@ -19,7 +18,9 @@ const DashboardBanner: React.FC = () => {
           </div>
           <div>
             <p className="font-medium">Welcome back, {user.email}!</p>
-            <p className="text-sm text-blue-100">Continue your dog's enrichment journey</p>
+            <p className="text-sm text-blue-100">
+              Continue your dog's enrichment journey
+            </p>
           </div>
         </div>
         <Link to="/app">

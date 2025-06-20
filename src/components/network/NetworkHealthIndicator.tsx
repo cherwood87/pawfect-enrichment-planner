@@ -1,50 +1,65 @@
-
-import React from 'react';
-import { useNetworkHealth } from '@/hooks/useNetworkHealth';
-import { CircuitBreakerState } from '@/services/network/RetryService';
-import { AlertCircle, Wifi, WifiOff, Activity, Database, Signal } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import React from "react";
+import { useNetworkHealth } from "@/hooks/useNetworkHealth";
+import { CircuitBreakerState } from "@/services/network/RetryService";
+import {
+  AlertCircle,
+  Wifi,
+  WifiOff,
+  Activity,
+  Database,
+  Signal,
+} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 export const NetworkHealthIndicator: React.FC = () => {
-  const { 
-    isOnline, 
-    isSupabaseConnected, 
-    connectionStability, 
-    retryConnection, 
+  const {
+    isOnline,
+    isSupabaseConnected,
+    connectionStability,
+    retryConnection,
     isRecovering,
     canRetry,
     connectionHistory,
     lastChecked,
     circuitBreakerStates,
-    cacheStats
+    cacheStats,
   } = useNetworkHealth();
 
   const getCircuitBreakerColor = (state: CircuitBreakerState | null) => {
     switch (state) {
-      case CircuitBreakerState.CLOSED: return 'bg-green-500';
-      case CircuitBreakerState.HALF_OPEN: return 'bg-yellow-500';
-      case CircuitBreakerState.OPEN: return 'bg-red-500';
-      default: return 'bg-gray-500';
+      case CircuitBreakerState.CLOSED:
+        return "bg-green-500";
+      case CircuitBreakerState.HALF_OPEN:
+        return "bg-yellow-500";
+      case CircuitBreakerState.OPEN:
+        return "bg-red-500";
+      default:
+        return "bg-gray-500";
     }
   };
 
   const getCircuitBreakerText = (state: CircuitBreakerState | null) => {
     switch (state) {
-      case CircuitBreakerState.CLOSED: return 'Healthy';
-      case CircuitBreakerState.HALF_OPEN: return 'Testing';
-      case CircuitBreakerState.OPEN: return 'Failed';
-      default: return 'Unknown';
+      case CircuitBreakerState.CLOSED:
+        return "Healthy";
+      case CircuitBreakerState.HALF_OPEN:
+        return "Testing";
+      case CircuitBreakerState.OPEN:
+        return "Failed";
+      default:
+        return "Unknown";
     }
   };
 
   const getConnectionQuality = () => {
     const stability = connectionStability;
-    if (stability >= 0.9) return { label: 'Excellent', color: 'text-green-600' };
-    if (stability >= 0.7) return { label: 'Good', color: 'text-yellow-600' };
-    if (stability >= 0.5) return { label: 'Fair', color: 'text-orange-600' };
-    return { label: 'Poor', color: 'text-red-600' };
+    if (stability >= 0.9)
+      return { label: "Excellent", color: "text-green-600" };
+    if (stability >= 0.7) return { label: "Good", color: "text-yellow-600" };
+    if (stability >= 0.5) return { label: "Fair", color: "text-orange-600" };
+    return { label: "Poor", color: "text-red-600" };
   };
 
   if (!isOnline) {
@@ -58,14 +73,14 @@ export const NetworkHealthIndicator: React.FC = () => {
         </CardHeader>
         <CardContent className="pt-0">
           <p className="text-xs text-red-600">Using cached data</p>
-          <Button 
+          <Button
             onClick={retryConnection}
             disabled={isRecovering}
-            size="sm" 
-            variant="outline" 
+            size="sm"
+            variant="outline"
             className="mt-2 text-xs"
           >
-            {isRecovering ? 'Checking...' : 'Retry'}
+            {isRecovering ? "Checking..." : "Retry"}
           </Button>
         </CardContent>
       </Card>
@@ -82,14 +97,19 @@ export const NetworkHealthIndicator: React.FC = () => {
             <Activity className="w-4 h-4 mr-2" />
             Network Health
           </div>
-          {isRecovering && <Activity className="w-3 h-3 animate-spin text-blue-500" />}
+          {isRecovering && (
+            <Activity className="w-3 h-3 animate-spin text-blue-500" />
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-0 space-y-2">
         {/* Connection Status */}
         <div className="flex items-center justify-between">
           <span className="text-xs text-gray-600">Status:</span>
-          <Badge variant={isSupabaseConnected ? "default" : "destructive"} className="text-xs">
+          <Badge
+            variant={isSupabaseConnected ? "default" : "destructive"}
+            className="text-xs"
+          >
             {isSupabaseConnected ? (
               <>
                 <Wifi className="w-3 h-3 mr-1" />
@@ -121,9 +141,9 @@ export const NetworkHealthIndicator: React.FC = () => {
               <div
                 key={index}
                 className={`w-2 h-2 rounded-full ${
-                  connected ? 'bg-green-500' : 'bg-red-500'
+                  connected ? "bg-green-500" : "bg-red-500"
                 }`}
-                title={connected ? 'Connected' : 'Disconnected'}
+                title={connected ? "Connected" : "Disconnected"}
               />
             ))}
           </div>
@@ -137,7 +157,9 @@ export const NetworkHealthIndicator: React.FC = () => {
               <div key={service} className="flex items-center justify-between">
                 <span className="text-xs capitalize">{service}:</span>
                 <Badge variant="outline" className="text-xs">
-                  <div className={`w-2 h-2 rounded-full mr-1 ${getCircuitBreakerColor(state as CircuitBreakerState)}`} />
+                  <div
+                    className={`w-2 h-2 rounded-full mr-1 ${getCircuitBreakerColor(state as CircuitBreakerState)}`}
+                  />
                   {getCircuitBreakerText(state as CircuitBreakerState)}
                 </Badge>
               </div>
@@ -161,14 +183,14 @@ export const NetworkHealthIndicator: React.FC = () => {
 
         {/* Retry Button for failed connections */}
         {!isSupabaseConnected && canRetry && (
-          <Button 
+          <Button
             onClick={retryConnection}
             disabled={isRecovering}
-            size="sm" 
-            variant="outline" 
+            size="sm"
+            variant="outline"
             className="w-full mt-2 text-xs"
           >
-            {isRecovering ? 'Reconnecting...' : 'Retry Connection'}
+            {isRecovering ? "Reconnecting..." : "Retry Connection"}
           </Button>
         )}
       </CardContent>

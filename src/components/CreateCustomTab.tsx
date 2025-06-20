@@ -1,11 +1,16 @@
-
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { Brain, Zap, Users, TreePine, Target } from 'lucide-react';
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Brain, Zap, Users, TreePine, Target } from "lucide-react";
 
 interface CreateCustomTabProps {
   activityName: string;
@@ -38,14 +43,19 @@ const CreateCustomTab: React.FC<CreateCustomTabProps> = ({
   description,
   setDescription,
   onSubmit,
-  onCancel
+  onCancel,
 }) => {
   const pillars = [
-    { id: 'mental', name: 'Mental', icon: Brain, color: 'purple' },
-    { id: 'physical', name: 'Physical', icon: Zap, color: 'green' },
-    { id: 'social', name: 'Social', icon: Users, color: 'blue' },
-    { id: 'environmental', name: 'Environmental', icon: TreePine, color: 'teal' },
-    { id: 'instinctual', name: 'Instinctual', icon: Target, color: 'orange' }
+    { id: "mental", name: "Mental", icon: Brain, color: "purple" },
+    { id: "physical", name: "Physical", icon: Zap, color: "green" },
+    { id: "social", name: "Social", icon: Users, color: "blue" },
+    {
+      id: "environmental",
+      name: "Environmental",
+      icon: TreePine,
+      color: "teal",
+    },
+    { id: "instinctual", name: "Instinctual", icon: Target, color: "orange" },
   ];
 
   return (
@@ -77,7 +87,10 @@ const CreateCustomTab: React.FC<CreateCustomTabProps> = ({
 
       {/* Activity Name */}
       <div>
-        <Label htmlFor="activity-name" className="text-sm font-medium text-gray-700">
+        <Label
+          htmlFor="activity-name"
+          className="text-sm font-medium text-gray-700"
+        >
           Activity Name
         </Label>
         <Input
@@ -106,7 +119,10 @@ const CreateCustomTab: React.FC<CreateCustomTabProps> = ({
 
       {/* Materials Needed */}
       <div>
-        <Label htmlFor="materials" className="text-sm font-medium text-gray-700">
+        <Label
+          htmlFor="materials"
+          className="text-sm font-medium text-gray-700"
+        >
           Materials Needed (comma-separated)
         </Label>
         <Input
@@ -120,7 +136,10 @@ const CreateCustomTab: React.FC<CreateCustomTabProps> = ({
 
       {/* Instructions */}
       <div>
-        <Label htmlFor="instructions" className="text-sm font-medium text-gray-700">
+        <Label
+          htmlFor="instructions"
+          className="text-sm font-medium text-gray-700"
+        >
           Instructions (one per line)
         </Label>
         <Textarea
@@ -134,7 +153,10 @@ const CreateCustomTab: React.FC<CreateCustomTabProps> = ({
 
       {/* Description */}
       <div>
-        <Label htmlFor="description" className="text-sm font-medium text-gray-700">
+        <Label
+          htmlFor="description"
+          className="text-sm font-medium text-gray-700"
+        >
           Benefits/Description
         </Label>
         <Textarea
@@ -151,8 +173,8 @@ const CreateCustomTab: React.FC<CreateCustomTabProps> = ({
         <Button variant="outline" onClick={onCancel} className="flex-1">
           Cancel
         </Button>
-        <Button 
-          onClick={onSubmit} 
+        <Button
+          onClick={onSubmit}
           className="flex-1 bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600"
           disabled={!activityName || !pillar || !duration}
         >

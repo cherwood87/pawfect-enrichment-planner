@@ -1,19 +1,19 @@
-import { useState, useEffect, useRef } from 'react';
-import { format } from 'date-fns';
-import { JournalEntry } from '@/types/journal';
-import { DAILY_PROMPTS } from '@/constants/journalConstants';
-import { Dog } from '@/types/dog';
-import { JournalService } from '@/services/journalService';
+import { useState, useEffect, useRef } from "react";
+import { format } from "date-fns";
+import { JournalEntry } from "@/types/journal";
+import { DAILY_PROMPTS } from "@/constants/journalConstants";
+import { Dog } from "@/types/dog";
+import { JournalService } from "@/services/journalService";
 
 export const useJournalEntry = (currentDog: Dog | null) => {
   const [todaysEntries, setTodaysEntries] = useState<JournalEntry[]>([]);
   const [currentEntry, setCurrentEntry] = useState<JournalEntry>({
-    date: format(new Date(), 'yyyy-MM-dd'),
-    prompt: '',
-    response: '',
-    mood: '',
+    date: format(new Date(), "yyyy-MM-dd"),
+    prompt: "",
+    response: "",
+    mood: "",
     behaviors: [],
-    notes: ''
+    notes: "",
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -26,7 +26,7 @@ export const useJournalEntry = (currentDog: Dog | null) => {
 
   useEffect(() => {
     const randomPrompt = getRandomPrompt();
-    setCurrentEntry(prev => ({ ...prev, prompt: randomPrompt }));
+    setCurrentEntry((prev) => ({ ...prev, prompt: randomPrompt }));
   }, []);
 
   useEffect(() => {
@@ -35,8 +35,11 @@ export const useJournalEntry = (currentDog: Dog | null) => {
     const loadTodaysEntries = async () => {
       try {
         setIsLoading(true);
-        const todaysDate = format(new Date(), 'yyyy-MM-dd');
-        const entries = await JournalService.getEntriesForDate(currentDog.id, todaysDate);
+        const todaysDate = format(new Date(), "yyyy-MM-dd");
+        const entries = await JournalService.getEntriesForDate(
+          currentDog.id,
+          todaysDate,
+        );
         setTodaysEntries(entries);
 
         if (entries.length === 0) {
@@ -44,19 +47,19 @@ export const useJournalEntry = (currentDog: Dog | null) => {
           setCurrentEntry({
             date: todaysDate,
             prompt: randomPrompt,
-            response: '',
-            mood: '',
+            response: "",
+            mood: "",
             behaviors: [],
-            notes: ''
+            notes: "",
           });
         } else if (!justCreatedNewRef.current) {
           setCurrentEntry(entries[0]);
         }
       } catch (error) {
-        console.error('Error loading today\'s entries:', error);
+        console.error("Error loading today's entries:", error);
         if (currentDog.journalEntries) {
           const fallbackEntries = currentDog.journalEntries.filter(
-            entry => entry.date === format(new Date(), 'yyyy-MM-dd')
+            (entry) => entry.date === format(new Date(), "yyyy-MM-dd"),
           );
           setTodaysEntries(fallbackEntries);
         }
@@ -70,24 +73,24 @@ export const useJournalEntry = (currentDog: Dog | null) => {
   }, [currentDog]);
 
   const updateResponse = (response: string) => {
-    setCurrentEntry(prev => ({ ...prev, response }));
+    setCurrentEntry((prev) => ({ ...prev, response }));
   };
 
   const updateMood = (mood: string) => {
-    setCurrentEntry(prev => ({ ...prev, mood }));
+    setCurrentEntry((prev) => ({ ...prev, mood }));
   };
 
   const toggleBehavior = (behavior: string) => {
-    setCurrentEntry(prev => ({
+    setCurrentEntry((prev) => ({
       ...prev,
       behaviors: prev.behaviors.includes(behavior)
-        ? prev.behaviors.filter(b => b !== behavior)
-        : [...prev.behaviors, behavior]
+        ? prev.behaviors.filter((b) => b !== behavior)
+        : [...prev.behaviors, behavior],
     }));
   };
 
   const updateNotes = (notes: string) => {
-    setCurrentEntry(prev => ({ ...prev, notes }));
+    setCurrentEntry((prev) => ({ ...prev, notes }));
   };
 
   const saveEntry = async (): Promise<boolean> => {
@@ -97,10 +100,13 @@ export const useJournalEntry = (currentDog: Dog | null) => {
       setIsSaving(true);
 
       // Use createOrUpdateEntry instead of createEntry
-      const savedEntry = await JournalService.createOrUpdateEntry(currentDog.id, currentEntry);
+      const savedEntry = await JournalService.createOrUpdateEntry(
+        currentDog.id,
+        currentEntry,
+      );
 
-      setTodaysEntries(prev => {
-        const updated = prev.filter(entry => entry.id !== savedEntry.id);
+      setTodaysEntries((prev) => {
+        const updated = prev.filter((entry) => entry.id !== savedEntry.id);
         return [savedEntry, ...updated];
       });
 
@@ -108,7 +114,7 @@ export const useJournalEntry = (currentDog: Dog | null) => {
       justCreatedNewRef.current = true;
       return true;
     } catch (error) {
-      console.error('Error saving journal entry:', error);
+      console.error("Error saving journal entry:", error);
       return false;
     } finally {
       setIsSaving(false);
@@ -118,12 +124,12 @@ export const useJournalEntry = (currentDog: Dog | null) => {
   const createNewEntry = () => {
     const newPrompt = getRandomPrompt();
     setCurrentEntry({
-      date: format(new Date(), 'yyyy-MM-dd'),
+      date: format(new Date(), "yyyy-MM-dd"),
       prompt: newPrompt,
-      response: '',
-      mood: '',
+      response: "",
+      mood: "",
       behaviors: [],
-      notes: ''
+      notes: "",
     });
     justCreatedNewRef.current = true;
   };
@@ -137,13 +143,13 @@ export const useJournalEntry = (currentDog: Dog | null) => {
 
     try {
       await JournalService.deleteEntry(entryId);
-      setTodaysEntries(prev => prev.filter(entry => entry.id !== entryId));
+      setTodaysEntries((prev) => prev.filter((entry) => entry.id !== entryId));
       if (currentEntry.id === entryId) {
         createNewEntry();
       }
       return true;
     } catch (error) {
-      console.error('Error deleting journal entry:', error);
+      console.error("Error deleting journal entry:", error);
       return false;
     }
   };
@@ -160,6 +166,6 @@ export const useJournalEntry = (currentDog: Dog | null) => {
     loadEntry,
     deleteEntry,
     isLoading,
-    isSaving
+    isSaving,
   };
 };

@@ -20,7 +20,7 @@ const ScrollArea = React.forwardRef<
       // Ensures the area is relatively positioned and hides scrollbars outside viewport
       "relative w-full overflow-hidden",
       // You *must* set a height/max-h to enable scroll!
-      className
+      className,
     )}
     {...props}
   >
@@ -29,7 +29,7 @@ const ScrollArea = React.forwardRef<
         // Always fill parent, enable smooth scrolling, and touch support
         "w-full h-full rounded-[inherit] scroll-smooth",
         // Support for mobile/touch devices
-        "touch-pan-y overscroll-contain"
+        "touch-pan-y overscroll-contain",
       )}
     >
       {children}
@@ -56,7 +56,7 @@ const ScrollBar = React.forwardRef<
       orientation === "vertical"
         ? "h-full w-2.5 border-l border-l-transparent p-[1px]"
         : "h-2.5 flex-col border-t border-t-transparent p-[1px]",
-      className
+      className,
     )}
     {...props}
   >

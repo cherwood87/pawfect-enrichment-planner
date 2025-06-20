@@ -1,18 +1,17 @@
-
 export interface DiscoveredActivity {
   id: string;
   title: string;
-  pillar: 'mental' | 'physical' | 'social' | 'environmental' | 'instinctual';
-  difficulty: 'Easy' | 'Medium' | 'Hard';
+  pillar: "mental" | "physical" | "social" | "environmental" | "instinctual";
+  difficulty: "Easy" | "Medium" | "Hard";
   duration: number;
   materials: string[];
   emotionalGoals: string[];
   instructions: string[];
   benefits: string;
   tags: string[];
-  ageGroup: 'Puppy' | 'Adult' | 'Senior' | 'All Ages';
-  energyLevel: 'Low' | 'Medium' | 'High';
-  source: 'discovered';
+  ageGroup: "Puppy" | "Adult" | "Senior" | "All Ages";
+  energyLevel: "Low" | "Medium" | "High";
+  source: "discovered";
   sourceUrl: string;
   discoveredAt: string;
   verified: boolean;
@@ -23,7 +22,7 @@ export interface DiscoveredActivity {
 
 export interface ContentDiscoveryConfig {
   enabled: boolean;
-  frequency: 'weekly' | 'monthly';
+  frequency: "weekly" | "monthly";
   maxActivitiesPerDiscovery: number;
   targetSources: string[];
   breedSpecific: boolean;

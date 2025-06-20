@@ -1,5 +1,4 @@
-
-import { ScheduledActivity } from '@/types/activity';
+import { ScheduledActivity } from "@/types/activity";
 
 export interface DuplicateCheckResult {
   isDuplicate: boolean;
@@ -16,19 +15,20 @@ export class DuplicateDetector {
    */
   static checkExactDuplicate(
     newActivity: Partial<ScheduledActivity>,
-    existingActivities: ScheduledActivity[]
+    existingActivities: ScheduledActivity[],
   ): DuplicateCheckResult {
-    const duplicate = existingActivities.find(existing => 
-      existing.activityId === newActivity.activityId &&
-      existing.dogId === newActivity.dogId &&
-      existing.scheduledDate === newActivity.scheduledDate
+    const duplicate = existingActivities.find(
+      (existing) =>
+        existing.activityId === newActivity.activityId &&
+        existing.dogId === newActivity.dogId &&
+        existing.scheduledDate === newActivity.scheduledDate,
     );
 
     if (duplicate) {
       return {
         isDuplicate: true,
         existingActivity: duplicate,
-        message: 'This activity is already scheduled for this date'
+        message: "This activity is already scheduled for this date",
       };
     }
 
@@ -40,7 +40,7 @@ export class DuplicateDetector {
    */
   static checkTimeConflicts(
     newActivity: Partial<ScheduledActivity>,
-    existingActivities: ScheduledActivity[]
+    existingActivities: ScheduledActivity[],
   ): DuplicateCheckResult {
     // For now, we only do day-based scheduling, so no time conflicts
     // This method is prepared for future time-based scheduling
@@ -53,21 +53,22 @@ export class DuplicateDetector {
   static checkDailyLimit(
     newActivity: Partial<ScheduledActivity>,
     existingActivities: ScheduledActivity[],
-    maxPerDay: number = 5
+    maxPerDay: number = 5,
   ): DuplicateCheckResult {
     if (!newActivity.scheduledDate || !newActivity.dogId) {
       return { isDuplicate: false };
     }
 
-    const activitiesOnSameDay = existingActivities.filter(existing =>
-      existing.dogId === newActivity.dogId &&
-      existing.scheduledDate === newActivity.scheduledDate
+    const activitiesOnSameDay = existingActivities.filter(
+      (existing) =>
+        existing.dogId === newActivity.dogId &&
+        existing.scheduledDate === newActivity.scheduledDate,
     );
 
     if (activitiesOnSameDay.length >= maxPerDay) {
       return {
         isDuplicate: true,
-        message: `Maximum of ${maxPerDay} activities allowed per day. Consider scheduling on a different day.`
+        message: `Maximum of ${maxPerDay} activities allowed per day. Consider scheduling on a different day.`,
       };
     }
 
@@ -80,16 +81,23 @@ export class DuplicateDetector {
   static performComprehensiveCheck(
     newActivity: Partial<ScheduledActivity>,
     existingActivities: ScheduledActivity[],
-    options: { maxPerDay?: number } = {}
+    options: { maxPerDay?: number } = {},
   ): DuplicateCheckResult {
     // Check exact duplicates first
-    const exactCheck = this.checkExactDuplicate(newActivity, existingActivities);
+    const exactCheck = this.checkExactDuplicate(
+      newActivity,
+      existingActivities,
+    );
     if (exactCheck.isDuplicate) {
       return exactCheck;
     }
 
     // Check daily limits
-    const dailyCheck = this.checkDailyLimit(newActivity, existingActivities, options.maxPerDay);
+    const dailyCheck = this.checkDailyLimit(
+      newActivity,
+      existingActivities,
+      options.maxPerDay,
+    );
     if (dailyCheck.isDuplicate) {
       return dailyCheck;
     }

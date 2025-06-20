@@ -1,5 +1,4 @@
-
-import { ScheduledActivity, UserActivity } from '@/types/activity';
+import { ScheduledActivity, UserActivity } from "@/types/activity";
 
 export interface DatabaseScheduledActivity {
   id: string;
@@ -23,23 +22,25 @@ export interface DatabaseUserActivity {
   id: string;
   dog_id: string;
   title: string;
-  pillar: 'mental' | 'physical' | 'social' | 'environmental' | 'instinctual';
-  difficulty: 'Easy' | 'Medium' | 'Hard';
+  pillar: "mental" | "physical" | "social" | "environmental" | "instinctual";
+  difficulty: "Easy" | "Medium" | "Hard";
   duration: number;
   materials: string[];
   emotional_goals: string[];
   instructions: string[];
   benefits: string;
   tags: string[];
-  age_group: 'Puppy' | 'Adult' | 'Senior' | 'All Ages';
-  energy_level: 'Low' | 'Medium' | 'High';
+  age_group: "Puppy" | "Adult" | "Senior" | "All Ages";
+  energy_level: "Low" | "Medium" | "High";
   is_custom: boolean;
   created_at: string;
   updated_at: string;
 }
 
 export class ActivityMappers {
-  static toScheduledActivity(dbActivity: DatabaseScheduledActivity): ScheduledActivity {
+  static toScheduledActivity(
+    dbActivity: DatabaseScheduledActivity,
+  ): ScheduledActivity {
     return {
       id: dbActivity.id,
       dogId: dbActivity.dog_id,
@@ -53,7 +54,7 @@ export class ActivityMappers {
       reminderEnabled: dbActivity.reminder_enabled,
       completedAt: dbActivity.completed_at,
       weekNumber: dbActivity.week_number,
-      dayOfWeek: dbActivity.day_of_week
+      dayOfWeek: dbActivity.day_of_week,
     };
   }
 
@@ -73,11 +74,11 @@ export class ActivityMappers {
       ageGroup: dbActivity.age_group,
       energyLevel: dbActivity.energy_level,
       isCustom: dbActivity.is_custom,
-      createdAt: dbActivity.created_at
+      createdAt: dbActivity.created_at,
     };
   }
 
-  static fromScheduledActivity(activity: Omit<ScheduledActivity, 'id'>) {
+  static fromScheduledActivity(activity: Omit<ScheduledActivity, "id">) {
     return {
       dog_id: activity.dogId,
       activity_id: activity.activityId,
@@ -85,16 +86,16 @@ export class ActivityMappers {
       user_selected_time: activity.userSelectedTime || activity.scheduledTime,
       scheduled_date: activity.scheduledDate,
       completed: activity.completed,
-      notes: activity.notes || '',
-      completion_notes: activity.completionNotes || '',
+      notes: activity.notes || "",
+      completion_notes: activity.completionNotes || "",
       reminder_enabled: activity.reminderEnabled || false,
       completed_at: activity.completedAt,
       week_number: activity.weekNumber || null,
-      day_of_week: activity.dayOfWeek !== undefined ? activity.dayOfWeek : null
+      day_of_week: activity.dayOfWeek !== undefined ? activity.dayOfWeek : null,
     };
   }
 
-  static fromUserActivity(activity: Omit<UserActivity, 'id' | 'createdAt'>) {
+  static fromUserActivity(activity: Omit<UserActivity, "id" | "createdAt">) {
     return {
       dog_id: activity.dogId,
       title: activity.title,
@@ -108,7 +109,7 @@ export class ActivityMappers {
       tags: activity.tags,
       age_group: activity.ageGroup,
       energy_level: activity.energyLevel,
-      is_custom: activity.isCustom
+      is_custom: activity.isCustom,
     };
   }
 }

@@ -1,12 +1,11 @@
-
-import React from 'react';
-import ActivityModal from '@/components/ActivityModal';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
-import ChatModal from '@/components/chat/ChatModal';
-import AddDogForm from '@/components/AddDogForm';
-import EditDogForm from '@/components/EditDogForm';
-import { Dog } from '@/types/dog';
-import { ActivityHelpContext } from '@/types/activityContext';
+import React from "react";
+import ActivityModal from "@/components/ActivityModal";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import ChatModal from "@/components/chat/ChatModal";
+import AddDogForm from "@/components/AddDogForm";
+import EditDogForm from "@/components/EditDogForm";
+import { Dog } from "@/types/dog";
+import { ActivityHelpContext } from "@/types/activityContext";
 
 interface DashboardModalsProps {
   isActivityModalOpen: boolean;
@@ -61,10 +60,7 @@ const DashboardModals: React.FC<DashboardModalsProps> = ({
         <DialogContent className="max-w-2xl">
           <div className="overflow-y-auto max-h-[80vh] p-4">
             {selectedDog && (
-              <EditDogForm 
-                dog={selectedDog} 
-                onClose={onEditDogModalClose} 
-              />
+              <EditDogForm dog={selectedDog} onClose={onEditDogModalClose} />
             )}
           </div>
         </DialogContent>

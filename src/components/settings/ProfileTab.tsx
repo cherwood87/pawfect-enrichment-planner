@@ -1,11 +1,16 @@
-
-import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { User, Calendar, Activity, TrendingUp } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
-import { useDog } from '@/contexts/DogContext';
-import { format } from 'date-fns';
+import React from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { User, Calendar, Activity, TrendingUp } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useDog } from "@/contexts/DogContext";
+import { format } from "date-fns";
 
 const ProfileTab = () => {
   const { user } = useAuth();
@@ -32,16 +37,20 @@ const ProfileTab = () => {
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">Email</label>
               <p className="text-gray-900 bg-gray-50 p-3 rounded-xl border">
-                {user?.email || 'Not available'}
+                {user?.email || "Not available"}
               </p>
             </div>
-            
+
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Member Since</label>
+              <label className="text-sm font-medium text-gray-700">
+                Member Since
+              </label>
               <p className="text-gray-900 bg-gray-50 p-3 rounded-xl border flex items-center space-x-2">
                 <Calendar className="w-4 h-4 text-gray-500" />
                 <span>
-                  {joinDate ? format(joinDate, 'MMMM d, yyyy') : 'Not available'}
+                  {joinDate
+                    ? format(joinDate, "MMMM d, yyyy")
+                    : "Not available"}
                 </span>
               </p>
             </div>
@@ -56,24 +65,24 @@ const ProfileTab = () => {
             <TrendingUp className="w-5 h-5" />
             <span>Usage Statistics</span>
           </CardTitle>
-          <CardDescription>
-            Your activity on the platform
-          </CardDescription>
+          <CardDescription>Your activity on the platform</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="text-center p-4 bg-gradient-to-br from-purple-100 to-purple-200 rounded-2xl">
-              <div className="text-2xl font-bold text-purple-800">{totalDogs}</div>
+              <div className="text-2xl font-bold text-purple-800">
+                {totalDogs}
+              </div>
               <div className="text-sm text-purple-600">
-                {totalDogs === 1 ? 'Dog Profile' : 'Dog Profiles'}
+                {totalDogs === 1 ? "Dog Profile" : "Dog Profiles"}
               </div>
             </div>
-            
+
             <div className="text-center p-4 bg-gradient-to-br from-cyan-100 to-cyan-200 rounded-2xl">
               <div className="text-2xl font-bold text-cyan-800">0</div>
               <div className="text-sm text-cyan-600">Activities Completed</div>
             </div>
-            
+
             <div className="text-center p-4 bg-gradient-to-br from-amber-100 to-amber-200 rounded-2xl">
               <div className="text-2xl font-bold text-amber-800">0</div>
               <div className="text-sm text-amber-600">Current Streak</div>
@@ -97,8 +106,8 @@ const ProfileTab = () => {
           <CardContent>
             <div className="space-y-3">
               {state.dogs.map((dog) => (
-                <div 
-                  key={dog.id} 
+                <div
+                  key={dog.id}
                   className="flex items-center justify-between p-3 bg-gradient-to-r from-purple-50 to-cyan-50 rounded-xl border border-purple-200"
                 >
                   <div className="flex items-center space-x-3">
@@ -112,7 +121,7 @@ const ProfileTab = () => {
                   </div>
                   <div className="flex items-center space-x-2">
                     <Badge className="bg-purple-100 text-purple-700 rounded-xl">
-                      {dog.age} {dog.age === 1 ? 'year' : 'years'}
+                      {dog.age} {dog.age === 1 ? "year" : "years"}
                     </Badge>
                     <Badge className="bg-cyan-100 text-cyan-700 rounded-xl">
                       {dog.activityLevel}

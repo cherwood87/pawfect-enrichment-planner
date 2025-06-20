@@ -1,9 +1,8 @@
-
-import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { AlertTriangle, RefreshCw, Home, Bug } from 'lucide-react';
-import { handleError } from '@/utils/errorUtils';
+import React, { Component, ErrorInfo, ReactNode } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { AlertTriangle, RefreshCw, Home, Bug } from "lucide-react";
+import { handleError } from "@/utils/errorUtils";
 
 interface Props {
   children: ReactNode;
@@ -26,7 +25,7 @@ class EnhancedErrorBoundary extends Component<Props, State> {
       hasError: false,
       error: null,
       errorInfo: null,
-      errorId: null
+      errorId: null,
     };
   }
 
@@ -34,21 +33,21 @@ class EnhancedErrorBoundary extends Component<Props, State> {
     return {
       hasError: true,
       error,
-      errorId: `error-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      errorId: `error-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
     };
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     this.setState({
-      errorInfo
+      errorInfo,
     });
 
     // Log the error
-    console.error('Error caught by Enhanced Error Boundary:', error);
-    console.error('Error Info:', errorInfo);
+    console.error("Error caught by Enhanced Error Boundary:", error);
+    console.error("Error Info:", errorInfo);
 
     // Call the error handler
-    handleError(error, 'ErrorBoundary', true);
+    handleError(error, "ErrorBoundary", true);
 
     // Call custom error handler if provided
     if (this.props.onError) {
@@ -68,11 +67,11 @@ class EnhancedErrorBoundary extends Component<Props, State> {
       errorId: this.state.errorId,
       timestamp: new Date().toISOString(),
       userAgent: navigator.userAgent,
-      url: window.location.href
+      url: window.location.href,
     };
 
-    console.error('Error Report:', errorReport);
-    
+    console.error("Error Report:", errorReport);
+
     // In a real application, you would send this to your error tracking service
     // Example: Sentry.captureException(error, { extra: errorReport });
   };
@@ -82,7 +81,7 @@ class EnhancedErrorBoundary extends Component<Props, State> {
       hasError: false,
       error: null,
       errorInfo: null,
-      errorId: null
+      errorId: null,
     });
   };
 
@@ -91,7 +90,7 @@ class EnhancedErrorBoundary extends Component<Props, State> {
   };
 
   private handleGoHome = () => {
-    window.location.href = '/';
+    window.location.href = "/";
   };
 
   private copyErrorDetails = () => {
@@ -100,15 +99,16 @@ class EnhancedErrorBoundary extends Component<Props, State> {
       message: this.state.error?.message,
       stack: this.state.error?.stack,
       componentStack: this.state.errorInfo?.componentStack,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
-    navigator.clipboard.writeText(JSON.stringify(errorDetails, null, 2))
+    navigator.clipboard
+      .writeText(JSON.stringify(errorDetails, null, 2))
       .then(() => {
-        alert('Error details copied to clipboard');
+        alert("Error details copied to clipboard");
       })
       .catch(() => {
-        console.error('Failed to copy error details');
+        console.error("Failed to copy error details");
       });
   };
 
@@ -133,7 +133,8 @@ class EnhancedErrorBoundary extends Component<Props, State> {
                 Oops! Something went wrong
               </CardTitle>
               <p className="text-gray-600 mt-2">
-                We encountered an unexpected error. Don't worry, your data is safe.
+                We encountered an unexpected error. Don't worry, your data is
+                safe.
               </p>
               {this.state.errorId && (
                 <p className="text-sm text-gray-500 mt-1">
@@ -208,7 +209,8 @@ class EnhancedErrorBoundary extends Component<Props, State> {
 
               <div className="text-center text-sm text-gray-500">
                 <p>
-                  If this problem persists, please contact support with the error ID above.
+                  If this problem persists, please contact support with the
+                  error ID above.
                 </p>
               </div>
             </CardContent>

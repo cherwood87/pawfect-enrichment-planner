@@ -1,22 +1,27 @@
-
-import React, { useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft, User, Dog, Shield } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import AccountTab from '@/components/settings/AccountTab';
-import DogsTab from '@/components/settings/DogsTab';
-import ProfileTab from '@/components/settings/ProfileTab';
+import React, { useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, User, Dog, Shield } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import AccountTab from "@/components/settings/AccountTab";
+import DogsTab from "@/components/settings/DogsTab";
+import ProfileTab from "@/components/settings/ProfileTab";
 
 const AccountSettings = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState('account');
+  const [activeTab, setActiveTab] = useState("account");
 
   const handleBack = () => {
-    navigate('/app');
+    navigate("/app");
   };
 
   return (
@@ -46,25 +51,29 @@ const AccountSettings = () => {
               Manage your account, dog profiles, and preferences
             </CardDescription>
           </CardHeader>
-          
+
           <CardContent className="p-6">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <Tabs
+              value={activeTab}
+              onValueChange={setActiveTab}
+              className="w-full"
+            >
               <TabsList className="grid w-full grid-cols-3 bg-purple-100 rounded-2xl p-1">
-                <TabsTrigger 
-                  value="account" 
+                <TabsTrigger
+                  value="account"
                   className="flex items-center space-x-2 rounded-xl data-[state=active]:bg-white data-[state=active]:text-purple-700 data-[state=active]:shadow-sm"
                 >
                   <Shield className="w-4 h-4" />
                   <span className="hidden sm:inline">Account</span>
                 </TabsTrigger>
-                <TabsTrigger 
+                <TabsTrigger
                   value="dogs"
                   className="flex items-center space-x-2 rounded-xl data-[state=active]:bg-white data-[state=active]:text-purple-700 data-[state=active]:shadow-sm"
                 >
                   <Dog className="w-4 h-4" />
                   <span className="hidden sm:inline">Dogs</span>
                 </TabsTrigger>
-                <TabsTrigger 
+                <TabsTrigger
                   value="profile"
                   className="flex items-center space-x-2 rounded-xl data-[state=active]:bg-white data-[state=active]:text-purple-700 data-[state=active]:shadow-sm"
                 >

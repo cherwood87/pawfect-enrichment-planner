@@ -1,6 +1,5 @@
-
-import React from 'react';
-import { Button } from '@/components/ui/button';
+import React from "react";
+import { Button } from "@/components/ui/button";
 
 interface WeeklyPlannerNavigationProps {
   onPreviousWeek: () => void;
@@ -11,7 +10,7 @@ interface WeeklyPlannerNavigationProps {
 const WeeklyPlannerNavigation: React.FC<WeeklyPlannerNavigationProps> = ({
   onPreviousWeek,
   onCurrentWeek,
-  onNextWeek
+  onNextWeek,
 }) => {
   return (
     <div className="flex items-center justify-between">

@@ -1,38 +1,53 @@
-
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+const openAIApiKey = Deno.env.get("OPENAI_API_KEY");
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
 };
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
+  if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { messages, dogProfile, activityHistory, pillarBalance, activityContext } = await req.json();
+    const {
+      messages,
+      dogProfile,
+      activityHistory,
+      pillarBalance,
+      activityContext,
+    } = await req.json();
 
     // Build context-aware system prompt
     let systemPrompt = `You are an expert dog enrichment coach specializing in the 5 pillars of enrichment: Mental, Physical, Social, Environmental, and Instinctual.
 
 Current Dog Profile:
-- Name: ${dogProfile?.name || 'Unknown'}
-- Age: ${dogProfile?.age || 'Unknown'} years
-- Breed: ${dogProfile?.breed || 'Unknown'}
-- Size: ${dogProfile?.size || 'Unknown'}
-- Energy Level: ${dogProfile?.energyLevel || 'Unknown'}
-- Mobility Issues: ${dogProfile?.mobilityIssues || 'None'}
-- Living Situation: ${dogProfile?.livingSituation || 'Unknown'}
+- Name: ${dogProfile?.name || "Unknown"}
+- Age: ${dogProfile?.age || "Unknown"} years
+- Breed: ${dogProfile?.breed || "Unknown"}
+- Size: ${dogProfile?.size || "Unknown"}
+- Energy Level: ${dogProfile?.energyLevel || "Unknown"}
+- Mobility Issues: ${dogProfile?.mobilityIssues || "None"}
+- Living Situation: ${dogProfile?.livingSituation || "Unknown"}
 
 Recent Activity Balance:
-${Object.entries(pillarBalance || {}).map(([pillar, count]) => `- ${pillar}: ${count} activities today`).join('\n')}
+${Object.entries(pillarBalance || {})
+  .map(([pillar, count]) => `- ${pillar}: ${count} activities today`)
+  .join("\n")}
 
-Quiz Results: ${dogProfile?.quizResults ? `Top pillars: ${dogProfile.quizResults.ranking.slice(0, 2).map(r => r.pillar).join(', ')}` : 'Not completed'}`;
+Quiz Results: ${
+      dogProfile?.quizResults
+        ? `Top pillars: ${dogProfile.quizResults.ranking
+            .slice(0, 2)
+            .map((r) => r.pillar)
+            .join(", ")}`
+        : "Not completed"
+    }`;
 
     if (activityContext) {
       systemPrompt += `
@@ -79,18 +94,15 @@ Always return the JSON exactly as shown:
 
 Respond in a friendly, expert tone as a professional dog enrichment specialist.`;
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
       headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
+        Authorization: `Bearer ${openAIApiKey}`,
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          ...messages
-        ],
+        model: "gpt-4o-mini",
+        messages: [{ role: "system", content: systemPrompt }, ...messages],
         temperature: 0.7,
         max_tokens: 1000,
       }),
@@ -105,14 +117,15 @@ Respond in a friendly, expert tone as a professional dog enrichment specialist.`
 
     // Clean reply of markdown, headers, and intro phrases
     const cleanedReply = reply
-      .replace(/^#+\s*/gm, '')                      // remove # headings
-      .replace(/```json|```/g, '')                  // remove markdown code blocks
-      .replace(/^\s*(Here('|’)s|Try this).*?({)/im, '$1') // remove intro phrases before JSON
+      .replace(/^#+\s*/gm, "") // remove # headings
+      .replace(/```json|```/g, "") // remove markdown code blocks
+      .replace(/^\s*(Here('|’)s|Try this).*?({)/im, "$1") // remove intro phrases before JSON
       .trim();
 
     // Extract JSON blocks that match activity schema
     const activityMatches = [];
-    const activityRegex = /{[\s\S]*?"title":\s*".+?[\s\S]*?"energyLevel":\s*".+?"[\s\S]*?}/g;
+    const activityRegex =
+      /{[\s\S]*?"title":\s*".+?[\s\S]*?"energyLevel":\s*".+?"[\s\S]*?}/g;
     let match;
     while ((match = activityRegex.exec(cleanedReply)) !== null) {
       try {
@@ -123,17 +136,20 @@ Respond in a friendly, expert tone as a professional dog enrichment specialist.`
       }
     }
 
-    return new Response(JSON.stringify({
-      reply: cleanedReply,
-      activities: activityMatches
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify({
+        reply: cleanedReply,
+        activities: activityMatches,
+      }),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
+    );
   } catch (error) {
-    console.error('Error in enrichment-coach function:', error);
+    console.error("Error in enrichment-coach function:", error);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });

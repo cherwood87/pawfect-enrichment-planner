@@ -1,5 +1,4 @@
-
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import React, { Component, ErrorInfo, ReactNode } from "react";
 
 interface Props {
   children: ReactNode;
@@ -13,19 +12,20 @@ interface State {
 class NetworkErrorBoundary extends Component<Props, State> {
   public state: State = {
     hasError: false,
-    isNetworkError: false
+    isNetworkError: false,
   };
 
   public static getDerivedStateFromError(error: Error): State {
-    const isNetworkError = error.message.includes('network') || 
-                          error.message.includes('fetch') ||
-                          error.message.includes('connection');
-    
+    const isNetworkError =
+      error.message.includes("network") ||
+      error.message.includes("fetch") ||
+      error.message.includes("connection");
+
     return { hasError: true, isNetworkError };
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Network error:', error, errorInfo);
+    console.error("Network error:", error, errorInfo);
   }
 
   public render() {
@@ -33,9 +33,12 @@ class NetworkErrorBoundary extends Component<Props, State> {
       return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50">
           <div className="text-center p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Network Error</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              Network Error
+            </h2>
             <p className="text-gray-600 mb-4">
-              Unable to connect to our servers. Please check your internet connection and try again.
+              Unable to connect to our servers. Please check your internet
+              connection and try again.
             </p>
             <button
               onClick={() => window.location.reload()}

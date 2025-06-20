@@ -1,9 +1,14 @@
-
-import React, { memo, useCallback } from 'react';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Search, Filter } from 'lucide-react';
+import React, { memo, useCallback } from "react";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Search, Filter } from "lucide-react";
 
 interface SearchAndFilterSectionProps {
   searchQuery: string;
@@ -22,11 +27,14 @@ const SearchAndFilterSection: React.FC<SearchAndFilterSectionProps> = ({
   setSelectedPillar,
   selectedDifficulty,
   setSelectedDifficulty,
-  filteredActivitiesCount
+  filteredActivitiesCount,
 }) => {
-  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-  }, [setSearchQuery]);
+  const handleSearchChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setSearchQuery(e.target.value);
+    },
+    [setSearchQuery],
+  );
 
   return (
     <div className="modern-card">
@@ -71,8 +79,13 @@ const SearchAndFilterSection: React.FC<SearchAndFilterSectionProps> = ({
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Difficulty</label>
-            <Select value={selectedDifficulty} onValueChange={setSelectedDifficulty}>
+            <label className="text-sm font-medium text-gray-700">
+              Difficulty
+            </label>
+            <Select
+              value={selectedDifficulty}
+              onValueChange={setSelectedDifficulty}
+            >
               <SelectTrigger className="modern-select">
                 <SelectValue placeholder="All Difficulties" />
               </SelectTrigger>
@@ -87,7 +100,9 @@ const SearchAndFilterSection: React.FC<SearchAndFilterSectionProps> = ({
         </div>
 
         {/* Active Filters Display */}
-        {(selectedPillar !== 'all' || selectedDifficulty !== 'all' || searchQuery) && (
+        {(selectedPillar !== "all" ||
+          selectedDifficulty !== "all" ||
+          searchQuery) && (
           <div className="flex flex-wrap gap-2 items-center">
             <Filter className="w-4 h-4 text-gray-500" />
             <span className="text-sm text-gray-600">Active filters:</span>
@@ -96,12 +111,12 @@ const SearchAndFilterSection: React.FC<SearchAndFilterSectionProps> = ({
                 Search: "{searchQuery}"
               </Badge>
             )}
-            {selectedPillar !== 'all' && (
+            {selectedPillar !== "all" && (
               <Badge variant="secondary" className="text-xs">
                 Pillar: {selectedPillar}
               </Badge>
             )}
-            {selectedDifficulty !== 'all' && (
+            {selectedDifficulty !== "all" && (
               <Badge variant="secondary" className="text-xs">
                 Difficulty: {selectedDifficulty}
               </Badge>

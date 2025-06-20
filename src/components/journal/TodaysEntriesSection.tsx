@@ -1,12 +1,11 @@
-
-import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Edit3, Trash2, Clock } from 'lucide-react';
-import { format, parseISO } from 'date-fns';
-import { JournalEntry } from '@/types/journal';
-import { MOOD_RATINGS } from '@/constants/journalConstants';
+import React from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Edit3, Trash2, Clock } from "lucide-react";
+import { format, parseISO } from "date-fns";
+import { JournalEntry } from "@/types/journal";
+import { MOOD_RATINGS } from "@/constants/journalConstants";
 
 interface TodaysEntriesSectionProps {
   entries: JournalEntry[];
@@ -19,21 +18,21 @@ const TodaysEntriesSection: React.FC<TodaysEntriesSectionProps> = ({
   entries,
   onLoadEntry,
   onDeleteEntry,
-  currentEntryId
+  currentEntryId,
 }) => {
   const getMoodIcon = (mood: string) => {
-    const moodRating = MOOD_RATINGS.find(rating => rating.mood === mood);
+    const moodRating = MOOD_RATINGS.find((rating) => rating.mood === mood);
     if (!moodRating) return null;
     const IconComponent = moodRating.icon;
     return <IconComponent className={`w-4 h-4 ${moodRating.color}`} />;
   };
 
   const formatTime = (timestamp?: string) => {
-    if (!timestamp) return '';
+    if (!timestamp) return "";
     try {
-      return format(parseISO(timestamp), 'h:mm a');
+      return format(parseISO(timestamp), "h:mm a");
     } catch (error) {
-      return '';
+      return "";
     }
   };
 
@@ -43,18 +42,18 @@ const TodaysEntriesSection: React.FC<TodaysEntriesSectionProps> = ({
         <Clock className="w-4 h-4" />
         <span>Today's Entries ({entries.length})</span>
       </h3>
-      
+
       <div className="grid gap-3">
         {entries.map((entry) => {
           const isCurrentEntry = entry.id === currentEntryId;
-          
+
           return (
-            <Card 
-              key={entry.id} 
+            <Card
+              key={entry.id}
               className={`border transition-all ${
-                isCurrentEntry 
-                  ? 'border-blue-300 bg-blue-50' 
-                  : 'border-gray-200 hover:border-gray-300'
+                isCurrentEntry
+                  ? "border-blue-300 bg-blue-50"
+                  : "border-gray-200 hover:border-gray-300"
               }`}
             >
               <CardContent className="p-4">
@@ -69,7 +68,9 @@ const TodaysEntriesSection: React.FC<TodaysEntriesSectionProps> = ({
                       {entry.mood && (
                         <div className="flex items-center space-x-1">
                           {getMoodIcon(entry.mood)}
-                          <span className="text-xs text-gray-600">{entry.mood}</span>
+                          <span className="text-xs text-gray-600">
+                            {entry.mood}
+                          </span>
                         </div>
                       )}
                       {entry.behaviors.length > 0 && (
@@ -78,23 +79,23 @@ const TodaysEntriesSection: React.FC<TodaysEntriesSectionProps> = ({
                         </Badge>
                       )}
                       {isCurrentEntry && (
-                        <Badge className="text-xs bg-blue-500">
-                          Editing
-                        </Badge>
+                        <Badge className="text-xs bg-blue-500">Editing</Badge>
                       )}
                     </div>
-                    
+
                     <p className="text-sm text-gray-600 line-clamp-2">
-                      <span className="font-medium">Prompt:</span> {entry.prompt}
+                      <span className="font-medium">Prompt:</span>{" "}
+                      {entry.prompt}
                     </p>
-                    
+
                     {entry.response && (
                       <p className="text-sm text-gray-700 line-clamp-2">
-                        <span className="font-medium">Response:</span> {entry.response}
+                        <span className="font-medium">Response:</span>{" "}
+                        {entry.response}
                       </p>
                     )}
                   </div>
-                  
+
                   <div className="flex items-center space-x-1 ml-4">
                     <Button
                       variant="ghost"

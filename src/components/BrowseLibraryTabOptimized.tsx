@@ -1,15 +1,16 @@
-
-import React, { memo, useMemo, useCallback } from 'react';
-import { FixedSizeList as List } from 'react-window';
-import ActivityCard from './ActivityCard';
-import { ActivityLibraryItem } from '@/types/activity';
-import { DiscoveredActivity } from '@/types/discovery';
-import { useBundleAnalytics } from '@/hooks/useBundleAnalytics';
+import React, { memo, useMemo, useCallback } from "react";
+import { FixedSizeList as List } from "react-window";
+import ActivityCard from "./ActivityCard";
+import { ActivityLibraryItem } from "@/types/activity";
+import { DiscoveredActivity } from "@/types/discovery";
+import { useBundleAnalytics } from "@/hooks/useBundleAnalytics";
 
 interface BrowseLibraryTabOptimizedProps {
   selectedPillar?: string | null;
   filteredLibraryActivities: (ActivityLibraryItem | DiscoveredActivity)[];
-  onActivitySelect: (activity: ActivityLibraryItem | DiscoveredActivity) => void;
+  onActivitySelect: (
+    activity: ActivityLibraryItem | DiscoveredActivity,
+  ) => void;
 }
 
 // Memoized activity item component
@@ -18,11 +19,13 @@ const ActivityItem = memo<{
   style: React.CSSProperties;
   data: {
     activities: (ActivityLibraryItem | DiscoveredActivity)[];
-    onActivitySelect: (activity: ActivityLibraryItem | DiscoveredActivity) => void;
+    onActivitySelect: (
+      activity: ActivityLibraryItem | DiscoveredActivity,
+    ) => void;
   };
 }>(({ index, style, data }) => {
   const activity = data.activities[index];
-  
+
   if (!activity) return null;
 
   return (
@@ -35,20 +38,23 @@ const ActivityItem = memo<{
   );
 });
 
-ActivityItem.displayName = 'ActivityItem';
+ActivityItem.displayName = "ActivityItem";
 
 const BrowseLibraryTabOptimized: React.FC<BrowseLibraryTabOptimizedProps> = ({
   selectedPillar,
   filteredLibraryActivities,
-  onActivitySelect
+  onActivitySelect,
 }) => {
-  const { getMetrics } = useBundleAnalytics('BrowseLibraryTabOptimized');
+  const { getMetrics } = useBundleAnalytics("BrowseLibraryTabOptimized");
 
   // Memoize the item data to prevent unnecessary re-renders
-  const itemData = useMemo(() => ({
-    activities: filteredLibraryActivities,
-    onActivitySelect
-  }), [filteredLibraryActivities, onActivitySelect]);
+  const itemData = useMemo(
+    () => ({
+      activities: filteredLibraryActivities,
+      onActivitySelect,
+    }),
+    [filteredLibraryActivities, onActivitySelect],
+  );
 
   // Memoized dimensions based on screen size
   const { listHeight, listWidth, itemHeight } = useMemo(() => {
@@ -56,7 +62,7 @@ const BrowseLibraryTabOptimized: React.FC<BrowseLibraryTabOptimizedProps> = ({
     return {
       listHeight: isMobile ? 400 : 600,
       listWidth: Math.min(window.innerWidth - 32, 800), // Max width with padding
-      itemHeight: isMobile ? 120 : 140
+      itemHeight: isMobile ? 120 : 140,
     };
   }, []);
 
@@ -65,10 +71,9 @@ const BrowseLibraryTabOptimized: React.FC<BrowseLibraryTabOptimizedProps> = ({
     return (
       <div className="text-center py-8">
         <p className="text-gray-500">
-          {selectedPillar 
-            ? `No activities found for ${selectedPillar} pillar` 
-            : 'No activities available'
-          }
+          {selectedPillar
+            ? `No activities found for ${selectedPillar} pillar`
+            : "No activities available"}
         </p>
       </div>
     );

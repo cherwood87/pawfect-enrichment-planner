@@ -1,15 +1,16 @@
-
-import React from 'react';
-import { Badge } from '@/components/ui/badge';
-import { CheckCircle } from 'lucide-react';
-import { ActivityLibraryItem } from '@/types/activity';
-import { DiscoveredActivity } from '@/types/discovery';
+import React from "react";
+import { Badge } from "@/components/ui/badge";
+import { CheckCircle } from "lucide-react";
+import { ActivityLibraryItem } from "@/types/activity";
+import { DiscoveredActivity } from "@/types/discovery";
 
 interface ActivityCardContentProps {
   activity: ActivityLibraryItem | DiscoveredActivity;
 }
 
-const ActivityCardContent: React.FC<ActivityCardContentProps> = ({ activity }) => {
+const ActivityCardContent: React.FC<ActivityCardContentProps> = ({
+  activity,
+}) => {
   return (
     <>
       {/* Benefits */}
@@ -36,7 +37,11 @@ const ActivityCardContent: React.FC<ActivityCardContentProps> = ({ activity }) =
         <h3 className="font-semibold text-gray-800 mb-2">Emotional Goals</h3>
         <div className="flex flex-wrap gap-2">
           {activity.emotionalGoals.map((goal, index) => (
-            <Badge key={index} variant="secondary" className="text-xs bg-purple-100 text-purple-700">
+            <Badge
+              key={index}
+              variant="secondary"
+              className="text-xs bg-purple-100 text-purple-700"
+            >
               {goal}
             </Badge>
           ))}
@@ -45,7 +50,9 @@ const ActivityCardContent: React.FC<ActivityCardContentProps> = ({ activity }) =
 
       {/* Instructions */}
       <div>
-        <h3 className="font-semibold text-gray-800 mb-2">Step-by-Step Instructions</h3>
+        <h3 className="font-semibold text-gray-800 mb-2">
+          Step-by-Step Instructions
+        </h3>
         <ol className="space-y-2">
           {activity.instructions.map((instruction, index) => (
             <li key={index} className="flex items-start space-x-3">

@@ -1,13 +1,12 @@
-
-import React, { useState, useCallback, useMemo } from 'react';
-import { useDog } from '@/contexts/DogContext';
-import DashboardHeader from '@/components/dashboard/DashboardHeader';
-import DashboardContent from '@/components/dashboard/DashboardContent';
-import FloatingChatButton from '@/components/dashboard/FloatingChatButton';
-import DashboardModalsOptimized from '@/components/dashboard/DashboardModalsOptimized';
-import { ActivityStateV2Provider } from '@/contexts/ActivityStateContextV2';
-import { ActivityOperationsV2Provider } from '@/contexts/ActivityOperationsContextV2';
-import { Dog } from '@/types/dog';
+import React, { useState, useCallback, useMemo } from "react";
+import { useDog } from "@/contexts/DogContext";
+import DashboardHeader from "@/components/dashboard/DashboardHeader";
+import DashboardContent from "@/components/dashboard/DashboardContent";
+import FloatingChatButton from "@/components/dashboard/FloatingChatButton";
+import DashboardModalsOptimized from "@/components/dashboard/DashboardModalsOptimized";
+import { ActivityStateV2Provider } from "@/contexts/ActivityStateContextV2";
+import { ActivityOperationsV2Provider } from "@/contexts/ActivityOperationsContextV2";
+import { Dog } from "@/types/dog";
 
 const IndexV2 = () => {
   const { currentDog } = useDog();
@@ -56,48 +55,57 @@ const IndexV2 = () => {
   }, []);
 
   // Memoize modal props to prevent unnecessary re-renders
-  const modalProps = useMemo(() => ({
-    isActivityModalOpen,
-    isChatModalOpen,
-    isAddDogModalOpen,
-    isEditDogModalOpen,
-    selectedPillar,
-    selectedDog,
-    onActivityModalClose: handleActivityModalClose,
-    onChatModalClose: handleChatModalClose,
-    onAddDogModalClose: handleAddDogModalClose,
-    onEditDogModalClose: handleEditDogModalClose
-  }), [
-    isActivityModalOpen,
-    isChatModalOpen,
-    isAddDogModalOpen,
-    isEditDogModalOpen,
-    selectedPillar,
-    selectedDog,
-    handleActivityModalClose,
-    handleChatModalClose,
-    handleAddDogModalClose,
-    handleEditDogModalClose
-  ]);
+  const modalProps = useMemo(
+    () => ({
+      isActivityModalOpen,
+      isChatModalOpen,
+      isAddDogModalOpen,
+      isEditDogModalOpen,
+      selectedPillar,
+      selectedDog,
+      onActivityModalClose: handleActivityModalClose,
+      onChatModalClose: handleChatModalClose,
+      onAddDogModalClose: handleAddDogModalClose,
+      onEditDogModalClose: handleEditDogModalClose,
+    }),
+    [
+      isActivityModalOpen,
+      isChatModalOpen,
+      isAddDogModalOpen,
+      isEditDogModalOpen,
+      selectedPillar,
+      selectedDog,
+      handleActivityModalClose,
+      handleChatModalClose,
+      handleAddDogModalClose,
+      handleEditDogModalClose,
+    ],
+  );
 
   // Memoize dashboard content props
-  const dashboardContentProps = useMemo(() => ({
-    onAddDogOpen: handleAddDogModalOpen,
-    onEditDogOpen: handleEditDogModalOpen,
-    onPillarSelect: handlePillarSelect,
-    onChatOpen: handleChatModalOpen
-  }), [
-    handleAddDogModalOpen,
-    handleEditDogModalOpen,
-    handlePillarSelect,
-    handleChatModalOpen
-  ]);
+  const dashboardContentProps = useMemo(
+    () => ({
+      onAddDogOpen: handleAddDogModalOpen,
+      onEditDogOpen: handleEditDogModalOpen,
+      onPillarSelect: handlePillarSelect,
+      onChatOpen: handleChatModalOpen,
+    }),
+    [
+      handleAddDogModalOpen,
+      handleEditDogModalOpen,
+      handlePillarSelect,
+      handleChatModalOpen,
+    ],
+  );
 
   // Memoize header props
-  const headerProps = useMemo(() => ({
-    onChatOpen: handleChatModalOpen,
-    onAddDogOpen: handleAddDogModalOpen
-  }), [handleChatModalOpen, handleAddDogModalOpen]);
+  const headerProps = useMemo(
+    () => ({
+      onChatOpen: handleChatModalOpen,
+      onAddDogOpen: handleAddDogModalOpen,
+    }),
+    [handleChatModalOpen, handleAddDogModalOpen],
+  );
 
   return (
     <ActivityStateV2Provider>
@@ -110,7 +118,9 @@ const IndexV2 = () => {
           <DashboardContent {...dashboardContentProps} />
 
           {/* Floating Chat Button - Only render when we have a dog */}
-          {currentDog && <FloatingChatButton onChatOpen={handleChatModalOpen} />}
+          {currentDog && (
+            <FloatingChatButton onChatOpen={handleChatModalOpen} />
+          )}
 
           {/* Modals - Use optimized version */}
           <DashboardModalsOptimized {...modalProps} />

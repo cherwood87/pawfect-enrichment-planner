@@ -1,6 +1,5 @@
-
-import { ScheduledActivity } from '@/types/activity';
-import { Dog } from '@/types/dog';
+import { ScheduledActivity } from "@/types/activity";
+import { Dog } from "@/types/dog";
 
 export interface ValidationResult {
   isValid: boolean;
@@ -17,13 +16,13 @@ export class SchedulingValidator {
     const warnings: string[] = [];
 
     if (!scheduledDate) {
-      errors.push('Scheduled date is required');
+      errors.push("Scheduled date is required");
       return { isValid: false, errors, warnings };
     }
 
     const date = new Date(scheduledDate);
     if (isNaN(date.getTime())) {
-      errors.push('Invalid date format');
+      errors.push("Invalid date format");
       return { isValid: false, errors, warnings };
     }
 
@@ -33,7 +32,7 @@ export class SchedulingValidator {
     yesterday.setHours(0, 0, 0, 0);
 
     if (date < yesterday) {
-      errors.push('Cannot schedule activities for past dates');
+      errors.push("Cannot schedule activities for past dates");
     }
 
     // Warn if scheduling too far in the future (more than 3 months)
@@ -41,39 +40,42 @@ export class SchedulingValidator {
     threeMonthsFromNow.setMonth(threeMonthsFromNow.getMonth() + 3);
 
     if (date > threeMonthsFromNow) {
-      warnings.push('Scheduling activities more than 3 months in advance');
+      warnings.push("Scheduling activities more than 3 months in advance");
     }
 
     return {
       isValid: errors.length === 0,
       errors,
-      warnings
+      warnings,
     };
   }
 
   /**
    * Validate week and day calculations
    */
-  static validateWeekAndDay(weekNumber?: number, dayOfWeek?: number): ValidationResult {
+  static validateWeekAndDay(
+    weekNumber?: number,
+    dayOfWeek?: number,
+  ): ValidationResult {
     const errors: string[] = [];
     const warnings: string[] = [];
 
     if (weekNumber !== undefined) {
       if (weekNumber < 1 || weekNumber > 53) {
-        errors.push('Week number must be between 1 and 53');
+        errors.push("Week number must be between 1 and 53");
       }
     }
 
     if (dayOfWeek !== undefined) {
       if (dayOfWeek < 0 || dayOfWeek > 6) {
-        errors.push('Day of week must be between 0 (Sunday) and 6 (Saturday)');
+        errors.push("Day of week must be between 0 (Sunday) and 6 (Saturday)");
       }
     }
 
     return {
       isValid: errors.length === 0,
       errors,
-      warnings
+      warnings,
     };
   }
 
@@ -85,18 +87,18 @@ export class SchedulingValidator {
     const warnings: string[] = [];
 
     if (!dog) {
-      errors.push('No dog selected for scheduling');
+      errors.push("No dog selected for scheduling");
       return { isValid: false, errors, warnings };
     }
 
     if (!dog.id) {
-      errors.push('Dog ID is missing');
+      errors.push("Dog ID is missing");
     }
 
     return {
       isValid: errors.length === 0,
       errors,
-      warnings
+      warnings,
     };
   }
 
@@ -105,7 +107,7 @@ export class SchedulingValidator {
    */
   static validateScheduledActivity(
     activity: Partial<ScheduledActivity>,
-    dog: Dog | null
+    dog: Dog | null,
   ): ValidationResult {
     const allErrors: string[] = [];
     const allWarnings: string[] = [];
@@ -117,11 +119,11 @@ export class SchedulingValidator {
 
     // Validate required fields
     if (!activity.activityId?.trim()) {
-      allErrors.push('Activity ID is required');
+      allErrors.push("Activity ID is required");
     }
 
     if (!activity.scheduledDate) {
-      allErrors.push('Scheduled date is required');
+      allErrors.push("Scheduled date is required");
     } else {
       // Validate date
       const dateValidation = this.validateScheduledDate(activity.scheduledDate);
@@ -130,14 +132,17 @@ export class SchedulingValidator {
     }
 
     // Validate week and day if provided
-    const weekDayValidation = this.validateWeekAndDay(activity.weekNumber, activity.dayOfWeek);
+    const weekDayValidation = this.validateWeekAndDay(
+      activity.weekNumber,
+      activity.dayOfWeek,
+    );
     allErrors.push(...weekDayValidation.errors);
     allWarnings.push(...weekDayValidation.warnings);
 
     return {
       isValid: allErrors.length === 0,
       errors: allErrors,
-      warnings: allWarnings
+      warnings: allWarnings,
     };
   }
 }

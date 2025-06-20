@@ -1,20 +1,19 @@
-
-import { Dog } from '@/types/dog';
-import { BaseSupabaseAdapter } from './BaseSupabaseAdapter';
-import { CacheService } from '../network/CacheService';
-import { DogDataMapper } from './mappers/DogDataMapper';
+import { Dog } from "@/types/dog";
+import { BaseSupabaseAdapter } from "./BaseSupabaseAdapter";
+import { CacheService } from "../network/CacheService";
+import { DogDataMapper } from "./mappers/DogDataMapper";
 
 export class DogSupabaseAdapter extends BaseSupabaseAdapter {
-  private static readonly CACHE_KEY_PREFIX = 'enhanced_dogs';
+  private static readonly CACHE_KEY_PREFIX = "enhanced_dogs";
 
   static async getDogs(userId: string, useCache = true): Promise<Dog[]> {
-    console.log('🐕 Loading dogs with enhanced adapter for user:', userId);
+    console.log("🐕 Loading dogs with enhanced adapter for user:", userId);
 
     // Try cache first if enabled
     if (useCache) {
       const cached = CacheService.getCachedDogs(userId);
       if (cached) {
-        console.log('📋 Returning cached dogs:', cached.length);
+        console.log("📋 Returning cached dogs:", cached.length);
         return cached;
       }
     }
@@ -22,15 +21,15 @@ export class DogSupabaseAdapter extends BaseSupabaseAdapter {
     // Use retry with circuit breaker
     const dogs = await this.executeWithRetry(
       async () => {
-        console.log('🔍 Querying dogs from Supabase...');
+        console.log("🔍 Querying dogs from Supabase...");
         const { data, error } = await this.getSupabaseClient()
-          .from('dogs')
-          .select('*')
-          .eq('user_id', userId)
-          .order('created_at', { ascending: false });
+          .from("dogs")
+          .select("*")
+          .eq("user_id", userId)
+          .order("created_at", { ascending: false });
 
         if (error) {
-          console.error('❌ Supabase dogs query error:', error);
+          console.error("❌ Supabase dogs query error:", error);
           throw new Error(`Failed to fetch dogs: ${error.message}`);
         }
 
@@ -41,9 +40,9 @@ export class DogSupabaseAdapter extends BaseSupabaseAdapter {
         baseDelay: 1000,
         maxDelay: 5000,
         backoffFactor: 2,
-        timeout: 10000
+        timeout: 10000,
       },
-      'dogs_query'
+      "dogs_query",
     );
 
     // Cache successful result
@@ -51,23 +50,25 @@ export class DogSupabaseAdapter extends BaseSupabaseAdapter {
       CacheService.cacheDogs(userId, dogs);
     }
 
-    console.log('✅ Enhanced dogs loaded:', dogs.length);
+    console.log("✅ Enhanced dogs loaded:", dogs.length);
     return dogs;
   }
 
-  static async createDog(dogData: Omit<Dog, 'id' | 'dateAdded' | 'lastUpdated'>): Promise<Dog> {
-    console.log('➕ Creating dog with enhanced adapter:', dogData.name);
+  static async createDog(
+    dogData: Omit<Dog, "id" | "dateAdded" | "lastUpdated">,
+  ): Promise<Dog> {
+    console.log("➕ Creating dog with enhanced adapter:", dogData.name);
 
     const dog = await this.executeWithRetry(
       async () => {
         const { data, error } = await this.getSupabaseClient()
-          .from('dogs')
+          .from("dogs")
           .insert([DogDataMapper.mapToDatabase(dogData)])
           .select()
           .single();
 
         if (error) {
-          console.error('❌ Dog creation error:', error);
+          console.error("❌ Dog creation error:", error);
           throw new Error(`Failed to create dog: ${error.message}`);
         }
 
@@ -78,9 +79,9 @@ export class DogSupabaseAdapter extends BaseSupabaseAdapter {
         baseDelay: 1000,
         maxDelay: 3000,
         backoffFactor: 2,
-        timeout: 10000
+        timeout: 10000,
       },
-      'dog_create'
+      "dog_create",
     );
 
     // Invalidate dogs cache for this user
@@ -88,25 +89,25 @@ export class DogSupabaseAdapter extends BaseSupabaseAdapter {
       CacheService.delete(`dogs_${dogData.userId}`);
     }
 
-    console.log('✅ Enhanced dog created:', dog.id);
+    console.log("✅ Enhanced dog created:", dog.id);
     return DogDataMapper.mapToDog(dog);
   }
 
   static async updateDog(dog: Dog): Promise<Dog> {
-    console.log('✏️ Updating dog with enhanced adapter:', dog.name);
+    console.log("✏️ Updating dog with enhanced adapter:", dog.name);
 
     const updatedDog = await this.executeWithRetry(
       async () => {
         const { data, error } = await this.getSupabaseClient()
-          .from('dogs')
+          .from("dogs")
           .update(DogDataMapper.mapToUpdatePayload(dog))
-          .eq('id', dog.id)
-          .eq('user_id', dog.userId)
+          .eq("id", dog.id)
+          .eq("user_id", dog.userId)
           .select()
           .single();
 
         if (error) {
-          console.error('❌ Dog update error:', error);
+          console.error("❌ Dog update error:", error);
           throw new Error(`Failed to update dog: ${error.message}`);
         }
 
@@ -117,30 +118,30 @@ export class DogSupabaseAdapter extends BaseSupabaseAdapter {
         baseDelay: 1000,
         maxDelay: 3000,
         backoffFactor: 2,
-        timeout: 10000
+        timeout: 10000,
       },
-      'dog_update'
+      "dog_update",
     );
 
     // Invalidate dogs cache for this user
     CacheService.delete(`dogs_${dog.userId}`);
 
-    console.log('✅ Enhanced dog updated:', updatedDog.id);
+    console.log("✅ Enhanced dog updated:", updatedDog.id);
     return DogDataMapper.mapToDog(updatedDog);
   }
 
   static async deleteDog(id: string): Promise<void> {
-    console.log('🗑️ Deleting dog with enhanced adapter:', id);
+    console.log("🗑️ Deleting dog with enhanced adapter:", id);
 
     await this.executeWithRetry(
       async () => {
         const { error } = await this.getSupabaseClient()
-          .from('dogs')
+          .from("dogs")
           .delete()
-          .eq('id', id);
+          .eq("id", id);
 
         if (error) {
-          console.error('❌ Dog deletion error:', error);
+          console.error("❌ Dog deletion error:", error);
           throw new Error(`Failed to delete dog: ${error.message}`);
         }
       },
@@ -149,11 +150,11 @@ export class DogSupabaseAdapter extends BaseSupabaseAdapter {
         baseDelay: 1000,
         maxDelay: 3000,
         backoffFactor: 2,
-        timeout: 8000
+        timeout: 8000,
       },
-      'dog_delete'
+      "dog_delete",
     );
 
-    console.log('✅ Enhanced dog deleted:', id);
+    console.log("✅ Enhanced dog deleted:", id);
   }
 }

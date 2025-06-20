@@ -1,8 +1,7 @@
-
-import React from 'react';
-import { CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Loader2, Sparkles, CheckCircle, Brain } from 'lucide-react';
+import React from "react";
+import { CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Loader2, Sparkles, CheckCircle, Brain } from "lucide-react";
 
 interface ActivityLibraryHeaderProps {
   autoApprovedCount: number;
@@ -13,7 +12,7 @@ interface ActivityLibraryHeaderProps {
 const ActivityLibraryHeader: React.FC<ActivityLibraryHeaderProps> = ({
   autoApprovedCount,
   isDiscovering,
-  onDiscoverMore
+  onDiscoverMore,
 }) => {
   return (
     <CardHeader className="bg-gradient-to-r from-purple-50 via-cyan-50 to-amber-50 border-b-2 border-purple-200 rounded-t-3xl">
@@ -27,7 +26,8 @@ const ActivityLibraryHeader: React.FC<ActivityLibraryHeaderProps> = ({
           </CardTitle>
           <div className="space-y-1">
             <p className="text-purple-600 font-medium">
-              Discover curated enriching activities personalized for your dog across all five pillars of wellness
+              Discover curated enriching activities personalized for your dog
+              across all five pillars of wellness
             </p>
             {autoApprovedCount > 0 && (
               <div className="flex items-center space-x-2">
@@ -41,9 +41,9 @@ const ActivityLibraryHeader: React.FC<ActivityLibraryHeaderProps> = ({
             )}
           </div>
         </div>
-        
+
         <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-1 border border-purple-200">
-          <Button 
+          <Button
             onClick={onDiscoverMore}
             disabled={isDiscovering}
             className="modern-button-primary shadow-lg hover:shadow-xl"
@@ -62,7 +62,7 @@ const ActivityLibraryHeader: React.FC<ActivityLibraryHeaderProps> = ({
           </Button>
         </div>
       </div>
-      
+
       {isDiscovering && (
         <div className="mt-4 bg-white/60 backdrop-blur-sm rounded-2xl p-4 border border-purple-200">
           <div className="flex items-center space-x-3">
@@ -70,7 +70,8 @@ const ActivityLibraryHeader: React.FC<ActivityLibraryHeaderProps> = ({
               <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
             </div>
             <span className="text-sm text-purple-700 font-medium">
-              Analyzing your dog's profile and discovering personalized activities...
+              Analyzing your dog's profile and discovering personalized
+              activities...
             </span>
           </div>
         </div>

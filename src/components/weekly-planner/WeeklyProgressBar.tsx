@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React from "react";
 
 interface WeeklyProgressBarProps {
   completedActivities: number;
@@ -8,15 +7,16 @@ interface WeeklyProgressBarProps {
 
 const WeeklyProgressBar: React.FC<WeeklyProgressBarProps> = ({
   completedActivities,
-  totalActivities
+  totalActivities,
 }) => {
-  const progressPercentage = totalActivities > 0 ? (completedActivities / totalActivities) * 100 : 0;
+  const progressPercentage =
+    totalActivities > 0 ? (completedActivities / totalActivities) * 100 : 0;
 
   return (
     <div className="mt-4">
       <div className="w-full bg-purple-100 rounded-full h-4 shadow-inner border border-purple-200">
-        <div 
-          className="bg-gradient-to-r from-purple-400 via-cyan-400 to-emerald-400 h-4 rounded-full transition-all duration-700 ease-out relative overflow-hidden" 
+        <div
+          className="bg-gradient-to-r from-purple-400 via-cyan-400 to-emerald-400 h-4 rounded-full transition-all duration-700 ease-out relative overflow-hidden"
           style={{ width: `${progressPercentage}%` }}
         >
           {/* Enhanced animated shine effect */}
@@ -25,7 +25,9 @@ const WeeklyProgressBar: React.FC<WeeklyProgressBarProps> = ({
       </div>
       <div className="flex justify-between text-sm text-purple-600 mt-2 font-medium">
         <span>Progress</span>
-        <span className={`font-semibold ${progressPercentage === 100 ? 'text-emerald-600' : ''}`}>
+        <span
+          className={`font-semibold ${progressPercentage === 100 ? "text-emerald-600" : ""}`}
+        >
           {Math.round(progressPercentage)}% Complete
           {progressPercentage === 100 && " 🎉"}
         </span>

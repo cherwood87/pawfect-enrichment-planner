@@ -1,15 +1,20 @@
-
-import { DiscoveredActivity, ContentDiscoveryConfig } from '@/types/discovery';
-import { SupabaseAdapter } from '../integration/SupabaseAdapter';
-import { LocalStorageAdapter } from '../integration/LocalStorageAdapter';
+import { DiscoveredActivity, ContentDiscoveryConfig } from "@/types/discovery";
+import { SupabaseAdapter } from "../integration/SupabaseAdapter";
+import { LocalStorageAdapter } from "../integration/LocalStorageAdapter";
 
 export class DiscoveryRepository {
   // Discovered Activities
-  static async getDiscoveredActivities(dogId: string, fallbackToLocalStorage = true): Promise<DiscoveredActivity[]> {
+  static async getDiscoveredActivities(
+    dogId: string,
+    fallbackToLocalStorage = true,
+  ): Promise<DiscoveredActivity[]> {
     try {
       return await SupabaseAdapter.getDiscoveredActivities(dogId);
     } catch (error) {
-      console.error('Failed to fetch from Supabase, falling back to localStorage:', error);
+      console.error(
+        "Failed to fetch from Supabase, falling back to localStorage:",
+        error,
+      );
       if (fallbackToLocalStorage) {
         return LocalStorageAdapter.getDiscoveredActivities(dogId);
       }
@@ -17,24 +22,36 @@ export class DiscoveryRepository {
     }
   }
 
-  static async saveDiscoveredActivities(dogId: string, activities: DiscoveredActivity[]): Promise<void> {
+  static async saveDiscoveredActivities(
+    dogId: string,
+    activities: DiscoveredActivity[],
+  ): Promise<void> {
     try {
       await SupabaseAdapter.createDiscoveredActivities(activities, dogId);
       // Update localStorage as backup
       LocalStorageAdapter.saveDiscoveredActivities(dogId, activities);
     } catch (error) {
-      console.error('Failed to save to Supabase, saving to localStorage:', error);
+      console.error(
+        "Failed to save to Supabase, saving to localStorage:",
+        error,
+      );
       LocalStorageAdapter.saveDiscoveredActivities(dogId, activities);
       throw error;
     }
   }
 
   // Discovery Config
-  static async getDiscoveryConfig(dogId: string, fallbackToLocalStorage = true): Promise<ContentDiscoveryConfig | null> {
+  static async getDiscoveryConfig(
+    dogId: string,
+    fallbackToLocalStorage = true,
+  ): Promise<ContentDiscoveryConfig | null> {
     try {
       return await SupabaseAdapter.getDiscoveryConfig(dogId);
     } catch (error) {
-      console.error('Failed to fetch from Supabase, falling back to localStorage:', error);
+      console.error(
+        "Failed to fetch from Supabase, falling back to localStorage:",
+        error,
+      );
       if (fallbackToLocalStorage) {
         return LocalStorageAdapter.getDiscoveryConfig(dogId);
       }
@@ -42,13 +59,19 @@ export class DiscoveryRepository {
     }
   }
 
-  static async saveDiscoveryConfig(dogId: string, config: ContentDiscoveryConfig): Promise<void> {
+  static async saveDiscoveryConfig(
+    dogId: string,
+    config: ContentDiscoveryConfig,
+  ): Promise<void> {
     try {
       await SupabaseAdapter.saveDiscoveryConfig(config, dogId);
       // Update localStorage as backup
       LocalStorageAdapter.saveDiscoveryConfig(dogId, config);
     } catch (error) {
-      console.error('Failed to save to Supabase, saving to localStorage:', error);
+      console.error(
+        "Failed to save to Supabase, saving to localStorage:",
+        error,
+      );
       LocalStorageAdapter.saveDiscoveryConfig(dogId, config);
       throw error;
     }
@@ -57,15 +80,19 @@ export class DiscoveryRepository {
   // Migration helpers
   static async migrateFromLocalStorage(dogId: string): Promise<void> {
     console.log(`Starting discovery migration for dog ${dogId}...`);
-    
+
     // Migrate discovered activities
     if (LocalStorageAdapter.hasDiscoveredActivitiesData(dogId)) {
-      const localDiscovered = LocalStorageAdapter.getDiscoveredActivities(dogId);
+      const localDiscovered =
+        LocalStorageAdapter.getDiscoveredActivities(dogId);
       try {
-        await SupabaseAdapter.createDiscoveredActivities(localDiscovered, dogId);
+        await SupabaseAdapter.createDiscoveredActivities(
+          localDiscovered,
+          dogId,
+        );
         LocalStorageAdapter.clearDiscoveredActivities(dogId);
       } catch (error) {
-        console.error('Failed to migrate discovered activities:', error);
+        console.error("Failed to migrate discovered activities:", error);
       }
     }
 
@@ -77,7 +104,7 @@ export class DiscoveryRepository {
           await SupabaseAdapter.saveDiscoveryConfig(localConfig, dogId);
           LocalStorageAdapter.clearDiscoveryConfig(dogId);
         } catch (error) {
-          console.error('Failed to migrate discovery config:', error);
+          console.error("Failed to migrate discovery config:", error);
         }
       }
     }

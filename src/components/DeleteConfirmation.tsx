@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -9,7 +8,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+} from "@/components/ui/alert-dialog";
 
 interface DeleteConfirmationProps {
   isOpen: boolean;
@@ -19,12 +18,12 @@ interface DeleteConfirmationProps {
   message: string;
 }
 
-const DeleteConfirmation: React.FC<DeleteConfirmationProps> = ({ 
+const DeleteConfirmation: React.FC<DeleteConfirmationProps> = ({
   isOpen,
   onClose,
   onConfirm,
   title,
-  message
+  message,
 }) => {
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
@@ -38,13 +37,10 @@ const DeleteConfirmation: React.FC<DeleteConfirmationProps> = ({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel 
-            onClick={onClose}
-            className="rounded-xl"
-          >
+          <AlertDialogCancel onClick={onClose} className="rounded-xl">
             Cancel
           </AlertDialogCancel>
-          <AlertDialogAction 
+          <AlertDialogAction
             onClick={onConfirm}
             className="bg-red-600 hover:bg-red-700 rounded-xl"
           >

@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { useDog } from '@/contexts/DogContext';
-import DogPersonalityQuiz from '@/components/DogPersonalityQuiz';
-import QuizResultsComponent from '@/components/QuizResults';
-import { ArrowLeft, PlusCircle } from 'lucide-react';
-import { QuizResults } from '@/types/quiz';
+import React, { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useDog } from "@/contexts/DogContext";
+import DogPersonalityQuiz from "@/components/DogPersonalityQuiz";
+import QuizResultsComponent from "@/components/QuizResults";
+import { ArrowLeft, PlusCircle } from "lucide-react";
+import { QuizResults } from "@/types/quiz";
 
 const DogProfileQuizPage: React.FC = () => {
   const { currentDog, updateDog } = useDog();
@@ -28,20 +28,25 @@ const DogProfileQuizPage: React.FC = () => {
             </CardHeader>
             <CardContent className="p-8 text-center bg-gradient-to-br from-white/90 to-purple-50/90">
               <p className="text-gray-600 mb-6 text-lg">
-                Please add a dog profile first before taking the personality quiz.
+                Please add a dog profile first before taking the personality
+                quiz.
               </p>
               <div className="space-y-4">
-                <Button onClick={() => window.location.href = '/app'}>
+                <Button onClick={() => (window.location.href = "/app")}>
                   Add Dog Profile
                 </Button>
-                <Button variant="outline" onClick={() => window.location.href = '/'}>
+                <Button
+                  variant="outline"
+                  onClick={() => (window.location.href = "/")}
+                >
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Back to Home
                 </Button>
               </div>
               <div className="mt-6 pt-6 border-t border-purple-200">
                 <p className="text-sm text-purple-600">
-                  💡 The personality quiz helps us understand your dog's preferences for better enrichment recommendations
+                  💡 The personality quiz helps us understand your dog's
+                  preferences for better enrichment recommendations
                 </p>
               </div>
             </CardContent>
@@ -69,7 +74,7 @@ const DogProfileQuizPage: React.FC = () => {
     setQuizCompleted(false);
     setQuizResults(null);
     // ✅ Redirect to Account Settings - Dogs tab
-    window.location.href = '/settings?tab=dogs';
+    window.location.href = "/settings?tab=dogs";
   };
 
   return (

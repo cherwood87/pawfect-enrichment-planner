@@ -1,14 +1,16 @@
-
-import React, { createContext, useContext, useState } from 'react';
-import { DiscoveredActivity, ContentDiscoveryConfig } from '@/types/discovery';
-import { ActivityLibraryItem } from '@/types/activity';
-import { useDog } from '@/contexts/DogContext';
-import { useActivityState } from './ActivityStateContext';
-import { useDiscoveryOperations } from '@/hooks/core/useDiscoveryOperations';
+import React, { createContext, useContext, useState } from "react";
+import { DiscoveredActivity, ContentDiscoveryConfig } from "@/types/discovery";
+import { ActivityLibraryItem } from "@/types/activity";
+import { useDog } from "@/contexts/DogContext";
+import { useActivityState } from "./ActivityStateContext";
+import { useDiscoveryOperations } from "@/hooks/core/useDiscoveryOperations";
 
 interface DiscoveryContextType {
   isDiscovering: boolean;
-  getCombinedActivityLibrary: () => (ActivityLibraryItem | DiscoveredActivity)[];
+  getCombinedActivityLibrary: () => (
+    | ActivityLibraryItem
+    | DiscoveredActivity
+  )[];
   discoverNewActivities: () => Promise<void>;
   approveDiscoveredActivity: (activityId: string) => void;
   rejectDiscoveredActivity: (activityId: string) => void;
@@ -16,25 +18,29 @@ interface DiscoveryContextType {
   checkAndRunAutoDiscovery?: () => Promise<void>;
 }
 
-const DiscoveryContext = createContext<DiscoveryContextType | undefined>(undefined);
+const DiscoveryContext = createContext<DiscoveryContextType | undefined>(
+  undefined,
+);
 
 export const useDiscovery = () => {
   const context = useContext(DiscoveryContext);
   if (!context) {
-    throw new Error('useDiscovery must be used within a DiscoveryProvider');
+    throw new Error("useDiscovery must be used within a DiscoveryProvider");
   }
   return context;
 };
 
-export const DiscoveryProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const DiscoveryProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const { currentDog } = useDog();
-  const { 
-    discoveredActivities, 
+  const {
+    discoveredActivities,
     discoveryConfig,
     setDiscoveredActivities,
-    setDiscoveryConfig 
+    setDiscoveryConfig,
   } = useActivityState();
-  
+
   const [isDiscovering, setIsDiscovering] = useState(false);
 
   const discoveryOps = useDiscoveryOperations(
@@ -42,7 +48,7 @@ export const DiscoveryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     discoveryConfig,
     currentDog,
     setDiscoveredActivities,
-    setDiscoveryConfig
+    setDiscoveryConfig,
   );
 
   const discoverNewActivities = async () => {
@@ -62,7 +68,9 @@ export const DiscoveryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     await discoveryOps.rejectDiscoveredActivity(activityId);
   };
 
-  const updateDiscoveryConfig = async (updates: Partial<ContentDiscoveryConfig>) => {
+  const updateDiscoveryConfig = async (
+    updates: Partial<ContentDiscoveryConfig>,
+  ) => {
     await discoveryOps.updateDiscoveryConfig(updates);
   };
 
@@ -73,7 +81,7 @@ export const DiscoveryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     approveDiscoveredActivity,
     rejectDiscoveredActivity,
     updateDiscoveryConfig,
-    checkAndRunAutoDiscovery: discoveryOps.checkAndRunAutoDiscovery
+    checkAndRunAutoDiscovery: discoveryOps.checkAndRunAutoDiscovery,
   };
 
   return (

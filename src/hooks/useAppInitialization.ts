@@ -1,14 +1,13 @@
-
-import { useEffect } from 'react';
-import { useLightweightMonitor } from '@/hooks/useLightweightMonitor';
+import { useEffect } from "react";
+import { useLightweightMonitor } from "@/hooks/useLightweightMonitor";
 
 export const useAppInitialization = () => {
-  useLightweightMonitor('App');
+  useLightweightMonitor("App");
 
   useEffect(() => {
     // Simple initialization without complex preloading
-    if (process.env.NODE_ENV === 'development') {
-      console.log('🚀 App initialized with optimized performance');
+    if (process.env.NODE_ENV === "development") {
+      console.log("🚀 App initialized with optimized performance");
     }
   }, []);
 

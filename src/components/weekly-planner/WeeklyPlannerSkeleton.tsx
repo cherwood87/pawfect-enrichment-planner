@@ -1,7 +1,6 @@
-
-import React from 'react';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import React from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 const WeeklyPlannerSkeleton: React.FC = () => {
   return (
@@ -17,10 +16,10 @@ const WeeklyPlannerSkeleton: React.FC = () => {
           <Skeleton className="h-8 w-24" />
           <Skeleton className="h-8 w-24" />
         </div>
-        
+
         {/* Progress skeleton */}
         <Skeleton className="h-4 w-full rounded-xl" />
-        
+
         {/* Weekly grid skeleton */}
         <div className="grid grid-cols-7 gap-2">
           {Array.from({ length: 7 }).map((_, index) => (

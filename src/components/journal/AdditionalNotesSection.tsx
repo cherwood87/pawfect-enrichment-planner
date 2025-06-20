@@ -1,6 +1,5 @@
-
-import React from 'react';
-import { Textarea } from '@/components/ui/textarea';
+import React from "react";
+import { Textarea } from "@/components/ui/textarea";
 
 interface AdditionalNotesSectionProps {
   notes: string;
@@ -9,7 +8,7 @@ interface AdditionalNotesSectionProps {
 
 const AdditionalNotesSection: React.FC<AdditionalNotesSectionProps> = ({
   notes,
-  onNotesChange
+  onNotesChange,
 }) => {
   return (
     <div className="space-y-3">

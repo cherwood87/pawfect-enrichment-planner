@@ -1,28 +1,27 @@
-
-import { useEffect, useRef } from 'react';
-import { loadingDiagnosticService } from '@/services/diagnostics/LoadingDiagnosticService';
+import { useEffect, useRef } from "react";
+import { loadingDiagnosticService } from "@/services/diagnostics/LoadingDiagnosticService";
 
 export const useDiagnosticTracking = (
   componentName: string,
   dependencies: any[] = [],
-  trackRender: boolean = true
+  trackRender: boolean = true,
 ) => {
   const renderStartRef = useRef<number>(0);
-  const stageNameRef = useRef<string>('');
+  const stageNameRef = useRef<string>("");
 
   // Track component loading stage
   useEffect(() => {
     const stageName = `Component: ${componentName}`;
     stageNameRef.current = stageName;
-    
+
     loadingDiagnosticService.startStage(stageName, {
       component: componentName,
-      dependencies: dependencies.length
+      dependencies: dependencies.length,
     });
 
     return () => {
       loadingDiagnosticService.completeStage(stageName, {
-        unmounted: true
+        unmounted: true,
       });
     };
   }, [componentName]);
@@ -46,7 +45,7 @@ export const useDiagnosticTracking = (
     if (stageNameRef.current) {
       loadingDiagnosticService.completeStage(stageNameRef.current, {
         dependenciesLoaded: true,
-        dependencyCount: dependencies.length
+        dependencyCount: dependencies.length,
       });
     }
   }, dependencies);
@@ -57,7 +56,10 @@ export const useDiagnosticTracking = (
   };
 
   const completeCustomStage = (name: string, details?: any) => {
-    loadingDiagnosticService.completeStage(`${componentName}: ${name}`, details);
+    loadingDiagnosticService.completeStage(
+      `${componentName}: ${name}`,
+      details,
+    );
   };
 
   const failCustomStage = (name: string, error: any) => {
@@ -72,7 +74,7 @@ export const useDiagnosticTracking = (
     startCustomStage,
     completeCustomStage,
     failCustomStage,
-    recordMetric
+    recordMetric,
   };
 };
 
@@ -80,25 +82,27 @@ export const useDiagnosticTracking = (
 export const useNetworkDiagnostics = () => {
   const trackRequest = async <T>(
     endpoint: string,
-    requestFn: () => Promise<T>
+    requestFn: () => Promise<T>,
   ): Promise<T> => {
     const startTime = performance.now();
-    
+
     try {
       loadingDiagnosticService.startStage(`Network: ${endpoint}`);
       const result = await requestFn();
       const duration = performance.now() - startTime;
-      
-      loadingDiagnosticService.completeStage(`Network: ${endpoint}`, { duration });
+
+      loadingDiagnosticService.completeStage(`Network: ${endpoint}`, {
+        duration,
+      });
       loadingDiagnosticService.recordNetworkRequest(endpoint, duration, true);
-      
+
       return result;
     } catch (error) {
       const duration = performance.now() - startTime;
-      
+
       loadingDiagnosticService.failStage(`Network: ${endpoint}`, error);
       loadingDiagnosticService.recordNetworkRequest(endpoint, duration, false);
-      
+
       throw error;
     }
   };
@@ -108,18 +112,26 @@ export const useNetworkDiagnostics = () => {
 
 // Hook for bundle loading diagnostics
 export const useBundleDiagnostics = () => {
-  const trackBundleLoad = (componentName: string, importFn: () => Promise<any>) => {
+  const trackBundleLoad = (
+    componentName: string,
+    importFn: () => Promise<any>,
+  ) => {
     const startTime = performance.now();
-    
-    return importFn().then(result => {
-      const loadTime = performance.now() - startTime;
-      loadingDiagnosticService.recordBundleLoad(componentName, loadTime);
-      return result;
-    }).catch(error => {
-      const loadTime = performance.now() - startTime;
-      loadingDiagnosticService.recordBundleLoad(`${componentName} (failed)`, loadTime);
-      throw error;
-    });
+
+    return importFn()
+      .then((result) => {
+        const loadTime = performance.now() - startTime;
+        loadingDiagnosticService.recordBundleLoad(componentName, loadTime);
+        return result;
+      })
+      .catch((error) => {
+        const loadTime = performance.now() - startTime;
+        loadingDiagnosticService.recordBundleLoad(
+          `${componentName} (failed)`,
+          loadTime,
+        );
+        throw error;
+      });
   };
 
   return { trackBundleLoad };

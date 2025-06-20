@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React from "react";
 
 interface ActivityLibraryStatsProps {
   filteredActivitiesCount: number;
@@ -12,12 +11,13 @@ const ActivityLibraryStats: React.FC<ActivityLibraryStatsProps> = ({
   filteredActivitiesCount,
   curatedCount,
   autoApprovedCount,
-  pendingReviewCount
+  pendingReviewCount,
 }) => {
   return (
     <div className="flex items-center justify-between text-sm text-gray-600">
       <span>
-        {filteredActivitiesCount} activit{filteredActivitiesCount === 1 ? 'y' : 'ies'} found
+        {filteredActivitiesCount} activit
+        {filteredActivitiesCount === 1 ? "y" : "ies"} found
       </span>
       <div className="flex items-center space-x-4">
         <span className="flex items-center space-x-1">

@@ -1,14 +1,15 @@
-
-import React, { memo, useMemo } from 'react';
-import { FixedSizeGrid as Grid } from 'react-window';
-import ActivityCard from './ActivityCard';
-import { ActivityLibraryItem } from '@/types/activity';
-import { DiscoveredActivity } from '@/types/discovery';
-import { useBundleAnalytics } from '@/hooks/useBundleAnalytics';
+import React, { memo, useMemo } from "react";
+import { FixedSizeGrid as Grid } from "react-window";
+import ActivityCard from "./ActivityCard";
+import { ActivityLibraryItem } from "@/types/activity";
+import { DiscoveredActivity } from "@/types/discovery";
+import { useBundleAnalytics } from "@/hooks/useBundleAnalytics";
 
 interface ActivityLibraryGridProps {
   activities: (ActivityLibraryItem | DiscoveredActivity)[];
-  onActivitySelect: (activity: ActivityLibraryItem | DiscoveredActivity) => void;
+  onActivitySelect: (
+    activity: ActivityLibraryItem | DiscoveredActivity,
+  ) => void;
 }
 
 // Memoized grid cell component
@@ -18,7 +19,9 @@ const GridCell = memo<{
   style: React.CSSProperties;
   data: {
     activities: (ActivityLibraryItem | DiscoveredActivity)[];
-    onActivitySelect: (activity: ActivityLibraryItem | DiscoveredActivity) => void;
+    onActivitySelect: (
+      activity: ActivityLibraryItem | DiscoveredActivity,
+    ) => void;
     columnsPerRow: number;
   };
 }>(({ columnIndex, rowIndex, style, data }) => {
@@ -40,23 +43,23 @@ const GridCell = memo<{
   );
 });
 
-GridCell.displayName = 'GridCell';
+GridCell.displayName = "GridCell";
 
 const ActivityLibraryGrid: React.FC<ActivityLibraryGridProps> = ({
   activities,
-  onActivitySelect
+  onActivitySelect,
 }) => {
-  const { getMetrics } = useBundleAnalytics('ActivityLibraryGrid');
+  const { getMetrics } = useBundleAnalytics("ActivityLibraryGrid");
 
   // Memoize grid configuration based on screen size
   const gridConfig = useMemo(() => {
     const containerWidth = Math.min(window.innerWidth - 64, 1200); // Max width with padding
     const isMobile = window.innerWidth < 768;
     const isTablet = window.innerWidth < 1024;
-    
+
     let columnsPerRow: number;
     let columnWidth: number;
-    
+
     if (isMobile) {
       columnsPerRow = 1;
       columnWidth = containerWidth;
@@ -69,24 +72,30 @@ const ActivityLibraryGrid: React.FC<ActivityLibraryGridProps> = ({
     }
 
     const rowHeight = isMobile ? 200 : 220;
-    const gridHeight = Math.min(600, Math.ceil(activities.length / columnsPerRow) * rowHeight);
-    
+    const gridHeight = Math.min(
+      600,
+      Math.ceil(activities.length / columnsPerRow) * rowHeight,
+    );
+
     return {
       columnsPerRow,
       columnWidth,
       rowHeight,
       gridHeight,
       gridWidth: containerWidth,
-      rowCount: Math.ceil(activities.length / columnsPerRow)
+      rowCount: Math.ceil(activities.length / columnsPerRow),
     };
   }, [activities.length]);
 
   // Memoize item data to prevent unnecessary re-renders
-  const itemData = useMemo(() => ({
-    activities,
-    onActivitySelect,
-    columnsPerRow: gridConfig.columnsPerRow
-  }), [activities, onActivitySelect, gridConfig.columnsPerRow]);
+  const itemData = useMemo(
+    () => ({
+      activities,
+      onActivitySelect,
+      columnsPerRow: gridConfig.columnsPerRow,
+    }),
+    [activities, onActivitySelect, gridConfig.columnsPerRow],
+  );
 
   // Early return for empty state
   if (!activities || activities.length === 0) {

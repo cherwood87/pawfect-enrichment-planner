@@ -1,7 +1,6 @@
-
-import React, { Component, ComponentType, ErrorInfo, ReactNode } from 'react';
-import { Button } from '@/components/ui/button';
-import { AlertTriangle, RefreshCw } from 'lucide-react';
+import React, { Component, ComponentType, ErrorInfo, ReactNode } from "react";
+import { Button } from "@/components/ui/button";
+import { AlertTriangle, RefreshCw } from "lucide-react";
 
 interface Props {
   children: ReactNode;
@@ -24,19 +23,23 @@ class ProviderErrorBoundary extends Component<Props, State> {
     this.state = {
       hasError: false,
       error: null,
-      isRetrying: false
+      isRetrying: false,
     };
   }
 
   static getDerivedStateFromError(error: Error): Partial<State> {
     return {
       hasError: true,
-      error
+      error,
     };
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error(`${this.props.providerName} Provider Error:`, error, errorInfo);
+    console.error(
+      `${this.props.providerName} Provider Error:`,
+      error,
+      errorInfo,
+    );
   }
 
   componentWillUnmount() {
@@ -47,12 +50,12 @@ class ProviderErrorBoundary extends Component<Props, State> {
 
   private handleRetry = () => {
     this.setState({ isRetrying: true });
-    
+
     this.retryTimeoutId = setTimeout(() => {
       this.setState({
         hasError: false,
         error: null,
-        isRetrying: false
+        isRetrying: false,
       });
     }, 1000);
   };
@@ -87,15 +90,17 @@ class ProviderErrorBoundary extends Component<Props, State> {
                 {this.state.error?.message}
               </p>
               <div className="space-y-3">
-                <Button 
+                <Button
                   onClick={this.handleRetry}
                   className="w-full bg-red-600 hover:bg-red-700 text-white"
                   disabled={this.state.isRetrying}
                 >
-                  <RefreshCw className={`w-4 h-4 mr-2 ${this.state.isRetrying ? 'animate-spin' : ''}`} />
-                  {this.state.isRetrying ? 'Retrying...' : 'Try Again'}
+                  <RefreshCw
+                    className={`w-4 h-4 mr-2 ${this.state.isRetrying ? "animate-spin" : ""}`}
+                  />
+                  {this.state.isRetrying ? "Retrying..." : "Try Again"}
                 </Button>
-                <Button 
+                <Button
                   onClick={this.handleReload}
                   variant="outline"
                   className="w-full"
@@ -121,7 +126,7 @@ class ProviderErrorBoundary extends Component<Props, State> {
                 Some features may be limited
               </p>
             </div>
-            <Button 
+            <Button
               onClick={this.handleRetry}
               size="sm"
               variant="outline"
@@ -139,7 +144,9 @@ class ProviderErrorBoundary extends Component<Props, State> {
         <div className="flex items-center justify-center p-4">
           <div className="text-center space-y-2">
             <div className="animate-spin rounded-full h-6 w-6 border-2 border-blue-200 border-t-blue-500 mx-auto"></div>
-            <p className="text-sm text-gray-600">Reconnecting {this.props.providerName}...</p>
+            <p className="text-sm text-gray-600">
+              Reconnecting {this.props.providerName}...
+            </p>
           </div>
         </div>
       );

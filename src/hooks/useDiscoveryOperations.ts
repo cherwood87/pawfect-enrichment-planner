@@ -1,36 +1,40 @@
-
-import { useState } from 'react';
-import { DiscoveredActivity, ContentDiscoveryConfig } from '@/types/discovery';
-import { ActivityLibraryItem } from '@/types/activity';
-import { Dog } from '@/types/dog';
-import { DiscoveryDomainService } from '@/services/domain/DiscoveryDomainService';
+import { useState } from "react";
+import { DiscoveredActivity, ContentDiscoveryConfig } from "@/types/discovery";
+import { ActivityLibraryItem } from "@/types/activity";
+import { Dog } from "@/types/dog";
+import { DiscoveryDomainService } from "@/services/domain/DiscoveryDomainService";
 
 export const useDiscoveryOperations = (
   discoveredActivities: DiscoveredActivity[],
   setDiscoveredActivities: (activities: DiscoveredActivity[]) => void,
   discoveryConfig: ContentDiscoveryConfig,
   setDiscoveryConfig: (config: ContentDiscoveryConfig) => void,
-  currentDog: Dog | null
+  currentDog: Dog | null,
 ) => {
   const [isDiscovering, setIsDiscovering] = useState(false);
 
-  const getCombinedActivityLibrary = (): (ActivityLibraryItem | DiscoveredActivity)[] => {
-    return DiscoveryDomainService.getCombinedActivityLibrary(discoveredActivities);
+  const getCombinedActivityLibrary = (): (
+    | ActivityLibraryItem
+    | DiscoveredActivity
+  )[] => {
+    return DiscoveryDomainService.getCombinedActivityLibrary(
+      discoveredActivities,
+    );
   };
 
   const discoverNewActivities = async (): Promise<void> => {
     if (!currentDog || isDiscovering) {
-      console.log('Discovery skipped: no dog or already discovering');
+      console.log("Discovery skipped: no dog or already discovering");
       return;
     }
 
     setIsDiscovering(true);
-    
+
     try {
       const newActivities = await DiscoveryDomainService.discoverNewActivities(
         discoveredActivities,
         discoveryConfig,
-        currentDog
+        currentDog,
       );
 
       if (newActivities.length > 0) {
@@ -39,14 +43,16 @@ export const useDiscoveryOperations = (
 
         const updatedConfig = {
           ...discoveryConfig,
-          lastDiscoveryRun: new Date().toISOString()
+          lastDiscoveryRun: new Date().toISOString(),
         };
         setDiscoveryConfig(updatedConfig);
 
-        console.log(`All ${newActivities.length} activities automatically added to library`);
+        console.log(
+          `All ${newActivities.length} activities automatically added to library`,
+        );
       }
     } catch (error) {
-      console.error('Discovery failed:', error);
+      console.error("Discovery failed:", error);
     } finally {
       setIsDiscovering(false);
     }
@@ -54,61 +60,66 @@ export const useDiscoveryOperations = (
 
   const checkAndRunAutoDiscovery = async () => {
     if (!currentDog || isDiscovering) {
-      console.log('Auto-discovery skipped: no current dog or already discovering');
+      console.log(
+        "Auto-discovery skipped: no current dog or already discovering",
+      );
       return;
     }
 
-    const shouldRun = DiscoveryDomainService.shouldRunAutoDiscovery(discoveryConfig);
+    const shouldRun =
+      DiscoveryDomainService.shouldRunAutoDiscovery(discoveryConfig);
     if (shouldRun) {
-      console.log('Running automatic weekly discovery...');
+      console.log("Running automatic weekly discovery...");
       await discoverNewActivities();
     } else {
-      console.log('Auto-discovery not needed at this time');
+      console.log("Auto-discovery not needed at this time");
     }
   };
 
   const approveDiscoveredActivity = async (activityId: string) => {
     if (!currentDog) return;
-    
+
     try {
       const updated = await DiscoveryDomainService.approveDiscoveredActivity(
-        activityId, 
-        discoveredActivities, 
-        currentDog.id
+        activityId,
+        discoveredActivities,
+        currentDog.id,
       );
       setDiscoveredActivities(updated);
     } catch (error) {
-      console.error('Failed to approve activity:', error);
+      console.error("Failed to approve activity:", error);
     }
   };
 
   const rejectDiscoveredActivity = async (activityId: string) => {
     if (!currentDog) return;
-    
+
     try {
       const updated = await DiscoveryDomainService.rejectDiscoveredActivity(
-        activityId, 
-        discoveredActivities, 
-        currentDog.id
+        activityId,
+        discoveredActivities,
+        currentDog.id,
       );
       setDiscoveredActivities(updated);
     } catch (error) {
-      console.error('Failed to reject activity:', error);
+      console.error("Failed to reject activity:", error);
     }
   };
 
-  const updateDiscoveryConfig = async (config: Partial<ContentDiscoveryConfig>) => {
+  const updateDiscoveryConfig = async (
+    config: Partial<ContentDiscoveryConfig>,
+  ) => {
     if (!currentDog) return;
-    
+
     try {
       const updated = await DiscoveryDomainService.updateDiscoveryConfig(
         currentDog.id,
         discoveryConfig,
-        config
+        config,
       );
       setDiscoveryConfig(updated);
     } catch (error) {
-      console.error('Failed to update discovery config:', error);
+      console.error("Failed to update discovery config:", error);
     }
   };
 
@@ -119,6 +130,6 @@ export const useDiscoveryOperations = (
     approveDiscoveredActivity,
     rejectDiscoveredActivity,
     updateDiscoveryConfig,
-    checkAndRunAutoDiscovery
+    checkAndRunAutoDiscovery,
   };
 };

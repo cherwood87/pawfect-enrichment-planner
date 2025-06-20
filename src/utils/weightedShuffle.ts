@@ -1,6 +1,5 @@
-
-import { ActivityLibraryItem } from '@/types/activity';
-import { DiscoveredActivity } from '@/types/discovery';
+import { ActivityLibraryItem } from "@/types/activity";
+import { DiscoveredActivity } from "@/types/discovery";
 
 interface WeightedActivity {
   activity: ActivityLibraryItem | DiscoveredActivity;
@@ -15,14 +14,16 @@ export interface ShuffleWeights {
 }
 
 const DEFAULT_WEIGHTS: ShuffleWeights = {
-  discoveredActivity: 3.0,  // 3x more likely to appear
-  libraryActivity: 1.0,     // Base weight
-  qualityBonus: 2.0,        // Bonus multiplier for high-quality activities
-  recentDiscoveryBonus: 1.5 // Bonus for recently discovered activities
+  discoveredActivity: 3.0, // 3x more likely to appear
+  libraryActivity: 1.0, // Base weight
+  qualityBonus: 2.0, // Bonus multiplier for high-quality activities
+  recentDiscoveryBonus: 1.5, // Bonus for recently discovered activities
 };
 
-const isDiscoveredActivity = (activity: ActivityLibraryItem | DiscoveredActivity): activity is DiscoveredActivity => {
-  return 'source' in activity && activity.source === 'discovered';
+const isDiscoveredActivity = (
+  activity: ActivityLibraryItem | DiscoveredActivity,
+): activity is DiscoveredActivity => {
+  return "source" in activity && activity.source === "discovered";
 };
 
 const isRecentlyDiscovered = (activity: DiscoveredActivity): boolean => {
@@ -35,7 +36,7 @@ const isRecentlyDiscovered = (activity: DiscoveredActivity): boolean => {
 
 const calculateActivityWeight = (
   activity: ActivityLibraryItem | DiscoveredActivity,
-  weights: ShuffleWeights = DEFAULT_WEIGHTS
+  weights: ShuffleWeights = DEFAULT_WEIGHTS,
 ): number => {
   let weight = weights.libraryActivity; // Base weight
 
@@ -62,30 +63,38 @@ const calculateActivityWeight = (
   return weight;
 };
 
-export const weightedShuffle = <T extends ActivityLibraryItem | DiscoveredActivity>(
+export const weightedShuffle = <
+  T extends ActivityLibraryItem | DiscoveredActivity,
+>(
   activities: T[],
-  customWeights?: Partial<ShuffleWeights>
+  customWeights?: Partial<ShuffleWeights>,
 ): T[] => {
   if (activities.length === 0) return [];
-  
+
   const weights = { ...DEFAULT_WEIGHTS, ...customWeights };
-  
+
   // Calculate weights for all activities
-  const weightedActivities: WeightedActivity[] = activities.map(activity => ({
+  const weightedActivities: WeightedActivity[] = activities.map((activity) => ({
     activity,
-    weight: calculateActivityWeight(activity, weights)
+    weight: calculateActivityWeight(activity, weights),
   }));
 
   // Create cumulative weight array for efficient selection
-  const totalWeight = weightedActivities.reduce((sum, item) => sum + item.weight, 0);
-  
+  const totalWeight = weightedActivities.reduce(
+    (sum, item) => sum + item.weight,
+    0,
+  );
+
   const shuffled: T[] = [];
   const remaining = [...weightedActivities];
 
   while (remaining.length > 0) {
-    const currentTotalWeight = remaining.reduce((sum, item) => sum + item.weight, 0);
+    const currentTotalWeight = remaining.reduce(
+      (sum, item) => sum + item.weight,
+      0,
+    );
     let random = Math.random() * currentTotalWeight;
-    
+
     let selectedIndex = 0;
     for (let i = 0; i < remaining.length; i++) {
       random -= remaining[i].weight;
@@ -94,7 +103,7 @@ export const weightedShuffle = <T extends ActivityLibraryItem | DiscoveredActivi
         break;
       }
     }
-    
+
     shuffled.push(remaining[selectedIndex].activity as T);
     remaining.splice(selectedIndex, 1);
   }
@@ -103,37 +112,39 @@ export const weightedShuffle = <T extends ActivityLibraryItem | DiscoveredActivi
 };
 
 // Utility function for getting top weighted activities without full shuffle
-export const getTopWeightedActivities = <T extends ActivityLibraryItem | DiscoveredActivity>(
+export const getTopWeightedActivities = <
+  T extends ActivityLibraryItem | DiscoveredActivity,
+>(
   activities: T[],
   count: number,
-  customWeights?: Partial<ShuffleWeights>
+  customWeights?: Partial<ShuffleWeights>,
 ): T[] => {
   if (activities.length === 0) return [];
-  
+
   const weights = { ...DEFAULT_WEIGHTS, ...customWeights };
-  
+
   const weightedActivities = activities
-    .map(activity => ({
+    .map((activity) => ({
       activity,
-      weight: calculateActivityWeight(activity, weights)
+      weight: calculateActivityWeight(activity, weights),
     }))
     .sort((a, b) => b.weight - a.weight)
     .slice(0, count);
-    
-  return weightedActivities.map(item => item.activity as T);
+
+  return weightedActivities.map((item) => item.activity as T);
 };
 
 // Debug function to see activity weights
 export const debugActivityWeights = (
   activities: (ActivityLibraryItem | DiscoveredActivity)[],
-  customWeights?: Partial<ShuffleWeights>
+  customWeights?: Partial<ShuffleWeights>,
 ): Array<{ title: string; weight: number; type: string; quality?: number }> => {
   const weights = { ...DEFAULT_WEIGHTS, ...customWeights };
-  
-  return activities.map(activity => ({
+
+  return activities.map((activity) => ({
     title: activity.title,
     weight: calculateActivityWeight(activity, weights),
-    type: isDiscoveredActivity(activity) ? 'discovered' : 'library',
-    quality: isDiscoveredActivity(activity) ? activity.qualityScore : undefined
+    type: isDiscoveredActivity(activity) ? "discovered" : "library",
+    quality: isDiscoveredActivity(activity) ? activity.qualityScore : undefined,
   }));
 };

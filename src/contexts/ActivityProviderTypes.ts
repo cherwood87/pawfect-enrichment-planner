@@ -1,6 +1,5 @@
-
-import { ScheduledActivity, UserActivity } from '@/types/activity';
-import { DiscoveredActivity, ContentDiscoveryConfig } from '@/types/discovery';
+import { ScheduledActivity, UserActivity } from "@/types/activity";
+import { DiscoveredActivity, ContentDiscoveryConfig } from "@/types/discovery";
 
 export interface ActivityProviderState {
   scheduledActivities: ScheduledActivity[];
@@ -10,8 +9,14 @@ export interface ActivityProviderState {
 }
 
 export interface ActivityProviderActions {
-  setScheduledActivities: (activities: ScheduledActivity[] | ((prev: ScheduledActivity[]) => ScheduledActivity[])) => void;
-  setUserActivities: (activities: UserActivity[] | ((prev: UserActivity[]) => UserActivity[])) => void;
+  setScheduledActivities: (
+    activities:
+      | ScheduledActivity[]
+      | ((prev: ScheduledActivity[]) => ScheduledActivity[]),
+  ) => void;
+  setUserActivities: (
+    activities: UserActivity[] | ((prev: UserActivity[]) => UserActivity[]),
+  ) => void;
   setDiscoveredActivities: (activities: DiscoveredActivity[]) => void;
   setDiscoveryConfig: (config: ContentDiscoveryConfig) => void;
 }

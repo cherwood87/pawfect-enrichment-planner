@@ -1,12 +1,11 @@
-
-import React, { useState, useCallback, useMemo } from 'react';
-import { QuizResults } from '@/types/quiz';
-import { useDog } from '@/contexts/DogContext';
-import { useNavigate } from 'react-router-dom';
-import DogAvatarBlock from './DogAvatarBlock';
-import QuizAndGoalsCard from './profile/QuizAndGoalsCard';
-import DogProfileDialogs from './profile/DogProfileDialogs';
-import { Dog } from '@/types/dog';
+import React, { useState, useCallback, useMemo } from "react";
+import { QuizResults } from "@/types/quiz";
+import { useDog } from "@/contexts/DogContext";
+import { useNavigate } from "react-router-dom";
+import DogAvatarBlock from "./DogAvatarBlock";
+import QuizAndGoalsCard from "./profile/QuizAndGoalsCard";
+import DogProfileDialogs from "./profile/DogProfileDialogs";
+import { Dog } from "@/types/dog";
 
 interface DogProfileProps {
   onEditDogOpen: (dog: Dog) => void;
@@ -19,16 +18,19 @@ const DogProfileOptimized: React.FC<DogProfileProps> = ({ onEditDogOpen }) => {
   const [showResults, setShowResults] = useState(false);
 
   // Memoize callbacks to prevent unnecessary re-renders
-  const handleQuizComplete = useCallback((results: QuizResults) => {
-    if (currentDog) {
-      updateDog({
-        ...currentDog,
-        quizResults: results
-      });
-    }
-    setShowQuiz(false);
-    setShowResults(true);
-  }, [currentDog, updateDog]);
+  const handleQuizComplete = useCallback(
+    (results: QuizResults) => {
+      if (currentDog) {
+        updateDog({
+          ...currentDog,
+          quizResults: results,
+        });
+      }
+      setShowQuiz(false);
+      setShowResults(true);
+    },
+    [currentDog, updateDog],
+  );
 
   const handleRetakeQuiz = useCallback(() => {
     setShowResults(false);
@@ -46,7 +48,7 @@ const DogProfileOptimized: React.FC<DogProfileProps> = ({ onEditDogOpen }) => {
   }, [currentDog, onEditDogOpen]);
 
   const handleAddActivities = useCallback(() => {
-    navigate('/activity-library');
+    navigate("/activity-library");
   }, [navigate]);
 
   const handleViewResults = useCallback(() => {
@@ -58,25 +60,28 @@ const DogProfileOptimized: React.FC<DogProfileProps> = ({ onEditDogOpen }) => {
   }, []);
 
   // Memoize dialog props to prevent unnecessary re-renders
-  const dialogProps = useMemo(() => ({
-    showQuiz,
-    showResults,
-    currentDog,
-    onQuizComplete: handleQuizComplete,
-    onRetakeQuiz: handleRetakeQuiz,
-    onCloseQuiz: handleCloseQuiz,
-    onCloseResults: handleCloseResults,
-    setShowQuiz,
-    setShowResults
-  }), [
-    showQuiz,
-    showResults,
-    currentDog,
-    handleQuizComplete,
-    handleRetakeQuiz,
-    handleCloseQuiz,
-    handleCloseResults
-  ]);
+  const dialogProps = useMemo(
+    () => ({
+      showQuiz,
+      showResults,
+      currentDog,
+      onQuizComplete: handleQuizComplete,
+      onRetakeQuiz: handleRetakeQuiz,
+      onCloseQuiz: handleCloseQuiz,
+      onCloseResults: handleCloseResults,
+      setShowQuiz,
+      setShowResults,
+    }),
+    [
+      showQuiz,
+      showResults,
+      currentDog,
+      handleQuizComplete,
+      handleRetakeQuiz,
+      handleCloseQuiz,
+      handleCloseResults,
+    ],
+  );
 
   // Early return if no dog
   if (!currentDog) {
@@ -86,10 +91,7 @@ const DogProfileOptimized: React.FC<DogProfileProps> = ({ onEditDogOpen }) => {
   return (
     <>
       {/* Enhanced Dog Avatar Block */}
-      <DogAvatarBlock 
-        dog={currentDog}
-        onEditClick={handleEditClick}
-      />
+      <DogAvatarBlock dog={currentDog} onEditClick={handleEditClick} />
 
       {/* Quiz and Goals Section */}
       <QuizAndGoalsCard

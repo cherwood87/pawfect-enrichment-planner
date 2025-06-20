@@ -1,8 +1,7 @@
-
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Plus, Calendar } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { Plus, Calendar } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const SimpleEmptyState = () => {
   const navigate = useNavigate();
@@ -18,8 +17,8 @@ const SimpleEmptyState = () => {
       <p className="text-gray-500 mb-4 text-sm">
         Add some enrichment activities to get started!
       </p>
-      <Button 
-        onClick={() => navigate('/activity-library')} 
+      <Button
+        onClick={() => navigate("/activity-library")}
         size="sm"
         className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
       >

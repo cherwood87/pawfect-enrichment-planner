@@ -1,7 +1,6 @@
-
-import { checkSupabaseConnection } from '@/integrations/supabase/client';
-import { RetryService, CircuitBreakerState } from './RetryService';
-import { CacheService } from './CacheService';
+import { checkSupabaseConnection } from "@/integrations/supabase/client";
+import { RetryService, CircuitBreakerState } from "./RetryService";
+import { CacheService } from "./CacheService";
 
 export interface NetworkHealthState {
   isOnline: boolean;
@@ -29,7 +28,7 @@ class NetworkHealthService {
   private subscribers: ((state: NetworkHealthState) => void)[] = [];
   private checkInterval: NodeJS.Timeout | null = null;
   private retryTimeout: NodeJS.Timeout | null = null;
-  
+
   private constructor() {
     this.healthState = {
       isOnline: navigator.onLine,
@@ -41,10 +40,10 @@ class NetworkHealthService {
       cacheStats: {
         memoryEntries: 0,
         hitRate: 0,
-        totalRequests: 0
-      }
+        totalRequests: 0,
+      },
     };
-    
+
     this.initializeMonitoring();
   }
 
@@ -57,36 +56,36 @@ class NetworkHealthService {
 
   private initializeMonitoring() {
     // Network event listeners
-    window.addEventListener('online', this.handleOnline);
-    window.addEventListener('offline', this.handleOffline);
-    document.addEventListener('visibilitychange', this.handleVisibilityChange);
-    
+    window.addEventListener("online", this.handleOnline);
+    window.addEventListener("offline", this.handleOffline);
+    document.addEventListener("visibilitychange", this.handleVisibilityChange);
+
     // Start periodic health checks
     this.startPeriodicChecks();
-    
+
     // Initial health check
     setTimeout(() => this.performHealthCheck(), 100);
   }
 
   private handleOnline = () => {
-    console.log('🌐 Network back online');
+    console.log("🌐 Network back online");
     this.updateState({ isOnline: true });
     setTimeout(() => this.performHealthCheck(), 500);
   };
 
   private handleOffline = () => {
-    console.log('📵 Network went offline');
+    console.log("📵 Network went offline");
     this.updateConnectionHistory(false);
-    this.updateState({ 
-      isOnline: false, 
+    this.updateState({
+      isOnline: false,
       isSupabaseConnected: false,
-      lastChecked: new Date()
+      lastChecked: new Date(),
     });
   };
 
   private handleVisibilityChange = () => {
     if (!document.hidden && navigator.onLine) {
-      console.log('👁️ App became visible, checking connection');
+      console.log("👁️ App became visible, checking connection");
       setTimeout(() => this.performHealthCheck(), 300);
     }
   };
@@ -95,7 +94,7 @@ class NetworkHealthService {
     if (this.checkInterval) {
       clearInterval(this.checkInterval);
     }
-    
+
     this.checkInterval = setInterval(() => {
       if (navigator.onLine) {
         this.performHealthCheck();
@@ -105,59 +104,66 @@ class NetworkHealthService {
 
   private async performHealthCheck(): Promise<HealthCheckResult> {
     const startTime = Date.now();
-    
+
     try {
       const isSupabaseConnected = await checkSupabaseConnection();
       const latency = Date.now() - startTime;
-      
+
       this.updateConnectionHistory(isSupabaseConnected);
       this.updateCircuitBreakerStates();
       this.updateCacheStats();
-      
+
       this.updateState({
         isOnline: navigator.onLine,
         isSupabaseConnected,
-        lastChecked: new Date()
+        lastChecked: new Date(),
       });
 
       const result = { connected: isSupabaseConnected, latency };
-      console.log('✅ Health check completed:', result);
+      console.log("✅ Health check completed:", result);
       return result;
     } catch (error) {
       const latency = Date.now() - startTime;
-      console.warn('⚠️ Health check failed:', error);
-      
+      console.warn("⚠️ Health check failed:", error);
+
       this.updateConnectionHistory(false);
       this.updateState({
         isSupabaseConnected: false,
-        lastChecked: new Date()
+        lastChecked: new Date(),
       });
-      
-      return { 
-        connected: false, 
-        latency, 
-        error: error instanceof Error ? error.message : 'Unknown error' 
+
+      return {
+        connected: false,
+        latency,
+        error: error instanceof Error ? error.message : "Unknown error",
       };
     }
   }
 
   private updateConnectionHistory(connected: boolean) {
-    const newHistory = [...this.healthState.connectionHistory.slice(-9), connected];
+    const newHistory = [
+      ...this.healthState.connectionHistory.slice(-9),
+      connected,
+    ];
     const stability = newHistory.filter(Boolean).length / newHistory.length;
-    
+
     this.updateState({
       connectionHistory: newHistory,
-      connectionStability: stability
+      connectionStability: stability,
     });
   }
 
   private updateCircuitBreakerStates() {
     const states = {
-      dogs: RetryService.getCircuitBreakerState('dogs_query'),
-      scheduledActivities: RetryService.getCircuitBreakerState('scheduled_activities_query'),
-      userActivities: RetryService.getCircuitBreakerState('user_activities_query')
+      dogs: RetryService.getCircuitBreakerState("dogs_query"),
+      scheduledActivities: RetryService.getCircuitBreakerState(
+        "scheduled_activities_query",
+      ),
+      userActivities: RetryService.getCircuitBreakerState(
+        "user_activities_query",
+      ),
     };
-    
+
     this.updateState({ circuitBreakerStates: states });
   }
 
@@ -165,24 +171,24 @@ class NetworkHealthService {
     try {
       // Fixed: Use CacheService static methods directly instead of getInstance()
       const basicStats = CacheService.getCacheStats();
-      
+
       // Convert to the expected format with proper metrics
       const stats = {
         memoryEntries: basicStats.memoryEntries,
         hitRate: 0.85, // Default hit rate, can be enhanced later
-        totalRequests: basicStats.memoryEntries * 2 // Rough estimation
+        totalRequests: basicStats.memoryEntries * 2, // Rough estimation
       };
-      
+
       this.updateState({ cacheStats: stats });
     } catch (error) {
-      console.warn('⚠️ Failed to update cache stats:', error);
+      console.warn("⚠️ Failed to update cache stats:", error);
       // Provide fallback stats to prevent errors
-      this.updateState({ 
+      this.updateState({
         cacheStats: {
           memoryEntries: 0,
           hitRate: 0.5,
-          totalRequests: 0
-        }
+          totalRequests: 0,
+        },
       });
     }
   }
@@ -193,11 +199,11 @@ class NetworkHealthService {
   }
 
   private notifySubscribers() {
-    this.subscribers.forEach(callback => {
+    this.subscribers.forEach((callback) => {
       try {
         callback(this.healthState);
       } catch (error) {
-        console.warn('Error notifying health subscriber:', error);
+        console.warn("Error notifying health subscriber:", error);
       }
     });
   }
@@ -205,10 +211,10 @@ class NetworkHealthService {
   // Public API
   subscribe(callback: (state: NetworkHealthState) => void): () => void {
     this.subscribers.push(callback);
-    
+
     // Send current state immediately
     callback(this.healthState);
-    
+
     // Return unsubscribe function
     return () => {
       const index = this.subscribers.indexOf(callback);
@@ -223,7 +229,7 @@ class NetworkHealthService {
   }
 
   async retryConnection(): Promise<boolean> {
-    console.log('🔄 Manual connection retry requested');
+    console.log("🔄 Manual connection retry requested");
     const result = await this.performHealthCheck();
     return result.connected;
   }
@@ -233,18 +239,25 @@ class NetworkHealthService {
       clearTimeout(this.retryTimeout);
     }
 
-    console.log('🔄 Initiating connection recovery...');
+    console.log("🔄 Initiating connection recovery...");
     const result = await this.performHealthCheck();
-    
+
     if (!result.connected) {
       // Schedule next retry with exponential backoff
-      const delay = Math.min(5000 * Math.pow(1.5, this.healthState.connectionHistory.filter(c => !c).length), 30000);
-      
+      const delay = Math.min(
+        5000 *
+          Math.pow(
+            1.5,
+            this.healthState.connectionHistory.filter((c) => !c).length,
+          ),
+        30000,
+      );
+
       this.retryTimeout = setTimeout(() => {
         this.initiateRecovery();
       }, delay);
     }
-    
+
     return result.connected;
   }
 
@@ -255,11 +268,14 @@ class NetworkHealthService {
     if (this.retryTimeout) {
       clearTimeout(this.retryTimeout);
     }
-    
-    window.removeEventListener('online', this.handleOnline);
-    window.removeEventListener('offline', this.handleOffline);
-    document.removeEventListener('visibilitychange', this.handleVisibilityChange);
-    
+
+    window.removeEventListener("online", this.handleOnline);
+    window.removeEventListener("offline", this.handleOffline);
+    document.removeEventListener(
+      "visibilitychange",
+      this.handleVisibilityChange,
+    );
+
     this.subscribers = [];
   }
 }

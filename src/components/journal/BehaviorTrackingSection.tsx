@@ -1,6 +1,5 @@
-
-import React from 'react';
-import { COMMON_BEHAVIORS } from '@/constants/journalConstants';
+import React from "react";
+import { COMMON_BEHAVIORS } from "@/constants/journalConstants";
 
 interface BehaviorTrackingSectionProps {
   selectedBehaviors: string[];
@@ -9,7 +8,7 @@ interface BehaviorTrackingSectionProps {
 
 const BehaviorTrackingSection: React.FC<BehaviorTrackingSectionProps> = ({
   selectedBehaviors,
-  onBehaviorToggle
+  onBehaviorToggle,
 }) => {
   return (
     <div className="space-y-3">
@@ -22,9 +21,9 @@ const BehaviorTrackingSection: React.FC<BehaviorTrackingSectionProps> = ({
               key={behavior}
               onClick={() => onBehaviorToggle(behavior)}
               className={`px-3 py-1 rounded-full text-xs border transition-all ${
-                isSelected 
-                  ? 'bg-green-100 border-green-300 text-green-700' 
-                  : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+                isSelected
+                  ? "bg-green-100 border-green-300 text-green-700"
+                  : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
               }`}
             >
               {behavior}

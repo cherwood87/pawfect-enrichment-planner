@@ -1,24 +1,33 @@
+import React, { createContext, useContext } from "react";
+import { ActivityContextType } from "@/types/activityContext";
+import {
+  ActivityStateProvider,
+  useActivityState,
+} from "./ActivityStateContext";
+import {
+  ActivityOperationsProvider,
+  useActivityOperations,
+} from "./ActivityOperationsContext";
+import { SyncProvider, useSync } from "./SyncContext";
+import { DiscoveryProvider, useDiscovery } from "./DiscoveryContext";
 
-import React, { createContext, useContext } from 'react';
-import { ActivityContextType } from '@/types/activityContext';
-import { ActivityStateProvider, useActivityState } from './ActivityStateContext';
-import { ActivityOperationsProvider, useActivityOperations } from './ActivityOperationsContext';
-import { SyncProvider, useSync } from './SyncContext';
-import { DiscoveryProvider, useDiscovery } from './DiscoveryContext';
-
-const ActivityContext = createContext<ActivityContextType | undefined>(undefined);
+const ActivityContext = createContext<ActivityContextType | undefined>(
+  undefined,
+);
 
 // Backward compatible hook that combines all contexts
 export const useActivity = () => {
   const context = useContext(ActivityContext);
   if (!context) {
-    throw new Error('useActivity must be used within an ActivityProvider');
+    throw new Error("useActivity must be used within an ActivityProvider");
   }
   return context;
 };
 
 // Internal component that combines all context values
-const ActivityContextAggregator: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const ActivityContextAggregator: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const stateContext = useActivityState();
   const operationsContext = useActivityOperations();
   const syncContext = useSync();
@@ -31,7 +40,7 @@ const ActivityContextAggregator: React.FC<{ children: React.ReactNode }> = ({ ch
     userActivities: stateContext.userActivities,
     discoveredActivities: stateContext.discoveredActivities,
     discoveryConfig: stateContext.discoveryConfig,
-    
+
     // Operations
     addScheduledActivity: operationsContext.addScheduledActivity,
     toggleActivityCompletion: operationsContext.toggleActivityCompletion,
@@ -43,7 +52,7 @@ const ActivityContextAggregator: React.FC<{ children: React.ReactNode }> = ({ ch
     getWeeklyProgress: operationsContext.getWeeklyProgress,
     getPillarBalance: operationsContext.getPillarBalance,
     getDailyGoals: operationsContext.getDailyGoals,
-    
+
     // Discovery
     isDiscovering: discoveryContext.isDiscovering,
     getCombinedActivityLibrary: discoveryContext.getCombinedActivityLibrary,
@@ -52,11 +61,11 @@ const ActivityContextAggregator: React.FC<{ children: React.ReactNode }> = ({ ch
     rejectDiscoveredActivity: discoveryContext.rejectDiscoveredActivity,
     updateDiscoveryConfig: discoveryContext.updateDiscoveryConfig,
     checkAndRunAutoDiscovery: discoveryContext.checkAndRunAutoDiscovery,
-    
+
     // Sync
     isSyncing: syncContext.isSyncing,
     lastSyncTime: syncContext.lastSyncTime,
-    syncToSupabase: syncContext.syncToSupabase
+    syncToSupabase: syncContext.syncToSupabase,
   };
 
   return (
@@ -67,15 +76,15 @@ const ActivityContextAggregator: React.FC<{ children: React.ReactNode }> = ({ ch
 };
 
 // Main provider that composes all sub-providers
-export const ActivityProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const ActivityProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   return (
     <ActivityStateProvider>
       <ActivityOperationsProvider>
         <SyncProvider>
           <DiscoveryProvider>
-            <ActivityContextAggregator>
-              {children}
-            </ActivityContextAggregator>
+            <ActivityContextAggregator>{children}</ActivityContextAggregator>
           </DiscoveryProvider>
         </SyncProvider>
       </ActivityOperationsProvider>

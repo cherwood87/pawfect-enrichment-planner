@@ -1,40 +1,24 @@
-import React, { useState } from 'react';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger
-} from '@/components/ui/tabs';
-import {
-  Calendar,
-  Save,
-  History,
-  Loader2,
-  Plus
-} from 'lucide-react';
-import { useDog } from '@/contexts/DogContext';
-import { format } from 'date-fns';
-import { useJournalEntry } from '@/hooks/useJournalEntry';
-import { useToast } from '@/hooks/use-toast';
+import React, { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Calendar, Save, History, Loader2, Plus } from "lucide-react";
+import { useDog } from "@/contexts/DogContext";
+import { format } from "date-fns";
+import { useJournalEntry } from "@/hooks/useJournalEntry";
+import { useToast } from "@/hooks/use-toast";
 
-import DailyPromptSection from './journal/DailyPromptSection';
-import MoodTrackingSection from './journal/MoodTrackingSection';
-import BehaviorTrackingSection from './journal/BehaviorTrackingSection';
-import AdditionalNotesSection from './journal/AdditionalNotesSection';
-import TodaysEntriesSection from './journal/TodaysEntriesSection';
-import JournalHistory from './journal/JournalHistory';
+import DailyPromptSection from "./journal/DailyPromptSection";
+import MoodTrackingSection from "./journal/MoodTrackingSection";
+import BehaviorTrackingSection from "./journal/BehaviorTrackingSection";
+import AdditionalNotesSection from "./journal/AdditionalNotesSection";
+import TodaysEntriesSection from "./journal/TodaysEntriesSection";
+import JournalHistory from "./journal/JournalHistory";
 
 const ReflectionJournal: React.FC = () => {
   const { currentDog } = useDog();
-  const [activeTab, setActiveTab] = useState('today');
+  const [activeTab, setActiveTab] = useState("today");
   const { toast } = useToast();
 
   const {
@@ -49,26 +33,26 @@ const ReflectionJournal: React.FC = () => {
     loadEntry,
     deleteEntry,
     isLoading,
-    isSaving
+    isSaving,
   } = useJournalEntry(currentDog);
 
   const handleSave = async () => {
     if (!currentDog) return;
     const success = await saveEntry();
     toast({
-      title: success ? 'Journal Entry Saved' : 'Save Failed',
+      title: success ? "Journal Entry Saved" : "Save Failed",
       description: success
-        ? 'Your daily reflection has been saved successfully.'
-        : 'There was an error saving your journal entry. Please try again.',
-      variant: success ? undefined : 'destructive'
+        ? "Your daily reflection has been saved successfully."
+        : "There was an error saving your journal entry. Please try again.",
+      variant: success ? undefined : "destructive",
     });
   };
 
   const handleCreateNew = () => {
     createNewEntry();
     toast({
-      title: 'New Entry Created',
-      description: 'You can now write another journal entry for today.'
+      title: "New Entry Created",
+      description: "You can now write another journal entry for today.",
     });
   };
 
@@ -76,11 +60,11 @@ const ReflectionJournal: React.FC = () => {
     if (!entryId) return;
     const success = await deleteEntry(entryId);
     toast({
-      title: success ? 'Entry Deleted' : 'Delete Failed',
+      title: success ? "Entry Deleted" : "Delete Failed",
       description: success
-        ? 'Your journal entry has been deleted.'
-        : 'There was an error deleting your journal entry.',
-      variant: success ? undefined : 'destructive'
+        ? "Your journal entry has been deleted."
+        : "There was an error deleting your journal entry.",
+      variant: success ? undefined : "destructive",
     });
   };
 
@@ -99,12 +83,12 @@ const ReflectionJournal: React.FC = () => {
           <div className="flex items-center gap-2">
             {todaysEntries.length > 0 && (
               <Badge className="bg-white text-purple-700 text-xs rounded-full px-3 py-1 shadow">
-                {todaysEntries.length}{' '}
-                {todaysEntries.length === 1 ? 'entry' : 'entries'} today
+                {todaysEntries.length}{" "}
+                {todaysEntries.length === 1 ? "entry" : "entries"} today
               </Badge>
             )}
             <Badge className="bg-white text-purple-700 text-xs rounded-full px-3 py-1 shadow">
-              {format(new Date(), 'MMM d')}
+              {format(new Date(), "MMM d")}
             </Badge>
           </div>
         </div>
@@ -149,7 +133,7 @@ const ReflectionJournal: React.FC = () => {
                 <div className="bg-white rounded-2xl p-6 shadow border border-purple-100">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-bold text-purple-900">
-                      {currentEntry.id ? 'Edit Entry' : 'New Entry'}
+                      {currentEntry.id ? "Edit Entry" : "New Entry"}
                     </h3>
                     {todaysEntries.length > 0 && !currentEntry.id && (
                       <Button
@@ -196,7 +180,7 @@ const ReflectionJournal: React.FC = () => {
                       ) : (
                         <>
                           <Save className="w-4 h-4 mr-2" />
-                          {currentEntry.id ? 'Update Entry' : 'Save Entry'}
+                          {currentEntry.id ? "Update Entry" : "Save Entry"}
                         </>
                       )}
                     </Button>
@@ -207,10 +191,7 @@ const ReflectionJournal: React.FC = () => {
           </TabsContent>
 
           <TabsContent value="history" className="mt-6">
-            <JournalHistory
-              dogId={currentDog.id}
-              dogName={currentDog.name}
-            />
+            <JournalHistory dogId={currentDog.id} dogName={currentDog.name} />
           </TabsContent>
         </Tabs>
       </CardContent>

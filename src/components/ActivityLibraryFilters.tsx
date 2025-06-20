@@ -1,8 +1,13 @@
-
-import React from 'react';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Brain, Zap, Users, TreePine, Target, Search } from 'lucide-react';
+import React from "react";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Brain, Zap, Users, TreePine, Target, Search } from "lucide-react";
 
 interface ActivityLibraryFiltersProps {
   searchQuery: string;
@@ -19,22 +24,27 @@ const ActivityLibraryFilters: React.FC<ActivityLibraryFiltersProps> = ({
   selectedPillar,
   setSelectedPillar,
   selectedDifficulty,
-  setSelectedDifficulty
+  setSelectedDifficulty,
 }) => {
   const pillars = [
-    { id: 'all', name: 'All Pillars', icon: Search, color: 'gray' },
-    { id: 'mental', name: 'Mental', icon: Brain, color: 'purple' },
-    { id: 'physical', name: 'Physical', icon: Zap, color: 'green' },
-    { id: 'social', name: 'Social', icon: Users, color: 'blue' },
-    { id: 'environmental', name: 'Environmental', icon: TreePine, color: 'teal' },
-    { id: 'instinctual', name: 'Instinctual', icon: Target, color: 'orange' }
+    { id: "all", name: "All Pillars", icon: Search, color: "gray" },
+    { id: "mental", name: "Mental", icon: Brain, color: "purple" },
+    { id: "physical", name: "Physical", icon: Zap, color: "green" },
+    { id: "social", name: "Social", icon: Users, color: "blue" },
+    {
+      id: "environmental",
+      name: "Environmental",
+      icon: TreePine,
+      color: "teal",
+    },
+    { id: "instinctual", name: "Instinctual", icon: Target, color: "orange" },
   ];
 
   const difficulties = [
-    { value: 'all', label: 'All Difficulties' },
-    { value: 'Easy', label: 'Easy' },
-    { value: 'Medium', label: 'Medium' },
-    { value: 'Hard', label: 'Hard' }
+    { value: "all", label: "All Difficulties" },
+    { value: "Easy", label: "Easy" },
+    { value: "Medium", label: "Medium" },
+    { value: "Hard", label: "Hard" },
   ];
 
   return (

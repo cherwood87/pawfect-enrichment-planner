@@ -1,11 +1,10 @@
-
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Calendar, Trophy, Target } from 'lucide-react';
-import { CircularProgress } from '@/components/ui/circular-progress';
-import { useActivity } from '@/contexts/ActivityContext';
-import { useDog } from '@/contexts/DogContext';
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Calendar, Trophy, Target } from "lucide-react";
+import { CircularProgress } from "@/components/ui/circular-progress";
+import { useActivity } from "@/contexts/ActivityContext";
+import { useDog } from "@/contexts/DogContext";
 
 const WeeklyProgressCard: React.FC = () => {
   const { scheduledActivities, getPillarBalance } = useActivity();
@@ -21,33 +20,34 @@ const WeeklyProgressCard: React.FC = () => {
     const firstThursday = target.valueOf();
     target.setMonth(0, 1);
     if (target.getDay() !== 4) {
-      target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
+      target.setMonth(0, 1 + ((4 - target.getDay() + 7) % 7));
     }
     return 1 + Math.ceil((firstThursday - target.valueOf()) / 604800000);
   };
 
   const currentWeek = getISOWeek(new Date());
-  const weekActivities = scheduledActivities.filter(activity => 
-    activity.weekNumber === currentWeek && 
-    activity.dogId === currentDog.id
+  const weekActivities = scheduledActivities.filter(
+    (activity) =>
+      activity.weekNumber === currentWeek && activity.dogId === currentDog.id,
   );
 
   const totalActivities = weekActivities.length;
-  const completedActivities = weekActivities.filter(a => a.completed).length;
-  const progressPercentage = totalActivities > 0 ? (completedActivities / totalActivities) * 100 : 0;
+  const completedActivities = weekActivities.filter((a) => a.completed).length;
+  const progressPercentage =
+    totalActivities > 0 ? (completedActivities / totalActivities) * 100 : 0;
 
   // Get pillar breakdown
   const pillarBalance = getPillarBalance();
   const topPillars = Object.entries(pillarBalance)
-    .sort(([,a], [,b]) => b - a)
+    .sort(([, a], [, b]) => b - a)
     .slice(0, 2);
 
   const pillarColors = {
-    mental: 'bg-purple-100 text-purple-700',
-    physical: 'bg-green-100 text-green-700',
-    social: 'bg-blue-100 text-blue-700',
-    environmental: 'bg-teal-100 text-teal-700',
-    instinctual: 'bg-orange-100 text-orange-700'
+    mental: "bg-purple-100 text-purple-700",
+    physical: "bg-green-100 text-green-700",
+    social: "bg-blue-100 text-blue-700",
+    environmental: "bg-teal-100 text-teal-700",
+    instinctual: "bg-orange-100 text-orange-700",
   };
 
   return (
@@ -78,7 +78,7 @@ const WeeklyProgressCard: React.FC = () => {
                 <div className="text-xs text-gray-500">Complete</div>
               </div>
             </CircularProgress>
-            
+
             <div className="text-center">
               <div className="text-sm font-medium text-gray-700">
                 {completedActivities} of {totalActivities} activities
@@ -95,12 +95,16 @@ const WeeklyProgressCard: React.FC = () => {
             <div className="grid grid-cols-2 gap-4">
               <div className="text-center p-3 bg-green-50 rounded-lg">
                 <Trophy className="w-5 h-5 text-green-500 mx-auto mb-1" />
-                <div className="text-lg font-bold text-green-700">{completedActivities}</div>
+                <div className="text-lg font-bold text-green-700">
+                  {completedActivities}
+                </div>
                 <div className="text-xs text-green-600">Completed</div>
               </div>
               <div className="text-center p-3 bg-blue-50 rounded-lg">
                 <Target className="w-5 h-5 text-blue-500 mx-auto mb-1" />
-                <div className="text-lg font-bold text-blue-700">{totalActivities - completedActivities}</div>
+                <div className="text-lg font-bold text-blue-700">
+                  {totalActivities - completedActivities}
+                </div>
                 <div className="text-xs text-blue-600">Remaining</div>
               </div>
             </div>
@@ -108,15 +112,18 @@ const WeeklyProgressCard: React.FC = () => {
             {/* Top Pillars */}
             {topPillars.length > 0 && (
               <div>
-                <h4 className="text-sm font-medium text-gray-700 mb-2">Top Focus Areas</h4>
+                <h4 className="text-sm font-medium text-gray-700 mb-2">
+                  Top Focus Areas
+                </h4>
                 <div className="flex flex-wrap gap-2">
                   {topPillars.map(([pillar, count]) => (
-                    <Badge 
-                      key={pillar} 
-                      variant="secondary" 
-                      className={`text-xs ${pillarColors[pillar as keyof typeof pillarColors] || 'bg-gray-100 text-gray-700'}`}
+                    <Badge
+                      key={pillar}
+                      variant="secondary"
+                      className={`text-xs ${pillarColors[pillar as keyof typeof pillarColors] || "bg-gray-100 text-gray-700"}`}
                     >
-                      {pillar.charAt(0).toUpperCase() + pillar.slice(1)} ({count})
+                      {pillar.charAt(0).toUpperCase() + pillar.slice(1)} (
+                      {count})
                     </Badge>
                   ))}
                 </div>
@@ -126,14 +133,13 @@ const WeeklyProgressCard: React.FC = () => {
             {/* Motivational Message */}
             <div className="p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-100">
               <div className="text-sm font-medium text-blue-800">
-                {progressPercentage === 100 ? 
-                  "🎉 Amazing work! You've completed all activities this week!" :
-                  progressPercentage >= 70 ?
-                  "🌟 Great progress! You're almost there!" :
-                  progressPercentage >= 30 ?
-                  "💪 Keep going! You're making good progress!" :
-                  "🚀 Let's get started on some enrichment activities!"
-                }
+                {progressPercentage === 100
+                  ? "🎉 Amazing work! You've completed all activities this week!"
+                  : progressPercentage >= 70
+                    ? "🌟 Great progress! You're almost there!"
+                    : progressPercentage >= 30
+                      ? "💪 Keep going! You're making good progress!"
+                      : "🚀 Let's get started on some enrichment activities!"}
               </div>
             </div>
           </div>

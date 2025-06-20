@@ -1,11 +1,10 @@
-
-import React from 'react';
-import { ScheduledActivity } from '@/types/activity';
-import WeeklyPlannerHeader from './WeeklyPlannerHeader';
-import VerticalDayCard from './VerticalDayCard';
-import WeeklySummary from './WeeklySummary';
-import SimpleEmptyState from './SimpleEmptyState';
-import ConsolidatedActivityModal from '@/components/modals/ConsolidatedActivityModal';
+import React from "react";
+import { ScheduledActivity } from "@/types/activity";
+import WeeklyPlannerHeader from "./WeeklyPlannerHeader";
+import VerticalDayCard from "./VerticalDayCard";
+import WeeklySummary from "./WeeklySummary";
+import SimpleEmptyState from "./SimpleEmptyState";
+import ConsolidatedActivityModal from "@/components/modals/ConsolidatedActivityModal";
 
 interface WeeklyPlannerViewProps {
   completedActivities: number;
@@ -13,7 +12,7 @@ interface WeeklyPlannerViewProps {
   currentWeek: number;
   currentYear: number;
   currentDate: Date;
-  viewMode: 'week' | 'day';
+  viewMode: "week" | "day";
   weekDays: Array<{
     label: string;
     date: Date;
@@ -23,9 +22,9 @@ interface WeeklyPlannerViewProps {
   isModalOpen: boolean;
   loadingStates: Record<string, boolean>;
   isRetrying: boolean;
-  onNavigateWeek: (direction: 'prev' | 'next') => void;
-  onNavigateDay: (direction: 'prev' | 'next') => void;
-  onViewModeChange: (mode: 'week' | 'day') => void;
+  onNavigateWeek: (direction: "prev" | "next") => void;
+  onNavigateDay: (direction: "prev" | "next") => void;
+  onViewModeChange: (mode: "week" | "day") => void;
   onActivityClick: (activity: ScheduledActivity) => void;
   onToggleCompletion: (activityId: string, completionNotes?: string) => void;
   onModalClose: () => void;
@@ -50,7 +49,7 @@ const WeeklyPlannerView: React.FC<WeeklyPlannerViewProps> = ({
   onActivityClick,
   onToggleCompletion,
   onModalClose,
-  getActivityDetails
+  getActivityDetails,
 }) => {
   return (
     <div className="bg-white/80 rounded-3xl shadow-lg border border-purple-100 max-w-4xl mx-auto my-8 overflow-hidden">
@@ -71,7 +70,7 @@ const WeeklyPlannerView: React.FC<WeeklyPlannerViewProps> = ({
       ) : (
         <>
           <div className="flex flex-col gap-6 p-4 md:p-8 bg-gradient-to-br from-purple-50/40 to-cyan-50/40">
-            {weekDays.map(day => (
+            {weekDays.map((day) => (
               <VerticalDayCard
                 key={day.date.toISOString()}
                 label={day.label}
@@ -96,7 +95,11 @@ const WeeklyPlannerView: React.FC<WeeklyPlannerViewProps> = ({
       <ConsolidatedActivityModal
         isOpen={isModalOpen}
         onClose={onModalClose}
-        activityDetails={selectedActivity ? getActivityDetails(selectedActivity.activityId) : null}
+        activityDetails={
+          selectedActivity
+            ? getActivityDetails(selectedActivity.activityId)
+            : null
+        }
         scheduledActivity={selectedActivity}
         onToggleCompletion={onToggleCompletion}
         mode="scheduled"

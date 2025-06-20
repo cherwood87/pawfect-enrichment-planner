@@ -1,7 +1,6 @@
-
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Calendar, Heart, MessageCircle } from 'lucide-react';
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { Calendar, Heart, MessageCircle } from "lucide-react";
 
 interface ActivityCardActionsProps {
   onClose: () => void;
@@ -16,13 +15,13 @@ const ActivityCardActions: React.FC<ActivityCardActionsProps> = ({
   onScheduleActivity,
   onAddToFavourites,
   disabled,
-  onNeedHelp
+  onNeedHelp,
 }) => {
   const handleScheduleClick = async () => {
     try {
       await onScheduleActivity();
     } catch (error) {
-      console.error('Error scheduling activity:', error);
+      console.error("Error scheduling activity:", error);
     }
   };
 
@@ -30,15 +29,15 @@ const ActivityCardActions: React.FC<ActivityCardActionsProps> = ({
     try {
       await onAddToFavourites();
     } catch (error) {
-      console.error('Error adding to favourites:', error);
+      console.error("Error adding to favourites:", error);
     }
   };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 pt-4 border-t border-purple-200/50">
-      <Button 
-        variant="outline" 
-        onClick={onClose} 
+      <Button
+        variant="outline"
+        onClick={onClose}
         className="rounded-2xl border-purple-300 hover:bg-purple-50"
       >
         Close

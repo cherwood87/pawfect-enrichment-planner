@@ -1,14 +1,15 @@
-
-import React, { memo, useMemo, Suspense, lazy } from 'react';
-import { Tabs, TabsContent } from '@/components/ui/tabs';
-import TabManager from './activity-modal/TabManager';
-import LoadingSpinner from '@/components/ui/loading-spinner';
-import { DiscoveredActivity } from '@/types/discovery';
+import React, { memo, useMemo, Suspense, lazy } from "react";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import TabManager from "./activity-modal/TabManager";
+import LoadingSpinner from "@/components/ui/loading-spinner";
+import { DiscoveredActivity } from "@/types/discovery";
 
 // Lazy load tab content components
-const BrowseLibraryTab = lazy(() => import('./BrowseLibraryTab'));
-const CreateCustomTabOptimized = lazy(() => import('./CreateCustomTabOptimized'));
-const DiscoveryReview = lazy(() => import('./DiscoveryReview'));
+const BrowseLibraryTab = lazy(() => import("./BrowseLibraryTab"));
+const CreateCustomTabOptimized = lazy(
+  () => import("./CreateCustomTabOptimized"),
+);
+const DiscoveryReview = lazy(() => import("./DiscoveryReview"));
 
 interface ActivityModalTabsProps {
   activeTab: string;
@@ -43,91 +44,104 @@ const TabLoader = () => (
   </div>
 );
 
-const ActivityModalTabsOptimized = memo<ActivityModalTabsProps>(({
-  activeTab,
-  onTabChange,
-  selectedPillar,
-  filteredLibraryActivities,
-  onActivitySelect,
-  pendingActivities,
-  discoveredActivities,
-  customTabProps
-}) => {
-  // Memoize tab props to prevent unnecessary re-renders
-  const browseTabProps = useMemo(() => ({
+const ActivityModalTabsOptimized = memo<ActivityModalTabsProps>(
+  ({
+    activeTab,
+    onTabChange,
     selectedPillar,
     filteredLibraryActivities,
-    onActivitySelect
-  }), [selectedPillar, filteredLibraryActivities, onActivitySelect]);
+    onActivitySelect,
+    pendingActivities,
+    discoveredActivities,
+    customTabProps,
+  }) => {
+    // Memoize tab props to prevent unnecessary re-renders
+    const browseTabProps = useMemo(
+      () => ({
+        selectedPillar,
+        filteredLibraryActivities,
+        onActivitySelect,
+      }),
+      [selectedPillar, filteredLibraryActivities, onActivitySelect],
+    );
 
-  const pendingActivitiesCount = useMemo(() => 
-    pendingActivities.length, 
-    [pendingActivities.length]
-  );
+    const pendingActivitiesCount = useMemo(
+      () => pendingActivities.length,
+      [pendingActivities.length],
+    );
 
-  // Map customTabProps to match CreateCustomTabOptimized interface
-  const createCustomTabProps = useMemo(() => ({
-    activityName: customTabProps.activityName,
-    setActivityName: customTabProps.setActivityName,
-    pillar: customTabProps.pillar,
-    setPillar: customTabProps.setPillar,
-    duration: customTabProps.duration,
-    setDuration: customTabProps.setDuration,
-    materials: customTabProps.materials,
-    setMaterials: customTabProps.setMaterials,
-    instructions: customTabProps.instructions,
-    setInstructions: customTabProps.setInstructions,
-    description: customTabProps.description,
-    setDescription: customTabProps.setDescription,
-    onSubmit: customTabProps.onCreateCustomActivity,
-    onCancel: customTabProps.onCancelCustomActivity
-  }), [customTabProps]);
+    // Map customTabProps to match CreateCustomTabOptimized interface
+    const createCustomTabProps = useMemo(
+      () => ({
+        activityName: customTabProps.activityName,
+        setActivityName: customTabProps.setActivityName,
+        pillar: customTabProps.pillar,
+        setPillar: customTabProps.setPillar,
+        duration: customTabProps.duration,
+        setDuration: customTabProps.setDuration,
+        materials: customTabProps.materials,
+        setMaterials: customTabProps.setMaterials,
+        instructions: customTabProps.instructions,
+        setInstructions: customTabProps.setInstructions,
+        description: customTabProps.description,
+        setDescription: customTabProps.setDescription,
+        onSubmit: customTabProps.onCreateCustomActivity,
+        onCancel: customTabProps.onCancelCustomActivity,
+      }),
+      [customTabProps],
+    );
 
-  return (
-    <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
-      <TabManager 
-        activeTab={activeTab}
-        onTabChange={onTabChange}
-        pendingActivitiesCount={pendingActivitiesCount}
-      />
-      
-      <TabsContent value="browse">
-        {activeTab === "browse" && (
-          <Suspense fallback={<TabLoader />}>
-            <BrowseLibraryTab {...browseTabProps} />
-          </Suspense>
-        )}
-      </TabsContent>
-      
-      <TabsContent value="create">
-        {activeTab === "create" && (
-          <Suspense fallback={<TabLoader />}>
-            <CreateCustomTabOptimized {...createCustomTabProps} />
-          </Suspense>
-        )}
-      </TabsContent>
-      
-      <TabsContent value="review">
-        {activeTab === "review" && (
-          <Suspense fallback={<TabLoader />}>
-            <DiscoveryReview activities={discoveredActivities} />
-          </Suspense>
-        )}
-      </TabsContent>
-    </Tabs>
-  );
-}, (prevProps, nextProps) => {
-  // Custom comparison for memo optimization
-  return (
-    prevProps.activeTab === nextProps.activeTab &&
-    prevProps.selectedPillar === nextProps.selectedPillar &&
-    prevProps.filteredLibraryActivities.length === nextProps.filteredLibraryActivities.length &&
-    prevProps.pendingActivities.length === nextProps.pendingActivities.length &&
-    prevProps.discoveredActivities.length === nextProps.discoveredActivities.length &&
-    JSON.stringify(prevProps.customTabProps) === JSON.stringify(nextProps.customTabProps)
-  );
-});
+    return (
+      <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
+        <TabManager
+          activeTab={activeTab}
+          onTabChange={onTabChange}
+          pendingActivitiesCount={pendingActivitiesCount}
+        />
 
-ActivityModalTabsOptimized.displayName = 'ActivityModalTabsOptimized';
+        <TabsContent value="browse">
+          {activeTab === "browse" && (
+            <Suspense fallback={<TabLoader />}>
+              <BrowseLibraryTab {...browseTabProps} />
+            </Suspense>
+          )}
+        </TabsContent>
+
+        <TabsContent value="create">
+          {activeTab === "create" && (
+            <Suspense fallback={<TabLoader />}>
+              <CreateCustomTabOptimized {...createCustomTabProps} />
+            </Suspense>
+          )}
+        </TabsContent>
+
+        <TabsContent value="review">
+          {activeTab === "review" && (
+            <Suspense fallback={<TabLoader />}>
+              <DiscoveryReview activities={discoveredActivities} />
+            </Suspense>
+          )}
+        </TabsContent>
+      </Tabs>
+    );
+  },
+  (prevProps, nextProps) => {
+    // Custom comparison for memo optimization
+    return (
+      prevProps.activeTab === nextProps.activeTab &&
+      prevProps.selectedPillar === nextProps.selectedPillar &&
+      prevProps.filteredLibraryActivities.length ===
+        nextProps.filteredLibraryActivities.length &&
+      prevProps.pendingActivities.length ===
+        nextProps.pendingActivities.length &&
+      prevProps.discoveredActivities.length ===
+        nextProps.discoveredActivities.length &&
+      JSON.stringify(prevProps.customTabProps) ===
+        JSON.stringify(nextProps.customTabProps)
+    );
+  },
+);
+
+ActivityModalTabsOptimized.displayName = "ActivityModalTabsOptimized";
 
 export default ActivityModalTabsOptimized;

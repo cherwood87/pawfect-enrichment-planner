@@ -1,5 +1,4 @@
-
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useMemo, useRef } from "react";
 
 interface CacheEntry<T> {
   value: T;
@@ -10,15 +9,18 @@ interface CacheEntry<T> {
 export const useProviderOptimization = <T>(
   computeValue: () => T,
   dependencies: any[],
-  cacheTime: number = 5000 // 5 seconds default cache
+  cacheTime: number = 5000, // 5 seconds default cache
 ) => {
   const cacheRef = useRef<CacheEntry<T> | null>(null);
 
   // Check if dependencies have changed
-  const dependenciesChanged = useCallback((oldDeps: any[], newDeps: any[]): boolean => {
-    if (oldDeps.length !== newDeps.length) return true;
-    return oldDeps.some((dep, index) => dep !== newDeps[index]);
-  }, []);
+  const dependenciesChanged = useCallback(
+    (oldDeps: any[], newDeps: any[]): boolean => {
+      if (oldDeps.length !== newDeps.length) return true;
+      return oldDeps.some((dep, index) => dep !== newDeps[index]);
+    },
+    [],
+  );
 
   // Memoized value computation with caching
   const cachedValue = useMemo(() => {
@@ -39,7 +41,7 @@ export const useProviderOptimization = <T>(
     cacheRef.current = {
       value: newValue,
       timestamp: now,
-      dependencies: [...dependencies]
+      dependencies: [...dependencies],
     };
 
     return newValue;
@@ -56,16 +58,13 @@ export const useProviderOptimization = <T>(
 // Hook for optimizing context re-renders
 export const useContextOptimization = <T extends Record<string, any>>(
   contextValue: T,
-  dependencies: any[]
+  dependencies: any[],
 ): T => {
   return useMemo(() => contextValue, dependencies);
 };
 
 // Hook for debouncing provider updates
-export const useProviderDebounce = <T>(
-  value: T,
-  delay: number = 100
-): T => {
+export const useProviderDebounce = <T>(value: T, delay: number = 100): T => {
   const timeoutRef = useRef<NodeJS.Timeout>();
   const valueRef = useRef(value);
 

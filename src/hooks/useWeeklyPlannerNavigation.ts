@@ -1,6 +1,5 @@
-
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export const useWeeklyPlannerNavigation = () => {
   const navigate = useNavigate();
@@ -23,7 +22,7 @@ export const useWeeklyPlannerNavigation = () => {
   };
 
   const navigateToActivityLibrary = (pillar: string) => {
-    navigate('/activity-library');
+    navigate("/activity-library");
   };
 
   return {
@@ -32,6 +31,6 @@ export const useWeeklyPlannerNavigation = () => {
     goToNextWeek,
     goToPreviousWeek,
     goToTodayWeek,
-    navigateToActivityLibrary
+    navigateToActivityLibrary,
   };
 };

@@ -1,19 +1,24 @@
-
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Plus, Edit, Trash2, Dog, Star, Brain, Target } from 'lucide-react';
-import { useDog } from '@/contexts/DogContext';
-import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
-import { Dog as DogType } from '@/types/dog';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
-import AddDogForm from '@/components/AddDogForm';
-import EditDogForm from '@/components/EditDogForm';
-import DeleteConfirmation from '@/components/DeleteConfirmation';
-import DogProfileDialogs from '@/components/profile/DogProfileDialogs';
+import React, { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Plus, Edit, Trash2, Dog, Star, Brain, Target } from "lucide-react";
+import { useDog } from "@/contexts/DogContext";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
+import { Dog as DogType } from "@/types/dog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import AddDogForm from "@/components/AddDogForm";
+import EditDogForm from "@/components/EditDogForm";
+import DeleteConfirmation from "@/components/DeleteConfirmation";
+import DogProfileDialogs from "@/components/profile/DogProfileDialogs";
 
 const DogsTab = () => {
   const { state, currentDog, setCurrentDog, deleteDog } = useDog();
@@ -46,18 +51,18 @@ const DogsTab = () => {
 
   const confirmDelete = async () => {
     if (!selectedDog) return;
-    
+
     try {
       await deleteDog(selectedDog.id);
       setIsDeleteModalOpen(false);
       setSelectedDog(null);
-      
+
       toast({
         title: "Dog profile deleted",
         description: `${selectedDog.name}'s profile has been successfully removed.`,
       });
     } catch (error) {
-      console.error('Error deleting dog:', error);
+      console.error("Error deleting dog:", error);
       toast({
         title: "Error",
         description: "Failed to delete dog profile. Please try again.",
@@ -73,7 +78,7 @@ const DogsTab = () => {
 
   const handleTakeQuiz = (dog: DogType) => {
     setCurrentDog(dog.id);
-    navigate('/dog-profile-quiz');
+    navigate("/dog-profile-quiz");
   };
 
   const handleViewResults = (dog: DogType) => {
@@ -91,7 +96,7 @@ const DogsTab = () => {
       setShowRetakeConfirmation(false);
       setShowQuizResults(false);
       setSelectedDog(null);
-      navigate('/dog-profile-quiz');
+      navigate("/dog-profile-quiz");
     }
   };
 
@@ -106,31 +111,37 @@ const DogsTab = () => {
 
   const getActivityLevelColor = (level: string) => {
     switch (level) {
-      case 'low': return 'bg-blue-100 text-blue-700';
-      case 'moderate': return 'bg-cyan-100 text-cyan-700';
-      case 'high': return 'bg-purple-100 text-purple-700';
-      default: return 'bg-gray-100 text-gray-700';
+      case "low":
+        return "bg-blue-100 text-blue-700";
+      case "moderate":
+        return "bg-cyan-100 text-cyan-700";
+      case "high":
+        return "bg-purple-100 text-purple-700";
+      default:
+        return "bg-gray-100 text-gray-700";
     }
   };
 
   const getPillarName = (pillar: string) => {
     const names = {
-      mental: 'Mental',
-      physical: 'Physical', 
-      social: 'Social',
-      environmental: 'Environmental',
-      instinctual: 'Instinctual'
+      mental: "Mental",
+      physical: "Physical",
+      social: "Social",
+      environmental: "Environmental",
+      instinctual: "Instinctual",
     };
     return names[pillar as keyof typeof names] || pillar;
   };
 
   const renderQuizSummary = (dog: DogType) => {
     if (!dog.quizResults?.ranking) return null;
-    
+
     const topTwoPillars = dog.quizResults.ranking.slice(0, 2);
     return (
       <div className="mt-2 text-xs text-gray-500 italic">
-        Top Pillars: {topTwoPillars.map(p => getPillarName(p.pillar)).join(' and ')} Enrichment
+        Top Pillars:{" "}
+        {topTwoPillars.map((p) => getPillarName(p.pillar)).join(" and ")}{" "}
+        Enrichment
       </div>
     );
   };
@@ -141,7 +152,9 @@ const DogsTab = () => {
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold text-purple-800">Your Dogs</h3>
-          <p className="text-sm text-gray-600">Manage your dog profiles and settings</p>
+          <p className="text-sm text-gray-600">
+            Manage your dog profiles and settings
+          </p>
         </div>
         <Button
           onClick={() => setIsAddModalOpen(true)}
@@ -157,7 +170,9 @@ const DogsTab = () => {
         <Card className="border border-purple-200 rounded-2xl bg-white/60 backdrop-blur-sm">
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Dog className="w-12 h-12 text-purple-300 mb-4" />
-            <h3 className="text-lg font-semibold text-purple-800 mb-2">No dogs added yet</h3>
+            <h3 className="text-lg font-semibold text-purple-800 mb-2">
+              No dogs added yet
+            </h3>
             <p className="text-gray-600 text-center mb-4">
               Add your first dog to start using the enrichment planner
             </p>
@@ -173,12 +188,12 @@ const DogsTab = () => {
       ) : (
         <div className="grid gap-4">
           {state.dogs.map((dog) => (
-            <Card 
-              key={dog.id} 
+            <Card
+              key={dog.id}
               className={`border-2 rounded-2xl bg-white/60 backdrop-blur-sm transition-all ${
-                currentDog?.id === dog.id 
-                  ? 'border-purple-300 bg-purple-50/80' 
-                  : 'border-purple-200 hover:border-purple-300'
+                currentDog?.id === dog.id
+                  ? "border-purple-300 bg-purple-50/80"
+                  : "border-purple-200 hover:border-purple-300"
               }`}
             >
               <CardContent className="p-6">
@@ -186,8 +201,8 @@ const DogsTab = () => {
                   {/* Avatar */}
                   <div className="relative">
                     <Avatar className="w-16 h-16 border-2 border-white shadow-lg">
-                      <AvatarImage 
-                        src={dog.photo || dog.image} 
+                      <AvatarImage
+                        src={dog.photo || dog.image}
                         alt={`${dog.name}'s photo`}
                         className="object-cover"
                       />
@@ -211,11 +226,13 @@ const DogsTab = () => {
                         </h4>
                         <p className="text-sm text-gray-600">{dog.breed}</p>
                         <div className="flex items-center space-x-2 mt-2">
-                          <Badge className={`${getActivityLevelColor(dog.activityLevel)} rounded-xl text-xs`}>
+                          <Badge
+                            className={`${getActivityLevelColor(dog.activityLevel)} rounded-xl text-xs`}
+                          >
                             {dog.activityLevel} activity
                           </Badge>
                           <span className="text-sm text-gray-500">
-                            {dog.age} {dog.age === 1 ? 'year' : 'years'} old
+                            {dog.age} {dog.age === 1 ? "year" : "years"} old
                           </span>
                         </div>
                         {renderQuizSummary(dog)}
@@ -233,7 +250,7 @@ const DogsTab = () => {
                             Make Primary
                           </Button>
                         )}
-                        
+
                         {/* Quiz Button */}
                         {dog.quizResults ? (
                           <Button
@@ -256,7 +273,7 @@ const DogsTab = () => {
                             <span>Take Personality Quiz</span>
                           </Button>
                         )}
-                        
+
                         <Button
                           variant="ghost"
                           size="sm"
@@ -298,9 +315,9 @@ const DogsTab = () => {
         <DialogContent className="max-w-2xl">
           <div className="overflow-y-auto max-h-[80vh] p-4">
             {selectedDog && (
-              <EditDogForm 
-                dog={selectedDog} 
-                onClose={() => setIsEditModalOpen(false)} 
+              <EditDogForm
+                dog={selectedDog}
+                onClose={() => setIsEditModalOpen(false)}
               />
             )}
           </div>
@@ -328,7 +345,11 @@ const DogsTab = () => {
         onClose={closeRetakeConfirmation}
         onConfirm={confirmRetakeQuiz}
         title="Retake Personality Quiz"
-        message={selectedDog ? `Are you sure you want to retake the personality quiz for ${selectedDog.name}? This will overwrite the existing results.` : ''}
+        message={
+          selectedDog
+            ? `Are you sure you want to retake the personality quiz for ${selectedDog.name}? This will overwrite the existing results.`
+            : ""
+        }
       />
 
       {/* Delete Confirmation */}
@@ -337,7 +358,11 @@ const DogsTab = () => {
         onClose={closeDeleteModal}
         onConfirm={confirmDelete}
         title="Delete Dog Profile"
-        message={selectedDog ? `Are you sure you want to delete ${selectedDog.name}'s profile? This action cannot be undone and will remove all associated data.` : ''}
+        message={
+          selectedDog
+            ? `Are you sure you want to delete ${selectedDog.name}'s profile? This action cannot be undone and will remove all associated data.`
+            : ""
+        }
       />
     </div>
   );

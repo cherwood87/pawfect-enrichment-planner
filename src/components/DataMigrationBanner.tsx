@@ -1,20 +1,19 @@
-
-import React, { useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Cloud, Database, Loader2, X } from 'lucide-react';
-import { useDog } from '@/contexts/DogContext';
+import React, { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Cloud, Database, Loader2, X } from "lucide-react";
+import { useDog } from "@/contexts/DogContext";
 
 const DataMigrationBanner: React.FC = () => {
   const { state, migrateFromLocalStorage } = useDog();
   const [dismissed, setDismissed] = useState(() => {
-    return localStorage.getItem('migrationBannerDismissed') === 'true';
+    return localStorage.getItem("migrationBannerDismissed") === "true";
   });
 
   // Check if there's local data that might need migration
   const hasLocalData = () => {
-    const localDogs = localStorage.getItem('dogs');
+    const localDogs = localStorage.getItem("dogs");
     return localDogs && JSON.parse(localDogs).length > 0;
   };
 
@@ -25,13 +24,13 @@ const DataMigrationBanner: React.FC = () => {
 
   const handleDismiss = () => {
     setDismissed(true);
-    localStorage.setItem('migrationBannerDismissed', 'true');
+    localStorage.setItem("migrationBannerDismissed", "true");
   };
 
   const handleMigrate = async () => {
     await migrateFromLocalStorage();
     setDismissed(true);
-    localStorage.setItem('migrationBannerDismissed', 'true');
+    localStorage.setItem("migrationBannerDismissed", "true");
   };
 
   return (
@@ -47,20 +46,27 @@ const DataMigrationBanner: React.FC = () => {
                 <h3 className="text-lg font-semibold text-gray-900">
                   Sync Your Data to the Cloud
                 </h3>
-                <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                <Badge
+                  variant="secondary"
+                  className="bg-blue-100 text-blue-800"
+                >
                   New Feature
                 </Badge>
               </div>
               <p className="text-gray-700 mb-3">
-                We've detected that you have dog profiles and activities stored locally. 
-                Sync them to the cloud to access your data across all your devices!
+                We've detected that you have dog profiles and activities stored
+                locally. Sync them to the cloud to access your data across all
+                your devices!
               </p>
               <div className="flex items-center space-x-2 text-sm text-gray-600 mb-4">
                 <Database className="w-4 h-4" />
-                <span>Your data will be safely stored and synchronized across devices</span>
+                <span>
+                  Your data will be safely stored and synchronized across
+                  devices
+                </span>
               </div>
               <div className="flex space-x-3">
-                <Button 
+                <Button
                   onClick={handleMigrate}
                   disabled={state.isSyncing}
                   className="bg-blue-600 hover:bg-blue-700"
@@ -77,8 +83,8 @@ const DataMigrationBanner: React.FC = () => {
                     </>
                   )}
                 </Button>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={handleDismiss}
                   disabled={state.isSyncing}
                 >

@@ -1,6 +1,6 @@
-import React, { Component, ComponentType, ErrorInfo, ReactNode } from 'react';
-import { Button } from '@/components/ui/button';
-import { AlertTriangle, RefreshCw } from 'lucide-react';
+import React, { Component, ComponentType, ErrorInfo, ReactNode } from "react";
+import { Button } from "@/components/ui/button";
+import { AlertTriangle, RefreshCw } from "lucide-react";
 
 interface Props {
   children: ReactNode;
@@ -22,30 +22,31 @@ class LazyLoadErrorBoundary extends Component<Props, State> {
     this.state = {
       hasError: false,
       error: null,
-      isRetrying: false
+      isRetrying: false,
     };
   }
 
   static getDerivedStateFromError(error: Error): Partial<State> {
     // Check if this is a lazy loading timeout error
-    const isLazyLoadError = error.message.includes('Component load timeout') ||
-                           error.message.includes('Loading chunk') ||
-                           error.message.includes('Failed to fetch');
-    
+    const isLazyLoadError =
+      error.message.includes("Component load timeout") ||
+      error.message.includes("Loading chunk") ||
+      error.message.includes("Failed to fetch");
+
     if (isLazyLoadError) {
-      console.error('Lazy loading error detected:', error.message);
+      console.error("Lazy loading error detected:", error.message);
       return {
         hasError: true,
-        error
+        error,
       };
     }
-    
+
     // Let other error boundaries handle non-lazy loading errors
     throw error;
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('LazyLoadErrorBoundary caught error:', error, errorInfo);
+    console.error("LazyLoadErrorBoundary caught error:", error, errorInfo);
   }
 
   componentWillUnmount() {
@@ -56,13 +57,13 @@ class LazyLoadErrorBoundary extends Component<Props, State> {
 
   private handleRetry = () => {
     this.setState({ isRetrying: true });
-    
+
     // Give a brief delay before retrying to allow network recovery
     this.retryTimeoutId = setTimeout(() => {
       this.setState({
         hasError: false,
         error: null,
-        isRetrying: false
+        isRetrying: false,
       });
     }, 1000);
   };
@@ -90,21 +91,25 @@ class LazyLoadErrorBoundary extends Component<Props, State> {
               Loading Failed
             </h2>
             <p className="text-gray-600 mb-1">
-              {this.props.componentName ? `Unable to load ${this.props.componentName}` : 'Unable to load this page'}
+              {this.props.componentName
+                ? `Unable to load ${this.props.componentName}`
+                : "Unable to load this page"}
             </p>
             <p className="text-sm text-gray-500 mb-6">
               This might be due to a slow connection or temporary issue.
             </p>
             <div className="space-y-3">
-              <Button 
+              <Button
                 onClick={this.handleRetry}
                 className="w-full bg-orange-600 hover:bg-orange-700 text-white"
                 disabled={this.state.isRetrying}
               >
-                <RefreshCw className={`w-4 h-4 mr-2 ${this.state.isRetrying ? 'animate-spin' : ''}`} />
-                {this.state.isRetrying ? 'Retrying...' : 'Try Again'}
+                <RefreshCw
+                  className={`w-4 h-4 mr-2 ${this.state.isRetrying ? "animate-spin" : ""}`}
+                />
+                {this.state.isRetrying ? "Retrying..." : "Try Again"}
               </Button>
-              <Button 
+              <Button
                 onClick={this.handleReload}
                 variant="outline"
                 className="w-full"

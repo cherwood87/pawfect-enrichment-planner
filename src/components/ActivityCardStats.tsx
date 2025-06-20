@@ -1,17 +1,18 @@
-
-import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Clock, Star, Target } from 'lucide-react';
-import { ActivityLibraryItem } from '@/types/activity';
-import { DiscoveredActivity } from '@/types/discovery';
+import React from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Clock, Star, Target } from "lucide-react";
+import { ActivityLibraryItem } from "@/types/activity";
+import { DiscoveredActivity } from "@/types/discovery";
 
 interface ActivityCardStatsProps {
   activity: ActivityLibraryItem | DiscoveredActivity;
 }
 
 const ActivityCardStats: React.FC<ActivityCardStatsProps> = ({ activity }) => {
-  const isDiscoveredActivity = (activity: ActivityLibraryItem | DiscoveredActivity): activity is DiscoveredActivity => {
-    return 'source' in activity && activity.source === 'discovered';
+  const isDiscoveredActivity = (
+    activity: ActivityLibraryItem | DiscoveredActivity,
+  ): activity is DiscoveredActivity => {
+    return "source" in activity && activity.source === "discovered";
   };
 
   const isDiscovered = isDiscoveredActivity(activity);

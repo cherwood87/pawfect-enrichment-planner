@@ -1,10 +1,15 @@
-
-import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { CheckCircle, X } from 'lucide-react';
+import React, { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { CheckCircle, X } from "lucide-react";
 
 interface ActivityCompletionModalProps {
   isOpen: boolean;
@@ -17,18 +22,18 @@ const ActivityCompletionModal: React.FC<ActivityCompletionModalProps> = ({
   isOpen,
   onClose,
   onComplete,
-  activityTitle
+  activityTitle,
 }) => {
-  const [notes, setNotes] = useState('');
+  const [notes, setNotes] = useState("");
 
   const handleComplete = () => {
     onComplete(notes);
-    setNotes('');
+    setNotes("");
     onClose();
   };
 
   const handleCancel = () => {
-    setNotes('');
+    setNotes("");
     onClose();
   };
 
@@ -41,10 +46,11 @@ const ActivityCompletionModal: React.FC<ActivityCompletionModalProps> = ({
             <span>Complete Activity</span>
           </DialogTitle>
           <DialogDescription>
-            Mark "{activityTitle}" as complete and add any notes about the experience.
+            Mark "{activityTitle}" as complete and add any notes about the
+            experience.
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="space-y-4">
           <div>
             <Label htmlFor="completion-notes" className="text-sm font-medium">
@@ -58,7 +64,7 @@ const ActivityCompletionModal: React.FC<ActivityCompletionModalProps> = ({
               className="mt-2 min-h-[100px]"
             />
           </div>
-          
+
           <div className="flex space-x-2 justify-end">
             <Button
               variant="outline"

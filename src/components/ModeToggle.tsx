@@ -1,6 +1,5 @@
-
-import React from 'react';
-import { Sun, Moon } from 'lucide-react';
+import React from "react";
+import { Sun, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const ModeToggle: React.FC = () => {
@@ -8,9 +7,9 @@ export const ModeToggle: React.FC = () => {
 
   React.useEffect(() => {
     if (dark) {
-      document.documentElement.classList.add('dark');
+      document.documentElement.classList.add("dark");
     } else {
-      document.documentElement.classList.remove('dark');
+      document.documentElement.classList.remove("dark");
     }
   }, [dark]);
 

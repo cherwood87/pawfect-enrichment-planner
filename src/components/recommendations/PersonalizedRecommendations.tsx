@@ -1,32 +1,40 @@
-
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Sparkles, ThumbsUp, ThumbsDown, Clock, Star } from 'lucide-react';
-import { SmartRecommendation } from '@/types/learning';
-import { useLearningSystem } from '@/hooks/useLearningSystem';
-import { useActivity } from '@/contexts/ActivityContext';
-import { RecommendationService } from '@/services/learning/RecommendationService';
-import { useAuth } from '@/contexts/AuthContext';
-import { useDog } from '@/contexts/DogContext';
-import LoadingSpinner from '@/components/ui/loading-spinner';
+import React, { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Sparkles, ThumbsUp, ThumbsDown, Clock, Star } from "lucide-react";
+import { SmartRecommendation } from "@/types/learning";
+import { useLearningSystem } from "@/hooks/useLearningSystem";
+import { useActivity } from "@/contexts/ActivityContext";
+import { RecommendationService } from "@/services/learning/RecommendationService";
+import { useAuth } from "@/contexts/AuthContext";
+import { useDog } from "@/contexts/DogContext";
+import LoadingSpinner from "@/components/ui/loading-spinner";
 
 interface PersonalizedRecommendationsProps {
-  type?: 'daily' | 'weekly' | 'weather_based' | 'mood_based' | 'discovery';
+  type?: "daily" | "weekly" | "weather_based" | "mood_based" | "discovery";
   limit?: number;
   onActivitySelect?: (activityId: string) => void;
 }
 
-const PersonalizedRecommendations: React.FC<PersonalizedRecommendationsProps> = ({
-  type = 'daily',
-  limit = 3,
-  onActivitySelect
-}) => {
-  const [recommendations, setRecommendations] = useState<SmartRecommendation[]>([]);
-  const [userActions, setUserActions] = useState<Record<string, 'accepted' | 'rejected'>>({});
+const PersonalizedRecommendations: React.FC<
+  PersonalizedRecommendationsProps
+> = ({ type = "daily", limit = 3, onActivitySelect }) => {
+  const [recommendations, setRecommendations] = useState<SmartRecommendation[]>(
+    [],
+  );
+  const [userActions, setUserActions] = useState<
+    Record<string, "accepted" | "rejected">
+  >({});
   const { getRecommendations, isLoading } = useLearningSystem();
-  const { getCombinedActivityLibrary, userActivities, discoveredActivities } = useActivity();
+  const { getCombinedActivityLibrary, userActivities, discoveredActivities } =
+    useActivity();
   const { user } = useAuth();
   const { currentDog } = useDog();
 
@@ -42,32 +50,36 @@ const PersonalizedRecommendations: React.FC<PersonalizedRecommendationsProps> = 
 
   // Get activity details
   const getActivityDetails = (activityId: string) => {
-    const allActivities = [...getCombinedActivityLibrary(), ...userActivities, ...discoveredActivities];
-    return allActivities.find(activity => activity.id === activityId);
+    const allActivities = [
+      ...getCombinedActivityLibrary(),
+      ...userActivities,
+      ...discoveredActivities,
+    ];
+    return allActivities.find((activity) => activity.id === activityId);
   };
 
   // Handle user feedback on recommendations
   const handleRecommendationAction = async (
     activityId: string,
-    action: 'accepted' | 'rejected'
+    action: "accepted" | "rejected",
   ) => {
     if (!user || !currentDog) return;
 
-    setUserActions(prev => ({ ...prev, [activityId]: action }));
+    setUserActions((prev) => ({ ...prev, [activityId]: action }));
 
     try {
       await RecommendationService.updateRecommendationAction(
         user.id,
         currentDog.id,
         [activityId],
-        action
+        action,
       );
 
-      if (action === 'accepted' && onActivitySelect) {
+      if (action === "accepted" && onActivitySelect) {
         onActivitySelect(activityId);
       }
     } catch (error) {
-      console.error('Failed to update recommendation action:', error);
+      console.error("Failed to update recommendation action:", error);
     }
   };
 
@@ -91,7 +103,8 @@ const PersonalizedRecommendations: React.FC<PersonalizedRecommendationsProps> = 
             Personalized Recommendations
           </CardTitle>
           <CardDescription>
-            We're learning your preferences! Complete a few activities to get personalized recommendations.
+            We're learning your preferences! Complete a few activities to get
+            personalized recommendations.
           </CardDescription>
         </CardHeader>
       </Card>
@@ -120,11 +133,11 @@ const PersonalizedRecommendations: React.FC<PersonalizedRecommendationsProps> = 
             <div
               key={rec.activityId}
               className={`p-4 border rounded-lg transition-all ${
-                userAction === 'accepted' 
-                  ? 'border-green-200 bg-green-50' 
-                  : userAction === 'rejected'
-                  ? 'border-gray-200 bg-gray-50 opacity-60'
-                  : 'border-gray-200 hover:border-purple-200 hover:bg-purple-50'
+                userAction === "accepted"
+                  ? "border-green-200 bg-green-50"
+                  : userAction === "rejected"
+                    ? "border-gray-200 bg-gray-50 opacity-60"
+                    : "border-gray-200 hover:border-purple-200 hover:bg-purple-50"
               }`}
             >
               <div className="flex items-start justify-between">
@@ -147,9 +160,7 @@ const PersonalizedRecommendations: React.FC<PersonalizedRecommendationsProps> = 
                       <Clock className="h-4 w-4" />
                       {activity.duration} min
                     </div>
-                    <Badge variant="secondary">
-                      {activity.difficulty}
-                    </Badge>
+                    <Badge variant="secondary">{activity.difficulty}</Badge>
                   </div>
                 </div>
                 <div className="flex flex-col gap-2 ml-4">
@@ -157,7 +168,9 @@ const PersonalizedRecommendations: React.FC<PersonalizedRecommendationsProps> = 
                     <>
                       <Button
                         size="sm"
-                        onClick={() => handleRecommendationAction(rec.activityId, 'accepted')}
+                        onClick={() =>
+                          handleRecommendationAction(rec.activityId, "accepted")
+                        }
                         className="bg-green-600 hover:bg-green-700"
                       >
                         <ThumbsUp className="h-4 w-4 mr-1" />
@@ -166,20 +179,22 @@ const PersonalizedRecommendations: React.FC<PersonalizedRecommendationsProps> = 
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => handleRecommendationAction(rec.activityId, 'rejected')}
+                        onClick={() =>
+                          handleRecommendationAction(rec.activityId, "rejected")
+                        }
                       >
                         <ThumbsDown className="h-4 w-4 mr-1" />
                         Not Now
                       </Button>
                     </>
                   )}
-                  {userAction === 'accepted' && (
+                  {userAction === "accepted" && (
                     <Badge className="bg-green-600">
                       <ThumbsUp className="h-3 w-3 mr-1" />
                       Added
                     </Badge>
                   )}
-                  {userAction === 'rejected' && (
+                  {userAction === "rejected" && (
                     <Badge variant="secondary">
                       <ThumbsDown className="h-3 w-3 mr-1" />
                       Dismissed

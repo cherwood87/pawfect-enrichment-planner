@@ -1,11 +1,10 @@
-
-import React, { useState, useCallback } from 'react';
-import { useDog } from '@/contexts/DogContext';
-import DashboardHeader from '@/components/dashboard/DashboardHeader';
-import DashboardContent from '@/components/dashboard/DashboardContent';
-import FloatingChatButton from '@/components/dashboard/FloatingChatButton';
-import DashboardModals from '@/components/dashboard/DashboardModals';
-import { Dog } from '@/types/dog';
+import React, { useState, useCallback } from "react";
+import { useDog } from "@/contexts/DogContext";
+import DashboardHeader from "@/components/dashboard/DashboardHeader";
+import DashboardContent from "@/components/dashboard/DashboardContent";
+import FloatingChatButton from "@/components/dashboard/FloatingChatButton";
+import DashboardModals from "@/components/dashboard/DashboardModals";
+import { Dog } from "@/types/dog";
 
 const Index = () => {
   const { currentDog } = useDog();
@@ -55,13 +54,13 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-orange-50 mobile-safe">
       {/* Header */}
-      <DashboardHeader 
-        onChatOpen={handleChatModalOpen} 
+      <DashboardHeader
+        onChatOpen={handleChatModalOpen}
         onAddDogOpen={handleAddDogModalOpen}
       />
 
       {/* Main Content */}
-      <DashboardContent 
+      <DashboardContent
         onAddDogOpen={handleAddDogModalOpen}
         onEditDogOpen={handleEditDogModalOpen}
         onPillarSelect={handlePillarSelect}

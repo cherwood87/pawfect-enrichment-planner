@@ -1,6 +1,5 @@
-
-import React from 'react';
-import { cn } from '@/lib/utils';
+import React from "react";
+import { cn } from "@/lib/utils";
 
 interface CircularProgressProps {
   value: number; // 0-100
@@ -15,7 +14,7 @@ const CircularProgress: React.FC<CircularProgressProps> = ({
   size = 120,
   strokeWidth = 8,
   className,
-  children
+  children,
 }) => {
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
@@ -23,12 +22,11 @@ const CircularProgress: React.FC<CircularProgressProps> = ({
   const strokeDashoffset = circumference - (value / 100) * circumference;
 
   return (
-    <div className={cn("relative", className)} style={{ width: size, height: size }}>
-      <svg
-        width={size}
-        height={size}
-        className="transform -rotate-90"
-      >
+    <div
+      className={cn("relative", className)}
+      style={{ width: size, height: size }}
+    >
+      <svg width={size} height={size} className="transform -rotate-90">
         {/* Background circle */}
         <circle
           cx={size / 2}
