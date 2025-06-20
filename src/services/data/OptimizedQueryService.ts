@@ -4,6 +4,8 @@ import { ScheduledActivity, UserActivity } from '@/types/activity';
 import { Dog } from '@/types/dog';
 import { CacheService } from '../network/CacheService';
 import { RetryService } from '../network/RetryService';
+import { DogDataMapper } from '../integration/mappers/DogDataMapper';
+import { ActivityDataMapper } from '../integration/mappers/ActivityDataMapper';
 
 export interface QueryOptions {
   useCache?: boolean;
@@ -41,6 +43,14 @@ class OptimizedQueryService {
       }
     }
 
+    // Initialize default response structure
+    const defaultResponse = {
+      dog: null,
+      scheduledActivities: [],
+      userActivities: [],
+      recentCompletions: []
+    };
+
     try {
       console.log('🔍 Fetching optimized dashboard data for:', dogId);
       
@@ -50,7 +60,7 @@ class OptimizedQueryService {
           async () => {
             const { data, error } = await supabase.from('dogs').select('*').eq('id', dogId).single();
             if (error) throw error;
-            return { data, error };
+            return data;
           },
           { maxAttempts: 3, baseDelay: 1000, maxDelay: 5000, backoffFactor: 2 },
           'dogs_query'
@@ -65,7 +75,7 @@ class OptimizedQueryService {
               .order('scheduled_date', { ascending: true })
               .limit(50);
             if (error) throw error;
-            return { data, error };
+            return data || [];
           },
           { maxAttempts: 3, baseDelay: 1000, maxDelay: 5000, backoffFactor: 2 },
           'scheduled_activities_query'
@@ -79,7 +89,7 @@ class OptimizedQueryService {
               .order('created_at', { ascending: false })
               .limit(20);
             if (error) throw error;
-            return { data, error };
+            return data || [];
           },
           { maxAttempts: 3, baseDelay: 1000, maxDelay: 5000, backoffFactor: 2 },
           'user_activities_query'
@@ -93,7 +103,7 @@ class OptimizedQueryService {
               .order('completion_time', { ascending: false })
               .limit(10);
             if (error) throw error;
-            return { data, error };
+            return data || [];
           },
           { maxAttempts: 3, baseDelay: 1000, maxDelay: 5000, backoffFactor: 2 },
           'activity_completions_query'
@@ -101,10 +111,13 @@ class OptimizedQueryService {
       ]);
 
       const result = {
-        dog: dogResult.status === 'fulfilled' && dogResult.value?.data ? dogResult.value.data : null,
-        scheduledActivities: scheduledResult.status === 'fulfilled' && scheduledResult.value?.data ? scheduledResult.value.data : [],
-        userActivities: userActivitiesResult.status === 'fulfilled' && userActivitiesResult.value?.data ? userActivitiesResult.value.data : [],
-        recentCompletions: completionsResult.status === 'fulfilled' && completionsResult.value?.data ? completionsResult.value.data : []
+        dog: dogResult.status === 'fulfilled' && dogResult.value ? DogDataMapper.mapToDog(dogResult.value) : null,
+        scheduledActivities: scheduledResult.status === 'fulfilled' && scheduledResult.value ? 
+          scheduledResult.value.map(ActivityDataMapper.mapToScheduledActivity) : [],
+        userActivities: userActivitiesResult.status === 'fulfilled' && userActivitiesResult.value ? 
+          userActivitiesResult.value.map(ActivityDataMapper.mapToUserActivity) : [],
+        recentCompletions: completionsResult.status === 'fulfilled' && completionsResult.value ? 
+          completionsResult.value : []
       };
 
       // Cache for 5 minutes
@@ -114,7 +127,7 @@ class OptimizedQueryService {
       return result;
     } catch (error) {
       console.error('❌ Failed to fetch dashboard data:', error);
-      throw error;
+      return defaultResponse;
     }
   }
 
@@ -158,13 +171,13 @@ class OptimizedQueryService {
             .order('scheduled_date', { ascending: true });
 
           if (error) throw error;
-          return { data, error };
+          return data || [];
         },
         { maxAttempts: 3, baseDelay: 1000, maxDelay: 5000, backoffFactor: 2 },
         'weekly_planner_query'
       );
 
-      const activities = result?.data || [];
+      const activities = result.map(ActivityDataMapper.mapToScheduledActivity);
       
       // Cache for 2 minutes (shorter for planner data)
       CacheService.set(cacheKey, activities, { ttl: 2 * 60 * 1000 });
@@ -173,7 +186,7 @@ class OptimizedQueryService {
       return activities;
     } catch (error) {
       console.error('❌ Failed to fetch weekly planner data:', error);
-      throw error;
+      return [];
     }
   }
 
@@ -205,7 +218,7 @@ class OptimizedQueryService {
             .insert(transformedActivities)
             .select();
           if (error) throw error;
-          return { data, error };
+          return data || [];
         },
         { maxAttempts: 3, baseDelay: 1000, maxDelay: 5000, backoffFactor: 2 },
         'batch_create_activities'
@@ -217,12 +230,12 @@ class OptimizedQueryService {
         this.clearDogCache(dogId);
       });
 
-      const createdActivities = result?.data || [];
+      const createdActivities = result.map(ActivityDataMapper.mapToScheduledActivity);
       console.log('✅ Batch activities created successfully:', createdActivities.length);
       return createdActivities;
     } catch (error) {
       console.error('❌ Failed to create activities batch:', error);
-      throw error;
+      return [];
     }
   }
 
@@ -242,6 +255,9 @@ class OptimizedQueryService {
       console.log('📚 Using cached activity library data');
       return cached;
     }
+
+    // Initialize default response
+    const defaultResponse = { data: [], total: 0 };
 
     try {
       console.log('🔍 Fetching activity library with filters:', options);
@@ -269,15 +285,15 @@ class OptimizedQueryService {
 
           const { data, error, count } = await query;
           if (error) throw error;
-          return { data, error, count };
+          return { data: data || [], count: count || 0 };
         },
         { maxAttempts: 3, baseDelay: 1000, maxDelay: 5000, backoffFactor: 2 },
         'activity_library_query'
       );
 
       const libraryResult = {
-        data: result?.data || [],
-        total: result?.count || 0
+        data: result.data,
+        total: result.count
       };
 
       // Cache for 10 minutes (library data doesn't change often)
@@ -287,7 +303,7 @@ class OptimizedQueryService {
       return libraryResult;
     } catch (error) {
       console.error('❌ Failed to fetch activity library:', error);
-      throw error;
+      return defaultResponse;
     }
   }
 
