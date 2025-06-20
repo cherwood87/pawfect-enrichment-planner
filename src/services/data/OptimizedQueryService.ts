@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { ScheduledActivity, UserActivity } from '@/types/activity';
 import { Dog } from '@/types/dog';
@@ -248,7 +247,7 @@ class OptimizedQueryService {
     searchTerm?: string;
     limit?: number;
     offset?: number;
-  } = {}): Promise<{ data: any[]; total: number }> {
+  } & QueryOptions = {}): Promise<{ data: any[]; total: number }> {
     const { pillar, difficulty, searchTerm, limit = 20, offset = 0 } = options;
     const cacheKey = `library_${pillar || 'all'}_${difficulty || 'all'}_${searchTerm || 'none'}_${limit}_${offset}`;
     
