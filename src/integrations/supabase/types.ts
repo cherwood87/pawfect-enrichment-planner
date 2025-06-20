@@ -1085,6 +1085,14 @@ export type Database = {
           course_reference: string
         }[]
       }
+      user_owns_dog: {
+        Args: { dog_uuid: string }
+        Returns: boolean
+      }
+      user_owns_dog_by_text_id: {
+        Args: { dog_text_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       activity_level: "low" | "moderate" | "high"
