@@ -2,7 +2,7 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { useNetworkResilience } from '@/hooks/useNetworkResilience';
+import { useNetworkHealth } from '@/hooks/useNetworkHealth';
 import { LoadingSkeleton } from '@/components/ui/loading-skeleton';
 import { AlertCircle, Wifi, WifiOff, Activity } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -20,11 +20,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     isRecovering,
     connectionStability,
     canRetry
-  } = useNetworkResilience({
-    maxRetries: 3,
-    retryInterval: 15000, // Reduced from 30s to 15s for better UX
-    exponentialBackoff: true
-  });
+  } = useNetworkHealth();
 
   // Show loading with improved timeout handling
   if (loading) {
@@ -61,7 +57,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     );
   }
 
-  // Handle offline mode gracefully - allow access if user was previously authenticated
+  // Handle offline mode gracefully
   if (!isOnline) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-orange-50 flex items-center justify-center p-4">
@@ -99,7 +95,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     );
   }
 
-  // Handle Supabase connection issues with enhanced recovery info
+  // Handle Supabase connection issues
   if (!isSupabaseConnected) {
     const stabilityPercent = Math.round(connectionStability * 100);
     
@@ -146,7 +142,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     );
   }
 
-  // Optimized fallback for unauthenticated states
+  // Check authentication
   if (!user || !session) {
     console.log('🚫 ProtectedRoute: No auth, redirecting to /auth');
     return <Navigate to="/auth" replace />;

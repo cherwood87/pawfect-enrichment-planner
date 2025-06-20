@@ -1,9 +1,7 @@
 
 import React from 'react';
-import { useNetworkResilience } from '@/hooks/useNetworkResilience';
-import { EnhancedSupabaseAdapter } from '@/services/integration/EnhancedSupabaseAdapter';
+import { useNetworkHealth } from '@/hooks/useNetworkHealth';
 import { CircuitBreakerState } from '@/services/network/RetryService';
-import { CacheService } from '@/services/network/CacheService';
 import { AlertCircle, Wifi, WifiOff, Activity, Database, Signal } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -18,23 +16,10 @@ export const NetworkHealthIndicator: React.FC = () => {
     isRecovering,
     canRetry,
     connectionHistory,
-    lastChecked 
-  } = useNetworkResilience();
-
-  const [circuitBreakerStates, setCircuitBreakerStates] = React.useState<any>({});
-  const [cacheStats, setCacheStats] = React.useState<any>({});
-
-  React.useEffect(() => {
-    const interval = setInterval(() => {
-      // Update circuit breaker states
-      setCircuitBreakerStates(EnhancedSupabaseAdapter.getNetworkHealth());
-      
-      // Update cache stats
-      setCacheStats(CacheService.getCacheStats());
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, []);
+    lastChecked,
+    circuitBreakerStates,
+    cacheStats
+  } = useNetworkHealth();
 
   const getCircuitBreakerColor = (state: CircuitBreakerState | null) => {
     switch (state) {
@@ -165,16 +150,14 @@ export const NetworkHealthIndicator: React.FC = () => {
           <span className="text-xs text-gray-600">Cache:</span>
           <Badge variant="outline" className="text-xs">
             <Database className="w-3 h-3 mr-1" />
-            {cacheStats.memoryEntries || 0} items
+            {cacheStats.memoryEntries} items
           </Badge>
         </div>
 
         {/* Last Checked */}
-        {lastChecked && (
-          <div className="text-xs text-gray-500">
-            Last checked: {lastChecked.toLocaleTimeString()}
-          </div>
-        )}
+        <div className="text-xs text-gray-500">
+          Last checked: {lastChecked.toLocaleTimeString()}
+        </div>
 
         {/* Retry Button for failed connections */}
         {!isSupabaseConnected && canRetry && (
