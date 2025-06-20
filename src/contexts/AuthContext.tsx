@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
-import { supabase, checkSupabaseConnection } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import { cleanupAuthState, robustSignOut, robustSignIn, robustSignUp } from '@/utils/authUtils';
 
 interface AuthContextType {
@@ -13,7 +13,6 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   clearError: () => void;
-  isConnected: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -45,19 +44,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isConnected, setIsConnected] = useState(true);
 
   const clearError = () => setError(null);
 
   useEffect(() => {
-    console.log('🔐 Initializing Phase 2 optimized auth state...');
+    console.log('🔐 Initializing Phase 3 optimized auth state...');
     
     let mounted = true;
     let authSubscription: any = null;
     
     const initializeAuth = async () => {
       try {
-        // Step 1: Set up auth state listener first (immediate, non-blocking)
+        // Set up auth state listener first (immediate, non-blocking)
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
           (event, session) => {
             if (!mounted) return;
@@ -84,22 +82,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         
         authSubscription = subscription;
         
-        // Step 2: Non-blocking connection check
-        checkSupabaseConnection()
-          .then(connectionOk => {
-            if (mounted) {
-              setIsConnected(connectionOk);
-              console.log('🌐 Connection status:', connectionOk ? 'connected' : 'offline');
-            }
-          })
-          .catch(() => {
-            if (mounted) {
-              setIsConnected(false);
-              console.warn('⚠️ Connection check failed, working offline');
-            }
-          });
-        
-        // Step 3: Get initial session with timeout
+        // Get initial session with timeout (no connection dependency)
         try {
           const { data: { session }, error } = await getSessionWithTimeout(5000);
           
@@ -213,7 +196,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     signIn,
     signOut,
     clearError,
-    isConnected,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

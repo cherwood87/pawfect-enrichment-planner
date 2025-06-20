@@ -4,7 +4,7 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNetworkResilience } from '@/hooks/useNetworkResilience';
 import { LoadingSkeleton } from '@/components/ui/loading-skeleton';
-import { AlertCircle, Wifi, WifiOff } from 'lucide-react';
+import { AlertCircle, Wifi, WifiOff, Activity } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface ProtectedRouteProps {
@@ -12,8 +12,19 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { user, session, loading, isConnected } = useAuth();
-  const { isOnline, isSupabaseConnected, retryConnection } = useNetworkResilience();
+  const { user, session, loading } = useAuth();
+  const { 
+    isOnline, 
+    isSupabaseConnected, 
+    retryConnection, 
+    isRecovering,
+    connectionStability,
+    canRetry
+  } = useNetworkResilience({
+    maxRetries: 3,
+    retryInterval: 30000,
+    exponentialBackoff: true
+  });
 
   // Show loading with improved timeout handling
   if (loading) {
@@ -42,10 +53,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
           <div className="space-y-3">
             <Button 
               onClick={retryConnection}
+              disabled={isRecovering}
               className="w-full bg-purple-600 hover:bg-purple-700 text-white"
             >
               <Wifi className="w-4 h-4 mr-2" />
-              Try to Reconnect
+              {isRecovering ? 'Checking...' : 'Try to Reconnect'}
             </Button>
             {user && (
               <Button 
@@ -62,27 +74,48 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     );
   }
 
-  // Handle Supabase connection issues with graceful degradation
-  if (!isSupabaseConnected && isConnected) {
+  // Handle Supabase connection issues with enhanced recovery info
+  if (!isSupabaseConnected) {
+    const stabilityPercent = Math.round(connectionStability * 100);
+    
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full text-center">
           <div className="mb-4">
-            <AlertCircle className="w-16 h-16 text-orange-500 mx-auto" />
+            {isRecovering ? (
+              <Activity className="w-16 h-16 text-blue-500 mx-auto animate-spin" />
+            ) : (
+              <AlertCircle className="w-16 h-16 text-orange-500 mx-auto" />
+            )}
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            Service Temporarily Unavailable
+            {isRecovering ? 'Reconnecting...' : 'Service Temporarily Unavailable'}
           </h2>
-          <p className="text-gray-600 mb-6">
-            We're having trouble connecting to our services. Please try again in a moment.
+          <p className="text-gray-600 mb-4">
+            {isRecovering 
+              ? 'Attempting to restore connection to our services.'
+              : 'We\'re having trouble connecting to our services. Please try again in a moment.'
+            }
           </p>
-          <Button 
-            onClick={retryConnection}
-            className="w-full bg-purple-600 hover:bg-purple-700 text-white"
-          >
-            <Wifi className="w-4 h-4 mr-2" />
-            Retry Connection
-          </Button>
+          {!isRecovering && (
+            <div className="text-sm text-gray-500 mb-6">
+              Connection stability: {stabilityPercent}%
+            </div>
+          )}
+          {canRetry && !isRecovering && (
+            <Button 
+              onClick={retryConnection}
+              className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+            >
+              <Wifi className="w-4 h-4 mr-2" />
+              Retry Connection
+            </Button>
+          )}
+          {!canRetry && !isRecovering && (
+            <p className="text-sm text-gray-500">
+              Please check your internet connection and try refreshing the page.
+            </p>
+          )}
         </div>
       </div>
     );

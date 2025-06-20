@@ -6,7 +6,7 @@ import type { Database } from './types';
 const SUPABASE_URL = "https://wdqdvvsygjgrhmafovjb.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndkcWR2dnN5Z2pncmhtYWZvdmpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgwMjM1MTgsImV4cCI6MjA2MzU5OTUxOH0.ai68XvoLXEbk5d6EG_UzbN2QdJOP8dl87Xv4cjdLjJ0";
 
-// Enhanced Supabase client configuration for better performance
+// Streamlined Supabase client configuration
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
     storage: localStorage,
@@ -30,11 +30,11 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
   }
 });
 
-// Simple connection checker without recursive retry logic
+// Lightweight connection checker for NetworkResilience hook
 export const checkSupabaseConnection = async (): Promise<boolean> => {
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3000); // Reduced timeout
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
     
     const { error } = await supabase
       .from('dogs')
@@ -45,32 +45,13 @@ export const checkSupabaseConnection = async (): Promise<boolean> => {
     clearTimeout(timeoutId);
     
     if (error) {
-      console.warn('Supabase connection check failed:', error.message);
+      console.warn('🌐 Connection check failed:', error.message);
       return false;
     }
     
     return true;
   } catch (error) {
-    console.warn('Supabase connection check error:', error);
+    console.warn('🌐 Connection check error:', error);
     return false;
   }
 };
-
-// Initialize connection monitoring with non-blocking approach
-if (typeof window !== 'undefined') {
-  // Check connection on visibility change (non-blocking)
-  document.addEventListener('visibilitychange', () => {
-    if (!document.hidden) {
-      checkSupabaseConnection().catch(() => {
-        // Silently fail - connection status will be updated elsewhere
-      });
-    }
-  });
-  
-  // Periodic connection check (non-blocking, reduced frequency)
-  setInterval(() => {
-    checkSupabaseConnection().catch(() => {
-      // Silently fail - this is just for monitoring
-    });
-  }, 60000); // Every 60 seconds instead of 30
-}
