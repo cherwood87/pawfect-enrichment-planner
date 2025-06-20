@@ -4,7 +4,7 @@ import { ActivityLibraryItem } from '@/types/activity';
 import { DiscoveredActivity } from '@/types/discovery';
 import { useActivity } from '@/contexts/ActivityContext';
 import { useSimpleFiltering } from '@/hooks/useSimpleFiltering';
-import { useLightweightMonitor } from '@/hooks/useLightweightMonitor';
+import { useDiagnosticTracking } from '@/hooks/useDiagnosticTracking';
 import ConsolidatedActivityModal from '@/components/modals/ConsolidatedActivityModal';
 import PillarSelectionCards from '@/components/PillarSelectionCards';
 import ActivityLibraryContent from '@/components/ActivityLibraryContent';
@@ -20,7 +20,11 @@ const normalizeEnergyLevel = (level: string): "Low" | "Medium" | "High" => {
 };
 
 const ActivityLibrary = () => {
-  useLightweightMonitor('ActivityLibrary');
+  const { 
+    startCustomStage, 
+    completeCustomStage, 
+    recordMetric 
+  } = useDiagnosticTracking('ActivityLibrary');
   
   const { 
     getCombinedActivityLibrary, 
@@ -38,16 +42,40 @@ const ActivityLibrary = () => {
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all');
   const [selectedActivity, setSelectedActivity] = useState<ActivityLibraryItem | DiscoveredActivity | null>(null);
 
-  // Get normalized activities
+  // Track data loading stages
+  useEffect(() => {
+    startCustomStage('Data Loading');
+    
+    const activities = getCombinedActivityLibrary();
+    const loadTime = performance.now();
+    
+    completeCustomStage('Data Loading', {
+      activitiesCount: activities.length,
+      discoveredCount: discoveredActivities.length
+    });
+    
+    recordMetric('Activities Loaded', loadTime);
+  }, [startCustomStage, completeCustomStage, recordMetric, getCombinedActivityLibrary, discoveredActivities.length]);
+
+  // Get normalized activities with performance tracking
   const normalizedActivities = useMemo(() => {
-    return getCombinedActivityLibrary().map(activity =>
+    const startTime = performance.now();
+    startCustomStage('Activity Normalization');
+    
+    const normalized = getCombinedActivityLibrary().map(activity =>
       activity && typeof activity.energyLevel === 'string'
         ? { ...activity, energyLevel: normalizeEnergyLevel(activity.energyLevel) }
         : activity
     );
-  }, [getCombinedActivityLibrary]);
+    
+    const processingTime = performance.now() - startTime;
+    completeCustomStage('Activity Normalization');
+    recordMetric('Normalization Time', processingTime);
+    
+    return normalized;
+  }, [getCombinedActivityLibrary, startCustomStage, completeCustomStage, recordMetric]);
 
-  // Use simple filtering instead of complex caching
+  // Use simple filtering with performance tracking
   const filteredActivities = useSimpleFiltering(
     searchQuery,
     selectedPillar,
@@ -55,45 +83,107 @@ const ActivityLibrary = () => {
     normalizedActivities
   );
 
-  // Check for auto-discovery on mount
+  // Track filtering performance
+  useEffect(() => {
+    const filteringTime = performance.now();
+    startCustomStage('Activity Filtering');
+    
+    setTimeout(() => {
+      completeCustomStage('Activity Filtering', {
+        totalActivities: normalizedActivities.length,
+        filteredCount: filteredActivities.length,
+        searchQuery,
+        selectedPillar,
+        selectedDifficulty
+      });
+      
+      const processingTime = performance.now() - filteringTime;
+      recordMetric('Filtering Time', processingTime);
+    }, 0);
+  }, [filteredActivities.length, normalizedActivities.length, searchQuery, selectedPillar, selectedDifficulty, startCustomStage, completeCustomStage, recordMetric]);
+
+  // Check for auto-discovery on mount with tracking
   useEffect(() => {
     if (checkAndRunAutoDiscovery) {
-      checkAndRunAutoDiscovery();
+      startCustomStage('Auto Discovery Check');
+      
+      checkAndRunAutoDiscovery().then(() => {
+        completeCustomStage('Auto Discovery Check');
+      }).catch((error) => {
+        console.error('Auto discovery failed:', error);
+      });
     }
-  }, [checkAndRunAutoDiscovery]);
+  }, [checkAndRunAutoDiscovery, startCustomStage, completeCustomStage]);
 
-  // Callback functions
+  // Callback functions with performance tracking
   const handleDiscoverMore = useCallback(async () => {
-    await discoverNewActivities();
-  }, [discoverNewActivities]);
+    startCustomStage('Manual Discovery');
+    const startTime = performance.now();
+    
+    try {
+      await discoverNewActivities();
+      const discoveryTime = performance.now() - startTime;
+      completeCustomStage('Manual Discovery');
+      recordMetric('Discovery Time', discoveryTime);
+    } catch (error) {
+      console.error('Manual discovery failed:', error);
+    }
+  }, [discoverNewActivities, startCustomStage, completeCustomStage, recordMetric]);
 
   const handleManualSync = useCallback(async () => {
-    await syncToSupabase();
-  }, [syncToSupabase]);
+    startCustomStage('Manual Sync');
+    const startTime = performance.now();
+    
+    try {
+      await syncToSupabase();
+      const syncTime = performance.now() - startTime;
+      completeCustomStage('Manual Sync');
+      recordMetric('Sync Time', syncTime);
+    } catch (error) {
+      console.error('Manual sync failed:', error);
+    }
+  }, [syncToSupabase, startCustomStage, completeCustomStage, recordMetric]);
 
   const handleActivitySelect = useCallback((activity: ActivityLibraryItem | DiscoveredActivity) => {
+    startCustomStage('Activity Selection');
     setSelectedActivity(activity);
-  }, []);
+    recordMetric('Activity Select Time', 0);
+    completeCustomStage('Activity Selection');
+  }, [startCustomStage, completeCustomStage, recordMetric]);
 
   const handleActivityModalClose = useCallback(() => {
+    startCustomStage('Modal Close');
     setSelectedActivity(null);
-  }, []);
+    completeCustomStage('Modal Close');
+  }, [startCustomStage, completeCustomStage]);
 
   const handlePillarSelect = useCallback((pillar: string) => {
+    startCustomStage('Pillar Selection');
     setSelectedPillar(pillar);
-  }, []);
+    recordMetric('Pillar Change Time', 0);
+    completeCustomStage('Pillar Selection');
+  }, [startCustomStage, completeCustomStage, recordMetric]);
 
-  // Compute stats
+  // Compute stats with performance tracking
   const { autoApprovedCount, curatedCount } = useMemo(() => {
+    const startTime = performance.now();
+    startCustomStage('Stats Calculation');
+    
     const isDiscoveredActivity = (activity: ActivityLibraryItem | DiscoveredActivity): activity is DiscoveredActivity => {
       return 'source' in activity && activity.source === 'discovered';
     };
 
-    return {
+    const stats = {
       autoApprovedCount: discoveredActivities.filter(a => a.approved).length,
       curatedCount: normalizedActivities.filter(a => !isDiscoveredActivity(a)).length
     };
-  }, [discoveredActivities, normalizedActivities]);
+    
+    const calculationTime = performance.now() - startTime;
+    completeCustomStage('Stats Calculation');
+    recordMetric('Stats Calculation Time', calculationTime);
+    
+    return stats;
+  }, [discoveredActivities, normalizedActivities, startCustomStage, completeCustomStage, recordMetric]);
 
   return (
     <div className="mobile-space-y">
