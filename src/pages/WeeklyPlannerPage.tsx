@@ -42,14 +42,8 @@ const WeeklyPlannerPage: React.FC = () => {
 
   const {
     handleToggleCompletion,
-    isRetrying
-  } = useWeeklyPlannerActions(
-    allWeekActivities,
-    optimisticUpdates,
-    loadingStates,
-    setOptimisticUpdates,
-    setLoadingStates
-  );
+    getActivityDetails: getActivityDetailsFromHook
+  } = useWeeklyPlannerActions();
 
   // Navigation functions
   const handleNavigateWeek = useCallback((direction: 'prev' | 'next') => {
@@ -87,10 +81,8 @@ const WeeklyPlannerPage: React.FC = () => {
   }, [setIsModalOpen, setSelectedActivity]);
 
   const getActivityDetails = useCallback((activityId: string) => {
-    // Combine all possible activity sources
-    const allActivities = [...getCombinedActivityLibrary(), ...userActivities, ...discoveredActivities];
-    return allActivities.find(activity => activity.id === activityId);
-  }, [getCombinedActivityLibrary, userActivities, discoveredActivities]);
+    return getActivityDetailsFromHook(activityId);
+  }, [getActivityDetailsFromHook]);
 
   const handlePillarSelect = useCallback((pillar: string) => {
     setSelectedPillar(pillar);
@@ -160,7 +152,7 @@ const WeeklyPlannerPage: React.FC = () => {
             selectedActivity={selectedActivity}
             isModalOpen={isModalOpen}
             loadingStates={loadingStates}
-            isRetrying={isRetrying}
+            isRetrying={false}
             onNavigateWeek={handleNavigateWeek}
             onNavigateDay={handleNavigateDay}
             onViewModeChange={handleViewModeChange}

@@ -98,9 +98,12 @@ export const robustSignUp = async (email: string, password: string) => {
     // Step 2: Sign up with email/password with timeout
     console.log('📧 Attempting sign up with timeout...');
     
-    const signUpPromise = supabase.auth.signUp({
+  const signUpPromise = supabase.auth.signUp({
       email,
       password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/`
+      }
     });
 
     // Add timeout for sign-up operation
