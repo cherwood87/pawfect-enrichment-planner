@@ -28,14 +28,10 @@ const ConsolidatedActivityModal: React.FC<ConsolidatedActivityModalProps> = ({
   mode = 'library'
 }) => {
   const {
-    selectedDayOfWeek,
-    setSelectedDayOfWeek,
-    isScheduling,
     isFavouriting,
     isChatOpen,
     setIsChatOpen,
     handleNeedHelp,
-    handleScheduleActivity,
     handleAddToFavourites
   } = useActivityModalState(activityDetails, onClose);
 
@@ -65,15 +61,11 @@ const ConsolidatedActivityModal: React.FC<ConsolidatedActivityModalProps> = ({
             activityDetails={activityDetails}
             mode={mode}
             scheduledActivity={scheduledActivity}
-            selectedDayOfWeek={selectedDayOfWeek}
-            onDaySelect={setSelectedDayOfWeek}
           />
 
           <ActivityModalActions
             mode={mode}
-            isScheduling={isScheduling}
             isFavouriting={isFavouriting}
-            onSchedule={handleScheduleActivity}
             onAddToFavourites={handleAddToFavourites}
             onClose={onClose}
           />

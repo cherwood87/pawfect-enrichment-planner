@@ -4,22 +4,17 @@ import { Badge } from '@/components/ui/badge';
 import { Clock, Star } from 'lucide-react';
 import { ScheduledActivity, ActivityLibraryItem, UserActivity } from '@/types/activity';
 import { DiscoveredActivity } from '@/types/discovery';
-import DaySelector from '@/components/DaySelector';
 
 interface ActivityModalContentProps {
   activityDetails: ActivityLibraryItem | UserActivity | DiscoveredActivity;
   mode: 'scheduled' | 'library';
   scheduledActivity?: ScheduledActivity | null;
-  selectedDayOfWeek: number;
-  onDaySelect: (day: number) => void;
 }
 
 const ActivityModalContent: React.FC<ActivityModalContentProps> = ({
   activityDetails,
   mode,
-  scheduledActivity,
-  selectedDayOfWeek,
-  onDaySelect
+  scheduledActivity
 }) => {
   const getPillarColor = (pillar: string) => {
     const colors = {
@@ -55,14 +50,6 @@ const ActivityModalContent: React.FC<ActivityModalContentProps> = ({
         </div>
       </div>
 
-      {mode === 'library' && (
-        <div className="bg-white/70 rounded-3xl p-4 border border-purple-200">
-          <DaySelector
-            selectedDayOfWeek={selectedDayOfWeek}
-            onDaySelect={onDaySelect}
-          />
-        </div>
-      )}
 
       <div className="bg-white/70 rounded-3xl p-6 border border-purple-200">
         <h3 className="text-lg font-semibold text-purple-800 mb-3">Benefits</h3>

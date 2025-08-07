@@ -18,7 +18,7 @@ const BrowseLibraryTab: React.FC<BrowseLibraryTabProps> = ({
       <div className="text-center mb-4">
         <p className="text-gray-600">Choose from our curated collection of enrichment activities</p>
         <p className="text-sm text-blue-600 mt-1">
-          Activities will be added to your weekly enrichment plan
+          Save activities you love for easy access
         </p>
       </div>
       
@@ -28,7 +28,7 @@ const BrowseLibraryTab: React.FC<BrowseLibraryTabProps> = ({
             key={activity.id}
             activity={activity}
             onSelect={onActivitySelect}
-            buttonText="Add to Weekly Plan"
+            buttonText="Add to Favorites"
           />
         ))}
       </div>
