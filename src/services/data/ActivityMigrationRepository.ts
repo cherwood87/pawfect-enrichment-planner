@@ -1,113 +1,69 @@
-import { handleError } from "@/utils/errorUtils";
-import { BaseRepository } from "./BaseRepository";
-import { BatchMigrationService } from "./BatchMigrationService";
+
+import { SupabaseAdapter } from '../integration/SupabaseAdapter';
+import { LocalStorageAdapter } from '../integration/LocalStorageAdapter';
+import { handleError } from '@/utils/errorUtils';
+import { BaseRepository } from './BaseRepository';
 
 export class ActivityMigrationRepository extends BaseRepository {
-	static async migrateFromLocalStorage(dogId: string): Promise<void> {
-		console.log(`🚀 Starting optimized migration for dog ${dogId}...`);
+  static async migrateFromLocalStorage(dogId: string): Promise<void> {
+    console.log(`Starting migration for dog ${dogId}...`);
+    
+    try {
+      this.validateDogId(dogId);
 
-		try {
-			ActivityMigrationRepository.validateDogId(dogId);
+      // Migrate scheduled activities
+      if (LocalStorageAdapter.hasScheduledActivitiesData(dogId)) {
+        const localScheduled = LocalStorageAdapter.getScheduledActivities(dogId);
+        const migrationResults = {
+          scheduled: { success: 0, failed: 0 },
+          user: { success: 0, failed: 0 }
+        };
 
-			// Check migration flags to avoid duplicate migrations
-			const scheduledMigrationFlag = `migration_scheduled_${dogId}`;
-			const userMigrationFlag = `migration_user_${dogId}`;
+        for (const activity of localScheduled) {
+          try {
+            await SupabaseAdapter.createScheduledActivity(activity);
+            migrationResults.scheduled.success++;
+          } catch (error) {
+            console.error('Failed to migrate scheduled activity:', error);
+            migrationResults.scheduled.failed++;
+            handleError(error as Error, { operation: 'migrateScheduledActivity', activity }, false);
+          }
+        }
+        
+        // Only clear localStorage if migration was mostly successful
+        if (migrationResults.scheduled.success > migrationResults.scheduled.failed) {
+          LocalStorageAdapter.clearScheduledActivities(dogId);
+        }
+      }
 
-			const hasScheduledMigration =
-				localStorage.getItem(scheduledMigrationFlag) === "completed";
-			const hasUserMigration =
-				localStorage.getItem(userMigrationFlag) === "completed";
+      // Migrate user activities
+      if (LocalStorageAdapter.hasUserActivitiesData(dogId)) {
+        const localUser = LocalStorageAdapter.getUserActivities(dogId);
+        let userSuccess = 0;
+        let userFailed = 0;
 
-			const migrationPromises = [];
+        for (const activity of localUser) {
+          try {
+            await SupabaseAdapter.createUserActivity(activity);
+            userSuccess++;
+          } catch (error) {
+            console.error('Failed to migrate user activity:', error);
+            userFailed++;
+            handleError(error as Error, { operation: 'migrateUserActivity', activity }, false);
+          }
+        }
+        
+        // Only clear localStorage if migration was mostly successful
+        if (userSuccess > userFailed) {
+          LocalStorageAdapter.clearUserActivities(dogId);
+        }
+      }
 
-			// Migrate scheduled activities if not already done
-			if (!hasScheduledMigration) {
-				migrationPromises.push(
-					BatchMigrationService.batchMigrateScheduledActivities(dogId).then(
-						(result) => {
-							if (result.success) {
-								localStorage.setItem(scheduledMigrationFlag, "completed");
-							}
-							return { type: "scheduled", ...result };
-						},
-					),
-				);
-			}
-
-			// Migrate user activities if not already done
-			if (!hasUserMigration) {
-				migrationPromises.push(
-					BatchMigrationService.batchMigrateUserActivities(dogId).then(
-						(result) => {
-							if (result.success) {
-								localStorage.setItem(userMigrationFlag, "completed");
-							}
-							return { type: "user", ...result };
-						},
-					),
-				);
-			}
-
-			if (migrationPromises.length === 0) {
-				console.log(`✅ Migration already completed for dog ${dogId}`);
-				return;
-			}
-
-			// Execute migrations in parallel for better performance
-			const results = await Promise.allSettled(migrationPromises);
-
-			let totalMigrated = 0;
-			let totalFailed = 0;
-			const allErrors: Error[] = [];
-
-			results.forEach((result) => {
-				if (result.status === "fulfilled") {
-					totalMigrated += result.value.migrated;
-					totalFailed += result.value.failed;
-					allErrors.push(...result.value.errors);
-
-					console.log(`✅ ${result.value.type} migration completed:`, {
-						migrated: result.value.migrated,
-						failed: result.value.failed,
-					});
-				} else {
-					console.error("Migration promise rejected:", result.reason);
-					allErrors.push(new Error(result.reason));
-				}
-			});
-
-			console.log(`🎉 Migration completed for dog ${dogId}:`, {
-				totalMigrated,
-				totalFailed,
-				errorCount: allErrors.length,
-			});
-
-			// If there were significant errors, report them but don't fail the entire operation
-			if (allErrors.length > 0 && totalFailed > totalMigrated * 0.2) {
-				console.warn(`⚠️ Migration completed with ${allErrors.length} errors`);
-				handleError(
-					new Error(
-						`Migration completed with errors: ${allErrors
-							.slice(0, 3)
-							.map((e) => e.message)
-							.join(", ")}`,
-					),
-					{
-						operation: "migrateFromLocalStorage",
-						dogId,
-						totalMigrated,
-						totalFailed,
-					},
-					false,
-				);
-			}
-		} catch (error) {
-			console.error(`❌ Migration failed for dog ${dogId}:`, error);
-			handleError(error as Error, {
-				operation: "migrateFromLocalStorage",
-				dogId,
-			});
-			throw error;
-		}
-	}
+      console.log(`Migration completed for dog ${dogId}`);
+    } catch (error) {
+      console.error(`Migration failed for dog ${dogId}:`, error);
+      handleError(error as Error, { operation: 'migrateFromLocalStorage', dogId });
+      throw error;
+    }
+  }
 }
