@@ -78,11 +78,11 @@ export const useActivityModalHandlers = (
       console.log('✅ [ActivityModalHandlers] Activity scheduled successfully');
       toast({
         title: "Activity Scheduled!",
-        description: `"${activity.title}" has been added to your weekly plan for ${['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][selectedDayOfWeek]}.`
+        description: `"${activity.title}" scheduled for ${['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][selectedDayOfWeek]}.`
       });
       
       onClose();
-      navigate('/dog-profile-dashboard/weekly-plan');
+      navigate('/app#favorites');
     } catch (error) {
       console.error('❌ [ActivityModalHandlers] Error scheduling activity:', error);
       
@@ -97,7 +97,7 @@ export const useActivityModalHandlers = (
         });
         // Still close modal and navigate as the upsert succeeded
         onClose();
-        navigate('/dog-profile-dashboard/weekly-plan');
+        navigate('/app#favorites');
       } else {
         toast({
           title: "Failed to Schedule Activity",
@@ -148,7 +148,7 @@ export const useActivityModalHandlers = (
       await addUserActivity(newActivity);
       resetCustomActivityForm();
       onClose();
-      navigate('/dog-profile-dashboard/weekly-plan');
+      navigate('/app#favorites');
     } catch (error) {
       console.error('Error creating custom activity:', error);
       // Don't show another toast here as the addUserActivity function already handles it

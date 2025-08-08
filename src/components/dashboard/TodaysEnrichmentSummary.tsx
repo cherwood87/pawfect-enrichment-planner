@@ -122,10 +122,10 @@ const TodaysEnrichmentSummary: React.FC<TodaysEnrichmentSummaryProps> = ({ onCha
             <p className="font-medium text-purple-800 mb-2">No activities scheduled for today!</p>
             <p className="text-sm text-purple-600 mb-4">Plan some enrichment activities for {currentDog.name}.</p>
             <Button
-              onClick={() => navigate('/dog-profile-dashboard/weekly-plan')}
+              onClick={() => navigate('/activity-library')}
               className="bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 text-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
             >
-              Plan Activities
+              Browse Activity Library
             </Button>
           </div>
         ) : (
@@ -232,11 +232,11 @@ const TodaysEnrichmentSummary: React.FC<TodaysEnrichmentSummaryProps> = ({ onCha
 
         <div className="mt-6 pt-4 border-t border-purple-200">
           <Button
-            onClick={() => navigate('/dog-profile-dashboard/weekly-plan')}
+            onClick={() => navigate('/app#favorites')}
             className="w-full bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 text-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
           >
             <Calendar className="w-4 h-4 mr-2" />
-            View Your Weekly Planner
+            View Favorites
           </Button>
         </div>
       </div>

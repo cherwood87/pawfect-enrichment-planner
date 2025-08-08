@@ -48,7 +48,7 @@ const WeeklyPlannerHeader: React.FC<WeeklyPlannerHeaderProps> = ({
           </div>
           <div>
             <CardTitle className="text-2xl font-bold text-purple-800 flex items-center space-x-3">
-              <span>{viewMode === 'week' ? 'Weekly Planner' : 'Daily Focus'}</span>
+              <span>{viewMode === 'week' ? 'Planner' : 'Daily Focus'}</span>
               {isComplete && (
                 <span className="text-sm bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full font-medium">
                   Complete!

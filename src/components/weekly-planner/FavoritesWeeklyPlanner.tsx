@@ -8,6 +8,7 @@ import { favouritesService, FavouriteActivity } from '@/services/favouritesServi
 import { getPillarActivities } from '@/data/activityLibrary';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import ConsolidatedActivityModal from '@/components/modals/ConsolidatedActivityModal';
 
 interface FavoritesWeeklyPlannerProps {
   onPillarSelect: (pillar: string) => void;
@@ -19,6 +20,8 @@ const FavoritesWeeklyPlanner: React.FC<FavoritesWeeklyPlannerProps> = ({ onPilla
   const navigate = useNavigate();
   const [favorites, setFavorites] = useState<FavouriteActivity[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedDetails, setSelectedDetails] = useState<any | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     loadFavorites();
@@ -66,16 +69,23 @@ const FavoritesWeeklyPlanner: React.FC<FavoritesWeeklyPlannerProps> = ({ onPilla
   };
 
   const handleActivityClick = (activity: FavouriteActivity) => {
-    // Could open activity details modal here in the future
-    toast({
-      title: activity.title || "Activity",
-      description: "Click 'Browse Library' to see full details and add more favorites",
-    });
+    // Try to find full details from library
+    const activityDetailsList = getPillarActivities();
+    const details = activityDetailsList.find(a => a.id === activity.activity_id);
+    if (details) {
+      setSelectedDetails(details);
+      setIsModalOpen(true);
+    } else {
+      toast({
+        title: activity.title || 'Activity',
+        description: 'Open the Activity Library to view full instructions',
+      });
+    }
   };
 
   const handleBrowseLibrary = () => {
     onPillarSelect('all');
-    navigate('/activities');
+    navigate('/activity-library');
   };
 
   const getPillarColor = (pillar: string) => {
@@ -196,6 +206,15 @@ const FavoritesWeeklyPlanner: React.FC<FavoritesWeeklyPlannerProps> = ({ onPilla
         )}
       </CardContent>
     </Card>
+
+    {selectedDetails && (
+      <ConsolidatedActivityModal
+        isOpen={isModalOpen}
+        onClose={() => { setIsModalOpen(false); setSelectedDetails(null); }}
+        activityDetails={selectedDetails}
+        mode="library"
+      />
+    )}
   );
 };
 

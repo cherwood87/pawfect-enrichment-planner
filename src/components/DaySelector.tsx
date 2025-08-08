@@ -12,7 +12,7 @@ const DaySelector: React.FC<DaySelectorProps> = ({ selectedDayOfWeek, onDaySelec
 
   return (
     <div className="space-y-3">
-      <h3 className="font-semibold text-purple-800 text-sm">Select Day for Weekly Plan</h3>
+      <h3 className="font-semibold text-purple-800 text-sm">Choose a Day</h3>
       <div className="grid grid-cols-7 gap-2">
         {dayNames.map((day, index) => (
           <Button

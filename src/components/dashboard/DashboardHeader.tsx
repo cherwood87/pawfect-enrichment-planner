@@ -25,7 +25,7 @@ interface DashboardHeaderProps {
 const DashboardHeader: React.FC<DashboardHeaderProps> = React.memo(
   ({ onChatOpen, onAddDogOpen }) => {
     const navigate = useNavigate();
-    const { pathname } = useLocation();
+    const { pathname, hash } = useLocation();
     const { currentDog } = useDog();
     const { user, signOut } = useAuth();
     const isMobile = useIsMobile();
@@ -189,18 +189,11 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = React.memo(
                     <span>Activity Library</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    onClick={() => handleNavigation('/dog-profile-dashboard/weekly-plan')}
-                    className={`touch-target rounded ${
-                      isCurrentPage('/dog-profile-dashboard/weekly-plan')
-                        ? 'bg-blue-50 text-blue-700'
-                        : ''
-                    }`}
-                    aria-current={
-                      isCurrentPage('/dog-profile-dashboard/weekly-plan') ? 'page' : undefined
-                    }
+                    onClick={() => handleNavigation('/app#favorites')}
+                    className={"touch-target rounded"}
                   >
                     <CalendarDays className="mr-2 h-4 w-4" />
-                    <span>Weekly Planner</span>
+                    <span>Favorites</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem

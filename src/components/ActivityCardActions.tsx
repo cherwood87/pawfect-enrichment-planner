@@ -35,21 +35,13 @@ const ActivityCardActions: React.FC<ActivityCardActionsProps> = ({
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 pt-4 border-t border-purple-200/50">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 pt-4 border-t border-purple-200/50">
       <Button 
         variant="outline" 
         onClick={onClose} 
         className="rounded-2xl border-purple-300 hover:bg-purple-50"
       >
         Close
-      </Button>
-      <Button
-        onClick={handleScheduleClick}
-        className="bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600 text-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
-        disabled={disabled}
-      >
-        <Calendar className="w-4 h-4 mr-2" />
-        Add to Weekly Plan
       </Button>
       <Button
         onClick={handleFavouritesClick}
