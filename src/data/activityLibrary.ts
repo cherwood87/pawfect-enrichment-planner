@@ -1,4 +1,3 @@
-
 import { ActivityLibraryItem } from '@/types/activity';
 import { DiscoveredActivity } from '@/types/discovery';
 import { mentalActivities } from './activities/mentalActivities';
@@ -58,7 +57,7 @@ export function getPillarActivities(pillar?: string | null): ActivityLibraryItem
   return weightedShuffle(pillarActivities);
 }
 
-// Search combined activities (library + discovered) with weighted results
+// Search combined activities (library + discovered + curated) with weighted results
 export function searchCombinedActivities(query: string, discoveredActivities: DiscoveredActivity[]): (ActivityLibraryItem | DiscoveredActivity)[] {
   const combinedActivities = getCombinedActivities(discoveredActivities);
   const lowercaseQuery = query.toLowerCase();
@@ -69,15 +68,25 @@ export function searchCombinedActivities(query: string, discoveredActivities: Di
     activity.tags?.some(tag => tag.toLowerCase().includes(lowercaseQuery)) ||
     activity.benefits?.toLowerCase().includes(lowercaseQuery)
   );
-
+  
   // Apply weighted shuffling to search results to promote discovered activities
   return weightedShuffle(matchingActivities);
 }
 
-// Get combined activities (library + discovered) with weighted shuffling
+// Get combined activities (library + discovered + curated) with weighted shuffling
 export function getCombinedActivities(discoveredActivities: DiscoveredActivity[]): (ActivityLibraryItem | DiscoveredActivity)[] {
-  const approvedDiscovered = discoveredActivities.filter(activity => activity.approved);
-  const combined = [...activityLibrary, ...approvedDiscovered];
+  // Filter discovered activities (AI-generated)
+  const approvedDiscovered = discoveredActivities.filter(activity => 
+    activity.approved && activity.source === 'discovered'
+  );
+  
+  // Filter curated activities (manually added high-quality activities)
+  const curatedActivities = discoveredActivities.filter(activity => 
+    activity.source === 'curated' && activity.approved
+  );
+  
+  // Combine static library + discovered + curated activities
+  const combined = [...activityLibrary, ...approvedDiscovered, ...curatedActivities];
   
   // Apply weighted shuffling to promote discovered activities
   return weightedShuffle(combined);
