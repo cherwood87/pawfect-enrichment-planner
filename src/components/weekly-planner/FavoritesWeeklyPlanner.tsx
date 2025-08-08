@@ -120,7 +120,8 @@ const FavoritesWeeklyPlanner: React.FC<FavoritesWeeklyPlannerProps> = ({ onPilla
   }
 
   return (
-    <Card className="col-span-2 shadow-lg rounded-2xl bg-gradient-to-br from-purple-50 to-cyan-50 border-2 border-purple-200">
+    <>
+      <Card className="col-span-2 shadow-lg rounded-2xl bg-gradient-to-br from-purple-50 to-cyan-50 border-2 border-purple-200">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
@@ -215,6 +216,7 @@ const FavoritesWeeklyPlanner: React.FC<FavoritesWeeklyPlannerProps> = ({ onPilla
         mode="library"
       />
     )}
+    </>
   );
 };
 
