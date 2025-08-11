@@ -101,14 +101,14 @@ const TodaysEnrichmentSummary: React.FC<TodaysEnrichmentSummaryProps> = ({ onCha
       <div className="modern-card p-6 rounded-3xl bg-gradient-to-br from-purple-50 to-cyan-50 border-2 border-purple-200">
         <div className="flex items-center space-x-3 mb-6">
           <div className="bg-gradient-to-r from-purple-500 to-cyan-500 p-3 rounded-2xl">
-            <Calendar className="w-6 h-6 text-white" />
+            <Star className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-purple-800">Today's Enrichment Summary</h2>
+            <h2 className="text-xl font-bold text-purple-800">Enrichment Hub</h2>
             <p className="text-sm text-purple-600">
               {todaysActivities.length === 0 
-                ? "No activities scheduled for today" 
-                : `${todaysActivities.filter(a => a.completed).length} of ${todaysActivities.length} activities completed`
+                ? "No schedule needed — choose from favorites anytime" 
+                : `Today's progress: ${todaysActivities.filter(a => a.completed).length} of ${todaysActivities.length} completed`
               }
             </p>
           </div>
@@ -117,10 +117,10 @@ const TodaysEnrichmentSummary: React.FC<TodaysEnrichmentSummaryProps> = ({ onCha
         {todaysActivities.length === 0 ? (
           <div className="text-center py-8 bg-gradient-to-br from-purple-50 to-cyan-50 rounded-2xl border-2 border-purple-200">
             <div className="bg-gradient-to-r from-purple-400 to-cyan-400 p-3 rounded-2xl w-16 h-16 mx-auto mb-4">
-              <Calendar className="w-10 h-10 text-white mx-auto" />
+              <Star className="w-10 h-10 text-white mx-auto" />
             </div>
-            <p className="font-medium text-purple-800 mb-2">No activities scheduled for today!</p>
-            <p className="text-sm text-purple-600 mb-4">Plan some enrichment activities for {currentDog.name}.</p>
+            <p className="font-medium text-purple-800 mb-2">No schedule needed today</p>
+            <p className="text-sm text-purple-600 mb-4">Pick a favorite for {currentDog.name} anytime.</p>
             <Button
               onClick={() => navigate('/activity-library')}
               className="bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 text-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
@@ -235,7 +235,7 @@ const TodaysEnrichmentSummary: React.FC<TodaysEnrichmentSummaryProps> = ({ onCha
             onClick={() => navigate('/app#favorites')}
             className="w-full bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 text-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
           >
-            <Calendar className="w-4 h-4 mr-2" />
+            <Star className="w-4 h-4 mr-2" />
             View Favorites
           </Button>
         </div>
