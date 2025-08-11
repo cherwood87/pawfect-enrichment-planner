@@ -174,7 +174,7 @@ const ActivityLibraryGrid = React.memo<ActivityLibraryGridProps>(({
     return (
       <div className="p-4">
         <div className="mb-4 text-sm text-muted-foreground">
-          Showing {activities.length} activities (virtualized for performance)
+          Showing {activities.length} activities
         </div>
         <VirtualizedList
           items={activities}
