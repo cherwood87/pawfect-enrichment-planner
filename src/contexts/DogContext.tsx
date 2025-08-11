@@ -3,6 +3,7 @@ import { Dog } from '@/types/dog';
 import { DogService } from '@/services/dogService';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { time, end } from '@/utils/perf';
 
 interface DogState {
   dogs: Dog[];
@@ -111,6 +112,7 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       dispatch({ type: 'SET_LOADING', payload: true });
       dispatch({ type: 'SET_ERROR', payload: null });
       console.log('📋 Loading dogs for user:', user.email);
+      time('Dogs:loadAll');
       
       // Add timeout for better UX
       const loadingTimeout = setTimeout(() => {
@@ -118,17 +120,34 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         dispatch({ type: 'SET_ERROR', payload: 'Loading is taking longer than expected. Please refresh the page.' });
       }, 10000); // 10 second timeout
 
-      // Load dogs with parallel localStorage check
+      // Load dogs with parallel localStorage check and explicit timing
+      const supabaseTimed = (async () => {
+        time('DB:getAllDogs');
+        const r = await DogService.getAllDogs();
+        end('DB:getAllDogs');
+        return r;
+      })();
+      const localTimed = (async () => {
+        time('LocalStorage:checkDogs');
+        const r = await checkLocalStorageForDogs();
+        end('LocalStorage:checkDogs');
+        return r;
+      })();
+
       const [supabaseDogs, localStorageCheck] = await Promise.allSettled([
-        DogService.getAllDogs(),
-        checkLocalStorageForDogs()
+        supabaseTimed,
+        localTimed
       ]);
 
       clearTimeout(loadingTimeout);
 
       if (supabaseDogs.status === 'fulfilled') {
         const dogs = supabaseDogs.value;
-        console.log('📋 Loaded dogs from Supabase:', dogs.length);
+        const totalImageChars = dogs.reduce((sum, d) => sum + (d.image?.length || 0), 0);
+        console.log('📋 Loaded dogs from Supabase:', {
+          count: dogs.length,
+          totalImageKB: Math.round(totalImageChars / 1024),
+        });
         
         dispatch({ type: 'SET_DOGS', payload: dogs });
         
@@ -156,6 +175,7 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       console.error('❌ Critical error loading dogs:', error);
       dispatch({ type: 'SET_ERROR', payload: 'Failed to load your dogs. Please try refreshing the page.' });
     } finally {
+      end('Dogs:loadAll');
       dispatch({ type: 'SET_LOADING', payload: false });
     }
   };

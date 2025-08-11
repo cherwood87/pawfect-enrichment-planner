@@ -1,6 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { Dog } from '@/types/dog';
+import { time, end } from '@/utils/perf';
 
 export interface DatabaseDog {
   id: string;
@@ -40,10 +41,15 @@ export class DogService {
     }
 
     // Create new promise and cache it
+    time('Auth:getUser');
     this._userPromise = supabase.auth.getUser().then(({ data: { user } }) => {
       this._currentUser = user;
       this._userPromise = null; // Clear promise cache
+      end('Auth:getUser');
       return user;
+    }).catch((e) => {
+      end('Auth:getUser');
+      throw e;
     });
 
     return this._userPromise;
