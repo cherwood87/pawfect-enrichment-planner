@@ -64,10 +64,9 @@ const Hero_Intro: React.FC = () => {
                 Unique Personality
               </h1>
               
-              <p className="text-lg md:text-xl text-gray-600 mb-8 leading-relaxed">
-                Create personalized enrichment plans based on your dog's unique personality and needs. 
-                Track activities across different enrichment pillars for a happier, healthier pup.
-              </p>
+              <p className="text-lg md:text-xl text-gray-600 mb-8 leading-relaxed">Discover the right mix of physical, mental, instinctual, environmental, and social activities for your dog—chosen to match their personality and your lifestyle.
+
+            </p>
 
               <div className="flex justify-center lg:justify-start">
                 <Button onClick={handleGetStarted} size="lg" className="bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 text-lg px-8 py-4 rounded-2xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300">
