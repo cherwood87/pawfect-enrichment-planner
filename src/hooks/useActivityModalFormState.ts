@@ -1,7 +1,6 @@
-
 import { useState } from 'react';
 
-export const useActivityModalState = (selectedPillar?: string | null) => {
+export const useActivityModalFormState = (selectedPillar?: string | null) => {
   const [activeTab, setActiveTab] = useState('browse');
   
   // State for CreateCustomTab

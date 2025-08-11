@@ -7,7 +7,7 @@ import DaySelector from './DaySelector';
 import ActivityModalTabs from './ActivityModalTabs';
 import { useActivity } from '@/contexts/ActivityContext';
 import { getPillarActivities } from '@/data/activityLibrary';
-import { useActivityModalState } from './ActivityModalState';
+import { useActivityModalFormState } from '@/hooks/useActivityModalFormState';
 import { useActivityModalHandlers } from './ActivityModalHandlers';
 
 interface ActivityModalProps {
@@ -41,7 +41,7 @@ const ActivityModal: React.FC<ActivityModalProps> = ({
     selectedDayOfWeek,
     setSelectedDayOfWeek,
     resetCustomActivityForm
-  } = useActivityModalState(selectedPillar);
+  } = useActivityModalFormState(selectedPillar);
 
   const customActivityState = {
     activityName,
