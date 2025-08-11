@@ -57,9 +57,9 @@ const Hero_Intro: React.FC = () => {
             {/* Left Content */}
             <div className="flex-1 max-w-lg text-left lg:text-left">
               <h1 className="text-3xl md:text-5xl font-bold text-purple-800 mb-6 leading-tight">
-                Give Your Dog the
+                Personalized Enrichment
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-cyan-600">
-                  {" "}Perfect Life{" "}
+                  {" "}Plans for Your Dog{" "}
                 </span>
                 They Deserve
               </h1>
