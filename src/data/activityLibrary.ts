@@ -80,13 +80,9 @@ export function getCombinedActivities(discoveredActivities: DiscoveredActivity[]
     activity.approved && activity.source === 'discovered'
   );
   
-  // Filter curated activities (manually added high-quality activities)
-  const curatedActivities = discoveredActivities.filter(activity => 
-    activity.source === 'curated' && activity.approved
-  );
-  
-  // Combine static library + discovered + curated activities
-  const combined = [...activityLibrary, ...approvedDiscovered, ...curatedActivities];
+  // Note: DiscoveredActivity.source is typed as 'discovered' only, so curated items are not part of this list
+  // Combine static library + approved discovered activities
+  const combined = [...activityLibrary, ...approvedDiscovered];
   
   // Apply weighted shuffling to promote discovered activities
   return weightedShuffle(combined);

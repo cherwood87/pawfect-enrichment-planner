@@ -7,6 +7,11 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instanciate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "13.0.4"
+  }
   public: {
     Tables: {
       activities: {
@@ -151,6 +156,89 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      activity_feedback: {
+        Row: {
+          activity_id: string
+          activity_type: string
+          created_at: string
+          difficulty_rating: number | null
+          dog_id: string | null
+          engagement_rating: number | null
+          enjoyment_rating: number | null
+          feedback_text: string | null
+          id: string
+          rating: number | null
+          tags: string[] | null
+          updated_at: string
+          user_id: string | null
+          would_recommend: boolean | null
+        }
+        Insert: {
+          activity_id: string
+          activity_type: string
+          created_at?: string
+          difficulty_rating?: number | null
+          dog_id?: string | null
+          engagement_rating?: number | null
+          enjoyment_rating?: number | null
+          feedback_text?: string | null
+          id?: string
+          rating?: number | null
+          tags?: string[] | null
+          updated_at?: string
+          user_id?: string | null
+          would_recommend?: boolean | null
+        }
+        Update: {
+          activity_id?: string
+          activity_type?: string
+          created_at?: string
+          difficulty_rating?: number | null
+          dog_id?: string | null
+          engagement_rating?: number | null
+          enjoyment_rating?: number | null
+          feedback_text?: string | null
+          id?: string
+          rating?: number | null
+          tags?: string[] | null
+          updated_at?: string
+          user_id?: string | null
+          would_recommend?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_feedback_dog_id_fkey"
+            columns: ["dog_id"]
+            isOneToOne: false
+            referencedRelation: "dogs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      content_templates: {
+        Row: {
+          content_type: string
+          created_at: string
+          id: string
+          template: string
+          updated_at: string
+        }
+        Insert: {
+          content_type: string
+          created_at?: string
+          id?: string
+          template: string
+          updated_at?: string
+        }
+        Update: {
+          content_type?: string
+          created_at?: string
+          id?: string
+          template?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       discovered_activities: {
         Row: {
@@ -383,6 +471,36 @@ export type Database = {
           },
         ]
       }
+      generated_content: {
+        Row: {
+          content_type: string
+          created_at: string
+          generated_text: string
+          id: string
+          topic: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          content_type: string
+          created_at?: string
+          generated_text: string
+          id?: string
+          topic: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          content_type?: string
+          created_at?: string
+          generated_text?: string
+          id?: string
+          topic?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       journal_entries: {
         Row: {
           behaviors: string[]
@@ -424,6 +542,187 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      kajabi_courses: {
+        Row: {
+          course_description: string | null
+          course_name: string
+          created_at: string
+          id: string
+          kajabi_course_id: string
+          last_synced_at: string | null
+          lessons_count: number | null
+          modules_count: number | null
+          sync_status: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          course_description?: string | null
+          course_name: string
+          created_at?: string
+          id?: string
+          kajabi_course_id: string
+          last_synced_at?: string | null
+          lessons_count?: number | null
+          modules_count?: number | null
+          sync_status?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          course_description?: string | null
+          course_name?: string
+          created_at?: string
+          id?: string
+          kajabi_course_id?: string
+          last_synced_at?: string | null
+          lessons_count?: number | null
+          modules_count?: number | null
+          sync_status?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      knowledge_base_files: {
+        Row: {
+          content_extracted: string
+          course_reference: string | null
+          created_at: string
+          file_name: string
+          file_size: number | null
+          file_type: string
+          id: string
+          kajabi_course_id: string | null
+          kajabi_lesson_id: string | null
+          kajabi_module_id: string | null
+          source: string | null
+          storage_path: string
+          tags: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content_extracted: string
+          course_reference?: string | null
+          created_at?: string
+          file_name: string
+          file_size?: number | null
+          file_type: string
+          id?: string
+          kajabi_course_id?: string | null
+          kajabi_lesson_id?: string | null
+          kajabi_module_id?: string | null
+          source?: string | null
+          storage_path: string
+          tags?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content_extracted?: string
+          course_reference?: string | null
+          created_at?: string
+          file_name?: string
+          file_size?: number | null
+          file_type?: string
+          id?: string
+          kajabi_course_id?: string | null
+          kajabi_lesson_id?: string | null
+          kajabi_module_id?: string | null
+          source?: string | null
+          storage_path?: string
+          tags?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      learning_metrics: {
+        Row: {
+          calculated_at: string
+          calculation_data: Json | null
+          confidence_level: number | null
+          dog_id: string | null
+          id: string
+          metric_type: string
+          metric_value: number
+          user_id: string | null
+        }
+        Insert: {
+          calculated_at?: string
+          calculation_data?: Json | null
+          confidence_level?: number | null
+          dog_id?: string | null
+          id?: string
+          metric_type: string
+          metric_value: number
+          user_id?: string | null
+        }
+        Update: {
+          calculated_at?: string
+          calculation_data?: Json | null
+          confidence_level?: number | null
+          dog_id?: string | null
+          id?: string
+          metric_type?: string
+          metric_value?: number
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_metrics_dog_id_fkey"
+            columns: ["dog_id"]
+            isOneToOne: false
+            referencedRelation: "dogs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recommendation_logs: {
+        Row: {
+          algorithm_version: string | null
+          context_data: Json | null
+          created_at: string
+          dog_id: string | null
+          id: string
+          recommendation_type: string
+          recommended_activities: string[]
+          user_action: string | null
+          user_id: string | null
+        }
+        Insert: {
+          algorithm_version?: string | null
+          context_data?: Json | null
+          created_at?: string
+          dog_id?: string | null
+          id?: string
+          recommendation_type: string
+          recommended_activities: string[]
+          user_action?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          algorithm_version?: string | null
+          context_data?: Json | null
+          created_at?: string
+          dog_id?: string | null
+          id?: string
+          recommendation_type?: string
+          recommended_activities?: string[]
+          user_action?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recommendation_logs_dog_id_fkey"
+            columns: ["dog_id"]
+            isOneToOne: false
+            referencedRelation: "dogs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       scheduled_activities: {
         Row: {
@@ -493,47 +792,6 @@ export type Database = {
           },
         ]
       }
-      scheduled_activity_audit_log: {
-        Row: {
-          id: string
-          new_values: Json | null
-          notes: string | null
-          old_values: Json | null
-          operation: string
-          performed_at: string | null
-          performed_by: string | null
-          scheduled_activity_id: string | null
-        }
-        Insert: {
-          id?: string
-          new_values?: Json | null
-          notes?: string | null
-          old_values?: Json | null
-          operation: string
-          performed_at?: string | null
-          performed_by?: string | null
-          scheduled_activity_id?: string | null
-        }
-        Update: {
-          id?: string
-          new_values?: Json | null
-          notes?: string | null
-          old_values?: Json | null
-          operation?: string
-          performed_at?: string | null
-          performed_by?: string | null
-          scheduled_activity_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "scheduled_activity_audit_log_scheduled_activity_id_fkey"
-            columns: ["scheduled_activity_id"]
-            isOneToOne: false
-            referencedRelation: "scheduled_activities"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       user_activities: {
         Row: {
           age_group: Database["public"]["Enums"]["age_group"] | null
@@ -599,11 +857,152 @@ export type Database = {
           },
         ]
       }
+      user_interactions: {
+        Row: {
+          activity_id: string | null
+          activity_type: string | null
+          context_data: Json | null
+          created_at: string
+          dog_id: string | null
+          id: string
+          interaction_type: string
+          pillar: string | null
+          session_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          activity_id?: string | null
+          activity_type?: string | null
+          context_data?: Json | null
+          created_at?: string
+          dog_id?: string | null
+          id?: string
+          interaction_type: string
+          pillar?: string | null
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          activity_id?: string | null
+          activity_type?: string | null
+          context_data?: Json | null
+          created_at?: string
+          dog_id?: string | null
+          id?: string
+          interaction_type?: string
+          pillar?: string | null
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_interactions_dog_id_fkey"
+            columns: ["dog_id"]
+            isOneToOne: false
+            referencedRelation: "dogs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_preferences: {
+        Row: {
+          confidence_score: number | null
+          dog_id: string | null
+          id: string
+          last_updated: string
+          preference_data: Json
+          preference_type: string
+          user_id: string | null
+        }
+        Insert: {
+          confidence_score?: number | null
+          dog_id?: string | null
+          id?: string
+          last_updated?: string
+          preference_data?: Json
+          preference_type: string
+          user_id?: string | null
+        }
+        Update: {
+          confidence_score?: number | null
+          dog_id?: string | null
+          id?: string
+          last_updated?: string
+          preference_data?: Json
+          preference_type?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_preferences_dog_id_fkey"
+            columns: ["dog_id"]
+            isOneToOne: false
+            referencedRelation: "dogs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_settings: {
+        Row: {
+          created_at: string
+          id: string
+          setting_data: Json
+          setting_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          setting_data?: Json
+          setting_type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          setting_data?: Json
+          setting_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      calculate_pillar_preferences: {
+        Args: { p_user_id: string; p_dog_id: string }
+        Returns: {
+          pillar: string
+          preference_score: number
+          confidence: number
+        }[]
+      }
+      enable_rls_for_table: {
+        Args: { table_name: string }
+        Returns: undefined
+      }
+      generate_smart_recommendations: {
+        Args: {
+          p_user_id: string
+          p_dog_id: string
+          p_recommendation_type?: string
+          p_limit?: number
+        }
+        Returns: {
+          activity_id: string
+          recommendation_score: number
+          reason: string
+        }[]
+      }
+      get_kajabi_settings: {
+        Args: { p_user_id: string }
+        Returns: Json
+      }
       resolve_scheduled_activity_duplicates: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -625,6 +1024,43 @@ export type Database = {
         }
         Returns: string
       }
+      search_knowledge_base_files: {
+        Args: { p_user_id: string; p_search_terms: string; p_limit?: number }
+        Returns: {
+          id: string
+          file_name: string
+          file_type: string
+          content_excerpt: string
+          relevance_score: number
+          tags: string[]
+        }[]
+      }
+      search_knowledge_base_with_courses: {
+        Args: {
+          p_user_id: string
+          p_search_terms: string
+          p_content_type?: string
+          p_limit?: number
+        }
+        Returns: {
+          id: string
+          file_name: string
+          file_type: string
+          content_excerpt: string
+          relevance_score: number
+          tags: string[]
+          source: string
+          course_reference: string
+        }[]
+      }
+      user_owns_dog: {
+        Args: { dog_uuid: string }
+        Returns: boolean
+      }
+      user_owns_dog_by_text_id: {
+        Args: { dog_text_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       activity_level: "low" | "moderate" | "high"
@@ -645,21 +1081,25 @@ export type Database = {
   }
 }
 
-type DefaultSchema = Database[Extract<keyof Database, "public">]
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
@@ -677,14 +1117,16 @@ export type Tables<
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
@@ -700,14 +1142,16 @@ export type TablesInsert<
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
@@ -723,14 +1167,16 @@ export type TablesUpdate<
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
-> = DefaultSchemaEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
     ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never
@@ -738,14 +1184,16 @@ export type Enums<
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
     : never = never,
-> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
