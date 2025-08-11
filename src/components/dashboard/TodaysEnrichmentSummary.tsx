@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, Clock, Star, Target, CheckCircle, MessageCircle, Eye, Quote, Shuffle } from 'lucide-react';
+import { Calendar, Clock, Star, Target, CheckCircle, MessageCircle, Eye, Quote } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useActivity } from '@/contexts/ActivityContext';
@@ -44,7 +44,7 @@ const TodaysEnrichmentSummary: React.FC<TodaysEnrichmentSummaryProps> = ({
   }, [getCombinedActivityLibrary, userActivities, discoveredActivities]);
 
   // Daily rotating quote for empty state
-  const { quote, shuffleNow } = useDailyQuote();
+  const { quote } = useDailyQuote();
 
   const handleToggleCompletion = useCallback(async (activityId: string, completionNotes?: string) => {
     const activity = todaysActivities.find(a => a.id === activityId);
@@ -107,17 +107,6 @@ const TodaysEnrichmentSummary: React.FC<TodaysEnrichmentSummaryProps> = ({
   }
   return <>
       <div className="modern-card p-6 rounded-3xl bg-gradient-to-br from-purple-50 to-cyan-50 border-2 border-purple-200">
-        <div className="flex items-center space-x-3 mb-6">
-          <div className="bg-gradient-to-r from-purple-500 to-cyan-500 p-3 rounded-2xl">
-            <Calendar className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h2 className="text-xl font-bold text-purple-800">Today's Enrichment Summary</h2>
-            <p className="text-sm text-purple-600">
-              {todaysActivities.length === 0 ? "No activities scheduled for today" : `${todaysActivities.filter(a => a.completed).length} of ${todaysActivities.length} activities completed`}
-            </p>
-          </div>
-        </div>
 
         {todaysActivities.length === 0 ? (
             <div className="text-center py-8 bg-gradient-to-br from-purple-50 to-cyan-50 rounded-2xl border-2 border-purple-200">
@@ -132,14 +121,7 @@ const TodaysEnrichmentSummary: React.FC<TodaysEnrichmentSummaryProps> = ({
                 )}
               </figure>
 
-              <div className="mt-6 flex flex-col sm:flex-row gap-2 justify-center">
-                <Button
-                  variant="outline"
-                  onClick={shuffleNow}
-                  className="rounded-2xl border-purple-300 text-purple-700 hover:bg-purple-50"
-                >
-                  <Shuffle className="w-4 h-4 mr-2" /> New quote
-                </Button>
+              <div className="mt-6 flex justify-center">
                 <Button
                   onClick={() => navigate('/activity-library')}
                   className="bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 text-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
