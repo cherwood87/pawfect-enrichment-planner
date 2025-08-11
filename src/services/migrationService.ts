@@ -1,7 +1,7 @@
 
 import { ScheduledActivity, UserActivity } from '@/types/activity';
 import { ScheduledActivityService } from './scheduledActivityService';
-import { UserActivityService } from './userActivityService';
+import { ActivityDomainService } from './domain/ActivityDomainService';
 
 export class MigrationService {
   static async migrateScheduledActivitiesFromLocalStorage(dogId: string): Promise<void> {
@@ -36,7 +36,7 @@ export class MigrationService {
 
       for (const activity of activities) {
         try {
-          await UserActivityService.create(activity);
+          await ActivityDomainService.createUserActivity(activity, dogId);
         } catch (error) {
           console.error(`Failed to migrate user activity:`, error);
         }

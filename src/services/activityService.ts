@@ -2,7 +2,6 @@
 import { ScheduledActivity, UserActivity } from '@/types/activity';
 import { ActivityDomainService } from './domain/ActivityDomainService';
 import { ActivityRepository } from './data/ActivityRepository';
-import { UserActivityService } from './userActivityService';
 
 export class ActivityService {
   // Scheduled Activities
@@ -25,13 +24,7 @@ export class ActivityService {
 
   // User Activities (Custom Activities)
   static async getUserActivities(dogId: string): Promise<UserActivity[]> {
-    try {
-      return await UserActivityService.getAll(dogId);
-    } catch (error) {
-      console.error('Failed to load user activities from Supabase, trying localStorage fallback:', error);
-      // Fallback to repository which handles localStorage
-      return ActivityRepository.getUserActivities(dogId, true);
-    }
+    return ActivityRepository.getUserActivities(dogId);
   }
 
   static async createUserActivity(activity: Omit<UserActivity, 'id' | 'createdAt'>): Promise<UserActivity> {
