@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, Clock, Star, Target, CheckCircle, MessageCircle, Eye } from 'lucide-react';
+import { Calendar, Clock, Star, Target, CheckCircle, MessageCircle, Eye, Quote, Shuffle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useActivity } from '@/contexts/ActivityContext';
@@ -10,6 +10,7 @@ import { DiscoveredActivity } from '@/types/discovery';
 import ConsolidatedActivityModal from '@/components/modals/ConsolidatedActivityModal';
 import ChatModal from '@/components/chat/ChatModal';
 import { ActivityHelpContext } from '@/types/activityContext';
+import { useDailyQuote } from '@/hooks/useDailyQuote';
 interface TodaysEnrichmentSummaryProps {
   onChatOpen?: () => void;
 }
@@ -41,6 +42,10 @@ const TodaysEnrichmentSummary: React.FC<TodaysEnrichmentSummaryProps> = ({
     const allActivities = [...getCombinedActivityLibrary(), ...userActivities, ...discoveredActivities];
     return allActivities.find(activity => activity.id === activityId);
   }, [getCombinedActivityLibrary, userActivities, discoveredActivities]);
+
+  // Daily rotating quote for empty state
+  const { quote, shuffleNow } = useDailyQuote();
+
   const handleToggleCompletion = useCallback(async (activityId: string, completionNotes?: string) => {
     const activity = todaysActivities.find(a => a.id === activityId);
     if (!activity) return;
@@ -114,16 +119,37 @@ const TodaysEnrichmentSummary: React.FC<TodaysEnrichmentSummaryProps> = ({
           </div>
         </div>
 
-        {todaysActivities.length === 0 ? <div className="text-center py-8 bg-gradient-to-br from-purple-50 to-cyan-50 rounded-2xl border-2 border-purple-200">
-            <div className="bg-gradient-to-r from-purple-400 to-cyan-400 p-3 rounded-2xl w-16 h-16 mx-auto mb-4">
-              <Calendar className="w-10 h-10 text-white mx-auto" />
+        {todaysActivities.length === 0 ? (
+            <div className="text-center py-8 bg-gradient-to-br from-purple-50 to-cyan-50 rounded-2xl border-2 border-purple-200">
+              <div className="bg-gradient-to-r from-purple-400 to-cyan-400 p-3 rounded-2xl w-16 h-16 mx-auto mb-4">
+                <Quote className="w-10 h-10 text-white mx-auto" />
+              </div>
+
+              <figure className="max-w-prose mx-auto">
+                <blockquote className="text-base md:text-lg text-purple-700 italic">“{quote.text}”</blockquote>
+                {quote.author && (
+                  <figcaption className="mt-2 text-sm text-purple-600">— {quote.author}</figcaption>
+                )}
+              </figure>
+
+              <div className="mt-6 flex flex-col sm:flex-row gap-2 justify-center">
+                <Button
+                  variant="outline"
+                  onClick={shuffleNow}
+                  className="rounded-2xl border-purple-300 text-purple-700 hover:bg-purple-50"
+                >
+                  <Shuffle className="w-4 h-4 mr-2" /> New quote
+                </Button>
+                <Button
+                  onClick={() => navigate('/activity-library')}
+                  className="bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 text-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
+                >
+                  Browse Activity Library
+                </Button>
+              </div>
             </div>
-            
-            <p className="text-sm text-purple-600 mb-4">Plan some enrichment activities for {currentDog.name}.</p>
-            <Button onClick={() => navigate('/activity-library')} className="bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 text-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
-              Browse Activity Library
-            </Button>
-          </div> : <div className="space-y-4">
+          ) : (
+            <div className="space-y-4">
             {todaysActivities.map(activity => {
           const activityDetails = getActivityDetails(activity.activityId);
           if (!activityDetails) return null;
@@ -191,7 +217,7 @@ const TodaysEnrichmentSummary: React.FC<TodaysEnrichmentSummaryProps> = ({
                     </div>}
                 </div>;
         })}
-          </div>}
+          </div>)}
 
         <div className="mt-6 pt-4 border-t border-purple-200">
           <Button onClick={() => navigate('/app#favorites')} className="w-full bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 text-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
