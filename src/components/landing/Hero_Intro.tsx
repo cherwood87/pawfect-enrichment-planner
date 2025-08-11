@@ -61,7 +61,7 @@ const Hero_Intro: React.FC = () => {
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-cyan-600">
                   {" "}Plans for Your Dog{" "}
                 </span>
-                They Deserve
+                Unique Personality
               </h1>
               
               <p className="text-lg md:text-xl text-gray-600 mb-8 leading-relaxed">
