@@ -80,10 +80,26 @@ export function getCombinedActivities(discoveredActivities: DiscoveredActivity[]
     activity.approved && activity.source === 'discovered'
   );
   
-  // Note: DiscoveredActivity.source is typed as 'discovered' only, so curated items are not part of this list
   // Combine static library + approved discovered activities
-  const combined = [...activityLibrary, ...approvedDiscovered];
+  const combined: (ActivityLibraryItem | DiscoveredActivity)[] = [
+    ...activityLibrary,
+    ...approvedDiscovered,
+  ];
+
+  // De-duplicate by id and normalized title while preserving order (prefer library entries)
+  const seenIds = new Set<string>();
+  const seenTitles = new Set<string>();
+  const unique: (ActivityLibraryItem | DiscoveredActivity)[] = [];
+
+  for (const item of combined) {
+    const idKey = String(item.id);
+    const titleKey = item.title.trim().toLowerCase();
+    if (seenIds.has(idKey) || seenTitles.has(titleKey)) continue;
+    seenIds.add(idKey);
+    seenTitles.add(titleKey);
+    unique.push(item);
+  }
   
   // Apply weighted shuffling to promote discovered activities
-  return weightedShuffle(combined);
+  return weightedShuffle(unique);
 }
