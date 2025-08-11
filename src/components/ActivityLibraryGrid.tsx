@@ -1,21 +1,26 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Clock, Star, CheckCircle, Sparkles, Brain, Zap, Users, TreePine, Target } from 'lucide-react';
 import { ActivityLibraryItem } from '@/types/activity';
 import { DiscoveredActivity } from '@/types/discovery';
+import { VirtualizedList } from './ui/VirtualizedList';
 
 interface ActivityLibraryGridProps {
   activities: (ActivityLibraryItem | DiscoveredActivity)[];
   onActivitySelect: (activity: ActivityLibraryItem | DiscoveredActivity) => void;
 }
 
-const ActivityLibraryGrid: React.FC<ActivityLibraryGridProps> = ({
+const ActivityLibraryGrid = React.memo<ActivityLibraryGridProps>(({
   activities,
   onActivitySelect
 }) => {
+  // Use virtualization for large lists (>50 items) for better performance
+  const shouldVirtualize = activities.length > 50;
+  const itemHeight = 400; // Estimated height per activity card
+  const containerHeight = Math.min(800, typeof window !== 'undefined' ? window.innerHeight - 200 : 800);
   const pillars = [
     { id: 'mental', name: 'Mental', icon: Brain, color: 'purple', gradient: 'from-purple-100 to-purple-50' },
     { id: 'physical', name: 'Physical', icon: Zap, color: 'green', gradient: 'from-emerald-100 to-emerald-50' },
@@ -46,6 +51,113 @@ const ActivityLibraryGrid: React.FC<ActivityLibraryGridProps> = ({
     onActivitySelect(activity);
   };
 
+  // Memoize activity card renderer for virtualization
+  const renderActivityCard = useMemo(() => (activity: ActivityLibraryItem | DiscoveredActivity, index: number) => {
+    const pillarData = getPillarData(activity.pillar);
+    const PillarIcon = pillarData.icon;
+    const isDiscovered = isDiscoveredActivity(activity);
+    
+    return (
+      <Card 
+        key={`${activity.id}-${index}`}
+        className="modern-card hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group cursor-pointer mb-4" 
+        onClick={() => onActivitySelect(activity)}
+      >
+        <CardHeader className="pb-3">
+          <div className="flex items-start justify-between mb-3">
+            <div className="flex items-center space-x-3">
+              <div className={`w-10 h-10 bg-gradient-to-br ${pillarData.gradient} rounded-2xl flex items-center justify-center border-2 border-${pillarData.color}-200 group-hover:scale-110 transition-transform duration-300`}>
+                <PillarIcon className={`w-5 h-5 text-${pillarData.color}-600`} />
+              </div>
+              <Badge className={`text-xs border-2 font-semibold ${getDifficultyColor(activity.difficulty)}`}>
+                {activity.difficulty}
+              </Badge>
+            </div>
+            <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700 border border-purple-200">
+              {activity.ageGroup}
+            </Badge>
+          </div>
+
+          {/* Discovery badges */}
+          {isDiscovered && (
+            <div className="flex items-center space-x-2 mb-2">
+              <Badge className={`text-xs border font-semibold ${activity.approved 
+                ? 'bg-emerald-100 text-emerald-700 border-emerald-300' 
+                : 'bg-purple-100 text-purple-700 border-purple-300'
+              }`}>
+                {activity.approved ? (
+                  <>
+                    <CheckCircle className="w-3 h-3 mr-1" />
+                    Auto-Added
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-3 h-3 mr-1" />
+                    Discovered
+                  </>
+                )}
+              </Badge>
+              {activity.qualityScore && (
+                <Badge className="text-xs bg-gray-100 text-gray-600 border border-gray-200">
+                  {Math.round(activity.qualityScore * 100)}% quality
+                </Badge>
+              )}
+            </div>
+          )}
+
+          <CardTitle className="text-lg font-bold text-purple-800 group-hover:text-purple-900 transition-colors leading-tight">
+            {activity.title}
+          </CardTitle>
+        </CardHeader>
+        
+        <CardContent className="space-y-4">
+          <div className="flex items-center space-x-4 text-sm text-gray-600">
+            <div className="flex items-center space-x-1">
+              <Clock className="w-4 h-4 text-purple-500" />
+              <span className="font-medium">{activity.duration} min</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <Star className="w-4 h-4 text-amber-500" />
+              <span className="font-medium">{activity.energyLevel}</span>
+            </div>
+          </div>
+          
+          <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">{activity.benefits}</p>
+          
+          <div className="space-y-3">
+            <div className="bg-gradient-to-r from-purple-50 to-cyan-50 rounded-xl p-3 border border-purple-200">
+              <p className="text-xs font-semibold text-purple-700 mb-1">Materials needed:</p>
+              <p className="text-xs text-purple-600">
+                {activity.materials && activity.materials.length > 0 
+                  ? activity.materials.slice(0, 2).join(', ') + (activity.materials.length > 2 ? '...' : '')
+                  : 'None required'
+                }
+              </p>
+            </div>
+            
+            <div className="bg-gradient-to-r from-cyan-50 to-amber-50 rounded-xl p-3 border border-cyan-200">
+              <p className="text-xs font-semibold text-cyan-700 mb-1">Emotional goals:</p>
+              <p className="text-xs text-cyan-600">
+                {activity.emotionalGoals && activity.emotionalGoals.length > 0
+                  ? activity.emotionalGoals.slice(0, 2).join(', ') + (activity.emotionalGoals.length > 2 ? '...' : '')
+                  : 'General enrichment'
+                }
+              </p>
+            </div>
+          </div>
+          
+          <Button 
+            className="w-full mt-4 modern-button-primary group-hover:shadow-lg transition-all duration-300" 
+            size="sm"
+            onClick={(event) => handleViewDetailsClick(event, activity)}
+          >
+            View Details
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }, [onActivitySelect]);
+
   // Show loading state if no activities
   if (activities.length === 0) {
     return (
@@ -57,115 +169,30 @@ const ActivityLibraryGrid: React.FC<ActivityLibraryGridProps> = ({
     );
   }
 
+  // Use virtualization for large lists
+  if (shouldVirtualize) {
+    return (
+      <div className="p-4">
+        <div className="mb-4 text-sm text-muted-foreground">
+          Showing {activities.length} activities (virtualized for performance)
+        </div>
+        <VirtualizedList
+          items={activities}
+          itemHeight={itemHeight}
+          containerHeight={containerHeight}
+          renderItem={renderActivityCard}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="mobile-grid mobile-gap">
-      {activities.map((activity) => {
-        const pillarData = getPillarData(activity.pillar);
-        const PillarIcon = pillarData.icon;
-        const isDiscovered = isDiscoveredActivity(activity);
-        
-        return (
-          <Card 
-            key={activity.id} 
-            className="modern-card hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group cursor-pointer" 
-            onClick={() => onActivitySelect(activity)}
-          >
-            <CardHeader className="pb-3">
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center space-x-3">
-                  <div className={`w-10 h-10 bg-gradient-to-br ${pillarData.gradient} rounded-2xl flex items-center justify-center border-2 border-${pillarData.color}-200 group-hover:scale-110 transition-transform duration-300`}>
-                    <PillarIcon className={`w-5 h-5 text-${pillarData.color}-600`} />
-                  </div>
-                  <Badge className={`text-xs border-2 font-semibold ${getDifficultyColor(activity.difficulty)}`}>
-                    {activity.difficulty}
-                  </Badge>
-                </div>
-                <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700 border border-purple-200">
-                  {activity.ageGroup}
-                </Badge>
-              </div>
-
-              {/* Discovery badges */}
-              {isDiscovered && (
-                <div className="flex items-center space-x-2 mb-2">
-                  <Badge className={`text-xs border font-semibold ${activity.approved 
-                    ? 'bg-emerald-100 text-emerald-700 border-emerald-300' 
-                    : 'bg-purple-100 text-purple-700 border-purple-300'
-                  }`}>
-                    {activity.approved ? (
-                      <>
-                        <CheckCircle className="w-3 h-3 mr-1" />
-                        Auto-Added
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="w-3 h-3 mr-1" />
-                        Discovered
-                      </>
-                    )}
-                  </Badge>
-                  {activity.qualityScore && (
-                    <Badge className="text-xs bg-gray-100 text-gray-600 border border-gray-200">
-                      {Math.round(activity.qualityScore * 100)}% quality
-                    </Badge>
-                  )}
-                </div>
-              )}
-
-              <CardTitle className="text-lg font-bold text-purple-800 group-hover:text-purple-900 transition-colors leading-tight">
-                {activity.title}
-              </CardTitle>
-            </CardHeader>
-            
-            <CardContent className="space-y-4">
-              <div className="flex items-center space-x-4 text-sm text-gray-600">
-                <div className="flex items-center space-x-1">
-                  <Clock className="w-4 h-4 text-purple-500" />
-                  <span className="font-medium">{activity.duration} min</span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <Star className="w-4 h-4 text-amber-500" />
-                  <span className="font-medium">{activity.energyLevel}</span>
-                </div>
-              </div>
-              
-              <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">{activity.benefits}</p>
-              
-              <div className="space-y-3">
-                <div className="bg-gradient-to-r from-purple-50 to-cyan-50 rounded-xl p-3 border border-purple-200">
-                  <p className="text-xs font-semibold text-purple-700 mb-1">Materials needed:</p>
-                  <p className="text-xs text-purple-600">
-                    {activity.materials && activity.materials.length > 0 
-                      ? activity.materials.slice(0, 2).join(', ') + (activity.materials.length > 2 ? '...' : '')
-                      : 'None required'
-                    }
-                  </p>
-                </div>
-                
-                <div className="bg-gradient-to-r from-cyan-50 to-amber-50 rounded-xl p-3 border border-cyan-200">
-                  <p className="text-xs font-semibold text-cyan-700 mb-1">Emotional goals:</p>
-                  <p className="text-xs text-cyan-600">
-                    {activity.emotionalGoals && activity.emotionalGoals.length > 0
-                      ? activity.emotionalGoals.slice(0, 2).join(', ') + (activity.emotionalGoals.length > 2 ? '...' : '')
-                      : 'General enrichment'
-                    }
-                  </p>
-                </div>
-              </div>
-              
-              <Button 
-                className="w-full mt-4 modern-button-primary group-hover:shadow-lg transition-all duration-300" 
-                size="sm"
-                onClick={(event) => handleViewDetailsClick(event, activity)}
-              >
-                View Details
-              </Button>
-            </CardContent>
-          </Card>
-        );
+      {activities.map((activity, index) => {
+        return renderActivityCard(activity, index);
       })}
     </div>
   );
-};
+});
 
 export default ActivityLibraryGrid;

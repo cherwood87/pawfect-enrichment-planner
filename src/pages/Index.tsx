@@ -9,7 +9,7 @@ import EmptyDashboard from '@/components/EmptyDashboard';
 import { LoadingSkeleton } from '@/components/ui/loading-skeleton';
 import { Dog } from '@/types/dog';
 
-const Index = () => {
+const Index = React.memo(() => {
   const { currentDog, state } = useDog();
   const [isActivityModalOpen, setIsActivityModalOpen] = useState(false);
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
@@ -128,6 +128,6 @@ const Index = () => {
       />
     </div>
   );
-};
+});
 
 export default Index;

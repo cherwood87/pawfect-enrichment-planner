@@ -23,7 +23,7 @@ const normalizeEnergyLevel = (level: string): "Low" | "Medium" | "High" => {
   return "Medium";
 };
 
-const ActivityLibrary = () => {
+const ActivityLibrary = React.memo(() => {
   const { 
     getCombinedActivityLibrary, 
     discoveredActivities, 
@@ -156,6 +156,6 @@ const ActivityLibrary = () => {
       )}
     </div>
   );
-};
+});
 
 export default ActivityLibrary;

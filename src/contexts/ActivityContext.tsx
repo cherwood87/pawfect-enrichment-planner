@@ -17,15 +17,15 @@ export const useActivity = () => {
   return context;
 };
 
-// Internal component that combines all context values
-const ActivityContextAggregator: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+// Internal component that combines all context values - memoized for performance
+const ActivityContextAggregator: React.FC<{ children: React.ReactNode }> = React.memo(({ children }) => {
   const stateContext = useActivityState();
   const operationsContext = useActivityOperations();
   const syncContext = useSync();
   const discoveryContext = useDiscovery();
 
-  // Combine all contexts into the original ActivityContextType interface
-  const contextValue: ActivityContextType = {
+  // Memoize context value to prevent unnecessary re-renders
+  const contextValue: ActivityContextType = React.useMemo(() => ({
     // State
     scheduledActivities: stateContext.scheduledActivities,
     userActivities: stateContext.userActivities,
@@ -57,14 +57,14 @@ const ActivityContextAggregator: React.FC<{ children: React.ReactNode }> = ({ ch
     isSyncing: syncContext.isSyncing,
     lastSyncTime: syncContext.lastSyncTime,
     syncToSupabase: syncContext.syncToSupabase
-  };
+  }), [stateContext, operationsContext, syncContext, discoveryContext]);
 
   return (
     <ActivityContext.Provider value={contextValue}>
       {children}
     </ActivityContext.Provider>
   );
-};
+});
 
 // Main provider that composes all sub-providers
 export const ActivityProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {

@@ -322,7 +322,8 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const currentDog = state.dogs.find(dog => dog.id === state.currentDogId) || null;
 
-  const value: DogContextType = {
+  // Memoize context value to prevent unnecessary re-renders
+  const value: DogContextType = React.useMemo(() => ({
     state,
     dispatch,
     currentDog,
@@ -331,7 +332,7 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     deleteDog,
     setCurrentDog,
     migrateFromLocalStorage
-  };
+  }), [state, currentDog, addDog, updateDog, deleteDog, setCurrentDog, migrateFromLocalStorage]);
 
   return <DogContext.Provider value={value}>{children}</DogContext.Provider>;
 };
