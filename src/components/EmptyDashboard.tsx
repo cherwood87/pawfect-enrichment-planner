@@ -28,8 +28,8 @@ const features = [{
   bgGradient: "from-emerald-100 to-emerald-200"
 }];
 const EmptyDashboard: React.FC<EmptyDashboardProps> = ({
-  onAddDogOpen,
-  onPillarSelect
+  onAddDogOpen = () => {},
+  onPillarSelect = () => {}
 }) => {
   return <div className="container mx-auto mobile-container py-12">
       <div className="max-w-4xl mx-auto">
@@ -144,8 +144,5 @@ const EmptyDashboard: React.FC<EmptyDashboardProps> = ({
       </div>
     </div>;
 };
-EmptyDashboard.defaultProps = {
-  onAddDogOpen: () => {},
-  onPillarSelect: () => {}
-};
+// Removed defaultProps to fix React warning - using default parameters instead
 export default EmptyDashboard;

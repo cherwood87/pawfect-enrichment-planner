@@ -114,8 +114,15 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       console.log('📋 Loading dogs for user:', user.email);
       time('Dogs:loadAll');
       
-      // Load dogs directly from Supabase with simplified error handling
-      const dogs = await DogService.getAllDogs(user.id);
+      // Add timeout protection against large requests
+      const timeoutPromise = new Promise<never>((_, reject) => 
+        setTimeout(() => reject(new Error('Request timeout after 10 seconds')), 10000)
+      );
+      
+      const dogsPromise = DogService.getAllDogs(user.id);
+      
+      // Race the request against timeout
+      const dogs = await Promise.race([dogsPromise, timeoutPromise]);
 
       const totalImageChars = dogs.reduce((sum, d) => sum + (d.image?.length || 0), 0);
       console.log('📋 Loaded dogs from Supabase:', {
@@ -134,7 +141,16 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       }
     } catch (error) {
       console.error('❌ Critical error loading dogs:', error);
-      dispatch({ type: 'SET_ERROR', payload: 'Failed to load your dogs. Please try refreshing the page.' });
+      
+      // Don't block the app for network errors - just show empty state
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      if (errorMessage.includes('Load failed') || errorMessage.includes('timeout')) {
+        console.log('🔄 Network issue detected, continuing with empty state');
+        dispatch({ type: 'SET_DOGS', payload: [] });
+        dispatch({ type: 'SET_ERROR', payload: null }); // Don't show error for network issues
+      } else {
+        dispatch({ type: 'SET_ERROR', payload: 'Failed to load your dogs. Please try refreshing the page.' });
+      }
     } finally {
       end('Dogs:loadAll');
       dispatch({ type: 'SET_LOADING', payload: false });
