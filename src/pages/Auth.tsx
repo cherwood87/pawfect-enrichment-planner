@@ -12,7 +12,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import ErrorBoundary from '@/components/error/ErrorBoundary';
 import { useRetry } from '@/hooks/useRetry';
 import { handleError, getUserFriendlyMessage } from '@/utils/errorUtils';
-import { supabase } from '@/integrations/supabase/client';
+
 
 const Auth: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -44,17 +44,6 @@ const Auth: React.FC = () => {
     return null;
   };
 
-  const preloadUserData = async () => {
-    try {
-      console.time('🐶 preloadUserData()');
-      const { data, error } = await supabase.from('dogs').select('*').limit(1);
-      if (error) throw error;
-      console.log('[Preload] 🐾 Dog data fetched:', data);
-      console.timeEnd('🐶 preloadUserData()');
-    } catch (err) {
-      console.warn('[Preload] ⚠️ Failed to fetch user data:', err);
-    }
-  };
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,7 +64,7 @@ const Auth: React.FC = () => {
         console.timeEnd('🔑 signIn()');
         toast({ title: 'Welcome back!', description: 'You have successfully signed in.' });
       });
-      await preloadUserData();
+      
 
       let waitCount = 0;
       while (!session && waitCount < 10) {

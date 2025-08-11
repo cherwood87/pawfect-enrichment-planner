@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { DogService } from '@/services/dogService';
 import { cleanupAuthState, robustSignOut, robustSignIn, robustSignUp } from '@/utils/authUtils';
 
 interface AuthContextType {
@@ -37,11 +38,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setSession(session);
         setUser(session?.user ?? null);
         setError(null);
+        DogService.setCurrentUser(session?.user ?? null);
         
         // Handle specific auth events
         if (event === 'SIGNED_OUT') {
           console.log('👋 User signed out');
           cleanupAuthState();
+          DogService.clearUserCache();
         }
         
         if (event === 'SIGNED_IN' && session?.user) {
@@ -75,6 +78,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       console.log('📱 Initial session check:', session?.user?.email || 'no session');
       setSession(session);
       setUser(session?.user ?? null);
+      DogService.setCurrentUser(session?.user ?? null);
       setLoading(false);
     }).catch((error) => {
       clearTimeout(sessionTimeout);

@@ -54,6 +54,11 @@ export class DogService {
     this._userPromise = null;
   }
 
+  static setCurrentUser(user: any) {
+    this._currentUser = user;
+    this._userPromise = null;
+  }
+
   static async createDog(dogData: Omit<Dog, 'id' | 'dateAdded' | 'lastUpdated'>): Promise<Dog> {
     const user = await this.getCurrentUser();
     if (!user) {
@@ -97,7 +102,7 @@ export class DogService {
 
     const { data, error } = await supabase
       .from('dogs')
-      .select('*')
+      .select('id, name, breed, age, weight, activity_level, special_needs, gender, breed_group, mobility_issues, image, notes, quiz_results, date_added, last_updated, created_at, updated_at, user_id')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
