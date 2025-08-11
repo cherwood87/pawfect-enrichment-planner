@@ -18,7 +18,7 @@ type DogAction =
   | { type: 'ADD_DOG'; payload: Dog }
   | { type: 'UPDATE_DOG'; payload: Dog }
   | { type: 'DELETE_DOG'; payload: string }
-  | { type: 'SET_CURRENT_DOG'; payload: string }
+  | { type: 'SET_CURRENT_DOG'; payload: string | null }
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_SYNCING'; payload: boolean }
   | { type: 'SET_ERROR'; payload: string | null };
@@ -92,9 +92,9 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     if (!user) {
       console.log('👤 No authenticated user, clearing dogs state');
       dispatch({ type: 'SET_DOGS', payload: [] });
-      dispatch({ type: 'SET_CURRENT_DOG', payload: '' });
+      dispatch({ type: 'SET_CURRENT_DOG', payload: null });
       dispatch({ type: 'SET_LOADING', payload: false });
-      DogService.clearUserCache(); // Clear user cache
+      DogService.clearDogCache();
       return;
     }
 
@@ -118,12 +118,12 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       const loadingTimeout = setTimeout(() => {
         console.log('⏰ Dog loading timeout, showing fallback');
         dispatch({ type: 'SET_ERROR', payload: 'Loading is taking longer than expected. Please refresh the page.' });
-      }, 10000); // 10 second timeout
+      }, 3000); // 3 second timeout
 
       // Load dogs with parallel localStorage check and explicit timing
       const supabaseTimed = (async () => {
         time('DB:getAllDogs');
-        const r = await DogService.getAllDogs();
+        const r = await DogService.getAllDogs(user.id);
         end('DB:getAllDogs');
         return r;
       })();
@@ -220,7 +220,7 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
     try {
       console.log('Adding new dog for user:', user.email, dogData.name);
-      const newDog = await DogService.createDog(dogData);
+      const newDog = await DogService.createDog(dogData, user.id);
       dispatch({ type: 'ADD_DOG', payload: newDog });
       dispatch({ type: 'SET_CURRENT_DOG', payload: newDog.id });
       
@@ -250,7 +250,7 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
     try {
       console.log('Updating dog for user:', user.email, dog.name);
-      const updatedDog = await DogService.updateDog(dog);
+      const updatedDog = await DogService.updateDog(dog, user.id);
       dispatch({ type: 'UPDATE_DOG', payload: updatedDog });
       
       toast({
@@ -280,7 +280,7 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     try {
       const dogToDelete = state.dogs.find(dog => dog.id === id);
       console.log('Deleting dog for user:', user.email, 'dog id:', id);
-      await DogService.deleteDog(id);
+      await DogService.deleteDog(id, user.id);
       dispatch({ type: 'DELETE_DOG', payload: id });
       
       toast({
@@ -324,7 +324,7 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         description: "Syncing your data to the cloud...",
       });
 
-      await DogService.migrateFromLocalStorage();
+      await DogService.migrateFromLocalStorage(user.id);
       await loadDogsWithTimeout(); // Reload from Supabase
 
       toast({

@@ -25,50 +25,29 @@ export interface DatabaseDog {
 }
 
 export class DogService {
-  // Cache for user authentication to reduce repeated calls
-  private static _currentUser: any = null;
-  private static _userPromise: Promise<any> | null = null;
+  // Cache for dog queries to reduce repeated database calls
+  private static _dogCache: Map<string, { dogs: Dog[], timestamp: number }> = new Map();
+  private static readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
-  private static async getCurrentUser() {
-    // Use cached user if available
-    if (this._currentUser) {
-      return this._currentUser;
+  private static getCachedDogs(userId: string): Dog[] | null {
+    const cached = this._dogCache.get(userId);
+    if (cached && Date.now() - cached.timestamp < this.CACHE_DURATION) {
+      return cached.dogs;
     }
-
-    // Reuse existing promise if one is in flight
-    if (this._userPromise) {
-      return this._userPromise;
-    }
-
-    // Create new promise and cache it
-    time('Auth:getUser');
-    this._userPromise = supabase.auth.getUser().then(({ data: { user } }) => {
-      this._currentUser = user;
-      this._userPromise = null; // Clear promise cache
-      end('Auth:getUser');
-      return user;
-    }).catch((e) => {
-      end('Auth:getUser');
-      throw e;
-    });
-
-    return this._userPromise;
+    return null;
   }
 
-  static clearUserCache() {
-    this._currentUser = null;
-    this._userPromise = null;
+  private static setCachedDogs(userId: string, dogs: Dog[]): void {
+    this._dogCache.set(userId, { dogs, timestamp: Date.now() });
   }
 
-  static setCurrentUser(user: any) {
-    this._currentUser = user;
-    this._userPromise = null;
+  static clearDogCache(): void {
+    this._dogCache.clear();
   }
 
-  static async createDog(dogData: Omit<Dog, 'id' | 'dateAdded' | 'lastUpdated'>): Promise<Dog> {
-    const user = await this.getCurrentUser();
-    if (!user) {
-      throw new Error('User must be authenticated to create a dog');
+  static async createDog(dogData: Omit<Dog, 'id' | 'dateAdded' | 'lastUpdated'>, userId: string): Promise<Dog> {
+    if (!userId) {
+      throw new Error('User ID is required to create a dog');
     }
 
     const { data, error } = await supabase
@@ -86,7 +65,7 @@ export class DogService {
         image: dogData.image || dogData.photo || '',
         notes: dogData.notes || '',
         quiz_results: dogData.quizResults ? JSON.parse(JSON.stringify(dogData.quizResults)) : null,
-        user_id: user.id
+        user_id: userId
       })
       .select()
       .single();
@@ -96,34 +75,48 @@ export class DogService {
       throw new Error('Failed to create dog: ' + error.message);
     }
 
+    // Clear cache for this user when creating a new dog
+    this.clearDogCache();
     return this.mapToDog(data);
   }
 
-  static async getAllDogs(): Promise<Dog[]> {
-    const user = await this.getCurrentUser();
-    if (!user) {
-      console.log('No authenticated user, returning empty array');
+  static async getAllDogs(userId: string): Promise<Dog[]> {
+    if (!userId) {
+      console.log('No user ID provided, returning empty array');
       return [];
     }
 
+    // Check cache first
+    const cached = this.getCachedDogs(userId);
+    if (cached) {
+      console.log('🎯 DogService: Returning cached dogs');
+      return cached;
+    }
+
+    time('DB:getAllDogs');
     const { data, error } = await supabase
       .from('dogs')
       .select('id, name, breed, age, weight, activity_level, special_needs, gender, breed_group, mobility_issues, image, notes, quiz_results, date_added, last_updated, created_at, updated_at, user_id')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .order('created_at', { ascending: false });
+    end('DB:getAllDogs');
 
     if (error) {
       console.error('Error fetching dogs:', error);
       throw new Error('Failed to fetch dogs: ' + error.message);
     }
 
-    return (data || []).map(dog => this.mapToDog(dog));
+    const dogs = (data || []).map(dog => this.mapToDog(dog));
+    
+    // Cache the results
+    this.setCachedDogs(userId, dogs);
+    
+    return dogs;
   }
 
-  static async updateDog(dog: Dog): Promise<Dog> {
-    const user = await this.getCurrentUser();
-    if (!user) {
-      throw new Error('User must be authenticated to update a dog');
+  static async updateDog(dog: Dog, userId: string): Promise<Dog> {
+    if (!userId) {
+      throw new Error('User ID is required to update a dog');
     }
 
     const { data, error } = await supabase
@@ -143,7 +136,7 @@ export class DogService {
         quiz_results: dog.quizResults ? JSON.parse(JSON.stringify(dog.quizResults)) : null
       })
       .eq('id', dog.id)
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .select()
       .single();
 
@@ -152,25 +145,29 @@ export class DogService {
       throw new Error('Failed to update dog: ' + error.message);
     }
 
+    // Clear cache when updating
+    this.clearDogCache();
     return this.mapToDog(data);
   }
 
-  static async deleteDog(id: string): Promise<void> {
-    const user = await this.getCurrentUser();
-    if (!user) {
-      throw new Error('User must be authenticated to delete a dog');
+  static async deleteDog(id: string, userId: string): Promise<void> {
+    if (!userId) {
+      throw new Error('User ID is required to delete a dog');
     }
 
     const { error } = await supabase
       .from('dogs')
       .delete()
       .eq('id', id)
-      .eq('user_id', user.id);
+      .eq('user_id', userId);
 
     if (error) {
       console.error('Error deleting dog:', error);
       throw new Error('Failed to delete dog: ' + error.message);
     }
+
+    // Clear cache when deleting
+    this.clearDogCache();
   }
 
   private static mapToDog(dbDog: DatabaseDog): Dog {
@@ -195,11 +192,10 @@ export class DogService {
   }
 
   // Optimized migration with parallel processing
-  static async migrateFromLocalStorage(): Promise<void> {
+  static async migrateFromLocalStorage(userId: string): Promise<void> {
     try {
-      const user = await this.getCurrentUser();
-      if (!user) {
-        console.log('No authenticated user, skipping migration');
+      if (!userId) {
+        console.log('No user ID provided, skipping migration');
         return;
       }
 
@@ -207,12 +203,12 @@ export class DogService {
       if (!localDogs) return;
 
       const dogs: Dog[] = JSON.parse(localDogs);
-      console.log(`Migrating ${dogs.length} dogs to Supabase for user ${user.id}...`);
+      console.log(`Migrating ${dogs.length} dogs to Supabase for user ${userId}...`);
 
       // Process dogs in parallel for better performance
       const migrationPromises = dogs.map(async (dog) => {
         try {
-          await this.createDog(dog);
+          await this.createDog(dog, userId);
           console.log(`Migrated dog: ${dog.name}`);
           return { success: true, dog: dog.name };
         } catch (error) {

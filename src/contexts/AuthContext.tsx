@@ -40,13 +40,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setSession(session);
         setUser(session?.user ?? null);
         setError(null);
-        DogService.setCurrentUser(session?.user ?? null);
         
         // Handle specific auth events
         if (event === 'SIGNED_OUT') {
           console.log('👋 User signed out');
           cleanupAuthState();
-          DogService.clearUserCache();
+          DogService.clearDogCache();
         }
         
         if (event === 'SIGNED_IN' && session?.user) {
@@ -82,7 +81,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       console.log('📱 Initial session check:', session?.user?.email || 'no session');
       setSession(session);
       setUser(session?.user ?? null);
-      DogService.setCurrentUser(session?.user ?? null);
       setLoading(false);
       end('Auth:getSession');
     }).catch((error) => {
