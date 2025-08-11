@@ -155,7 +155,7 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       // Call enrichment coach function
       const { supabase } = await import('@/integrations/supabase/client');
-      const { data, error } = await supabase.functions.invoke('enrichment-coach', {
+      const { data, error } = await supabase.functions.invoke('enrichment-coach-enhanced', {
         body: {
           messages: updatedMessages.map(msg => ({
             role: msg.role,

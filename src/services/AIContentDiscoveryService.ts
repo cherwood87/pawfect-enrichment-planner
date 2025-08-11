@@ -44,7 +44,7 @@ export class AIContentDiscoveryService {
     
     try {
       // Call the Supabase AI discovery function
-      const { data, error } = await supabase.functions.invoke('discover-activities', {
+      const { data, error } = await supabase.functions.invoke('discover-activities-enhanced', {
         body: {
           existingActivities: existingActivities.map(a => ({
             title: a.title,

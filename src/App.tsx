@@ -22,6 +22,7 @@ const ActivityLibraryPage = lazy(() => import("./pages/ActivityLibraryPage"));
 const WeeklyPlannerPage = lazy(() => import("./pages/WeeklyPlannerPage"));
 const AccountSettings = lazy(() => import("./pages/AccountSettings"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const OpenAITestPage = lazy(() => import("./pages/OpenAITestPage"));
 
 // Loading fallback component
 const PageLoader = () => (
@@ -117,6 +118,13 @@ const App = () => (
                           <ProtectedRoute>
                             <ErrorBoundary>
                               <AccountSettings />
+                            </ErrorBoundary>
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/openai-test" element={
+                          <ProtectedRoute>
+                            <ErrorBoundary>
+                              <OpenAITestPage />
                             </ErrorBoundary>
                           </ProtectedRoute>
                         } />
