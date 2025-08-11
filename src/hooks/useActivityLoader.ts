@@ -43,17 +43,30 @@ export const useActivityLoader = (currentDog: Dog | null) => {
           console.warn('User activities failed, will try migration:', error);
           return null;
         }),
-        // Discovered Activities (try localStorage first)
+        // Discovered Activities: fetch from Supabase and merge with any local items, then dedupe
         (async () => {
-          const localDiscovered = getDiscoveredActivities(dogId);
-          if (localDiscovered && localDiscovered.length > 0) {
-            return localDiscovered;
-          }
           try {
-            return await ContentDiscoveryService.getDiscoveredActivities(dogId);
+            const [supabaseDiscovered, localDiscovered] = await Promise.all([
+              ContentDiscoveryService.getDiscoveredActivities(dogId),
+              Promise.resolve(getDiscoveredActivities(dogId) || [])
+            ]);
+            // De-duplicate by id and normalized title (prefer Supabase order)
+            const seenIds = new Set<string>();
+            const seenTitles = new Set<string>();
+            const combined = [...supabaseDiscovered, ...localDiscovered];
+            const unique: DiscoveredActivity[] = [];
+            for (const item of combined) {
+              const idKey = String(item.id);
+              const titleKey = item.title.trim().toLowerCase();
+              if (seenIds.has(idKey) || seenTitles.has(titleKey)) continue;
+              seenIds.add(idKey);
+              seenTitles.add(titleKey);
+              unique.push(item);
+            }
+            return unique;
           } catch (error) {
-            console.warn('Discovery activities failed:', error);
-            return [];
+            console.warn('Discovery activities failed, falling back to localStorage:', error);
+            return getDiscoveredActivities(dogId) || [];
           }
         })(),
         // Discovery Config (try localStorage first)
