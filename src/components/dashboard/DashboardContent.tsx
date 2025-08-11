@@ -8,6 +8,8 @@ import TodaysEnrichmentSummary from '@/components/dashboard/TodaysEnrichmentSumm
 import ReflectionJournal from '@/components/ReflectionJournal';
 import EmptyDashboard from '@/components/EmptyDashboard';
 import ConsolidatedActivityModal from '@/components/modals/ConsolidatedActivityModal';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -24,6 +26,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
   onPillarSelect,
   onChatOpen
 }) => {
+  const navigate = useNavigate();
   const {
     getCombinedActivityLibrary,
     userActivities,
@@ -98,7 +101,14 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
                   </svg>
                 </div>
                 <p className="font-medium">No favourites yet!</p>
-                <p className="text-sm">Add activities to your favourites from the Activity Library or Chat.</p>
+<div className="mt-3 flex justify-center">
+  <Button
+    onClick={() => navigate('/activity-library')}
+    className="bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 text-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
+  >
+    Add favourites
+  </Button>
+</div>
               </div>
             ) : (
               <div className="space-y-4">
