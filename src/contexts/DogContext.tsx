@@ -114,62 +114,23 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       console.log('📋 Loading dogs for user:', user.email);
       time('Dogs:loadAll');
       
-      // Add timeout for better UX
-      const loadingTimeout = setTimeout(() => {
-        console.log('⏰ Dog loading timeout, showing fallback');
-        dispatch({ type: 'SET_ERROR', payload: 'Loading is taking longer than expected. Please refresh the page.' });
-      }, 3000); // 3 second timeout
+      // Load dogs directly from Supabase with simplified error handling
+      const dogs = await DogService.getAllDogs(user.id);
 
-      // Load dogs with parallel localStorage check and explicit timing
-      const supabaseTimed = (async () => {
-        time('DB:getAllDogs');
-        const r = await DogService.getAllDogs(user.id);
-        end('DB:getAllDogs');
-        return r;
-      })();
-      const localTimed = (async () => {
-        time('LocalStorage:checkDogs');
-        const r = await checkLocalStorageForDogs();
-        end('LocalStorage:checkDogs');
-        return r;
-      })();
-
-      const [supabaseDogs, localStorageCheck] = await Promise.allSettled([
-        supabaseTimed,
-        localTimed
-      ]);
-
-      clearTimeout(loadingTimeout);
-
-      if (supabaseDogs.status === 'fulfilled') {
-        const dogs = supabaseDogs.value;
-        const totalImageChars = dogs.reduce((sum, d) => sum + (d.image?.length || 0), 0);
-        console.log('📋 Loaded dogs from Supabase:', {
-          count: dogs.length,
-          totalImageKB: Math.round(totalImageChars / 1024),
-        });
-        
-        dispatch({ type: 'SET_DOGS', payload: dogs });
-        
-        // Set current dog from localStorage or first dog
-        const savedCurrentDogId = localStorage.getItem('currentDogId');
-        if (savedCurrentDogId && dogs.find(dog => dog.id === savedCurrentDogId)) {
-          dispatch({ type: 'SET_CURRENT_DOG', payload: savedCurrentDogId });
-        } else if (dogs.length > 0) {
-          dispatch({ type: 'SET_CURRENT_DOG', payload: dogs[0].id });
-        }
-      } else {
-        console.error('❌ Error loading dogs from Supabase:', supabaseDogs.reason);
-        dispatch({ type: 'SET_ERROR', payload: 'Failed to load your dogs. Please try refreshing the page.' });
-        
-        // Fallback to localStorage
-        if (localStorageCheck.status === 'fulfilled') {
-          const localDogs = localStorageCheck.value;
-          if (localDogs.length > 0) {
-            dispatch({ type: 'SET_DOGS', payload: localDogs });
-            console.log('📋 Loaded dogs from localStorage fallback:', localDogs.length);
-          }
-        }
+      const totalImageChars = dogs.reduce((sum, d) => sum + (d.image?.length || 0), 0);
+      console.log('📋 Loaded dogs from Supabase:', {
+        count: dogs.length,
+        totalImageKB: Math.round(totalImageChars / 1024),
+      });
+      
+      dispatch({ type: 'SET_DOGS', payload: dogs });
+      
+      // Set current dog from localStorage or first dog
+      const savedCurrentDogId = localStorage.getItem('currentDogId');
+      if (savedCurrentDogId && dogs.find(dog => dog.id === savedCurrentDogId)) {
+        dispatch({ type: 'SET_CURRENT_DOG', payload: savedCurrentDogId });
+      } else if (dogs.length > 0) {
+        dispatch({ type: 'SET_CURRENT_DOG', payload: dogs[0].id });
       }
     } catch (error) {
       console.error('❌ Critical error loading dogs:', error);

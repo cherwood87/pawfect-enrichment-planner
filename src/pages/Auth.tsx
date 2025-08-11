@@ -32,8 +32,8 @@ const Auth: React.FC = () => {
 
   useEffect(() => {
     if (user && session) {
-      console.log('[Auth] 🎯 Detected active session, redirecting to dog tab:', new Date());
-      navigate('/activity-library', { replace: true });
+      console.log('[Auth] 🎯 Detected active session, redirecting to dashboard:', new Date());
+      navigate('/app', { replace: true });
     }
   }, [user, session, navigate]);
 
@@ -72,7 +72,7 @@ const Auth: React.FC = () => {
         waitCount++;
       }
       console.log('[Auth] ✅ Ready to redirect at:', new Date());
-      navigate('/activity-library', { replace: true });
+      navigate('/app', { replace: true });
     } catch (error: any) {
       const friendlyMessage = getUserFriendlyMessage(error);
       setError(friendlyMessage);

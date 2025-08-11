@@ -5,10 +5,12 @@ import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import DashboardContent from '@/components/dashboard/DashboardContent';
 import FloatingChatButton from '@/components/dashboard/FloatingChatButton';
 import DashboardModals from '@/components/dashboard/DashboardModals';
+import EmptyDashboard from '@/components/EmptyDashboard';
+import { LoadingSkeleton } from '@/components/ui/loading-skeleton';
 import { Dog } from '@/types/dog';
 
 const Index = () => {
-  const { currentDog } = useDog();
+  const { currentDog, state } = useDog();
   const [isActivityModalOpen, setIsActivityModalOpen] = useState(false);
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
   const [isAddDogModalOpen, setIsAddDogModalOpen] = useState(false);
@@ -52,6 +54,46 @@ const Index = () => {
     setSelectedDog(null);
   }, []);
 
+  // Show loading skeleton while dogs are loading
+  if (state.isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-orange-50 mobile-safe">
+        <LoadingSkeleton type="dashboard" />
+      </div>
+    );
+  }
+
+  // Show empty dashboard if no dogs exist
+  if (state.dogs.length === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-orange-50 mobile-safe">
+        <DashboardHeader 
+          onChatOpen={handleChatModalOpen} 
+          onAddDogOpen={handleAddDogModalOpen}
+        />
+        
+        <EmptyDashboard 
+          onAddDogOpen={handleAddDogModalOpen}
+          onPillarSelect={handlePillarSelect}
+        />
+
+        <DashboardModals
+          isActivityModalOpen={isActivityModalOpen}
+          isChatModalOpen={isChatModalOpen}
+          isAddDogModalOpen={isAddDogModalOpen}
+          isEditDogModalOpen={isEditDogModalOpen}
+          selectedPillar={selectedPillar}
+          selectedDog={selectedDog}
+          onActivityModalClose={handleActivityModalClose}
+          onChatModalClose={handleChatModalClose}
+          onAddDogModalClose={handleAddDogModalClose}
+          onEditDogModalClose={handleEditDogModalClose}
+        />
+      </div>
+    );
+  }
+
+  // Show full dashboard when dogs exist
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-orange-50 mobile-safe">
       {/* Header */}
