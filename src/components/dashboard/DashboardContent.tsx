@@ -139,6 +139,15 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
 
         {/* Journal Section */}
         <ReflectionJournal />
+
+        {selectedFavDetails && (
+          <ConsolidatedActivityModal
+            isOpen={isActivityModalOpen}
+            onClose={() => { setIsActivityModalOpen(false); setSelectedFavDetails(null); }}
+            activityDetails={selectedFavDetails}
+            mode="library"
+          />
+        )}
       </div>
     </div>
   );
