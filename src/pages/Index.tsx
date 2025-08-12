@@ -2,7 +2,7 @@
 import React, { useState, useCallback } from 'react';
 import { useDog } from '@/contexts/DogContext';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
-import DashboardContent from '@/components/dashboard/DashboardContent';
+import { SimplifiedDashboardContent } from '@/components/dashboard/SimplifiedDashboardContent';
 import FloatingChatButton from '@/components/dashboard/FloatingChatButton';
 import DashboardModals from '@/components/dashboard/DashboardModals';
 import ImageMigrationBanner from '@/components/ImageMigrationBanner';
@@ -157,14 +157,10 @@ const Index = React.memo(() => {
       </div>
 
       {/* Main Content */}
-      <DashboardContent 
-        onAddDogOpen={handleAddDogModalOpen}
-        onEditDogOpen={handleEditDogModalOpen}
-        onPillarSelect={handlePillarSelect}
-        onChatOpen={handleChatModalOpen}
-        onTakeQuiz={handleTakeQuiz}
-        onViewQuizResults={handleViewQuizResults}
-      />
+        <SimplifiedDashboardContent
+          onAddDogOpen={handleAddDogModalOpen}
+          onChatOpen={handleChatModalOpen}
+        />
 
       {/* Floating Chat Button */}
       {currentDog && <FloatingChatButton onChatOpen={handleChatModalOpen} />}
