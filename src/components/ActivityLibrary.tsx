@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { ActivityLibraryItem } from '@/types/activity';
 import { DiscoveredActivity } from '@/types/discovery';
 import { useActivity } from '@/contexts/ActivityContext';
+import { useDog } from '@/contexts/DogContext';
 import { useActivityFiltering } from '@/hooks/useActivityFiltering';
 import ActivityCard from '@/components/ActivityCard';
 import ConsolidatedActivityModal from '@/components/modals/ConsolidatedActivityModal';
@@ -9,6 +10,8 @@ import PillarSelectionCards from '@/components/PillarSelectionCards';
 import ActivityLibraryContent from '@/components/ActivityLibraryContent';
 import ActivityLibraryDebug from '@/components/ActivityLibraryDebug';
 import ActivityLibraryGrid from '@/components/ActivityLibraryGrid';
+import { PersonalizedActivityBanner } from '@/components/PersonalizedActivityBanner';
+import { QuizPromptCard } from '@/components/QuizPromptCard';
 
 // Energy level normalization function
 const normalizeEnergyLevel = (level: string): "Low" | "Medium" | "High" => {
@@ -34,6 +37,8 @@ const ActivityLibrary = React.memo(() => {
     lastSyncTime,
     syncToSupabase
   } = useActivity();
+  
+  const { currentDog } = useDog();
   
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPillar, setSelectedPillar] = useState<string>('all');
@@ -62,13 +67,14 @@ const ActivityLibrary = React.memo(() => {
     }
   }, [checkAndRunAutoDiscovery]);
 
-  // Use the filtering hook
+  // Use the filtering hook with dog context for personalization
   const filteredActivities = useActivityFiltering(
     searchQuery,
     selectedPillar,
     selectedDifficulty,
     currentActivities,
-    discoveredActivities
+    discoveredActivities,
+    currentDog
   );
 
   // Memoize callback functions to prevent unnecessary re-renders
@@ -92,6 +98,10 @@ const ActivityLibrary = React.memo(() => {
     setSelectedActivity(null);
   }, []);
 
+  const handleTakeQuiz = useCallback(() => {
+    window.location.href = '/quiz';
+  }, []);
+
   const handlePillarSelect = useCallback((pillar: string) => {
     setSelectedPillar(pillar);
   }, []);
@@ -108,6 +118,9 @@ const ActivityLibrary = React.memo(() => {
     };
   }, [discoveredActivities, currentActivities]);
 
+  // Check if activities are personalized (no filters and quiz results exist)
+  const isPersonalized = selectedPillar === 'all' && selectedDifficulty === 'all' && !searchQuery && !!currentDog?.quizResults;
+
   return (
     <div className="mobile-space-y">
       <PillarSelectionCards
@@ -117,6 +130,22 @@ const ActivityLibrary = React.memo(() => {
         isSyncing={isSyncing}
         lastSyncTime={lastSyncTime}
       />
+
+      {/* Show personalization banner when appropriate */}
+      {currentDog && isPersonalized && (
+        <PersonalizedActivityBanner 
+          currentDog={currentDog} 
+          isPersonalized={isPersonalized}
+        />
+      )}
+
+      {/* Show quiz prompt for dogs without quiz results */}
+      {currentDog && !currentDog.quizResults && (
+        <QuizPromptCard 
+          currentDog={currentDog}
+          onTakeQuiz={handleTakeQuiz}
+        />
+      )}
       
       <ActivityLibraryContent
         autoApprovedCount={autoApprovedCount}

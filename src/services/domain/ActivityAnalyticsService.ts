@@ -179,17 +179,51 @@ export class ActivityAnalyticsService {
 
   static getDailyGoals(currentDog: Dog | null): PillarGoals {
     if (!currentDog?.quizResults) {
+      // Default goals for dogs without quiz results
       return { mental: 1, physical: 1, social: 1, environmental: 1, instinctual: 1 };
     }
     
     const ranking = currentDog.quizResults.ranking;
     const goals: PillarGoals = { mental: 1, physical: 1, social: 1, environmental: 1, instinctual: 1 };
     
+    // Dynamic goal setting based on quiz scores and dog attributes
     if (ranking.length >= 2) {
-      goals[ranking[0].pillar as keyof PillarGoals] = 2;
-      goals[ranking[1].pillar as keyof PillarGoals] = 2;
+      // Top 2 pillars get higher goals
+      goals[ranking[0].pillar as keyof PillarGoals] = this.calculateDynamicGoal(ranking[0].score, currentDog);
+      goals[ranking[1].pillar as keyof PillarGoals] = this.calculateDynamicGoal(ranking[1].score, currentDog, true);
+    }
+    
+    // Adjust for dog age and activity level
+    if (currentDog.age >= 84) {
+      // Senior dogs - slightly lower physical goals
+      goals.physical = Math.max(1, goals.physical - 1);
+    } else if (currentDog.age < 12) {
+      // Puppies - focus on mental and social development
+      goals.mental = Math.max(goals.mental, 2);
+      goals.social = Math.max(goals.social, 2);
+    }
+    
+    if (currentDog.activityLevel === 'high') {
+      goals.physical = Math.max(goals.physical, 2);
+    } else if (currentDog.activityLevel === 'low') {
+      goals.physical = Math.max(1, goals.physical - 1);
+      goals.mental = Math.max(goals.mental, 2); // Compensate with mental stimulation
     }
     
     return goals;
+  }
+
+  private static calculateDynamicGoal(score: number, dog: Dog, isSecondary: boolean = false): number {
+    // Base goal calculation from quiz score
+    let goal = Math.ceil(score / 2); // Score of 4-5 = 2-3 goals, score of 2-3 = 1-2 goals
+    
+    // Secondary pillar gets slightly lower goals
+    if (isSecondary) {
+      goal = Math.max(1, goal - 1);
+    }
+    
+    // Cap based on dog's overall capacity
+    const maxGoal = dog.activityLevel === 'high' ? 4 : dog.activityLevel === 'moderate' ? 3 : 2;
+    return Math.min(goal, maxGoal);
   }
 }
