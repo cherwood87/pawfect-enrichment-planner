@@ -792,6 +792,36 @@ export type Database = {
           },
         ]
       }
+      scheduled_activity_audit_log: {
+        Row: {
+          created_at: string
+          id: string
+          new_values: Json | null
+          notes: string | null
+          old_values: Json | null
+          operation: string
+          scheduled_activity_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          new_values?: Json | null
+          notes?: string | null
+          old_values?: Json | null
+          operation: string
+          scheduled_activity_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          new_values?: Json | null
+          notes?: string | null
+          old_values?: Json | null
+          operation?: string
+          scheduled_activity_id?: string
+        }
+        Relationships: []
+      }
       user_activities: {
         Row: {
           age_group: Database["public"]["Enums"]["age_group"] | null
