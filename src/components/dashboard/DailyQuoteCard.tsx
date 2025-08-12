@@ -4,17 +4,19 @@ import { Button } from '@/components/ui/button';
 import { Quote } from 'lucide-react';
 import { useLoginQuote } from '@/hooks/useLoginQuote';
 import { useNavigate } from 'react-router-dom';
-
 interface DailyQuoteCardProps {
-  currentDog?: { name: string } | null;
+  currentDog?: {
+    name: string;
+  } | null;
 }
-
-export const DailyQuoteCard: React.FC<DailyQuoteCardProps> = ({ currentDog }) => {
-  const { quote } = useLoginQuote();
+export const DailyQuoteCard: React.FC<DailyQuoteCardProps> = ({
+  currentDog
+}) => {
+  const {
+    quote
+  } = useLoginQuote();
   const navigate = useNavigate();
-
-  return (
-    <Card className="bg-gradient-to-br from-purple-50 to-cyan-50 border-2 border-purple-200">
+  return <Card className="bg-gradient-to-br from-purple-50 to-cyan-50 border-2 border-purple-200">
       <CardContent className="p-6">
         <div className="flex items-center space-x-3">
           <div className="bg-gradient-to-r from-purple-500 to-cyan-500 p-3 rounded-2xl">
@@ -35,24 +37,14 @@ export const DailyQuoteCard: React.FC<DailyQuoteCardProps> = ({ currentDog }) =>
             "{quote.text}"
           </blockquote>
           
-          {quote.author && (
-            <p className="text-sm text-purple-600 mb-6">— {quote.author}</p>
-          )}
+          {quote.author && <p className="text-sm text-purple-600 mb-6">— {quote.author}</p>}
           
-          {currentDog && (
-            <p className="text-sm text-purple-600 mb-6">
+          {currentDog && <p className="text-sm text-purple-600 mb-6">
               Ready to enrich {currentDog.name}'s day?
-            </p>
-          )}
+            </p>}
           
-          <Button 
-            onClick={() => navigate('/activity-library')} 
-            className="bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 text-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
-          >
-            Browse Activity Library
-          </Button>
+          
         </div>
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };
