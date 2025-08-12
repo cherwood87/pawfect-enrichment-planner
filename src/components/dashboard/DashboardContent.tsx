@@ -4,7 +4,7 @@ import { useActivity } from '@/contexts/ActivityContext';
 import { useDog } from '@/contexts/DogContext';
 import { useFavourites } from '@/hooks/useFavourites';
 import { useAuth } from '@/contexts/AuthContext';
-import TodaysEnrichmentSummary from '@/components/dashboard/TodaysEnrichmentSummary';
+import { DailyQuoteCard } from '@/components/dashboard/DailyQuoteCard';
 import ReflectionJournal from '@/components/ReflectionJournal';
 import EmptyDashboard from '@/components/EmptyDashboard';
 import ConsolidatedActivityModal from '@/components/modals/ConsolidatedActivityModal';
@@ -88,8 +88,8 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
             <QuizCompletionCard currentDog={currentDog} onViewResults={onViewQuizResults || (() => {})} />
           )}
           
-          {/* Today's Enrichment Summary */}
-          <TodaysEnrichmentSummary onChatOpen={onChatOpen} />
+          {/* Daily Quote Card */}
+          <DailyQuoteCard currentDog={currentDog} />
         </div>
 
         {/* Enhanced Favourites Section */}
