@@ -4,24 +4,24 @@ import { Brain, Users, CheckCircle } from 'lucide-react';
 const Benefits_Overview: React.FC = () => {
   const benefits = [{
     icon: Brain,
-    title: "Science-Based Approach",
-    description: "Built on proven canine behavior research and veterinary expertise to ensure your dog's optimal wellbeing.",
+    title: "Never Run Out of Ideas",
+    description: "From 5-minute brain games to weekend adventures, discover activities you never thought of trying with your dog.",
     color: "purple",
     bgGradient: "from-purple-100 to-purple-200",
     iconBg: "bg-purple-100",
     iconColor: "text-purple-600"
   }, {
     icon: Users,
-    title: "Personalized for Your Dog",
-    description: "Take our personality quiz to get customized recommendations that match your dog's unique needs and preferences.",
+    title: "Perfect for Your Dog",
+    description: "Our quiz matches activities to your dog's breed, energy level, and living situation - no more guessing what might work.",
     color: "cyan",
     bgGradient: "from-cyan-100 to-cyan-200",
     iconBg: "bg-cyan-100",
     iconColor: "text-cyan-600"
   }, {
     icon: CheckCircle,
-    title: "Track Progress & Build Habits",
-    description: "Monitor your dog's activities, build consistent routines, and watch their happiness and health improve over time.",
+    title: "Instant Expert Help",
+    description: "Stuck on an activity? Our AI enrichment coach gives you step-by-step guidance and troubleshooting tips instantly.",
     color: "amber",
     bgGradient: "from-amber-100 to-amber-200",
     iconBg: "bg-amber-100",
@@ -31,9 +31,9 @@ const Benefits_Overview: React.FC = () => {
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold text-purple-800 mb-4">
-            Why Dogs Need Enrichment
+            Tired of Your Bored Dog?
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">A fulfilled dog is a happy, healthy dog. Our comprehensive approach ensures your dog gets the mental, physical, social, instinctual and environmental enrichment they need to thrive.</p>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">When you don't know what activities to try, your dog gets bored. When you have fun activity ideas, both you and your dog are happier.</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
@@ -57,47 +57,47 @@ const Benefits_Overview: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
             <div>
               <h3 className="text-2xl font-bold text-purple-800 mb-4">
-                The Cost of Boredom
+                When You Don't Know What To Do
               </h3>
               <ul className="space-y-3 text-gray-700">
                 <li className="flex items-center">
                   <div className="w-3 h-3 bg-red-400 rounded-full mr-3 flex-shrink-0"></div>
-                  <span>Destructive behaviors like chewing and digging</span>
+                  <span>Same boring walks every day</span>
                 </li>
                 <li className="flex items-center">
                   <div className="w-3 h-3 bg-red-400 rounded-full mr-3 flex-shrink-0"></div>
-                  <span>Excessive barking and anxiety</span>
+                  <span>Running out of new games to try</span>
                 </li>
                 <li className="flex items-center">
                   <div className="w-3 h-3 bg-red-400 rounded-full mr-3 flex-shrink-0"></div>
-                  <span>Weight gain and health issues</span>
+                  <span>Your dog destroys things out of boredom</span>
                 </li>
                 <li className="flex items-center">
                   <div className="w-3 h-3 bg-red-400 rounded-full mr-3 flex-shrink-0"></div>
-                  <span>Shortened lifespan and reduced quality of life</span>
+                  <span>Feeling like a boring dog parent</span>
                 </li>
               </ul>
             </div>
             <div>
               <h3 className="text-2xl font-bold text-purple-800 mb-4">
-                The Benefits of Enrichment
+                When You Have Fun Activity Ideas
               </h3>
               <ul className="space-y-3 text-gray-700">
                 <li className="flex items-center">
                   <div className="w-3 h-3 bg-emerald-400 rounded-full mr-3 flex-shrink-0"></div>
-                  <span>Improved behavior and obedience</span>
+                  <span>A happier, more well-behaved dog</span>
                 </li>
                 <li className="flex items-center">
                   <div className="w-3 h-3 bg-emerald-400 rounded-full mr-3 flex-shrink-0"></div>
-                  <span>Reduced stress and anxiety</span>
+                  <span>Stronger bond through fun activities</span>
                 </li>
                 <li className="flex items-center">
                   <div className="w-3 h-3 bg-emerald-400 rounded-full mr-3 flex-shrink-0"></div>
-                  <span>Better physical health and fitness</span>
+                  <span>Easier exercise that feels like play</span>
                 </li>
                 <li className="flex items-center">
                   <div className="w-3 h-3 bg-emerald-400 rounded-full mr-3 flex-shrink-0"></div>
-                  <span>Stronger bond with their human family</span>
+                  <span>Confidence as a great dog parent</span>
                 </li>
               </ul>
             </div>

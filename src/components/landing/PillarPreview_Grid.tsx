@@ -6,11 +6,10 @@ const PillarPreview_Grid: React.FC = () => {
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold text-purple-800 mb-4">
-            Personalized Just for Your Dog
+            Simple Process, Amazing Results
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Not every dog needs the same thing. Our personality quiz helps determine which pillars 
-            your dog values most, so you can focus your energy where it matters.
+            Getting started is easy! Take a quick quiz, get activity ideas that work for your dog, and have fun together.
           </p>
         </div>
 
@@ -20,9 +19,9 @@ const PillarPreview_Grid: React.FC = () => {
               <div className="w-16 h-16 mx-auto rounded-full bg-purple-100 flex items-center justify-center mb-4 shadow-lg">
                 <Lightbulb className="w-8 h-8 text-purple-600" />
               </div>
-              <h3 className="text-xl font-bold text-purple-800 mb-3">Take the Quiz</h3>
+              <h3 className="text-xl font-bold text-purple-800 mb-3">Quick Personality Quiz</h3>
               <p className="text-gray-700">
-                Discover your dog's personality and which enrichment pillars they enjoy most
+                Tell us about your dog's breed, energy level, and what they love to do
               </p>
             </CardContent>
           </Card>
@@ -32,9 +31,9 @@ const PillarPreview_Grid: React.FC = () => {
               <div className="w-16 h-16 mx-auto rounded-full bg-cyan-100 flex items-center justify-center mb-4 shadow-lg">
                 <Zap className="w-8 h-8 text-cyan-600" />
               </div>
-              <h3 className="text-xl font-bold text-purple-800 mb-3">Get Custom Plan</h3>
+              <h3 className="text-xl font-bold text-purple-800 mb-3">Get Activity Ideas</h3>
               <p className="text-gray-700">
-                Receive a personalized weekly enrichment plan tailored to your dog's preferences
+                Instantly see activities perfect for your dog - from quick games to fun projects
               </p>
             </CardContent>
           </Card>
@@ -44,9 +43,9 @@ const PillarPreview_Grid: React.FC = () => {
               <div className="w-16 h-16 mx-auto rounded-full bg-amber-100 flex items-center justify-center mb-4 shadow-lg">
                 <Star className="w-8 h-8 text-amber-600" />
               </div>
-              <h3 className="text-xl font-bold text-purple-800 mb-3">Track Progress</h3>
+              <h3 className="text-xl font-bold text-purple-800 mb-3">Try & Have Fun</h3>
               <p className="text-gray-700">
-                Monitor activities, build streaks, and watch your dog thrive with consistent enrichment
+                Start playing! Track what works and discover even more activities over time
               </p>
             </CardContent>
           </Card>
@@ -56,15 +55,14 @@ const PillarPreview_Grid: React.FC = () => {
           <CardContent className="p-8 text-center">
             <div className="mb-6">
               <div className="inline-flex items-center space-x-2 bg-white/80 backdrop-blur-sm rounded-full px-6 py-3 shadow-lg">
-                <span className="text-lg font-bold text-purple-800">Take the quiz → Get custom plan →  Track progress </span>
+                <span className="text-lg font-bold text-purple-800">Quick quiz → Activity ideas → Have fun together</span>
               </div>
             </div>
             <h3 className="text-2xl font-bold text-purple-800 mb-4">
-              Your Dog's Journey Starts Here
+              Ready to Try Something New?
             </h3>
             <p className="text-gray-700 text-lg">
-              Join thousands of dog owners who have transformed their pets' lives through 
-              science-based enrichment planning.
+              Join dog owners who never run out of fun activities to try with their dogs.
             </p>
           </CardContent>
         </Card>
