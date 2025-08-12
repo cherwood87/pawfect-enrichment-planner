@@ -26,7 +26,7 @@ export const DailyQuoteCard: React.FC<DailyQuoteCardProps> = ({
           </div>
         </div>
 
-        <div className="text-center bg-gradient-to-br from-purple-50 to-cyan-50 rounded-2xl border-2 border-purple-200 mb-6 mx-[18px] px-0 py-[7px]">
+        <div className="text-center bg-gradient-to-br from-purple-50 to-cyan-50 rounded-2xl mb-6 mx-[18px] px-0 py-[7px]">
           
           
           <blockquote className="text-lg font-medium text-purple-800 mb-4 max-w-md mx-auto italic">
