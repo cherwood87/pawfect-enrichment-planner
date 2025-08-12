@@ -7,6 +7,7 @@ import FloatingChatButton from '@/components/dashboard/FloatingChatButton';
 import DashboardModals from '@/components/dashboard/DashboardModals';
 import ImageMigrationBanner from '@/components/ImageMigrationBanner';
 import EmptyDashboard from '@/components/EmptyDashboard';
+import { ActivitySyncManager } from '@/components/ActivitySyncManager';
 import { LoadingSkeleton } from '@/components/ui/loading-skeleton';
 import { Dog } from '@/types/dog';
 import { QuizResults } from '@/types/quiz';
@@ -153,6 +154,9 @@ const Index = React.memo(() => {
       {/* Image Migration Banner */}
       <div className="container mx-auto mobile-container">
         <ImageMigrationBanner />
+        <div className="mb-6">
+          <ActivitySyncManager />
+        </div>
       </div>
 
       {/* Main Content */}

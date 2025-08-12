@@ -57,16 +57,15 @@ const Hero_Intro: React.FC = () => {
             {/* Left Content */}
             <div className="flex-1 max-w-lg text-left lg:text-left">
               <h1 className="text-3xl md:text-5xl font-bold text-purple-800 mb-6 leading-tight">
-                Personalized Enrichment
+                280+ Fun Activities to
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-cyan-600">
-                  {" "}Plans for Your Dog{" "}
+                  {" "}Keep Your Dog{" "}
                 </span>
-                Unique Personality
+                Happy & Entertained
               </h1>
               
               <p className="text-lg md:text-xl text-gray-600 mb-8 leading-relaxed">
-                Create personalized enrichment plans based on your dog's unique personality and needs. 
-                Track activities across different enrichment pillars for a happier, healthier pup.
+                Take a quick quiz, get simple activity ideas perfect for your dog, plus an AI coach for instant help.
               </p>
 
               <div className="flex justify-center lg:justify-start">
@@ -98,18 +97,18 @@ const Hero_Intro: React.FC = () => {
           <div className="bg-gradient-to-r from-purple-100 via-cyan-100 to-amber-100 p-6 md:p-8">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
               <div className="transform hover:scale-105 transition-all duration-300">
-                <div className="text-2xl md:text-3xl font-bold text-purple-600 mb-2">10K+</div>
-                <div className="text-gray-700 font-medium">Happy Dogs</div>
+                <div className="text-2xl md:text-3xl font-bold text-purple-600 mb-2">280+</div>
+                <div className="text-gray-700 font-medium">Activities</div>
                 <div className="w-12 h-1 bg-gradient-to-r from-purple-400 to-purple-500 rounded-full mx-auto mt-2"></div>
               </div>
               <div className="transform hover:scale-105 transition-all duration-300">
-                <div className="text-2xl md:text-3xl font-bold text-cyan-600 mb-2">5</div>
-                <div className="text-gray-700 font-medium">Enrichment Pillars</div>
+                <div className="text-2xl md:text-3xl font-bold text-cyan-600 mb-2">5-Min</div>
+                <div className="text-gray-700 font-medium">Setup</div>
                 <div className="w-12 h-1 bg-gradient-to-r from-cyan-400 to-cyan-500 rounded-full mx-auto mt-2"></div>
               </div>
               <div className="transform hover:scale-105 transition-all duration-300">
-                <div className="text-2xl md:text-3xl font-bold text-amber-600 mb-2">100+</div>
-                <div className="text-gray-700 font-medium">Activities</div>
+                <div className="text-2xl md:text-3xl font-bold text-amber-600 mb-2">Instant</div>
+                <div className="text-gray-700 font-medium">AI Help</div>
                 <div className="w-12 h-1 bg-gradient-to-r from-amber-400 to-amber-500 rounded-full mx-auto mt-2"></div>
               </div>
             </div>
