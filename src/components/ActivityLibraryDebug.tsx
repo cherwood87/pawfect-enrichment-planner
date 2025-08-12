@@ -21,16 +21,10 @@ const ActivityLibraryDebug: React.FC<ActivityLibraryDebugProps> = ({
   const debugData = debugActivityWeights(activities);
   const discoveredCount = debugData.filter(d => d.type === 'discovered').length;
   const libraryCount = debugData.filter(d => d.type === 'library').length;
-  return (
-    <div className="modern-card p-4 mb-4 bg-amber-50 border border-amber-200">
+  return <div className="modern-card p-4 mb-4 bg-amber-50 border border-amber-200">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="font-semibold text-amber-800">Activity Library Debug</h3>
-        <Button
-          onClick={handleReshuffle}
-          variant="outline"
-          size="sm"
-          className="bg-amber-100 border-amber-300 text-amber-700 hover:bg-amber-200"
-        >
+        <h3 className="font-semibold text-amber-800">Activity Library</h3>
+        <Button onClick={handleReshuffle} variant="outline" size="sm" className="bg-amber-100 border-amber-300 text-amber-700 hover:bg-amber-200">
           <Shuffle className="w-4 h-4 mr-2" />
           Reshuffle
         </Button>
@@ -47,12 +41,9 @@ const ActivityLibraryDebug: React.FC<ActivityLibraryDebugProps> = ({
         </div>
       </div>
       
-      {lastShuffle && (
-        <p className="text-xs text-amber-600 mt-2">
+      {lastShuffle && <p className="text-xs text-amber-600 mt-2">
           Last shuffled: {lastShuffle.toLocaleTimeString()}
-        </p>
-      )}
-    </div>
-  );
+        </p>}
+    </div>;
 };
 export default ActivityLibraryDebug;
