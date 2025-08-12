@@ -76,7 +76,7 @@ export const SimplifiedDashboardContent: React.FC<SimplifiedDashboardContentProp
         {/* 3) Your Favorite Activities (horizontal scroll) */}
         {!favouritesLoading && favourites.length > 0 && (
           <section aria-labelledby="favorites-heading" className="space-y-3">
-            <h2 id="favorites-heading" className="text-lg font-semibold">Your Favorite Activities</h2>
+            <h2 id="favorites-heading" className="text-lg font-semibold">Choose an Activity</h2>
             <div className="-mx-4 px-4 pb-2 flex gap-3 overflow-x-auto snap-x">
               {favourites.map((fav) => (
                 <button
