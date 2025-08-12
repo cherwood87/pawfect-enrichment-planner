@@ -2,14 +2,13 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Settings, Library, MessageCircle, Menu, User, LogOut, CalendarDays, Home } from 'lucide-react';
+import { Library, MessageCircle, Menu, User, LogOut, Home } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useIsMobile, useIsSmallMobile } from '@/hooks/use-mobile';
 import { useDog } from '@/contexts/DogContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/components/ui/use-toast';
-import DogSelector from '@/components/DogSelector';
-import { QuizProgressBanner } from '@/components/dashboard/QuizProgressBanner';
+
 interface DashboardHeaderProps {
   onChatOpen: () => void;
   onAddDogOpen: () => void;
@@ -25,7 +24,8 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = React.memo(({
   } = useLocation();
   const {
     currentDog,
-    state
+    state,
+    setCurrentDog
   } = useDog();
   const {
     user,
@@ -54,13 +54,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = React.memo(({
     }
   };
   const isCurrentPage = (path: string) => pathname === path;
-  const getTimeBasedGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return 'Good morning';
-    if (hour < 17) return 'Good afternoon';
-    return 'Good evening';
-  };
-  const showDashboardGreeting = pathname.startsWith('/app') && !!currentDog;
+  // Simplified header: greetings removed for a cleaner layout
   return <header className="
           sticky top-0 z-40
           bg-gradient-to-r from-blue-100/90 via-white/80 to-orange-100/90
