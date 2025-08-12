@@ -8,16 +8,19 @@ import { Progress } from '@/components/ui/progress';
 import { AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { quizQuestions } from '@/data/quizQuestions';
 import { QuizResults } from '@/types/quiz';
-import { analyzeQuizResults } from '@/utils/quizAnalysis';
+import { analyzeQuizResultsWithBreed } from '@/utils/quizAnalysis';
+import { Dog } from '@/types/dog';
 
 interface DogPersonalityQuizProps {
   dogName: string;
+  dog: Dog;
   onComplete: (results: QuizResults) => void;
   onClose: () => void;
 }
 
 const DogPersonalityQuiz: React.FC<DogPersonalityQuizProps> = ({
   dogName,
+  dog,
   onComplete,
   onClose
 }) => {
@@ -45,7 +48,7 @@ const DogPersonalityQuiz: React.FC<DogPersonalityQuizProps> = ({
         // Add a small delay to show the analyzing state
         await new Promise(resolve => setTimeout(resolve, 1500));
         
-        const results = analyzeQuizResults(answers);
+        const results = analyzeQuizResultsWithBreed(answers, dog);
         onComplete(results);
       } catch (error) {
         console.error('Error analyzing quiz results:', error);

@@ -33,6 +33,7 @@ const DogProfileDialogs: React.FC<DogProfileDialogsProps> = ({
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <DogPersonalityQuiz
           dogName={currentDog.name}
+          dog={currentDog}
           onComplete={onQuizComplete}
           onClose={onCloseQuiz}
         />

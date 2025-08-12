@@ -2,6 +2,7 @@ import { ActivityLibraryItem } from '@/types/activity';
 import { DiscoveredActivity } from '@/types/discovery';
 import { Dog } from '@/types/dog';
 import { QuizResults } from '@/types/quiz';
+import { BreedAwareActivityRecommendationService } from './BreedAwareActivityRecommendationService';
 
 interface ActivityScore {
   activity: ActivityLibraryItem | DiscoveredActivity;
@@ -194,6 +195,12 @@ export class ActivityRecommendationService {
     dog: Dog,
     limit: number = 20
   ): (ActivityLibraryItem | DiscoveredActivity)[] {
+    // Use breed-aware recommendations if breed information is available
+    if (dog.breed && dog.breed !== 'Unknown') {
+      return BreedAwareActivityRecommendationService.getBreedSpecificActivities(activities, dog, limit);
+    }
+    
+    // Fall back to standard recommendations
     const scoredActivities = this.scoreActivitiesForDog(activities, dog);
     
     // Sort by score (highest first) and return top activities
@@ -220,6 +227,12 @@ export class ActivityRecommendationService {
     
     if (recommendations && recommendations.length > 0) {
       context += ` Recommended activities include: ${recommendations.slice(0, 3).join(', ')}.`;
+    }
+    
+    // Add breed-specific context if available
+    if (dog.breed && dog.breed !== 'Unknown') {
+      const breedContext = BreedAwareActivityRecommendationService.getBreedCompatibilityExplanation(dog);
+      context += ` ${breedContext}`;
     }
     
     return context;

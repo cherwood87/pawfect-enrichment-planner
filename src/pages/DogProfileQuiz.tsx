@@ -77,6 +77,7 @@ const DogProfileQuizPage: React.FC = () => {
       {showQuiz && (
         <DogPersonalityQuiz
           dogName={currentDog.name}
+          dog={currentDog}
           onComplete={handleQuizComplete}
           onClose={handleQuizClose}
         />

@@ -1,6 +1,8 @@
 
 import { QuizResults, QuizQuestion } from '@/types/quiz';
+import { Dog } from '@/types/dog';
 import { quizQuestions } from '@/data/quizQuestions';
+import { BreedAwareQuizAnalysisService } from '@/services/domain/BreedAwareQuizAnalysisService';
 
 export const generateReason = (pillar: string, score: number): string => {
   const reasons = {
@@ -82,4 +84,14 @@ export const analyzeQuizResults = (answers: Record<string, string>): QuizResults
     personality,
     recommendations
   };
+};
+
+export const analyzeQuizResultsWithBreed = (answers: Record<string, string>, dog: Dog): QuizResults => {
+  // Use breed-aware analysis if breed information is available
+  if (dog.breed && dog.breed !== 'Unknown') {
+    return BreedAwareQuizAnalysisService.analyzeQuizWithBreedContext(answers, dog);
+  }
+  
+  // Fall back to standard analysis
+  return analyzeQuizResults(answers);
 };
