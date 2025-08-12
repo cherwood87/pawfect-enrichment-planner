@@ -8,6 +8,8 @@ import TodaysEnrichmentSummary from '@/components/dashboard/TodaysEnrichmentSumm
 import ReflectionJournal from '@/components/ReflectionJournal';
 import EmptyDashboard from '@/components/EmptyDashboard';
 import ConsolidatedActivityModal from '@/components/modals/ConsolidatedActivityModal';
+import { QuizPromptCard } from '@/components/QuizPromptCard';
+import { QuizCompletionCard } from '@/components/dashboard/QuizCompletionCard';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 
@@ -18,13 +20,17 @@ interface DashboardContentProps {
   onEditDogOpen?: (dog: any) => void;
   onPillarSelect?: (pillar: string, mode?: 'daily' | 'weekly') => void;
   onChatOpen?: () => void;
+  onTakeQuiz?: () => void;
+  onViewQuizResults?: () => void;
 }
 
 const DashboardContent: React.FC<DashboardContentProps> = ({
   onAddDogOpen,
   onEditDogOpen,
   onPillarSelect,
-  onChatOpen
+  onChatOpen,
+  onTakeQuiz,
+  onViewQuizResults
 }) => {
   const navigate = useNavigate();
   const {
@@ -72,6 +78,16 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
       <div className="container mx-auto mobile-container mobile-space-y">
         {/* Main Dashboard Content */}
         <div className="mobile-space-y bg-slate-100">
+          {/* Quiz Status Card */}
+          {currentDog && !currentDog.quizResults && (
+            <QuizPromptCard currentDog={currentDog} onTakeQuiz={onTakeQuiz || (() => {})} />
+          )}
+          
+          {/* Quiz Completion Card */}
+          {currentDog && currentDog.quizResults && (
+            <QuizCompletionCard currentDog={currentDog} onViewResults={onViewQuizResults || (() => {})} />
+          )}
+          
           {/* Today's Enrichment Summary */}
           <TodaysEnrichmentSummary onChatOpen={onChatOpen} />
         </div>

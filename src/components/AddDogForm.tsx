@@ -9,9 +9,10 @@ import DogFormFields from './DogFormFields';
 
 interface AddDogFormProps {
   onClose: () => void;
+  onDogCreated?: (dog: any) => void;
 }
 
-const AddDogForm: React.FC<AddDogFormProps> = ({ onClose }) => {
+const AddDogForm: React.FC<AddDogFormProps> = ({ onClose, onDogCreated }) => {
   const { addDog } = useDog();
   const isMobile = useIsMobile();
   const [formData, setFormData] = useState({
@@ -34,19 +35,26 @@ const AddDogForm: React.FC<AddDogFormProps> = ({ onClose }) => {
     try {
       setIsSubmitting(true);
       
-      addDog({
+      const newDog = {
         name: formData.name.trim(),
         age: parseInt(formData.age) || 0,
         breed: formData.breed.trim() || 'Unknown',
         weight: 0, // Default weight
-        activityLevel: 'moderate', // Default activity level
+        activityLevel: 'moderate' as 'low' | 'moderate' | 'high', // Default activity level
         specialNeeds: '', // Default special needs
         gender: formData.gender as 'Male' | 'Female' | 'Unknown',
         breedGroup: formData.breedGroup,
         mobilityIssues: formData.mobilityIssues,
         image: formData.image,
         notes: formData.notes.trim()
-      });
+      };
+
+      addDog(newDog);
+      
+      // Notify about dog creation for post-creation flow
+      if (onDogCreated) {
+        onDogCreated(newDog);
+      }
       
       onClose();
     } catch (error) {

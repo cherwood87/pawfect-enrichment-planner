@@ -16,6 +16,7 @@ import { useDog } from '@/contexts/DogContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/components/ui/use-toast';
 import DogSelector from '@/components/DogSelector';
+import { QuizProgressBanner } from '@/components/dashboard/QuizProgressBanner';
 
 interface DashboardHeaderProps {
   onChatOpen: () => void;
@@ -26,7 +27,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = React.memo(
   ({ onChatOpen, onAddDogOpen }) => {
     const navigate = useNavigate();
     const { pathname, hash } = useLocation();
-    const { currentDog } = useDog();
+    const { currentDog, state } = useDog();
     const { user, signOut } = useAuth();
     const isMobile = useIsMobile();
     const isSmallMobile = useIsSmallMobile();
@@ -233,6 +234,13 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = React.memo(
               </DropdownMenu>
             </div>
           </div>
+          
+          {/* Quiz Progress Banner - only show if multiple dogs exist */}
+          {state.dogs.length > 1 && (
+            <div className="mt-3">
+              <QuizProgressBanner dogs={state.dogs} />
+            </div>
+          )}
         </div>
       </header>
     );
