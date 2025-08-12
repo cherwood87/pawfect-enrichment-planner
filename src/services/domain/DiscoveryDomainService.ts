@@ -1,11 +1,10 @@
-
 import { ActivityLibraryItem } from '@/types/activity';
 import { DiscoveredActivity, ContentDiscoveryConfig } from '@/types/discovery';
 import { Dog } from '@/types/dog';
 import { DiscoveryRepository } from '../data/DiscoveryRepository';
 import { AIContentDiscoveryService } from '../AIContentDiscoveryService';
 import { ContentDiscoveryService } from '../ContentDiscoveryService';
-import { activityLibrary, getCombinedActivities } from '@/data/activityLibrary';
+import { activityLibrary, getCombinedActivitiesSync } from '@/data/activityLibrary';
 import { weightedShuffle } from '@/utils/weightedShuffle';
 
 export class DiscoveryDomainService {
@@ -24,7 +23,7 @@ export class DiscoveryDomainService {
   static getCombinedActivityLibrary(discoveredActivities: DiscoveredActivity[]): (ActivityLibraryItem | DiscoveredActivity)[] {
     // Only include approved activities (all AI activities are auto-approved)
     const approvedDiscovered = discoveredActivities.filter(activity => activity.approved);
-    const combined = getCombinedActivities(approvedDiscovered);
+    const combined = getCombinedActivitiesSync(approvedDiscovered);
     
     // Apply weighted shuffling to promote discovered activities
     return weightedShuffle(combined, {

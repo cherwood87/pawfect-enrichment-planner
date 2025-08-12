@@ -57,9 +57,9 @@ export function getPillarActivities(pillar?: string | null): ActivityLibraryItem
   return weightedShuffle(pillarActivities);
 }
 
-// Search combined activities (library + discovered + curated) with weighted results
+// Search combined activities (library + discovered + curated + database) with weighted results
 export function searchCombinedActivities(query: string, discoveredActivities: DiscoveredActivity[]): (ActivityLibraryItem | DiscoveredActivity)[] {
-  const combinedActivities = getCombinedActivities(discoveredActivities);
+  const combinedActivities = getCombinedActivitiesSync(discoveredActivities);
   const lowercaseQuery = query.toLowerCase();
   
   const matchingActivities = combinedActivities.filter(activity => 
@@ -73,8 +73,63 @@ export function searchCombinedActivities(query: string, discoveredActivities: Di
   return weightedShuffle(matchingActivities);
 }
 
-// Get combined activities (library + discovered + curated) with weighted shuffling
-export function getCombinedActivities(discoveredActivities: DiscoveredActivity[]): (ActivityLibraryItem | DiscoveredActivity)[] {
+// Get combined activities (library + discovered + curated + database) with weighted shuffling
+export async function getCombinedActivities(discoveredActivities: DiscoveredActivity[]): Promise<(ActivityLibraryItem | DiscoveredActivity)[]> {
+  // Filter discovered activities (AI-generated)
+  const approvedDiscovered = discoveredActivities.filter(activity => 
+    activity.approved && activity.source === 'discovered'
+  );
+  
+  // Start with static library activities
+  let combined: (ActivityLibraryItem | DiscoveredActivity)[] = [...activityLibrary];
+  
+  // Add approved discovered activities
+  combined.push(...approvedDiscovered);
+  
+  // Try to load additional activities from database if available
+  try {
+    const { SyncDomainService } = await import('@/services/domain/SyncDomainService');
+    const dbActivities = await SyncDomainService.loadActivitiesFromSupabase();
+    
+    // Add curated activities from database (if not already included)
+    const additionalCurated = dbActivities.curated.filter(dbActivity => 
+      !activityLibrary.some(libActivity => libActivity.id === dbActivity.id)
+    );
+    combined.push(...additionalCurated);
+    
+    // Add additional discovered activities from database
+    const additionalDiscovered = dbActivities.discovered.filter(dbActivity => 
+      dbActivity.approved && !discoveredActivities.some(discActivity => discActivity.id === dbActivity.id)
+    );
+    combined.push(...additionalDiscovered);
+    
+    // Add user activities from database
+    combined.push(...dbActivities.user);
+    
+  } catch (error) {
+    console.log('Using static activities only - database not available:', error);
+  }
+
+  // De-duplicate by id and normalized title while preserving order (prefer library entries)
+  const seenIds = new Set<string>();
+  const seenTitles = new Set<string>();
+  const unique: (ActivityLibraryItem | DiscoveredActivity)[] = [];
+
+  for (const item of combined) {
+    const idKey = String(item.id);
+    const titleKey = item.title.trim().toLowerCase();
+    if (seenIds.has(idKey) || seenTitles.has(titleKey)) continue;
+    seenIds.add(idKey);
+    seenTitles.add(titleKey);
+    unique.push(item);
+  }
+  
+  // Apply weighted shuffling to promote discovered activities
+  return weightedShuffle(unique);
+}
+
+// Synchronous version for backward compatibility
+export function getCombinedActivitiesSync(discoveredActivities: DiscoveredActivity[]): (ActivityLibraryItem | DiscoveredActivity)[] {
   // Filter discovered activities (AI-generated)
   const approvedDiscovered = discoveredActivities.filter(activity => 
     activity.approved && activity.source === 'discovered'

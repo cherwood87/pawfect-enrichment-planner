@@ -1,10 +1,10 @@
-
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useCallback } from 'react';
 import { DiscoveredActivity, ContentDiscoveryConfig } from '@/types/discovery';
 import { ActivityLibraryItem } from '@/types/activity';
 import { useDog } from '@/contexts/DogContext';
 import { useActivityState } from './ActivityStateContext';
 import { useDiscoveryOperations } from '@/hooks/core/useDiscoveryOperations';
+import { getCombinedActivitiesSync } from '@/data/activityLibrary';
 
 interface DiscoveryContextType {
   isDiscovering: boolean;
@@ -66,9 +66,13 @@ export const DiscoveryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     await discoveryOps.updateDiscoveryConfig(updates);
   };
 
+  const getCombinedActivityLibrary = useCallback(() => {
+    return getCombinedActivitiesSync(discoveredActivities);
+  }, [discoveredActivities]);
+
   const value: DiscoveryContextType = {
     isDiscovering,
-    getCombinedActivityLibrary: discoveryOps.getCombinedActivityLibrary,
+    getCombinedActivityLibrary,
     discoverNewActivities,
     approveDiscoveredActivity,
     rejectDiscoveredActivity,

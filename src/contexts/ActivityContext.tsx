@@ -5,6 +5,8 @@ import { ActivityStateProvider, useActivityState } from './ActivityStateContext'
 import { ActivityOperationsProvider, useActivityOperations } from './ActivityOperationsContext';
 import { SyncProvider, useSync } from './SyncContext';
 import { DiscoveryProvider, useDiscovery } from './DiscoveryContext';
+import { useDog } from '@/contexts/DogContext';
+import { BackgroundSyncService } from '@/services/core/BackgroundSyncService';
 
 const ActivityContext = createContext<ActivityContextType | undefined>(undefined);
 
@@ -19,10 +21,18 @@ export const useActivity = () => {
 
 // Internal component that combines all context values - memoized for performance
 const ActivityContextAggregator: React.FC<{ children: React.ReactNode }> = React.memo(({ children }) => {
+  const { currentDog } = useDog();
   const stateContext = useActivityState();
   const operationsContext = useActivityOperations();
   const syncContext = useSync();
   const discoveryContext = useDiscovery();
+
+  // Initialize background sync when app loads or dog changes
+  React.useEffect(() => {
+    if (currentDog?.id && !BackgroundSyncService.isBackgroundSyncInitialized()) {
+      BackgroundSyncService.initializeAllActivities(currentDog.id);
+    }
+  }, [currentDog?.id]);
 
   // Memoize context value to prevent unnecessary re-renders
   const contextValue: ActivityContextType = React.useMemo(() => ({
