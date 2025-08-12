@@ -19,9 +19,7 @@ export const DailyQuoteCard: React.FC<DailyQuoteCardProps> = ({
   return <Card className="bg-gradient-to-br from-purple-50 to-cyan-50 border-2 border-purple-200">
       <CardContent className="p-6">
         <div className="flex items-center space-x-3">
-          <div className="bg-gradient-to-r from-purple-500 to-cyan-500 p-3 rounded-2xl">
-            <Quote className="w-6 h-6 text-white" />
-          </div>
+          
           <div>
             <h2 className="text-xl font-bold text-purple-800">Daily Inspiration</h2>
             <p className="text-sm text-purple-600">Your enrichment motivation for today</p>
