@@ -54,6 +54,13 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = React.memo(({
     }
   };
   const isCurrentPage = (path: string) => pathname === path;
+  const getTimeBasedGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
+  };
+  const showDashboardGreeting = pathname.startsWith('/app') && !!currentDog;
   return <header className="
           sticky top-0 z-40
           bg-gradient-to-r from-blue-100/90 via-white/80 to-orange-100/90
@@ -84,16 +91,31 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = React.memo(({
 
               {/* Title or Dog Name */}
               {!isSmallMobile && <div className="min-w-0 flex-1">
-                  {currentDog ? <div>
-                      <h1 className="font-extrabold text-gray-800 truncate text-base sm:text-lg md:text-xl tracking-tight drop-shadow">
-                        {currentDog.name}
-                      </h1>
-                      <p className="text-xs sm:text-sm text-gray-600 truncate">
-                        {currentDog.breed}
-                      </p>
-                    </div> : <h1 className="font-extrabold text-gray-800 truncate text-base sm:text-lg md:text-xl tracking-tight drop-shadow">
+                  {currentDog ? (
+                    showDashboardGreeting ? (
+                      <div>
+                        <h1 className="font-extrabold text-gray-800 truncate text-base sm:text-lg md:text-xl tracking-tight drop-shadow">
+                          {`${getTimeBasedGreeting()}, ${currentDog.name}!`}
+                        </h1>
+                        <p className="text-xs sm:text-sm text-gray-600 truncate">
+                          Here’s your enrichment plan for today
+                        </p>
+                      </div>
+                    ) : (
+                      <div>
+                        <h1 className="font-extrabold text-gray-800 truncate text-base sm:text-lg md:text-xl tracking-tight drop-shadow">
+                          {currentDog.name}
+                        </h1>
+                        <p className="text-xs sm:text-sm text-gray-600 truncate">
+                          {currentDog.breed}
+                        </p>
+                      </div>
+                    )
+                  ) : (
+                    <h1 className="font-extrabold text-gray-800 truncate text-base sm:text-lg md:text-xl tracking-tight drop-shadow">
                       {isMobile ? 'Dog Enrichment' : 'Beyond Busy Dog Enrichment Planner'}
-                    </h1>}
+                    </h1>
+                  )}
                 </div>}
             </div>
             <div className="flex items-center space-x-2 flex-shrink-0">

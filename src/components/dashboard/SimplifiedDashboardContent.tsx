@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { DogProfileHero } from './DogProfileHero';
+
 import { useDog } from '@/contexts/DogContext';
 import { useActivity } from '@/contexts/ActivityContext';
 import EmptyDashboard from '@/components/EmptyDashboard';
@@ -60,8 +60,6 @@ export const SimplifiedDashboardContent: React.FC<SimplifiedDashboardContentProp
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-cyan-50 to-amber-50">
       <div className="container mx-auto mobile-container mobile-space-y">
-        {/* 1) Dog Profile Header */}
-        <DogProfileHero dog={currentDog} className="mx-0 px-0 py-[7px]" />
 
         {/* 2) Primary Call-to-Action */}
         <div className="text-center">
@@ -75,7 +73,7 @@ export const SimplifiedDashboardContent: React.FC<SimplifiedDashboardContentProp
 
         {/* 3) Your Favorite Activities (horizontal scroll) */}
         {!favouritesLoading && favourites.length > 0 && (
-          <section aria-labelledby="favorites-heading" className="space-y-3">
+          <section id="favorites" aria-labelledby="favorites-heading" className="space-y-3">
             <h2 id="favorites-heading" className="text-lg font-semibold">Choose an Activity</h2>
             <div className="-mx-4 px-4 pb-2 flex gap-3 overflow-x-auto snap-x">
               {favourites.map((fav) => (
