@@ -5,6 +5,7 @@ import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import DashboardContent from '@/components/dashboard/DashboardContent';
 import FloatingChatButton from '@/components/dashboard/FloatingChatButton';
 import DashboardModals from '@/components/dashboard/DashboardModals';
+import ImageMigrationBanner from '@/components/ImageMigrationBanner';
 import EmptyDashboard from '@/components/EmptyDashboard';
 import { LoadingSkeleton } from '@/components/ui/loading-skeleton';
 import { Dog } from '@/types/dog';
@@ -148,6 +149,11 @@ const Index = React.memo(() => {
         onChatOpen={handleChatModalOpen} 
         onAddDogOpen={handleAddDogModalOpen}
       />
+
+      {/* Image Migration Banner */}
+      <div className="container mx-auto mobile-container">
+        <ImageMigrationBanner />
+      </div>
 
       {/* Main Content */}
       <DashboardContent 

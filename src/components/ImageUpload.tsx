@@ -1,64 +1,78 @@
 
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Camera, Upload, X } from 'lucide-react';
+import { Camera, Upload, X, Loader2 } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useOptimizedImageUpload } from '@/hooks/useOptimizedImageUpload';
+import { Progress } from '@/components/ui/progress';
 
 interface ImageUploadProps {
   currentImage?: string;
   onImageChange: (image: string | undefined) => void;
   className?: string;
+  dogId?: string;
+  useStorageUpload?: boolean;
 }
 
 const ImageUpload: React.FC<ImageUploadProps> = ({ 
   currentImage, 
   onImageChange, 
-  className = "" 
+  className = "",
+  dogId,
+  useStorageUpload = true
 }) => {
   const [dragOver, setDragOver] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isMobile = useIsMobile();
+  
+  const { uploadOptimizedImage, validateImageFile, uploadProgress, isUploading } = useOptimizedImageUpload({
+    maxWidth: 1200,
+    maxHeight: 1200,
+    quality: 0.85,
+    format: 'webp'
+  });
 
   const handleFileSelect = async (file: File) => {
-    if (!file || !file.type.startsWith('image/')) {
-      setError('Please select a valid image file');
-      return;
-    }
-
-    // Check file size (limit to 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      setError('Image must be less than 5MB');
+    // Validate file
+    const validation = validateImageFile(file);
+    if (!validation.valid) {
+      setError(validation.error || 'Invalid file');
       return;
     }
 
     try {
-      setIsProcessing(true);
       setError(null);
       
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const result = e.target?.result as string;
-          onImageChange(result);
-          setIsProcessing(false);
-        } catch (error) {
-          console.error('Error processing image result:', error);
-          setError('Failed to process image');
-          setIsProcessing(false);
+      if (useStorageUpload) {
+        // Upload to Supabase Storage with optimization
+        const result = await uploadOptimizedImage(file, dogId);
+        
+        if (result.success && result.imageUrl) {
+          onImageChange(result.imageUrl);
+        } else {
+          setError(result.error || 'Upload failed');
         }
-      };
-      reader.onerror = (error) => {
-        console.error('Error reading file:', error);
-        setError('Failed to read image file');
-        setIsProcessing(false);
-      };
-      reader.readAsDataURL(file);
+      } else {
+        // Fallback to base64 for backward compatibility
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const result = e.target?.result as string;
+            onImageChange(result);
+          } catch (error) {
+            console.error('Error processing image result:', error);
+            setError('Failed to process image');
+          }
+        };
+        reader.onerror = () => {
+          setError('Failed to read image file');
+        };
+        reader.readAsDataURL(file);
+      }
     } catch (error) {
       console.error('Error processing image:', error);
       setError('Failed to process image');
-      setIsProcessing(false);
     }
   };
 
@@ -82,7 +96,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   };
 
   const handleClick = () => {
-    if (!isProcessing) {
+    if (!isUploading) {
       setError(null);
       fileInputRef.current?.click();
     }
@@ -108,10 +122,10 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
         className={`
           ${avatarSize} rounded-full border-2 border-dashed cursor-pointer
           flex items-center justify-center transition-colors touch-target
-          ${dragOver ? 'border-blue-400 bg-blue-50' : 'border-gray-300 hover:border-gray-400'}
+          ${dragOver ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}
           ${currentImage ? 'border-solid' : ''}
-          ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}
-          ${error ? 'border-red-400 bg-red-50' : ''}
+          ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}
+          ${error ? 'border-destructive bg-destructive/5' : ''}
         `}
       >
         {currentImage ? (
@@ -131,23 +145,37 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
               variant="destructive"
               onClick={handleRemove}
               className={`absolute -top-2 -right-2 ${removeButtonSize} rounded-full p-0 touch-target`}
-              disabled={isProcessing}
+              disabled={isUploading}
             >
               <X className={`${isMobile ? 'w-2.5 h-2.5' : 'w-3 h-3'}`} />
             </Button>
           </>
         ) : (
           <div className="text-center">
-            <Camera className={`${iconSize} text-gray-400 mx-auto mb-1`} />
-            <div className="text-xs text-gray-500">
-              {isProcessing ? 'Processing...' : error ? 'Try Again' : 'Add Photo'}
+            {isUploading ? (
+              <Loader2 className={`${iconSize} text-muted-foreground mx-auto mb-1 animate-spin`} />
+            ) : (
+              <Camera className={`${iconSize} text-muted-foreground mx-auto mb-1`} />
+            )}
+            <div className="text-xs text-muted-foreground">
+              {isUploading ? uploadProgress.stage : error ? 'Try Again' : 'Add Photo'}
             </div>
           </div>
         )}
       </div>
       
-      {error && (
-        <div className="absolute top-full left-0 mt-1 text-xs text-red-500 text-center w-full">
+      {/* Upload Progress */}
+      {isUploading && uploadProgress.progress > 0 && (
+        <div className="absolute top-full left-0 mt-2 w-full">
+          <Progress value={uploadProgress.progress} className="h-1" />
+          <div className="text-xs text-center text-muted-foreground mt-1">
+            {uploadProgress.stage === 'compressing' ? 'Optimizing...' : 'Uploading...'}
+          </div>
+        </div>
+      )}
+      
+      {error && !isUploading && (
+        <div className="absolute top-full left-0 mt-1 text-xs text-destructive text-center w-full">
           {error}
         </div>
       )}
@@ -161,7 +189,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
           if (file) handleFileSelect(file);
         }}
         className="hidden"
-        disabled={isProcessing}
+        disabled={isUploading}
       />
     </div>
   );

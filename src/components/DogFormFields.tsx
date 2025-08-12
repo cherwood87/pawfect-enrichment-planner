@@ -61,6 +61,7 @@ const DogFormFields: React.FC<DogFormFieldsProps> = ({
         <ImageUpload
           currentImage={formData.image}
           onImageChange={(image) => updateFormData('image', image)}
+          useStorageUpload={true}
         />
       </div>
 

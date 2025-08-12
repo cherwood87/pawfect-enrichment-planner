@@ -3,7 +3,7 @@ import React, { useState, useCallback } from 'react';
 import { QuizResults } from '@/types/quiz';
 import { useDog } from '@/contexts/DogContext';
 import { useNavigate } from 'react-router-dom';
-import DogAvatarBlock from './DogAvatarBlock';
+import DogProfileBanner from './DogProfileBanner';
 import QuizAndGoalsCard from './profile/QuizAndGoalsCard';
 import DogProfileDialogs from './profile/DogProfileDialogs';
 import { Dog } from '@/types/dog';
@@ -62,8 +62,8 @@ const DogProfile: React.FC<DogProfileProps> = ({ onEditDogOpen }) => {
 
   return (
     <>
-      {/* Enhanced Dog Avatar Block */}
-      <DogAvatarBlock 
+      {/* Enhanced Dog Profile Banner */}
+      <DogProfileBanner 
         dog={currentDog}
         onEditClick={handleEditClick}
       />
