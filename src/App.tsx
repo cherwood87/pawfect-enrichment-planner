@@ -72,10 +72,11 @@ const App = () => (
             <DogProvider>
               <ActivityProvider>
                 <ChatProvider>
-                  <Toaster />
-                  <Sonner />
-                  <BrowserRouter>
-                    <Suspense fallback={<PageLoader />}>
+                  <SubscriptionProvider>
+                    <Toaster />
+                    <Sonner />
+                    <BrowserRouter>
+                      <Suspense fallback={<PageLoader />}>
                       <Routes>
                         <Route path="/auth" element={<Auth />} />
                         <Route path="/subscribe" element={<ErrorBoundary><Subscribe /></ErrorBoundary>} />
@@ -186,6 +187,7 @@ const App = () => (
                       </Routes>
                     </Suspense>
                   </BrowserRouter>
+                  </SubscriptionProvider>
                 </ChatProvider>
               </ActivityProvider>
             </DogProvider>
