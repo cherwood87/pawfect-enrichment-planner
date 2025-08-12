@@ -4,7 +4,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Library, MessageCircle, Menu, User, LogOut, Home } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useIsMobile, useIsSmallMobile } from '@/hooks/use-mobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { useDog } from '@/contexts/DogContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/components/ui/use-toast';
@@ -13,160 +13,166 @@ interface DashboardHeaderProps {
   onChatOpen: () => void;
   onAddDogOpen: () => void;
 }
-const DashboardHeader: React.FC<DashboardHeaderProps> = React.memo(({
-  onChatOpen,
-  onAddDogOpen
-}) => {
+
+const DashboardHeader: React.FC<DashboardHeaderProps> = React.memo(({ onAddDogOpen }) => {
   const navigate = useNavigate();
-  const {
-    pathname,
-    hash
-  } = useLocation();
-  const {
-    currentDog,
-    state,
-    setCurrentDog
-  } = useDog();
-  const {
-    user,
-    signOut
-  } = useAuth();
+  const { pathname } = useLocation();
+  const { currentDog, state, setCurrentDog } = useDog();
+  const { signOut } = useAuth();
   const isMobile = useIsMobile();
-  const isSmallMobile = useIsSmallMobile();
+
   const handleNavigation = React.useCallback((path: string) => {
     navigate(path);
   }, [navigate]);
+
   const handleSignOut = async () => {
-    console.log('🔐 Sign out button clicked');
     try {
       await signOut();
-      toast({
-        title: "Signed out",
-        description: "You have been successfully signed out."
-      });
+      toast({ title: 'Signed out', description: 'You have been successfully signed out.' });
     } catch (error) {
-      console.error('❌ Sign out error:', error);
-      toast({
-        title: "Error",
-        description: "Failed to sign out",
-        variant: "destructive"
-      });
+      console.error('Sign out error:', error);
+      toast({ title: 'Error', description: 'Failed to sign out', variant: 'destructive' });
     }
   };
-  const isCurrentPage = (path: string) => pathname === path;
-  // Simplified header: greetings removed for a cleaner layout
-  return <header className="
-          sticky top-0 z-40
-          bg-gradient-to-r from-blue-100/90 via-white/80 to-orange-100/90
-          backdrop-blur-lg
-          shadow-md
-          border-b border-blue-100
-          rounded-b-xl
-        " style={{
-    WebkitBackdropFilter: 'blur(12px)',
-    backdropFilter: 'blur(12px)'
-  }} aria-label="Main dashboard header">
-        <div className="max-w-screen-lg mx-auto mobile-container sm:py-3 px-[70px] py-px">
-          <div className="flex items-center justify-between">
-            {/* Dog Avatar or Default Button */}
-            <div className="flex items-center space-x-3 flex-1 min-w-0">
-              {currentDog ? <button className="flex-shrink-0 transition-transform hover:scale-105 active:scale-95" aria-label={`${currentDog.name}'s profile`} onClick={() => handleNavigation('/app')} tabIndex={0} type="button">
-                  <Avatar className="w-12 h-12 sm:w-14 sm:h-14 border-2 border-white shadow-lg">
-                    <AvatarImage src={currentDog.photo || currentDog.image} alt={`${currentDog.name}'s photo`} className="object-cover" />
-                    <AvatarFallback className="bg-gradient-to-br from-blue-500 to-orange-500 text-white font-bold text-lg sm:text-xl">
-                      {currentDog.name.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                </button> : <button className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-blue-500 to-orange-500 rounded-full flex items-center justify-center shadow-lg flex-shrink-0 border-2 border-white transition-transform hover:scale-105 active:scale-95" aria-label="Go to Dashboard" onClick={() => handleNavigation('/app')} tabIndex={0} type="button">
-                  <span className="text-white font-bold text-lg sm:text-xl drop-shadow">
-                    🐕
-                  </span>
-                </button>}
 
-              {/* Title or Dog Name */}
-              {!isSmallMobile && <div className="min-w-0 flex-1">
-                  {currentDog ? (
-                    showDashboardGreeting ? (
-                      <div>
-                        <h1 className="font-extrabold text-gray-800 truncate text-base sm:text-lg md:text-xl tracking-tight drop-shadow">
-                          {`${getTimeBasedGreeting()}, ${currentDog.name}!`}
-                        </h1>
-                        <p className="text-xs sm:text-sm text-gray-600 truncate">
-                          Here’s your enrichment plan for today
-                        </p>
-                      </div>
-                    ) : (
-                      <div>
-                        <h1 className="font-extrabold text-gray-800 truncate text-base sm:text-lg md:text-xl tracking-tight drop-shadow">
-                          {currentDog.name}
-                        </h1>
-                        <p className="text-xs sm:text-sm text-gray-600 truncate">
-                          {currentDog.breed}
-                        </p>
-                      </div>
-                    )
-                  ) : (
-                    <h1 className="font-extrabold text-gray-800 truncate text-base sm:text-lg md:text-xl tracking-tight drop-shadow">
-                      {isMobile ? 'Dog Enrichment' : 'Beyond Busy Dog Enrichment Planner'}
-                    </h1>
-                  )}
-                </div>}
-            </div>
-            <div className="flex items-center space-x-2 flex-shrink-0">
-              <DogSelector onAddDogOpen={onAddDogOpen} />
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size={isMobile ? 'sm' : 'default'} className="
-                      touch-target
-                      rounded-full
-                      bg-white/80
-                      shadow
-                      border
-                      hover:bg-blue-100/80
-                      transition
-                    " aria-label="Open settings menu">
-                    {isMobile ? <Menu className="w-5 h-5" /> : <Settings className="w-6 h-6" />}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 bg-white/95 border shadow-lg z-50 rounded-xl mt-2">
-                  <DropdownMenuItem onClick={() => handleNavigation('/app')} className={`touch-target rounded ${isCurrentPage('/app') ? 'bg-blue-50 text-blue-700' : ''}`} aria-current={isCurrentPage('/app') ? 'page' : undefined}>
-                    <Home className="mr-2 h-4 w-4" />
-                    <span>Dashboard</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => handleNavigation('/activity-library')} className={`touch-target rounded ${isCurrentPage('/activity-library') ? 'bg-blue-50 text-blue-700' : ''}`} aria-current={isCurrentPage('/activity-library') ? 'page' : undefined}>
-                    <Library className="mr-2 h-4 w-4" />
-                    <span>Activity Library</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleNavigation('/app#favorites')} className={"touch-target rounded"}>
-                    <CalendarDays className="mr-2 h-4 w-4" />
-                    <span>Favorites</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => handleNavigation('/coach')} className={`touch-target rounded ${isCurrentPage('/coach') ? 'bg-blue-50 text-blue-700' : ''}`} aria-current={isCurrentPage('/coach') ? 'page' : undefined}>
-                    <MessageCircle className="mr-2 h-4 w-4" />
-                    <span>Enrichment Coach</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => handleNavigation('/settings')} className={`touch-target rounded ${isCurrentPage('/settings') ? 'bg-blue-50 text-blue-700' : ''}`} aria-current={isCurrentPage('/settings') ? 'page' : undefined}>
-                    <User className="mr-2 h-4 w-4" />
-                    <span>Account Settings</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleSignOut} className="touch-target rounded text-red-600 hover:text-red-700 hover:bg-red-50">
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Sign Out</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+  const isCurrentPage = (path: string) => pathname === path;
+
+  return (
+    <header
+      className="sticky top-0 z-40 bg-gradient-to-r from-blue-100/90 via-white/80 to-orange-100/90 backdrop-blur-lg shadow-md border-b border-blue-100 rounded-b-xl"
+      style={{ WebkitBackdropFilter: 'blur(12px)', backdropFilter: 'blur(12px)' }}
+      aria-label="Main dashboard header"
+    >
+      <div className="max-w-screen-lg mx-auto mobile-container sm:py-3 px-[70px] py-px">
+        <div className="grid grid-cols-3 items-center">
+          {/* Left: Brand/Home link */}
+          <div className="flex items-center">
+            <button
+              type="button"
+              onClick={() => handleNavigation('/app')}
+              aria-label="Go to Dashboard"
+              className="font-extrabold tracking-tight text-gray-800 text-sm sm:text-base hover:opacity-90 transition"
+            >
+              Beyond Busy
+            </button>
           </div>
-          
-          {/* Quiz Progress Banner - only show if multiple dogs exist */}
-          {state.dogs.length > 1 && <div className="mt-3">
-              <QuizProgressBanner dogs={state.dogs} />
-            </div>}
+
+          {/* Center: Dog identity dropdown (single source of truth) */}
+          <div className="flex justify-center">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  aria-label={currentDog ? `Switch dog from ${currentDog.name}` : 'Select a dog'}
+                  className="flex items-center gap-2 rounded-full px-2 py-1 hover:bg-white/70 transition focus:outline-none focus:ring-2 focus:ring-blue-200"
+                >
+                  <Avatar className="w-10 h-10 sm:w-12 sm:h-12 border-2 border-white shadow">
+                    <AvatarImage
+                      src={currentDog?.photo || currentDog?.image}
+                      alt={currentDog ? `${currentDog.name}'s photo` : 'Dog avatar'}
+                      className="object-cover"
+                    />
+                    <AvatarFallback className="bg-muted font-bold">🐶</AvatarFallback>
+                  </Avatar>
+                  <span className="max-w-[140px] sm:max-w-[200px] truncate font-semibold text-gray-800">
+                    {currentDog ? currentDog.name : 'Select a dog'}
+                  </span>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="center" className="z-50 w-64 bg-background border shadow-lg rounded-xl p-1">
+                {state.dogs.length > 0 ? (
+                  <>
+                    {state.dogs.map((dog) => (
+                      <DropdownMenuItem
+                        key={dog.id}
+                        className="rounded flex items-center gap-2"
+                        onClick={() => setCurrentDog(dog.id)}
+                      >
+                        <Avatar className="w-8 h-8">
+                          <AvatarImage src={dog.photo || dog.image} alt={`${dog.name} avatar`} />
+                          <AvatarFallback className="bg-muted">
+                            {dog.name.charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="truncate">{dog.name}</span>
+                      </DropdownMenuItem>
+                    ))}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="rounded" onClick={onAddDogOpen}>
+                      + Add Dog
+                    </DropdownMenuItem>
+                  </>
+                ) : (
+                  <>
+                    <DropdownMenuItem className="rounded" onClick={onAddDogOpen}>
+                      + Add Dog
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
+          {/* Right: Hamburger menu */}
+          <div className="flex justify-end">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size={isMobile ? 'sm' : 'default'}
+                  className="touch-target rounded-full bg-white/80 shadow border hover:bg-blue-100/80 transition"
+                  aria-label="Open menu"
+                >
+                  <Menu className="w-6 h-6" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 bg-background border shadow-lg z-50 rounded-xl mt-2">
+                <DropdownMenuItem
+                  onClick={() => handleNavigation('/app')}
+                  className={`touch-target rounded ${isCurrentPage('/app') ? 'bg-blue-50 text-blue-700' : ''}`}
+                  aria-current={isCurrentPage('/app') ? 'page' : undefined}
+                >
+                  <Home className="mr-2 h-4 w-4" />
+                  <span>Dashboard</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => handleNavigation('/activity-library')}
+                  className={`touch-target rounded ${isCurrentPage('/activity-library') ? 'bg-blue-50 text-blue-700' : ''}`}
+                  aria-current={isCurrentPage('/activity-library') ? 'page' : undefined}
+                >
+                  <Library className="mr-2 h-4 w-4" />
+                  <span>Activity Library</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => handleNavigation('/coach')}
+                  className={`touch-target rounded ${isCurrentPage('/coach') ? 'bg-blue-50 text-blue-700' : ''}`}
+                  aria-current={isCurrentPage('/coach') ? 'page' : undefined}
+                >
+                  <MessageCircle className="mr-2 h-4 w-4" />
+                  <span>Enrichment Coach</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => handleNavigation('/settings')}
+                  className={`touch-target rounded ${isCurrentPage('/settings') ? 'bg-blue-50 text-blue-700' : ''}`}
+                  aria-current={isCurrentPage('/settings') ? 'page' : undefined}
+                >
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Account Settings</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSignOut} className="touch-target rounded text-red-600 hover:text-red-700 hover:bg-red-50">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Sign Out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
-      </header>;
+      </div>
+    </header>
+  );
 });
+
 export default DashboardHeader;
