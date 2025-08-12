@@ -7,6 +7,7 @@ import { useActivity } from '@/contexts/ActivityContext';
 import EmptyDashboard from '@/components/EmptyDashboard';
 import ConsolidatedActivityModal from '@/components/modals/ConsolidatedActivityModal';
 import { useFavourites } from '@/hooks/useFavourites';
+import { DailyQuoteCard } from '@/components/dashboard/DailyQuoteCard';
 
 interface SimplifiedDashboardContentProps {
   onAddDogOpen?: () => void;
@@ -60,6 +61,12 @@ export const SimplifiedDashboardContent: React.FC<SimplifiedDashboardContentProp
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-cyan-50 to-amber-50">
       <div className="container mx-auto mobile-container mobile-space-y">
+
+        {/* Daily Quote - placed under header, above CTA */}
+        <section aria-labelledby="daily-quote-heading">
+          <h2 id="daily-quote-heading" className="sr-only">Daily Inspiration</h2>
+          <DailyQuoteCard currentDog={{ name: currentDog.name }} />
+        </section>
 
         {/* 2) Primary Call-to-Action */}
         <div className="text-center">
