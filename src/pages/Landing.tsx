@@ -43,6 +43,13 @@ const Landing: React.FC = () => {
         </header>
       )}
       
+      {/* Simple pricing ribbon */}
+      <div className="container mx-auto px-6 pt-20">
+        <div className="rounded-xl border border-primary/20 bg-white/70 backdrop-blur p-3 text-center text-sm">
+          Premium enrichment for your dog — just <span className="font-semibold text-primary">$5.99/mo</span>
+        </div>
+      </div>
+      
       <Hero_Intro />
       <Benefits_Overview />
       <PillarPreview_Grid />

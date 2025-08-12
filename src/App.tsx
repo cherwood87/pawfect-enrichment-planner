@@ -11,6 +11,8 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import ErrorBoundary from "@/components/error/ErrorBoundary";
 import NetworkErrorBoundary from "@/components/error/NetworkErrorBoundary";
 import { Suspense, lazy } from "react";
+import SubscriptionGuard from "@/components/SubscriptionGuard";
+import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 
 // Lazy load all pages for better bundle splitting
 const Index = lazy(() => import("./pages/Index"));
@@ -23,6 +25,10 @@ const WeeklyPlannerPage = lazy(() => import("./pages/WeeklyPlannerPage"));
 const AccountSettings = lazy(() => import("./pages/AccountSettings"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const OpenAITestPage = lazy(() => import("./pages/OpenAITestPage"));
+const Subscribe = lazy(() => import("./pages/Subscribe"));
+const DogsHome = lazy(() => import("./pages/DogsHome"));
+const DogDetails = lazy(() => import("./pages/DogDetails"));
+const DogQuizRoute = lazy(() => import("./pages/DogQuizRoute"));
 
 // Loading fallback component
 const PageLoader = () => (
@@ -72,6 +78,43 @@ const App = () => (
                     <Suspense fallback={<PageLoader />}>
                       <Routes>
                         <Route path="/auth" element={<Auth />} />
+                        <Route path="/subscribe" element={<ErrorBoundary><Subscribe /></ErrorBoundary>} />
+                        <Route path="/dogs" element={
+                          <ProtectedRoute>
+                            <SubscriptionGuard>
+                              <ErrorBoundary>
+                                <DogsHome />
+                              </ErrorBoundary>
+                            </SubscriptionGuard>
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/dogs/:id" element={
+                          <ProtectedRoute>
+                            <SubscriptionGuard>
+                              <ErrorBoundary>
+                                <DogDetails />
+                              </ErrorBoundary>
+                            </SubscriptionGuard>
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/dogs/:id/quiz" element={
+                          <ProtectedRoute>
+                            <SubscriptionGuard>
+                              <ErrorBoundary>
+                                <DogQuizRoute />
+                              </ErrorBoundary>
+                            </SubscriptionGuard>
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/activities" element={
+                          <ProtectedRoute>
+                            <SubscriptionGuard>
+                              <ErrorBoundary>
+                                <ActivityLibraryPage />
+                              </ErrorBoundary>
+                            </SubscriptionGuard>
+                          </ProtectedRoute>
+                        } />
                         <Route path="/app" element={
                           <ProtectedRoute>
                             <ErrorBoundary>
@@ -88,9 +131,11 @@ const App = () => (
                         } />
                         <Route path="/activity-library" element={
                           <ProtectedRoute>
-                            <ErrorBoundary>
-                              <ActivityLibraryPage />
-                            </ErrorBoundary>
+                            <SubscriptionGuard>
+                              <ErrorBoundary>
+                                <ActivityLibraryPage />
+                              </ErrorBoundary>
+                            </SubscriptionGuard>
                           </ProtectedRoute>
                         } />
                         <Route path="/weekly-planner" element={

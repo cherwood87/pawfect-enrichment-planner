@@ -29,7 +29,7 @@ const Auth: React.FC = () => {
 
   useEffect(() => {
     if (user && session) {
-      navigate('/app', { replace: true });
+      navigate('/dogs', { replace: true });
     }
   }, [user, session, navigate]);
 
@@ -63,7 +63,7 @@ const Auth: React.FC = () => {
         await new Promise((res) => setTimeout(res, 250));
         waitCount++;
       }
-      navigate('/app', { replace: true });
+      navigate('/dogs', { replace: true });
     } catch (error: any) {
       const friendlyMessage = getUserFriendlyMessage(error);
       setError(friendlyMessage);

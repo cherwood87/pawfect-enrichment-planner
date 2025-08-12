@@ -12,6 +12,7 @@ import ActivityLibraryDebug from '@/components/ActivityLibraryDebug';
 import ActivityLibraryGrid from '@/components/ActivityLibraryGrid';
 import { PersonalizedActivityBanner } from '@/components/PersonalizedActivityBanner';
 import { QuizPromptCard } from '@/components/QuizPromptCard';
+import { usePersonalizedActivities } from '@/hooks/usePersonalizedActivities';
 
 // Energy level normalization function
 const normalizeEnergyLevel = (level: string): "Low" | "Medium" | "High" => {
@@ -45,6 +46,7 @@ const ActivityLibrary = React.memo(() => {
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all');
   const [selectedActivity, setSelectedActivity] = useState<ActivityLibraryItem | DiscoveredActivity | null>(null);
   const [currentActivities, setCurrentActivities] = useState<(ActivityLibraryItem | DiscoveredActivity)[]>([]);
+  const [suggestIndex, setSuggestIndex] = useState(0);
 
   // Memoize normalized activities to prevent unnecessary recalculations
   const normalizedActivities = useMemo(() => {
@@ -121,6 +123,16 @@ const ActivityLibrary = React.memo(() => {
   // Check if activities are personalized (no filters and quiz results exist)
   const isPersonalized = selectedPillar === 'all' && selectedDifficulty === 'all' && !searchQuery && !!currentDog?.quizResults;
 
+  // Build a personalized list for "Choose For Me"
+  const { personalizedActivities } = usePersonalizedActivities(currentActivities, currentDog, currentActivities.length || 20);
+
+  const pickSuggested = useCallback(() => {
+    if (personalizedActivities.length === 0) return;
+    const next = personalizedActivities[suggestIndex % personalizedActivities.length];
+    setSelectedActivity(next);
+    setSuggestIndex((i) => i + 1);
+  }, [personalizedActivities, suggestIndex]);
+
   return (
     <div className="mobile-space-y">
       <PillarSelectionCards
@@ -160,6 +172,27 @@ const ActivityLibrary = React.memo(() => {
         filteredActivitiesCount={filteredActivities.length}
         curatedCount={curatedCount}
       />
+
+      {/* Simple inline "Choose For Me" control */}
+      <div className="flex items-center gap-3 px-2">
+        <button
+          type="button"
+          onClick={pickSuggested}
+          className="modern-button-primary px-4 py-2 rounded-xl"
+          disabled={personalizedActivities.length === 0}
+        >
+          {personalizedActivities.length === 0 ? 'Choose For Me (needs quiz)' : 'Choose For Me'}
+        </button>
+        {selectedActivity && (
+          <button
+            type="button"
+            onClick={pickSuggested}
+            className="modern-button-outline px-4 py-2 rounded-xl"
+          >
+            Re‑spin
+          </button>
+        )}
+      </div>
 
       {/* Weighted Shuffling Debug Component */}
       <ActivityLibraryDebug 
