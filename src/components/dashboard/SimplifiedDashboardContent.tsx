@@ -45,7 +45,7 @@ export const SimplifiedDashboardContent: React.FC<SimplifiedDashboardContentProp
       <div className="container mx-auto mobile-container mobile-space-y">
         
         {/* Hero Section with Dog Profile */}
-        <DogProfileHero dog={currentDog} />
+        <DogProfileHero dog={currentDog} className="mx-0 px-0 py-[7px]" />
         
         {/* Primary Call-to-Action */}
         <div className="text-center">
