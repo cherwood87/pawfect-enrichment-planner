@@ -40,7 +40,6 @@ export const useActivityStateHook = (currentDog: Dog | null) => {
       return;
     }
 
-    console.log('🔄 Loading activities for dog:', currentDog.name);
     setDataLoaded(false);
 
     const loadData = async () => {
@@ -54,7 +53,6 @@ export const useActivityStateHook = (currentDog: Dog | null) => {
           loadAndMigrateUserActivities
         );
         setDataLoaded(true);
-        console.log('✅ Activities loaded successfully for dog:', currentDog.name);
       } catch (error) {
         console.error('❌ Error loading activities:', error);
         setDataLoaded(true); // Set to true even on error to prevent infinite loading

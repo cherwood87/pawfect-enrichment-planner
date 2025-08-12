@@ -33,7 +33,6 @@ const AddDogForm: React.FC<AddDogFormProps> = ({ onClose }) => {
     
     try {
       setIsSubmitting(true);
-      console.log('Adding dog with data:', formData);
       
       addDog({
         name: formData.name.trim(),
@@ -49,7 +48,6 @@ const AddDogForm: React.FC<AddDogFormProps> = ({ onClose }) => {
         notes: formData.notes.trim()
       });
       
-      console.log('Dog added successfully');
       onClose();
     } catch (error) {
       console.error('Error adding dog:', error);

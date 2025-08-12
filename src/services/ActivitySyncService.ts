@@ -86,8 +86,6 @@ export class ActivitySyncService {
 
   static async syncCuratedActivities(): Promise<SyncResult> {
     try {
-      console.log('Starting curated activities sync...');
-      
       const activitiesToSync = activityLibrary.map(activity => 
         this.transformToSupabaseActivity(activity, 'curated')
       );
@@ -104,7 +102,6 @@ export class ActivitySyncService {
         return { success: false, error: error.message, synced: 0 };
       }
 
-      console.log(`Successfully synced ${activitiesToSync.length} curated activities`);
       return { success: true, synced: activitiesToSync.length };
     } catch (error) {
       console.error('Failed to sync curated activities:', error);
@@ -121,8 +118,6 @@ export class ActivitySyncService {
     dogId: string
   ): Promise<SyncResult> {
     try {
-      console.log(`Starting discovered activities sync for dog ${dogId}...`);
-      
       if (!discoveredActivities.length) {
         return { success: true, synced: 0 };
       }
@@ -143,7 +138,6 @@ export class ActivitySyncService {
         return { success: false, error: error.message, synced: 0 };
       }
 
-      console.log(`Successfully synced ${activitiesToSync.length} discovered activities`);
       return { success: true, synced: activitiesToSync.length };
     } catch (error) {
       console.error('Failed to sync discovered activities:', error);
@@ -160,8 +154,6 @@ export class ActivitySyncService {
     dogId: string
   ): Promise<SyncResult> {
     try {
-      console.log(`Starting user activities sync for dog ${dogId}...`);
-      
       if (!userActivities.length) {
         return { success: true, synced: 0 };
       }
@@ -182,7 +174,6 @@ export class ActivitySyncService {
         return { success: false, error: error.message, synced: 0 };
       }
 
-      console.log(`Successfully synced ${activitiesToSync.length} user activities`);
       return { success: true, synced: activitiesToSync.length };
     } catch (error) {
       console.error('Failed to sync user activities:', error);
@@ -200,7 +191,6 @@ export class ActivitySyncService {
     dogId?: string
   ): Promise<{ success: boolean; error?: string; totalSynced: number; details: any }> {
     try {
-      console.log('Starting full activity sync...');
       
       // Always sync curated activities
       const curatedResult = await this.syncCuratedActivities();
@@ -232,7 +222,6 @@ export class ActivitySyncService {
         }
       };
 
-      console.log('Full sync completed:', result);
       return result;
     } catch (error) {
       console.error('Failed to complete full sync:', error);
@@ -251,7 +240,6 @@ export class ActivitySyncService {
     user: UserActivity[];
   }> {
     try {
-      console.log('Loading activities from Supabase...');
       
       let query = supabase.from('activities').select('*');
       
@@ -312,7 +300,6 @@ export class ActivitySyncService {
         }
       });
 
-      console.log(`Loaded ${curated.length} curated, ${discovered.length} discovered, ${user.length} user activities`);
       return { curated, discovered, user };
     } catch (error) {
       console.error('Failed to load activities from Supabase:', error);

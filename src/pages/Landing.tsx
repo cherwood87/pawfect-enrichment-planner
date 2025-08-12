@@ -13,17 +13,9 @@ import { LogIn } from 'lucide-react';
 const Landing: React.FC = () => {
   const { user, loading, session } = useAuth();
 
-  // Debug logging for landing page behavior
-  useEffect(() => {
-    console.log('🏠 Landing page mounted');
-    console.log('👤 User:', user?.email || 'none');
-    console.log('📱 Session:', session ? 'exists' : 'none');
-    console.log('⏳ Loading:', loading);
-  }, [user, session, loading]);
 
   // Show loading spinner while auth is initializing
   if (loading) {
-    console.log('⏳ Landing: Showing loading state');
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-cyan-50 to-amber-50">
         <div className="text-center modern-card p-8">
@@ -33,8 +25,6 @@ const Landing: React.FC = () => {
       </div>
     );
   }
-
-  console.log('🏠 Landing: Showing landing page for user:', user?.email || 'unauthenticated');
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-cyan-50 to-amber-50">

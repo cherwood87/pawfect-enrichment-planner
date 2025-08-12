@@ -85,12 +85,10 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // Optimized data loading with timeout and parallel operations
   useEffect(() => {
     if (authLoading) {
-      console.log('🔐 Auth still loading, waiting...');
       return;
     }
     
     if (!user) {
-      console.log('👤 No authenticated user, clearing dogs state');
       dispatch({ type: 'SET_DOGS', payload: [] });
       dispatch({ type: 'SET_CURRENT_DOG', payload: null });
       dispatch({ type: 'SET_LOADING', payload: false });
@@ -98,20 +96,17 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       return;
     }
 
-    console.log('👤 User authenticated, loading dogs for:', user.email);
     loadDogsWithTimeout();
   }, [user, authLoading]);
 
   const loadDogsWithTimeout = async () => {
     if (!user) {
-      console.log('❌ Cannot load dogs: no authenticated user');
       return;
     }
 
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
       dispatch({ type: 'SET_ERROR', payload: null });
-      console.log('📋 Loading dogs for user:', user.email);
       time('Dogs:loadAll');
       
       // Add timeout protection against large requests
@@ -123,12 +118,6 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       
       // Race the request against timeout
       const dogs = await Promise.race([dogsPromise, timeoutPromise]);
-
-      const totalImageChars = dogs.reduce((sum, d) => sum + (d.image?.length || 0), 0);
-      console.log('📋 Loaded dogs from Supabase:', {
-        count: dogs.length,
-        totalImageKB: Math.round(totalImageChars / 1024),
-      });
       
       dispatch({ type: 'SET_DOGS', payload: dogs });
       
@@ -145,7 +134,6 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       // Don't block the app for network errors - just show empty state
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       if (errorMessage.includes('Load failed') || errorMessage.includes('timeout')) {
-        console.log('🔄 Network issue detected, continuing with empty state');
         dispatch({ type: 'SET_DOGS', payload: [] });
         dispatch({ type: 'SET_ERROR', payload: null }); // Don't show error for network issues
       } else {
@@ -196,7 +184,6 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
 
     try {
-      console.log('Adding new dog for user:', user.email, dogData.name);
       const newDog = await DogService.createDog(dogData, user.id);
       dispatch({ type: 'ADD_DOG', payload: newDog });
       dispatch({ type: 'SET_CURRENT_DOG', payload: newDog.id });
@@ -226,7 +213,6 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
 
     try {
-      console.log('Updating dog for user:', user.email, dog.name);
       const updatedDog = await DogService.updateDog(dog, user.id);
       dispatch({ type: 'UPDATE_DOG', payload: updatedDog });
       
@@ -256,7 +242,6 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
     try {
       const dogToDelete = state.dogs.find(dog => dog.id === id);
-      console.log('Deleting dog for user:', user.email, 'dog id:', id);
       await DogService.deleteDog(id, user.id);
       dispatch({ type: 'DELETE_DOG', payload: id });
       
@@ -276,7 +261,6 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const setCurrentDog = (id: string) => {
     try {
-      console.log('Setting current dog to:', id);
       dispatch({ type: 'SET_CURRENT_DOG', payload: id });
     } catch (error) {
       console.error('❌ Error setting current dog:', error);

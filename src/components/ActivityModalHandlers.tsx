@@ -23,13 +23,6 @@ export const useActivityModalHandlers = (
   const { currentDog } = useDog();
 
   const handleActivitySelect = async (activity: any) => {
-    console.log('🎯 [ActivityModalHandlers] Activity selected for scheduling:', {
-      activityId: activity.id,
-      activityTitle: activity.title,
-      selectedDayOfWeek,
-      currentDog: currentDog?.name || 'None'
-    });
-    
     if (!currentDog) {
       console.error('❌ [ActivityModalHandlers] No dog selected');
       toast({
@@ -65,17 +58,8 @@ export const useActivityModalHandlers = (
       dayOfWeek: selectedDayOfWeek
     };
     
-    console.log('📋 [ActivityModalHandlers] Preparing to schedule activity:', {
-      ...scheduledActivityData,
-      dogName: currentDog.name,
-      activityTitle: activity.title
-    });
-    
     try {
-      console.log('⏳ [ActivityModalHandlers] Calling addScheduledActivity...');
       await addScheduledActivity(scheduledActivityData);
-      
-      console.log('✅ [ActivityModalHandlers] Activity scheduled successfully');
       toast({
         title: "Activity Scheduled!",
         description: `"${activity.title}" scheduled for ${['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][selectedDayOfWeek]}.`

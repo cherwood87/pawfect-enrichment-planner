@@ -24,7 +24,7 @@ export const useActivityLoader = (currentDog: Dog | null) => {
       setIsLoading(true);
       const dogId = currentDog.id;
       
-      console.log('🔄 Loading activities from Supabase for dog:', currentDog.name);
+      
 
       // Execute all data loading operations in parallel for better performance
       const [
@@ -34,15 +34,9 @@ export const useActivityLoader = (currentDog: Dog | null) => {
         configResult
       ] = await Promise.allSettled([
         // Scheduled Activities
-        ActivityService.getScheduledActivities(dogId).catch((error) => {
-          console.warn('Scheduled activities failed, will try migration:', error);
-          return null;
-        }),
+        ActivityService.getScheduledActivities(dogId).catch(() => null),
         // User Activities
-        ActivityService.getUserActivities(dogId).catch((error) => {
-          console.warn('User activities failed, will try migration:', error);
-          return null;
-        }),
+        ActivityService.getUserActivities(dogId).catch(() => null),
         // Discovered Activities: fetch from Supabase and merge with any local items, then dedupe
         (async () => {
           try {
@@ -65,7 +59,7 @@ export const useActivityLoader = (currentDog: Dog | null) => {
             }
             return unique;
           } catch (error) {
-            console.warn('Discovery activities failed, falling back to localStorage:', error);
+            
             return getDiscoveredActivities(dogId) || [];
           }
         })(),
@@ -78,7 +72,7 @@ export const useActivityLoader = (currentDog: Dog | null) => {
           try {
             return await ContentDiscoveryService.getDiscoveryConfig(dogId);
           } catch (error) {
-            console.warn('Discovery config failed:', error);
+            
             return null;
           }
         })()
@@ -86,41 +80,32 @@ export const useActivityLoader = (currentDog: Dog | null) => {
 
       // Handle scheduled activities
       if (scheduledResult.status === 'fulfilled' && scheduledResult.value && scheduledResult.value.length > 0) {
-        console.log('📅 Loaded scheduled activities from Supabase:', scheduledResult.value.length);
         setScheduledActivities(scheduledResult.value);
       } else {
-        console.log('📅 No scheduled activities in Supabase or failed, trying migration...');
         await loadAndMigrateScheduledActivities();
       }
 
       // Handle user activities
       if (userActivitiesResult.status === 'fulfilled' && userActivitiesResult.value && userActivitiesResult.value.length > 0) {
-        console.log('👤 Loaded user activities from Supabase:', userActivitiesResult.value.length);
         setUserActivities(userActivitiesResult.value);
       } else {
-        console.log('👤 No user activities in Supabase or failed, trying migration...');
         await loadAndMigrateUserActivities();
       }
 
       // Handle discovered activities
       if (discoveredActivitiesResult.status === 'fulfilled') {
         const discoveredActivities = discoveredActivitiesResult.value || [];
-        console.log('🔍 Loaded discovered activities:', discoveredActivities.length);
         setDiscoveredActivities(discoveredActivities);
       }
 
       // Handle discovery config
       if (configResult.status === 'fulfilled' && configResult.value) {
-        console.log('⚙️ Loaded discovery config');
         setDiscoveryConfig(configResult.value);
       }
-
-      console.log('✅ Successfully completed parallel activity loading for dog:', currentDog.name);
 
     } catch (error) {
       console.error('❌ Critical error during activity loading:', error);
       // Fallback to localStorage
-      console.log('🔄 Falling back to localStorage loading...');
       loadActivitiesFromLocalStorage(
         setScheduledActivities,
         setUserActivities,
@@ -138,8 +123,6 @@ export const useActivityLoader = (currentDog: Dog | null) => {
     setDiscoveredActivities: (activities: DiscoveredActivity[]) => void,
     dog: Dog
   ) => {
-    console.log('📂 Loading activities from localStorage for dog:', dog.name);
-    
     // Load all localStorage data in parallel
     const [savedScheduled, savedUser, savedDiscovered] = [
       localStorage.getItem(`scheduledActivities-${dog.id}`),
@@ -151,7 +134,6 @@ export const useActivityLoader = (currentDog: Dog | null) => {
       try {
         const parsedActivities = JSON.parse(savedScheduled);
         const migratedActivities = parsedActivities.map(migrateScheduledActivity);
-        console.log('📅 Loaded scheduled activities from localStorage:', migratedActivities.length);
         setScheduledActivities(migratedActivities);
       } catch (error) {
         console.error('Error parsing scheduled activities from localStorage:', error);
@@ -164,7 +146,6 @@ export const useActivityLoader = (currentDog: Dog | null) => {
     if (savedUser) {
       try {
         const userActivities = JSON.parse(savedUser);
-        console.log('👤 Loaded user activities from localStorage:', userActivities.length);
         setUserActivities(userActivities);
       } catch (error) {
         console.error('Error parsing user activities from localStorage:', error);
@@ -174,7 +155,6 @@ export const useActivityLoader = (currentDog: Dog | null) => {
       setUserActivities([]);
     }
 
-    console.log('🔍 Loaded discovered activities from localStorage:', savedDiscovered?.length || 0);
     setDiscoveredActivities(savedDiscovered || []);
   };
 

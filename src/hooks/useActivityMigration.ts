@@ -21,7 +21,6 @@ export const useActivityMigration = (
       // Migrate to Supabase in background
       try {
         await ActivityService.migrateScheduledActivitiesFromLocalStorage(currentDog.id);
-        console.log('Scheduled activities migrated to Supabase');
         // Optionally: clear localStorage after successful migration
         // localStorage.removeItem(`scheduledActivities-${currentDog.id}`);
       } catch (error) {
@@ -85,7 +84,6 @@ export const useActivityMigration = (
       // Migrate to Supabase in background
       try {
         await ActivityService.migrateUserActivitiesFromLocalStorage(currentDog.id);
-        console.log('User activities migrated to Supabase');
         // Optionally: clear localStorage after successful migration
         // localStorage.removeItem(`userActivities-${currentDog.id}`);
       } catch (error) {

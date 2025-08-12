@@ -59,8 +59,6 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const loadConversation = (dogId: string, type: ConversationType = 'general') => {
-    console.log('Loading conversation for dog:', dogId, 'type:', type);
-    
     // For activity help, always start fresh - don't load existing conversations
     if (type === 'activity-help') {
       startNewConversation(type);
@@ -83,7 +81,6 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const startNewConversation = (type: ConversationType = 'general') => {
     if (!currentDog) return;
 
-    console.log('Starting new conversation for dog:', currentDog.name, 'type:', type);
     const conversationKey = getConversationKey(currentDog.id, type);
     
     const newConversation: ChatConversation = {
@@ -108,12 +105,9 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
 
     if (isLoading) {
-      console.log('Already loading, skipping message send');
       return;
     }
 
-    console.log('Sending message:', content);
-    console.log('Activity context:', activityContext);
     setIsLoading(true);
 
     try {
@@ -148,11 +142,6 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const pillarBalance = getPillarBalance();
       const todaysActivities = getTodaysActivities();
 
-      console.log('Calling enrichment coach function...');
-      console.log('Dog profile:', currentDog);
-      console.log('Pillar balance:', pillarBalance);
-      console.log('Today\'s activities:', todaysActivities);
-
       // Call enrichment coach function
       const { supabase } = await import('@/integrations/supabase/client');
       const { data, error } = await supabase.functions.invoke('enrichment-coach-enhanced', {
@@ -175,8 +164,6 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         console.error('Supabase function error:', error);
         throw error;
       }
-
-      console.log('Enrichment coach response:', data);
 
       if (!data || !data.reply) {
         throw new Error('Invalid response from enrichment coach');
@@ -206,8 +193,6 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           prev.map(conv => conv.id === finalConversation.id ? finalConversation : conv)
         );
       }
-
-      console.log('Message sent successfully');
 
     } catch (error) {
       console.error('Error sending message:', error);

@@ -25,7 +25,6 @@ export class AIContentDiscoveryService {
     const fullConfig = { ...this.DEFAULT_CONFIG, ...config };
     
     if (!fullConfig.enabled) {
-      console.log('AI content discovery is disabled');
       return [];
     }
 
@@ -34,13 +33,12 @@ export class AIContentDiscoveryService {
     if (this.lastDiscoveryAttempt) {
       const timeSinceLastAttempt = Date.now() - new Date(this.lastDiscoveryAttempt).getTime();
       if (timeSinceLastAttempt < this.MIN_DISCOVERY_INTERVAL_MS) {
-        console.log('Discovery attempted too recently, skipping to prevent loops');
         return [];
       }
     }
     this.lastDiscoveryAttempt = now;
 
-    console.log('Starting AI-powered content discovery...');
+    
     
     try {
       // Call the Supabase AI discovery function
@@ -64,18 +62,13 @@ export class AIContentDiscoveryService {
       }
 
       if (!data?.activities || !Array.isArray(data.activities)) {
-        console.log('No activities returned from AI discovery:', data);
         return [];
       }
-
-      console.log(`AI discovered ${data.activities.length} new activities`);
       
       // Convert AI response to DiscoveredActivity format and auto-approve all
       const discoveredActivities = data.activities.map((activity: any, index: number) => 
         this.convertToDiscoveredActivity(activity, true) // Auto-approve all
       );
-      
-      console.log(`Auto-approved ${discoveredActivities.length} AI-discovered activities`);
       
       return discoveredActivities.slice(0, fullConfig.maxActivitiesPerDiscovery);
       
@@ -136,6 +129,5 @@ export class AIContentDiscoveryService {
 
   static async scheduleWeeklyDiscovery(dogId: string, dogProfile: any): Promise<void> {
     // This would integrate with a background job system
-    console.log(`Scheduled weekly AI discovery for dog: ${dogId}`);
   }
 }

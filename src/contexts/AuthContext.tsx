@@ -28,13 +28,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const clearError = () => setError(null);
 
   useEffect(() => {
-    console.log('🔐 Initializing auth state...');
-    
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         time('Auth:onAuthStateChange');
-        console.log('🔄 Auth state change:', event, session?.user?.email || 'no user');
         
         // Update state synchronously - no async operations here to prevent deadlocks
         setSession(session);
@@ -43,17 +40,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         
         // Handle specific auth events
         if (event === 'SIGNED_OUT') {
-          console.log('👋 User signed out');
           cleanupAuthState();
           DogService.clearDogCache();
-        }
-        
-        if (event === 'SIGNED_IN' && session?.user) {
-          console.log('👋 User signed in:', session.user.email);
-        }
-        
-        if (event === 'TOKEN_REFRESHED') {
-          console.log('🔄 Token refreshed for user:', session?.user?.email);
         }
         
         // Always set loading to false after auth state change
@@ -64,7 +52,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     // THEN check for existing session - with timeout for better UX
     const sessionTimeout = setTimeout(() => {
-      console.log('⏰ Session check timeout, proceeding without session');
       setLoading(false);
     }, 3000); // 3 second timeout
 
@@ -78,7 +65,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setError('Failed to restore your session. Please sign in again.');
       }
       
-      console.log('📱 Initial session check:', session?.user?.email || 'no session');
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -92,13 +78,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     return () => {
       clearTimeout(sessionTimeout);
-      console.log('🧹 Cleaning up auth subscription');
       subscription.unsubscribe();
     };
   }, []);
 
   const signUp = async (email: string, password: string) => {
-    console.log('📝 Sign up requested for:', email);
     setError(null);
     
     try {
@@ -114,7 +98,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const signIn = async (email: string, password: string) => {
-    console.log('🔑 Sign in requested for:', email);
     setError(null);
     
     try {
@@ -131,7 +114,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const signOut = async () => {
-    console.log('👋 Sign out requested');
     setError(null);
     
     try {

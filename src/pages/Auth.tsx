@@ -25,14 +25,10 @@ const Auth: React.FC = () => {
   const { retry, isRetrying, attempt } = useRetry({
     maxAttempts: 3,
     delay: 1000,
-    onRetry: (attemptNum, error) => {
-      console.log(`Auth retry attempt ${attemptNum}:`, error.message);
-    },
   });
 
   useEffect(() => {
     if (user && session) {
-      console.log('[Auth] 🎯 Detected active session, redirecting to dashboard:', new Date());
       navigate('/app', { replace: true });
     }
   }, [user, session, navigate]);
@@ -54,14 +50,10 @@ const Auth: React.FC = () => {
     }
     setLoading(true);
     setError(null);
-    console.time('🔐 Total signIn flow');
-    console.log('[Auth] ⏳ SignIn clicked at:', new Date());
 
     try {
       await retry(async () => {
-        console.time('🔑 signIn()');
         await signIn(email, password);
-        console.timeEnd('🔑 signIn()');
         toast({ title: 'Welcome back!', description: 'You have successfully signed in.' });
       });
       
@@ -71,7 +63,6 @@ const Auth: React.FC = () => {
         await new Promise((res) => setTimeout(res, 250));
         waitCount++;
       }
-      console.log('[Auth] ✅ Ready to redirect at:', new Date());
       navigate('/app', { replace: true });
     } catch (error: any) {
       const friendlyMessage = getUserFriendlyMessage(error);
@@ -80,7 +71,6 @@ const Auth: React.FC = () => {
       toast({ title: 'Sign In Error', description: friendlyMessage, variant: 'destructive' });
     } finally {
       setLoading(false);
-      console.timeEnd('🔐 Total signIn flow');
     }
   };
 

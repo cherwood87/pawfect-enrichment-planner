@@ -23,14 +23,12 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 
   const handleFileSelect = async (file: File) => {
     if (!file || !file.type.startsWith('image/')) {
-      console.warn('Invalid file type selected:', file?.type);
       setError('Please select a valid image file');
       return;
     }
 
     // Check file size (limit to 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      console.warn('File too large:', file.size);
       setError('Image must be less than 5MB');
       return;
     }
@@ -38,13 +36,11 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     try {
       setIsProcessing(true);
       setError(null);
-      console.log('Processing image file:', file.name, file.size);
       
       const reader = new FileReader();
       reader.onload = (e) => {
         try {
           const result = e.target?.result as string;
-          console.log('Image processed successfully');
           onImageChange(result);
           setIsProcessing(false);
         } catch (error) {
@@ -94,7 +90,6 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 
   const handleRemove = (e: React.MouseEvent) => {
     e.stopPropagation();
-    console.log('Removing image');
     setError(null);
     onImageChange(undefined);
   };

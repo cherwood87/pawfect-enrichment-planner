@@ -37,7 +37,6 @@ const EditDogForm: React.FC<EditDogFormProps> = ({ dog, onClose }) => {
     
     try {
       setIsSubmitting(true);
-      console.log('Updating dog with data:', formData);
       
       updateDog({
         ...dog,
@@ -51,7 +50,6 @@ const EditDogForm: React.FC<EditDogFormProps> = ({ dog, onClose }) => {
         notes: formData.notes.trim()
       });
       
-      console.log('Dog updated successfully');
       onClose();
     } catch (error) {
       console.error('Error updating dog:', error);
@@ -62,7 +60,6 @@ const EditDogForm: React.FC<EditDogFormProps> = ({ dog, onClose }) => {
 
   const handleDelete = () => {
     try {
-      console.log('Deleting dog:', dog.id);
       deleteDog(dog.id);
       onClose();
     } catch (error) {
