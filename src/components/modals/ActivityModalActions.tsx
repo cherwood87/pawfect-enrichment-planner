@@ -22,28 +22,15 @@ const ActivityModalActions: React.FC<ActivityModalActionsProps> = ({
 }) => {
   return (
     <>
-      {/* Start Activity / View Instructions Toggle */}
-      {canStartActivity && onToggleStartActivity && (
+      {/* Start Activity / View Instructions Toggle - Only show when NOT in Start Activity mode */}
+      {!isStartActivity && canStartActivity && onToggleStartActivity && (
         <div className="flex justify-center gap-3 pt-4 border-t border-purple-200/50">
           <Button 
             onClick={onToggleStartActivity}
-            className={`rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 px-6 ${
-              isStartActivity 
-                ? 'bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 text-white'
-                : 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white'
-            }`}
+            className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 px-6"
           >
-            {isStartActivity ? (
-              <>
-                <Eye className="w-4 h-4 mr-2" />
-                View Instructions
-              </>
-            ) : (
-              <>
-                <Play className="w-4 h-4 mr-2" />
-                Start Activity
-              </>
-            )}
+            <Play className="w-4 h-4 mr-2" />
+            Start Activity
           </Button>
           
           {mode === 'library' && (
@@ -60,8 +47,8 @@ const ActivityModalActions: React.FC<ActivityModalActionsProps> = ({
         </div>
       )}
 
-      {/* Fallback for non-activity mode */}
-      {(!canStartActivity || !onToggleStartActivity) && mode === 'library' && (
+      {/* Fallback for non-activity mode - Only show when NOT in Start Activity mode */}
+      {!isStartActivity && (!canStartActivity || !onToggleStartActivity) && mode === 'library' && (
         <div className="flex justify-center pt-4 border-t border-purple-200/50">
           <Button 
             onClick={onAddToFavourites} 
