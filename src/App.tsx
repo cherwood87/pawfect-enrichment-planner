@@ -27,7 +27,7 @@ const AccountSettings = lazy(() => import("./pages/AccountSettings"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const OpenAITestPage = lazy(() => import("./pages/OpenAITestPage"));
 const Subscribe = lazy(() => import("./pages/Subscribe"));
-const DogsHome = lazy(() => import("./pages/DogsHome"));
+
 const DogDetails = lazy(() => import("./pages/DogDetails"));
 const DogQuizRoute = lazy(() => import("./pages/DogQuizRoute"));
 
@@ -81,15 +81,7 @@ const App = () => (
                       <Routes>
                         <Route path="/auth" element={<Auth />} />
                         <Route path="/subscribe" element={<ErrorBoundary><Subscribe /></ErrorBoundary>} />
-                        <Route path="/dogs" element={
-                          <ProtectedRoute>
-                            <SubscriptionGuard>
-                              <ErrorBoundary>
-                                <DogsHome />
-                              </ErrorBoundary>
-                            </SubscriptionGuard>
-                          </ProtectedRoute>
-                        } />
+                        <Route path="/dogs" element={<Navigate to="/settings?tab=dogs" replace />} />
                         <Route path="/dogs/:id" element={
                           <ProtectedRoute>
                             <SubscriptionGuard>

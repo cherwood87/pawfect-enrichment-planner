@@ -1,10 +1,10 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, User, Dog, Shield } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import AccountTab from '@/components/settings/AccountTab';
 import DogsTab from '@/components/settings/DogsTab';
@@ -13,7 +13,19 @@ import ProfileTab from '@/components/settings/ProfileTab';
 const AccountSettings = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState('account');
+  const [searchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(() => {
+    // Default to 'dogs' tab if no tab specified or if coming from dogs route
+    return searchParams.get('tab') || 'dogs';
+  });
+
+  // Update tab when URL changes
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab && ['dogs', 'account', 'profile'].includes(tab)) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
 
   const handleBack = () => {
     navigate('/activity-library');
@@ -40,10 +52,10 @@ const AccountSettings = () => {
           <CardHeader className="bg-gradient-to-r from-purple-100 to-cyan-100 rounded-t-3xl">
             <CardTitle className="text-2xl font-bold text-purple-800 flex items-center space-x-2">
               <Shield className="w-6 h-6" />
-              <span>Account Settings</span>
+              <span>Profile & Settings</span>
             </CardTitle>
             <CardDescription className="text-purple-600">
-              Manage your account, dog profiles, and preferences
+              Manage your dogs, account, and preferences
             </CardDescription>
           </CardHeader>
           
@@ -51,18 +63,18 @@ const AccountSettings = () => {
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid w-full grid-cols-3 bg-purple-100 rounded-2xl p-1">
                 <TabsTrigger 
+                  value="dogs"
+                  className="flex items-center space-x-2 rounded-xl data-[state=active]:bg-white data-[state=active]:text-purple-700 data-[state=active]:shadow-sm"
+                >
+                  <Dog className="w-4 h-4" />
+                  <span className="hidden sm:inline">My Dogs</span>
+                </TabsTrigger>
+                <TabsTrigger 
                   value="account" 
                   className="flex items-center space-x-2 rounded-xl data-[state=active]:bg-white data-[state=active]:text-purple-700 data-[state=active]:shadow-sm"
                 >
                   <Shield className="w-4 h-4" />
                   <span className="hidden sm:inline">Account</span>
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="dogs"
-                  className="flex items-center space-x-2 rounded-xl data-[state=active]:bg-white data-[state=active]:text-purple-700 data-[state=active]:shadow-sm"
-                >
-                  <Dog className="w-4 h-4" />
-                  <span className="hidden sm:inline">Dogs</span>
                 </TabsTrigger>
                 <TabsTrigger 
                   value="profile"
@@ -74,12 +86,12 @@ const AccountSettings = () => {
               </TabsList>
 
               <div className="mt-6">
-                <TabsContent value="account" className="space-y-6">
-                  <AccountTab />
-                </TabsContent>
-
                 <TabsContent value="dogs" className="space-y-6">
                   <DogsTab />
+                </TabsContent>
+
+                <TabsContent value="account" className="space-y-6">
+                  <AccountTab />
                 </TabsContent>
 
                 <TabsContent value="profile" className="space-y-6">
