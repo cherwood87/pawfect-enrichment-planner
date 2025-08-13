@@ -96,7 +96,7 @@ const Hero_Intro: React.FC = () => {
           <div className="bg-gradient-to-r from-purple-100 via-cyan-100 to-amber-100 p-6 md:p-8">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
               <div className="transform hover:scale-105 transition-all duration-300">
-                <div className="text-2xl md:text-3xl font-bold text-purple-600 mb-2">280+</div>
+                <div className="text-2xl md:text-3xl font-bold text-purple-600 mb-2">250+</div>
                 <div className="text-gray-700 font-medium">Activities</div>
                 <div className="w-12 h-1 bg-gradient-to-r from-purple-400 to-purple-500 rounded-full mx-auto mt-2"></div>
               </div>
