@@ -183,7 +183,13 @@ OUTPUT FORMAT: Return ONLY a valid JSON array of activity objects. Each activity
   "difficulty": "Easy|Medium|Hard",
   "duration": number (minutes),
   "materials": ["list", "of", "materials"],
-  "instructions": ["step", "by", "step", "instructions"],
+  "instructions": [
+    "Detailed step 1 with specific actions, timing (e.g., '5 minutes'), and clear expectations",
+    "Step 2 with safety considerations if relevant (especially for physical activities)",
+    "Step 3 with troubleshooting tips or variations if the dog struggles",
+    "Step 4 with completion criteria or signs of success",
+    "Final step with cleanup, reward, or transition guidance"
+  ],
   "benefits": "Description of benefits for the dog",
   "tags": ["relevant", "tags"],
   "ageGroup": "Puppy|Adult|Senior|All Ages",
