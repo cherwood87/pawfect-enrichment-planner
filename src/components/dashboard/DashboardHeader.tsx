@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Library, MessageCircle, Menu, User, LogOut, Home } from 'lucide-react';
+import { Library, Menu, User, LogOut } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useDog } from '@/contexts/DogContext';
@@ -128,12 +128,12 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = React.memo(({ onAddDogOp
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56 bg-background border shadow-lg z-50 rounded-xl mt-2">
                 <DropdownMenuItem
-                  onClick={() => handleNavigation('/app')}
-                  className={`touch-target rounded ${isCurrentPage('/app') ? 'bg-blue-50 text-blue-700' : ''}`}
-                  aria-current={isCurrentPage('/app') ? 'page' : undefined}
+                  onClick={() => handleNavigation('/settings')}
+                  className={`touch-target rounded ${isCurrentPage('/settings') ? 'bg-blue-50 text-blue-700' : ''}`}
+                  aria-current={isCurrentPage('/settings') ? 'page' : undefined}
                 >
-                  <Home className="mr-2 h-4 w-4" />
-                  <span>Dashboard</span>
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Profile</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
@@ -143,23 +143,6 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = React.memo(({ onAddDogOp
                 >
                   <Library className="mr-2 h-4 w-4" />
                   <span>Activity Library</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => handleNavigation('/coach')}
-                  className={`touch-target rounded ${isCurrentPage('/coach') ? 'bg-blue-50 text-blue-700' : ''}`}
-                  aria-current={isCurrentPage('/coach') ? 'page' : undefined}
-                >
-                  <MessageCircle className="mr-2 h-4 w-4" />
-                  <span>Enrichment Coach</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={() => handleNavigation('/settings')}
-                  className={`touch-target rounded ${isCurrentPage('/settings') ? 'bg-blue-50 text-blue-700' : ''}`}
-                  aria-current={isCurrentPage('/settings') ? 'page' : undefined}
-                >
-                  <User className="mr-2 h-4 w-4" />
-                  <span>Account Settings</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut} className="touch-target rounded text-red-600 hover:text-red-700 hover:bg-red-50">
