@@ -6,6 +6,7 @@ import { Loader2, Sparkles, CheckCircle, Brain } from 'lucide-react';
 
 interface ActivityLibraryHeaderProps {
   autoApprovedCount: number;
+  curatedCount: number;
   isDiscovering: boolean;
   onDiscoverMore: () => void;
   onChooseForMe?: () => void;
@@ -14,6 +15,7 @@ interface ActivityLibraryHeaderProps {
 
 const ActivityLibraryHeader: React.FC<ActivityLibraryHeaderProps> = ({
   autoApprovedCount,
+  curatedCount,
   isDiscovering,
   onDiscoverMore,
   onChooseForMe,
@@ -31,18 +33,26 @@ const ActivityLibraryHeader: React.FC<ActivityLibraryHeaderProps> = ({
           </CardTitle>
           <div className="space-y-1">
             <p className="text-purple-600 font-medium">
-              Discover curated enriching activities personalized for your dog across all five pillars of wellness
+              Discover curated enriching activities across all five pillars — personalized to your dog
             </p>
-            {autoApprovedCount > 0 && (
+            <div className="flex items-center flex-wrap gap-2">
               <div className="flex items-center space-x-2">
                 <div className="bg-emerald-100 rounded-full p-1">
                   <CheckCircle className="w-4 h-4 text-emerald-600" />
                 </div>
                 <span className="text-sm text-emerald-700 font-semibold">
-                  {autoApprovedCount} curated activities added
+                  Community Discovered: {autoApprovedCount}
                 </span>
               </div>
-            )}
+              <div className="flex items-center space-x-2">
+                <div className="bg-purple-100 rounded-full p-1">
+                  <CheckCircle className="w-4 h-4 text-purple-600" />
+                </div>
+                <span className="text-sm text-purple-700 font-semibold">
+                  Curated: {curatedCount}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
         

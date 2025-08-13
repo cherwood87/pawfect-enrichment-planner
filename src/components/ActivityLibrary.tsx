@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { ActivityLibraryItem } from '@/types/activity';
 import { DiscoveredActivity } from '@/types/discovery';
@@ -13,6 +14,7 @@ import ActivityLibraryGrid from '@/components/ActivityLibraryGrid';
 import { PersonalizedActivityBanner } from '@/components/PersonalizedActivityBanner';
 import { QuizPromptCard } from '@/components/QuizPromptCard';
 import { usePersonalizedActivities } from '@/hooks/usePersonalizedActivities';
+import { activityLibrary } from '@/data/activityLibrary';
 
 // Energy level normalization function
 const normalizeEnergyLevel = (level: string): "Low" | "Medium" | "High" => {
@@ -108,17 +110,13 @@ const ActivityLibrary = React.memo(() => {
     setSelectedPillar(pillar);
   }, []);
 
-  // Memoize computed values
+  // Memoize counts for header/stats
   const { autoApprovedCount, curatedCount } = useMemo(() => {
-    const isDiscoveredActivity = (activity: ActivityLibraryItem | DiscoveredActivity): activity is DiscoveredActivity => {
-      return 'source' in activity && activity.source === 'discovered';
-    };
-
     return {
       autoApprovedCount: discoveredActivities.filter(a => a.approved).length,
-      curatedCount: currentActivities.filter(a => !isDiscoveredActivity(a)).length
+      curatedCount: activityLibrary.length, // static curated library count (e.g., 36)
     };
-  }, [discoveredActivities, currentActivities]);
+  }, [discoveredActivities]);
 
   // Check if activities are personalized (no filters and quiz results exist)
   const isPersonalized = selectedPillar === 'all' && selectedDifficulty === 'all' && !searchQuery && !!currentDog?.quizResults;
@@ -161,6 +159,7 @@ const ActivityLibrary = React.memo(() => {
       
       <ActivityLibraryContent
         autoApprovedCount={autoApprovedCount}
+        curatedCount={curatedCount}
         isDiscovering={isDiscovering}
         onDiscoverMore={handleDiscoverMore}
         onChooseForMe={pickSuggested}
@@ -172,7 +171,6 @@ const ActivityLibrary = React.memo(() => {
         selectedDifficulty={selectedDifficulty}
         setSelectedDifficulty={setSelectedDifficulty}
         filteredActivitiesCount={filteredActivities.length}
-        curatedCount={curatedCount}
       />
 
       {/* Simple inline "Choose For Me" control */}

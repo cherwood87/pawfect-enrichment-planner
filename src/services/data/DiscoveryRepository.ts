@@ -2,18 +2,26 @@
 import { DiscoveredActivity, ContentDiscoveryConfig } from '@/types/discovery';
 import { SupabaseAdapter } from '../integration/SupabaseAdapter';
 import { LocalStorageAdapter } from '../integration/LocalStorageAdapter';
+import { ContentDiscoveryService } from '@/services/ContentDiscoveryService';
 
 export class DiscoveryRepository {
   // Discovered Activities
   static async getDiscoveredActivities(dogId: string, fallbackToLocalStorage = true): Promise<DiscoveredActivity[]> {
     try {
-      return await SupabaseAdapter.getDiscoveredActivities(dogId);
+      // Fetch globally visible discovered activities (ignores dogId for visibility)
+      return await ContentDiscoveryService.getDiscoveredActivities(dogId);
     } catch (error) {
-      console.error('Failed to fetch from Supabase, falling back to localStorage:', error);
-      if (fallbackToLocalStorage) {
-        return LocalStorageAdapter.getDiscoveredActivities(dogId);
+      console.error('Failed to fetch global discovered activities, falling back:', error);
+      // Fall back to previous behavior (dog-scoped via SupabaseAdapter), then local storage
+      try {
+        return await SupabaseAdapter.getDiscoveredActivities(dogId);
+      } catch (innerError) {
+        console.error('Failed to fetch from SupabaseAdapter, falling back to localStorage:', innerError);
+        if (fallbackToLocalStorage) {
+          return LocalStorageAdapter.getDiscoveredActivities(dogId);
+        }
+        throw innerError;
       }
-      throw error;
     }
   }
 

@@ -29,6 +29,7 @@ export type Database = {
           id: string
           instructions: string[] | null
           is_custom: boolean | null
+          is_public: boolean
           materials: string[] | null
           pillar: string
           quality_score: number | null
@@ -53,6 +54,7 @@ export type Database = {
           id: string
           instructions?: string[] | null
           is_custom?: boolean | null
+          is_public?: boolean
           materials?: string[] | null
           pillar: string
           quality_score?: number | null
@@ -77,6 +79,7 @@ export type Database = {
           id?: string
           instructions?: string[] | null
           is_custom?: boolean | null
+          is_public?: boolean
           materials?: string[] | null
           pillar?: string
           quality_score?: number | null

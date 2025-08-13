@@ -9,6 +9,7 @@ import ActivityLibraryStats from '@/components/ActivityLibraryStats';
 
 interface ActivityLibraryContentProps {
   autoApprovedCount: number;
+  curatedCount: number;
   isDiscovering: boolean;
   onDiscoverMore: () => void;
   onChooseForMe?: () => void;
@@ -20,11 +21,11 @@ interface ActivityLibraryContentProps {
   selectedDifficulty: string;
   setSelectedDifficulty: (difficulty: string) => void;
   filteredActivitiesCount: number;
-  curatedCount: number;
 }
 
 const ActivityLibraryContent: React.FC<ActivityLibraryContentProps> = memo(({
   autoApprovedCount,
+  curatedCount,
   isDiscovering,
   onDiscoverMore,
   onChooseForMe,
@@ -35,13 +36,13 @@ const ActivityLibraryContent: React.FC<ActivityLibraryContentProps> = memo(({
   setSelectedPillar,
   selectedDifficulty,
   setSelectedDifficulty,
-  filteredActivitiesCount,
-  curatedCount
+  filteredActivitiesCount
 }) => {
   return (
     <Card className="modern-card">
       <ActivityLibraryHeader
         autoApprovedCount={autoApprovedCount}
+        curatedCount={curatedCount}
         isDiscovering={isDiscovering}
         onDiscoverMore={onDiscoverMore}
         onChooseForMe={onChooseForMe}

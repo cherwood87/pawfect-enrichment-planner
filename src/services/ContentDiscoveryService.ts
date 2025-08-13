@@ -14,51 +14,28 @@ export class ContentDiscoveryService {
     };
   }
 
-  static async getDiscoveredActivities(dogId: string): Promise<DiscoveredActivity[]> {
+  static async getDiscoveredActivities(_dogId: string): Promise<DiscoveredActivity[]> {
     try {
-      // Fetch from both sources in parallel: legacy discovered_activities and new activities table
-      const [discRes, actRes] = await Promise.all([
-        supabase
-          .from('discovered_activities')
-          .select('*')
-          .eq('dog_id', dogId)
-          .eq('is_approved', true),
-        supabase
-          .from('activities')
-          .select('*')
-          .eq('source', 'discovered')
-          .eq('approved', true)
-          .eq('dog_id', dogId)
-      ]);
+      // Fetch globally visible approved discovered activities (activities table)
+      const actRes = await supabase
+        .from('activities')
+        .select('*')
+        .eq('source', 'discovered')
+        .eq('approved', true)
+        .eq('is_public', true);
 
-      if (discRes.error) throw discRes.error;
       if (actRes.error) throw actRes.error;
 
-      const discData = discRes.data || [];
-      const actData = actRes.data || [];
+      // Fetch approved legacy discovered_activities (for backwards compatibility)
+      const discRes = await supabase
+        .from('discovered_activities')
+        .select('*')
+        .eq('is_approved', true);
 
-      // Map discovered_activities rows to DiscoveredActivity
-      const fromDiscoveredActivities: DiscoveredActivity[] = discData.map((activity: any) => ({
-        id: activity.id,
-        title: activity.title,
-        pillar: activity.pillar,
-        difficulty: activity.difficulty,
-        duration: activity.duration,
-        materials: activity.materials || [],
-        emotionalGoals: activity.emotional_goals || [],
-        instructions: activity.instructions || [],
-        benefits: activity.benefits || '',
-        tags: activity.tags || [],
-        ageGroup: activity.age_group || 'All Ages',
-        energyLevel: activity.energy_level || 'Medium',
-        source: 'discovered' as const,
-        sourceUrl: activity.source_url || '',
-        discoveredAt: activity.discovered_at,
-        verified: !!activity.is_approved,
-        qualityScore: Number(activity.confidence_score) || 0.5,
-        approved: !!activity.is_approved,
-        rejected: !!activity.is_rejected,
-      }));
+      if (discRes.error) throw discRes.error;
+
+      const actData = actRes.data || [];
+      const discData = discRes.data || [];
 
       // Map activities rows (source='discovered') to DiscoveredActivity
       const fromActivitiesTable: DiscoveredActivity[] = actData.map((activity: any) => ({
@@ -83,6 +60,29 @@ export class ContentDiscoveryService {
         rejected: false,
       }));
 
+      // Map discovered_activities rows to DiscoveredActivity
+      const fromDiscoveredActivities: DiscoveredActivity[] = discData.map((activity: any) => ({
+        id: activity.id,
+        title: activity.title,
+        pillar: activity.pillar,
+        difficulty: activity.difficulty,
+        duration: activity.duration,
+        materials: activity.materials || [],
+        emotionalGoals: activity.emotional_goals || [],
+        instructions: activity.instructions || [],
+        benefits: activity.benefits || '',
+        tags: activity.tags || [],
+        ageGroup: activity.age_group || 'All Ages',
+        energyLevel: activity.energy_level || 'Medium',
+        source: 'discovered' as const,
+        sourceUrl: activity.source_url || '',
+        discoveredAt: activity.discovered_at,
+        verified: !!activity.is_approved,
+        qualityScore: Number(activity.confidence_score) || 0.5,
+        approved: !!activity.is_approved,
+        rejected: !!activity.is_rejected,
+      }));
+
       // Merge and de-duplicate by id and normalized title to avoid repeats
       const combined = [...fromActivitiesTable, ...fromDiscoveredActivities];
       const seenIds = new Set<string>();
@@ -91,7 +91,8 @@ export class ContentDiscoveryService {
 
       for (const item of combined) {
         const idKey = String(item.id);
-        const titleKey = item.title.trim().toLowerCase();
+        const titleKey = (item.title || '').trim().toLowerCase();
+        if (!item.title) continue;
         if (seenIds.has(idKey) || seenTitles.has(titleKey)) continue;
         seenIds.add(idKey);
         seenTitles.add(titleKey);
@@ -100,7 +101,7 @@ export class ContentDiscoveryService {
 
       return unique;
     } catch (error) {
-      console.error('Error fetching discovered activities:', error);
+      console.error('Error fetching discovered activities (global):', error);
       return [];
     }
   }
