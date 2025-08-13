@@ -94,9 +94,24 @@ const ActivityLibrary = React.memo(() => {
   }, [shuffleArray]);
 
   const handleChooseForMe = useCallback(() => {
-    const picks = personalizedActivities.slice(0, 3);
-    setTopPicks(picks);
-  }, [personalizedActivities]);
+    // Get available activities for randomization
+    const availableActivities = personalizedActivities.length > 0 
+      ? personalizedActivities 
+      : filteredActivities;
+    
+    if (availableActivities.length === 0) return;
+    
+    // Select a random activity, avoiding the last few selected ones
+    const lastSelectedIds = new Set([selectedActivity?.id].filter(Boolean));
+    const eligibleActivities = availableActivities.filter(activity => !lastSelectedIds.has(activity.id));
+    const activitiesToChooseFrom = eligibleActivities.length > 0 ? eligibleActivities : availableActivities;
+    
+    const randomIndex = Math.floor(Math.random() * activitiesToChooseFrom.length);
+    const randomActivity = activitiesToChooseFrom[randomIndex];
+    
+    // Immediately show the activity in the modal
+    setSelectedActivity(randomActivity);
+  }, [personalizedActivities, filteredActivities, selectedActivity?.id]);
 
   // Compose displayed list: top picks (if any) followed by rest (deduped)
   const displayedActivities = useMemo(() => {
@@ -113,7 +128,7 @@ const ActivityLibrary = React.memo(() => {
         onChooseForMe={handleChooseForMe}
         onDiscoverNew={handleDiscoverMore}
         onShuffle={handleShuffle}
-        canChoose={personalizedActivities.length > 0}
+        canChoose={normalizedActivities.length > 0}
         isDiscovering={isDiscovering}
       />
 
