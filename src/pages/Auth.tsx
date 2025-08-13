@@ -10,7 +10,7 @@ import { useSubscription } from '@/contexts/SubscriptionContext';
 import { toast } from '@/hooks/use-toast';
 import { Heart, Mail, Lock, User, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import ErrorBoundary from '@/components/error/ErrorBoundary';
+import UnifiedErrorBoundary from '@/components/error/UnifiedErrorBoundary';
 import { useRetry } from '@/hooks/useRetry';
 import { handleError, getUserFriendlyMessage } from '@/utils/errorUtils';
 
@@ -104,7 +104,7 @@ const Auth: React.FC = () => {
   const clearError = () => setError(null);
 
   return (
-    <ErrorBoundary>
+    <UnifiedErrorBoundary context="Auth Page">
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-cyan-50 to-amber-50 flex items-center justify-center p-4">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
@@ -242,7 +242,7 @@ const Auth: React.FC = () => {
           </Card>
         </div>
       </div>
-    </ErrorBoundary>
+    </UnifiedErrorBoundary>
   );
 };
 

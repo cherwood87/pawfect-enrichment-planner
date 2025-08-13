@@ -1,7 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { Dog } from '@/types/dog';
-import { time, end } from '@/utils/perf';
+import { logger } from '@/utils/logger';
 import { CacheManager } from '@/services/core/CacheManager';
 
 export interface DatabaseDog {
@@ -116,13 +116,13 @@ export class DogService {
       this.CACHE_NAMESPACE,
       userId,
       async () => {
-        time('DB:getAllDogs');
+        logger.time('DB:getAllDogs');
         const { data, error } = await supabase
           .from('dogs')
           .select('id, name, breed, age, weight, activity_level, special_needs, gender, breed_group, mobility_issues, image, notes, quiz_results, date_added, last_updated, created_at, updated_at, user_id')
           .eq('user_id', userId)
           .order('created_at', { ascending: false });
-        end('DB:getAllDogs');
+        logger.timeEnd('DB:getAllDogs');
 
         if (error) {
           console.error('Error fetching dogs:', error);

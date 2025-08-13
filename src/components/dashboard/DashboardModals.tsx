@@ -1,6 +1,6 @@
 
 import React from 'react';
-import ActivityModal from '@/components/ActivityModal';
+import ConsolidatedActivityModal from '@/components/modals/ConsolidatedActivityModal';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import ChatModal from '@/components/chat/ChatModal';
 import AddDogForm from '@/components/AddDogForm';
@@ -62,10 +62,10 @@ const DashboardModals: React.FC<DashboardModalsProps> = ({
 }) => {
   return (
     <>
-      <ActivityModal
+      <ConsolidatedActivityModal
         isOpen={isActivityModalOpen}
         onClose={onActivityModalClose}
-        selectedPillar={selectedPillar}
+        activityDetails={null}
       />
 
       <ChatModal

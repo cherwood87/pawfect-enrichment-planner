@@ -8,8 +8,7 @@ import { DogProvider } from "@/contexts/DogContext";
 import { ActivityProvider } from "@/contexts/ActivityContext";
 import { ChatProvider } from "@/contexts/ChatContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import ErrorBoundary from "@/components/error/ErrorBoundary";
-import NetworkErrorBoundary from "@/components/error/NetworkErrorBoundary";
+import UnifiedErrorBoundary from "@/components/error/UnifiedErrorBoundary";
 import { Suspense, lazy } from "react";
 import SubscriptionGuard from "@/components/SubscriptionGuard";
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
@@ -25,9 +24,7 @@ const ActivityLibraryPage = lazy(() => import("./pages/ActivityLibraryPage"));
 const WeeklyPlannerPage = lazy(() => import("./pages/WeeklyPlannerPage"));
 const AccountSettings = lazy(() => import("./pages/AccountSettings"));
 const NotFound = lazy(() => import("./pages/NotFound"));
-const OpenAITestPage = lazy(() => import("./pages/OpenAITestPage"));
 const Subscribe = lazy(() => import("./pages/Subscribe"));
-
 const DogDetails = lazy(() => import("./pages/DogDetails"));
 const DogQuizRoute = lazy(() => import("./pages/DogQuizRoute"));
 
@@ -65,38 +62,45 @@ const queryClient = new QueryClient({
 });
 
 const App = () => (
-  <ErrorBoundary>
+  <UnifiedErrorBoundary context="App Root">
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <NetworkErrorBoundary>
-          <AuthProvider>
-            <DogProvider>
-              <ActivityProvider>
-                <ChatProvider>
-                  <SubscriptionProvider>
-                    <Toaster />
-                    <Sonner />
-                    <BrowserRouter>
-                      <Suspense fallback={<PageLoader />}>
+        <AuthProvider>
+          <DogProvider>
+            <ActivityProvider>
+              <ChatProvider>
+                <SubscriptionProvider>
+                  <Toaster />
+                  <Sonner />
+                  <BrowserRouter>
+                    <Suspense fallback={<PageLoader />}>
                       <Routes>
-                        <Route path="/auth" element={<Auth />} />
-                        <Route path="/subscribe" element={<ErrorBoundary><Subscribe /></ErrorBoundary>} />
+                        <Route path="/auth" element={
+                          <UnifiedErrorBoundary context="Auth">
+                            <Auth />
+                          </UnifiedErrorBoundary>
+                        } />
+                        <Route path="/subscribe" element={
+                          <UnifiedErrorBoundary context="Subscribe">
+                            <Subscribe />
+                          </UnifiedErrorBoundary>
+                        } />
                         <Route path="/dogs" element={<Navigate to="/settings?tab=dogs" replace />} />
                         <Route path="/dogs/:id" element={
                           <ProtectedRoute>
                             <SubscriptionGuard>
-                              <ErrorBoundary>
+                              <UnifiedErrorBoundary context="Dog Details">
                                 <DogDetails />
-                              </ErrorBoundary>
+                              </UnifiedErrorBoundary>
                             </SubscriptionGuard>
                           </ProtectedRoute>
                         } />
                         <Route path="/dogs/:id/quiz" element={
                           <ProtectedRoute>
                             <SubscriptionGuard>
-                              <ErrorBoundary>
+                              <UnifiedErrorBoundary context="Dog Quiz">
                                 <DogQuizRoute />
-                              </ErrorBoundary>
+                              </UnifiedErrorBoundary>
                             </SubscriptionGuard>
                           </ProtectedRoute>
                         } />
@@ -104,27 +108,27 @@ const App = () => (
                         <Route path="/app" element={
                           <ProtectedRoute>
                             <SubscriptionGuard>
-                              <ErrorBoundary>
+                              <UnifiedErrorBoundary context="Dashboard">
                                 <Index />
-                              </ErrorBoundary>
+                              </UnifiedErrorBoundary>
                             </SubscriptionGuard>
                           </ProtectedRoute>
                         } />
                         <Route path="/coach" element={
                           <ProtectedRoute>
                             <SubscriptionGuard>
-                              <ErrorBoundary>
+                              <UnifiedErrorBoundary context="Coach">
                                 <Coach />
-                              </ErrorBoundary>
+                              </UnifiedErrorBoundary>
                             </SubscriptionGuard>
                           </ProtectedRoute>
                         } />
                         <Route path="/activity-library" element={
                           <ProtectedRoute>
                             <SubscriptionGuard>
-                              <ErrorBoundary>
+                              <UnifiedErrorBoundary context="Activity Library">
                                 <ActivityLibraryPage />
-                              </ErrorBoundary>
+                              </UnifiedErrorBoundary>
                             </SubscriptionGuard>
                           </ProtectedRoute>
                         } />
@@ -132,9 +136,9 @@ const App = () => (
                           <Route path="/weekly-planner" element={
                             <ProtectedRoute>
                               <SubscriptionGuard>
-                                <ErrorBoundary>
+                                <UnifiedErrorBoundary context="Weekly Planner">
                                   <WeeklyPlannerPage />
-                                </ErrorBoundary>
+                                </UnifiedErrorBoundary>
                               </SubscriptionGuard>
                             </ProtectedRoute>
                           } />
@@ -143,50 +147,40 @@ const App = () => (
                         <Route path="/dog-profile-quiz" element={
                           <ProtectedRoute>
                             <SubscriptionGuard>
-                              <ErrorBoundary>
+                              <UnifiedErrorBoundary context="Dog Profile Quiz">
                                 <DogProfileQuizPage />
-                              </ErrorBoundary>
+                              </UnifiedErrorBoundary>
                             </SubscriptionGuard>
                           </ProtectedRoute>
                         } />
                         <Route path="/settings" element={
                           <ProtectedRoute>
-                            <ErrorBoundary>
+                            <UnifiedErrorBoundary context="Settings">
                               <AccountSettings />
-                            </ErrorBoundary>
+                            </UnifiedErrorBoundary>
                           </ProtectedRoute>
                         } />
-                        {FLAGS.ENABLE_OPENAI_TEST && (
-                          <Route path="/openai-test" element={
-                            <ProtectedRoute>
-                              <ErrorBoundary>
-                                <OpenAITestPage />
-                              </ErrorBoundary>
-                            </ProtectedRoute>
-                          } />
-                        )}
                         <Route path="/" element={
-                          <ErrorBoundary>
+                          <UnifiedErrorBoundary context="Landing">
                             <Landing />
-                          </ErrorBoundary>
+                          </UnifiedErrorBoundary>
                         } />
                         <Route path="*" element={
-                          <ErrorBoundary>
+                          <UnifiedErrorBoundary context="Not Found">
                             <NotFound />
-                          </ErrorBoundary>
+                          </UnifiedErrorBoundary>
                         } />
                       </Routes>
                     </Suspense>
                   </BrowserRouter>
-                  </SubscriptionProvider>
-                </ChatProvider>
-              </ActivityProvider>
-            </DogProvider>
-          </AuthProvider>
-        </NetworkErrorBoundary>
+                </SubscriptionProvider>
+              </ChatProvider>
+            </ActivityProvider>
+          </DogProvider>
+        </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
-  </ErrorBoundary>
+  </UnifiedErrorBoundary>
 );
 
 export default App;

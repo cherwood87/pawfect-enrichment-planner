@@ -3,7 +3,7 @@ import { Dog } from '@/types/dog';
 import { DogService } from '@/services/dogService';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
-import { time, end } from '@/utils/perf';
+import { logger } from '@/utils/logger';
 import { CacheManager } from '@/services/core/CacheManager';
 
 interface DogState {
@@ -108,7 +108,7 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
       dispatch({ type: 'SET_ERROR', payload: null });
-      time('Dogs:loadAll');
+      logger.time('Dogs:loadAll');
       
       // Add timeout protection against large requests
       const timeoutPromise = new Promise<never>((_, reject) => 
@@ -141,7 +141,7 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         dispatch({ type: 'SET_ERROR', payload: 'Failed to load your dogs. Please try refreshing the page.' });
       }
     } finally {
-      end('Dogs:loadAll');
+      logger.timeEnd('Dogs:loadAll');
       dispatch({ type: 'SET_LOADING', payload: false });
     }
   };

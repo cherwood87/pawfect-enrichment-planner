@@ -6,7 +6,7 @@ import { useDog } from '@/contexts/DogContext';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import DashboardModals from '@/components/dashboard/DashboardModals';
 import WeeklyPlannerView from '@/components/weekly-planner/WeeklyPlannerView';
-import ActivityModal from '@/components/ActivityModal';
+import ConsolidatedActivityModal from '@/components/modals/ConsolidatedActivityModal';
 import { Dog } from '@/types/dog';
 
 const WeeklyPlannerPage: React.FC = () => {
@@ -164,10 +164,10 @@ const WeeklyPlannerPage: React.FC = () => {
         </div>
       </div>
 
-      <ActivityModal
+      <ConsolidatedActivityModal
         isOpen={isActivityModalOpen}
         onClose={handleActivityModalClose}
-        selectedPillar={selectedPillar}
+        activityDetails={null}
       />
 
       {/* Dashboard Modals */}
