@@ -31,7 +31,7 @@ const Auth: React.FC = () => {
 
   useEffect(() => {
     if (user && session) {
-      navigate(isActive ? '/dogs' : '/subscribe', { replace: true });
+      navigate(isActive ? '/settings?tab=dogs' : '/subscribe', { replace: true });
     }
   }, [user, session, isActive, navigate]);
 
@@ -65,7 +65,7 @@ const Auth: React.FC = () => {
         await new Promise((res) => setTimeout(res, 250));
         waitCount++;
       }
-      navigate(isActive ? '/dogs' : '/subscribe', { replace: true });
+      navigate(isActive ? '/settings?tab=dogs' : '/subscribe', { replace: true });
     } catch (error: any) {
       const friendlyMessage = getUserFriendlyMessage(error);
       setError(friendlyMessage);

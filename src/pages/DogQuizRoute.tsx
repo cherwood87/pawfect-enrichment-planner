@@ -15,7 +15,7 @@ const DogQuizRoute: React.FC = () => {
     if (exists) {
       setCurrentDog(id);
     } else if (!state.isLoading) {
-      navigate('/dogs', { replace: true });
+      navigate('/settings?tab=dogs', { replace: true });
     }
   }, [id, state.dogs, state.isLoading, setCurrentDog, navigate]);
 

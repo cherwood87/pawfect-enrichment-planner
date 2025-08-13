@@ -20,9 +20,11 @@ const DogDetails: React.FC = () => {
     const exists = state.dogs.find(d => d.id === id);
     if (exists) {
       setCurrentDog(id);
+      // Redirect to unified settings page instead
+      navigate('/settings?tab=dogs', { replace: true });
     } else if (!state.isLoading) {
       // If dog not found, go back to dogs list
-      navigate('/dogs', { replace: true });
+      navigate('/settings?tab=dogs', { replace: true });
     }
   }, [id, state.dogs, state.isLoading, setCurrentDog, navigate]);
 

@@ -1,19 +1,20 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft, User, Dog, Shield } from 'lucide-react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { User, Dog, Shield } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import DashboardHeader from '@/components/dashboard/DashboardHeader';
+import ChatModal from '@/components/chat/ChatModal';
 import AccountTab from '@/components/settings/AccountTab';
 import DogsTab from '@/components/settings/DogsTab';
 import ProfileTab from '@/components/settings/ProfileTab';
 
 const AccountSettings = () => {
-  const navigate = useNavigate();
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(() => {
     // Default to 'dogs' tab if no tab specified or if coming from dogs route
     return searchParams.get('tab') || 'dogs';
@@ -27,25 +28,17 @@ const AccountSettings = () => {
     }
   }, [searchParams]);
 
-  const handleBack = () => {
-    navigate('/activity-library');
-  };
+  const handleChatOpen = useCallback(() => setIsChatOpen(true), []);
+  const handleChatClose = useCallback(() => setIsChatOpen(false), []);
+  const handleAddDogOpen = useCallback(() => {
+    // Already on the dogs tab, just ensure it's active
+    setActiveTab('dogs');
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-cyan-50 to-amber-50">
+      <DashboardHeader onChatOpen={handleChatOpen} onAddDogOpen={handleAddDogOpen} />
       <div className="max-w-4xl mx-auto p-4 space-y-6">
-        {/* Header */}
-        <div className="flex items-center space-x-4 mb-6">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleBack}
-            className="flex items-center space-x-2 hover:bg-purple-100 rounded-2xl"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Back to Dashboard</span>
-          </Button>
-        </div>
 
         {/* Main Content */}
         <Card className="border-2 border-purple-200 rounded-3xl bg-white/80 backdrop-blur-sm shadow-lg">
@@ -102,6 +95,7 @@ const AccountSettings = () => {
           </CardContent>
         </Card>
       </div>
+      <ChatModal isOpen={isChatOpen} onClose={handleChatClose} />
     </div>
   );
 };

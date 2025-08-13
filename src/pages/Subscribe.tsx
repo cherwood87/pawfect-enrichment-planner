@@ -13,7 +13,7 @@ const Subscribe: React.FC = () => {
 
   const handleActivate = () => {
     activate();
-    navigate('/dogs', { replace: true });
+    navigate('/settings?tab=dogs', { replace: true });
   };
 
   return (
@@ -44,7 +44,7 @@ const Subscribe: React.FC = () => {
                 <Button onClick={handleActivate} className="w-full modern-button-primary">Activate Subscription</Button>
               ) : (
                 <div className="space-y-2">
-                  <Button onClick={() => navigate('/dogs')} className="w-full" variant="secondary">Go to Dogs</Button>
+                  <Button onClick={() => navigate('/settings?tab=dogs')} className="w-full" variant="secondary">Go to Dogs</Button>
                   <Button onClick={cancel} variant="outline" className="w-full">Cancel (dev)</Button>
                 </div>
               )}
