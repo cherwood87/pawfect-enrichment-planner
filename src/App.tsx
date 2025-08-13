@@ -9,7 +9,7 @@ import { ActivityProvider } from "@/contexts/ActivityContext";
 import { ChatProvider } from "@/contexts/ChatContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import ErrorBoundary from "@/components/error/ErrorBoundary";
-import NetworkErrorBoundary from "@/components/error/NetworkErrorBoundary";
+import { NetworkErrorBoundary } from "@/components/error/NetworkErrorBoundary";
 import { Suspense, lazy } from "react";
 import SubscriptionGuard from "@/components/SubscriptionGuard";
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";

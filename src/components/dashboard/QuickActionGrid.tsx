@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Heart, MessageCircle, BookOpen, User } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { SmartNavigationButton } from '@/components/navigation/SmartNavigationButton';
 
 interface QuickActionGridProps {
   onChatOpen?: () => void;
@@ -51,13 +51,9 @@ const actionItems = [
 ];
 
 export const QuickActionGrid: React.FC<QuickActionGridProps> = ({ onChatOpen }) => {
-  const navigate = useNavigate();
-
   const handleAction = (item: typeof actionItems[0]) => {
     if (item.action === 'chat' && onChatOpen) {
       onChatOpen();
-    } else if (item.route) {
-      navigate(item.route);
     } else if (item.scrollTo) {
       const element = document.getElementById(item.scrollTo);
       if (element) {
@@ -70,6 +66,25 @@ export const QuickActionGrid: React.FC<QuickActionGridProps> = ({ onChatOpen }) 
     <div className="grid grid-cols-2 gap-4">
       {actionItems.map((item) => {
         const IconComponent = item.icon;
+        if (item.route) {
+          return (
+            <SmartNavigationButton
+              key={item.id}
+              to={item.route}
+              variant="ghost"
+              className={`modern-card h-auto p-0 touch-target bg-gradient-to-br ${item.bgGradient} ${item.borderColor} hover:shadow-lg transition-all duration-300 transform hover:scale-[1.02]`}
+            >
+              <CardContent className="p-6 text-center w-full">
+                <div className={`bg-gradient-to-r ${item.gradient} p-3 rounded-2xl w-fit mx-auto mb-3 shadow-lg`}>
+                  <IconComponent className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="font-semibold text-gray-800 mb-1">{item.title}</h3>
+                <p className="text-xs text-gray-600">{item.description}</p>
+              </CardContent>
+            </SmartNavigationButton>
+          );
+        }
+
         return (
           <Card 
             key={item.id}
