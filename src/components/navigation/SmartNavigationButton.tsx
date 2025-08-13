@@ -1,7 +1,6 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useActivityModalPersistence } from '@/hooks/useActivityModalPersistence';
 import { LucideIcon } from 'lucide-react';
 
 interface SmartNavigationButtonProps {
@@ -12,17 +11,11 @@ interface SmartNavigationButtonProps {
   size?: 'sm' | 'default' | 'lg';
   className?: string;
   preserveModalState?: boolean;
-  modalOptions?: {
-    selectedPillar?: string | null;
-    selectedDay?: number;
-    activeTab?: string;
-  };
   onClick?: () => void;
 }
 
 /**
- * Smart navigation button that preserves modal state and handles navigation properly
- * Ensures users don't lose their progress when navigating between pages
+ * Smart navigation button that handles navigation properly
  */
 export const SmartNavigationButton: React.FC<SmartNavigationButtonProps> = ({
   to,
@@ -31,26 +24,14 @@ export const SmartNavigationButton: React.FC<SmartNavigationButtonProps> = ({
   variant = 'default',
   size = 'default',
   className = '',
-  preserveModalState = false,
-  modalOptions,
   onClick
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { openModal } = useActivityModalPersistence();
 
   const handleClick = () => {
     if (onClick) {
       onClick();
-    }
-
-    // If we're preserving modal state, set it up
-    if (preserveModalState && modalOptions) {
-      openModal(
-        modalOptions.selectedPillar,
-        modalOptions.selectedDay,
-        modalOptions.activeTab
-      );
     }
 
     // Navigate to destination
