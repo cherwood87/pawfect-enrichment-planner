@@ -17,7 +17,7 @@ export const environmentalActivities: ActivityLibraryItem[] = [
       'Take photos of spots your dog shows high interest in to revisit later',
       'Note your dog\'s reactions: confident exploration vs. hesitation, and adjust accordingly',
       'If dog seems overwhelmed, take breaks in quiet areas until they relax',
-      'Complete route when dog shows familiarity with new area and walks confidently'
+      'End when dog shows comfort with the new area, typically after 20-30 minutes'
     ],
     benefits: 'Mental stimulation from new smells, sights, and sounds',
     tags: ['exploration', 'walking', 'outdoor'],
@@ -39,7 +39,7 @@ export const environmentalActivities: ActivityLibraryItem[] = [
       'Reward brave behavior immediately with treats and praise when dog steps on new texture',
       'If dog refuses surface, don\'t force - try smaller steps like just front paws first',
       'Go at your dog\'s pace - some may need 2-3 exposures to feel comfortable',
-      'Complete when dog willingly walks on 4-5 different surfaces without hesitation'
+      'End when dog shows confidence on new surfaces - progress at their own pace'
     ],
     benefits: 'Builds confidence and desensitizes to different textures',
     tags: ['textures', 'confidence', 'outdoor'],
@@ -61,7 +61,7 @@ export const environmentalActivities: ActivityLibraryItem[] = [
       'Take bathroom and water breaks every 30-45 minutes on longer trips',
       'If dog shows car sickness (drooling, whining), try shorter trips and gradual increase',
       'Keep car well-ventilated and at comfortable temperature - never leave dog alone in car',
-      'Complete trip successfully when dog remains calm and comfortable throughout journey'
+      'End trip when dog shows comfort and confidence throughout the journey'
     ],
     benefits: 'Exposure to vehicle travel and new destinations',
     tags: ['travel', 'car', 'adventure'],
@@ -83,7 +83,7 @@ export const environmentalActivities: ActivityLibraryItem[] = [
       'Watch for signs of discomfort: shivering, excessive panting, lifting paws, or seeking shelter',
       'Keep sessions positive with treats and encouragement - never force dog to continue if distressed',
       'Dry off thoroughly if wet, especially paws and ears to prevent issues',
-      'Complete when dog shows confidence walking in various weather conditions'
+      'End when dog walks confidently in the weather - never force if distressed'
     ],
     benefits: 'Builds resilience and comfort in various weather conditions',
     tags: ['weather', 'resilience', 'outdoor'],
@@ -104,7 +104,7 @@ export const environmentalActivities: ActivityLibraryItem[] = [
       'Provide fresh drinking water every 15-20 minutes - salt water can cause dehydration',
       'Watch for signs of overheating or fatigue: excessive panting, slowing down, seeking shade',
       'Prevent dogs from drinking salt water or eating sand, which can cause digestive issues',
-      'Take breaks in shade and limit exposure to 45-60 minutes to prevent sunburn on nose/ears',
+      'Take frequent breaks in shade and watch for overheating signs, limiting sun exposure',
       'Rinse off salt water and sand thoroughly, especially between toes and in ears'
     ],
     benefits: 'Rich sensory experience with water, sand, and new smells',
@@ -126,8 +126,8 @@ export const environmentalActivities: ActivityLibraryItem[] = [
       'Reward calm behavior immediately with treats when dog remains relaxed around new sounds',
       'Use counter-conditioning: give treats the moment dog hears concerning sound, before they react',
       'If dog shows fear (trembling, trying to hide), move farther from sound source and try again',
-      'Keep sessions to 20-30 minutes to prevent overwhelming your dog with too much stimulation',
-      'Complete when dog can walk calmly through moderate urban environment without stress signs'
+      'Keep sessions short to prevent overwhelming - watch for stress signs continuously',
+      'End when dog shows calm confidence around urban sounds'
     ],
     benefits: 'Builds confidence around urban environments',
     tags: ['city', 'sounds', 'confidence'],
@@ -149,7 +149,7 @@ export const environmentalActivities: ActivityLibraryItem[] = [
       'If dog shows anxiety (panting, trembling), go back to previous step for a few more days',
       'Keep initial rides very short (1-2 floors) and always have treats ready',
       'Practice during low-traffic times to avoid crowded, stressful situations',
-      'Complete when dog can ride elevator calmly for 5+ floors without stress signs'
+      'End when dog shows calm confidence in elevators - progress at their own pace'
     ],
     benefits: 'Prepares dog for urban living and vet visits',
     tags: ['elevator', 'urban', 'confidence'],

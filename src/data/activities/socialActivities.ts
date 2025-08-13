@@ -39,7 +39,7 @@ export const socialActivities: ActivityLibraryItem[] = [
       'Stay positive and patient - puppies have short attention spans and may need multiple attempts',
       'If your dog seems overwhelmed, ask instructor for a brief break or easier exercise',
       'Practice lessons at home for 5-10 minutes daily between classes for better retention',
-      'Complete class goals: basic commands, socialization with other dogs, and impulse control'
+      'Focus on progress, not perfection - celebrate small wins and keep sessions positive'
     ],
     benefits: 'Structured socialization and basic training',
     tags: ['training', 'class', 'socialization'],
@@ -61,7 +61,7 @@ export const socialActivities: ActivityLibraryItem[] = [
       'Reward calm behavior around distractions (cars, bicycles, other dogs) with treats within 2 seconds',
       'If dog becomes overstimulated, find a quiet spot to sit and let them observe until calm',
       'Keep treats handy and reward frequently for attention and good behavior',
-      'Complete when dog can walk calmly past 3-4 different distractions without pulling'
+      'End when dog shows improvement with distractions - progress takes time and patience'
     ],
     benefits: 'Real-world socialization practice',
     tags: ['walking', 'socialization', 'training'],
@@ -83,7 +83,7 @@ export const socialActivities: ActivityLibraryItem[] = [
       'Watch for signs of stress: excessive panting, trying to hide, mounting, or resource guarding',
       'Have backup plan ready: if dogs don\'t click, separate calmly and try a different dog another time',
       'Provide separate water bowls and toys to prevent resource guarding conflicts',
-      'End playdate while dogs are still having fun, typically after 45-60 minutes to prevent overstimulation'
+      'End playdate while dogs are still having fun, before any signs of overstimulation appear'
     ],
     benefits: 'One-on-one socialization and play',
     tags: ['playdate', 'socialization', 'friends'],
@@ -105,7 +105,7 @@ export const socialActivities: ActivityLibraryItem[] = [
       'Allow positive interactions with staff who offer to greet your dog, but ensure dog sits first',
       'If dog seems nervous or excited, take breaks in quieter sections of store',
       'Practice basic commands (sit, stay) while in store to reinforce training in new environment',
-      'Complete visit successfully when dog can walk calmly through store without pulling or excessive excitement'
+      'End when dog shows calm behavior - success is measured by comfort, not perfection'
     ],
     benefits: 'Exposure to new environments and people',
     tags: ['outing', 'socialization', 'indoor'],
@@ -149,7 +149,7 @@ export const socialActivities: ActivityLibraryItem[] = [
       'Choose off-peak hours initially (mid-afternoon) to avoid crowds and noise',
       'Allow positive interactions with patrons who approach calmly and ask permission first',
       'If dog becomes restless or anxious, take a brief walk outside and return when calm',
-      'Complete visit successfully when dog can settle quietly for 30+ minutes in busy environment'
+      'End when dog shows calm settling behavior - duration matters less than comfort level'
     ],
     benefits: 'Real-world manners practice in busy environments',
     tags: ['cafe', 'manners', 'socialization'],

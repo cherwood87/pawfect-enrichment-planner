@@ -39,7 +39,7 @@ export const physicalActivities: ActivityLibraryItem[] = [
       'If dog doesn\'t return toy, try running away or kneeling down to encourage return',
       'Gradually increase distance to 30-50 feet as dog warms up and shows enthusiasm',
       'Take 30-second water breaks every 5-7 throws to prevent overheating',
-      'End session while dog is still interested (before they get tired) to maintain positive association'
+      'End session while dog is still interested and before signs of fatigue appear'
     ],
     benefits: 'High-intensity exercise and reinforces retrieve training',
     tags: ['fetch', 'exercise', 'outdoor'],
@@ -82,7 +82,7 @@ export const physicalActivities: ActivityLibraryItem[] = [
       'Let dog enter at their own pace - never force or throw them in',
       'Stay within arm\'s reach at all times, even if dog is a strong swimmer',
       'Watch for signs of fatigue: head lower in water, slower paddling, or distress',
-      'Swimming sessions should be 10-15 minutes maximum for beginners, building up gradually',
+      'Watch for fatigue signs closely - start with very short sessions and gradually increase',
       'Dry thoroughly with towels immediately after swimming, especially ears to prevent infection'
     ],
     benefits: 'Low-impact, full-body exercise excellent for joint health',
@@ -105,7 +105,7 @@ export const physicalActivities: ActivityLibraryItem[] = [
       'Bring water for both of you and offer to dog every 10-15 minutes',
       'Stop immediately if dog shows distress - they can\'t sweat and overheat quickly',
       'Avoid hot pavement (over 77°F) - test with back of your hand for 5 seconds',
-      'Cool down with 10-minute slow walk, allowing dog to gradually return to normal breathing'
+      'Cool down with slow walk until dog returns to normal breathing'
     ],
     benefits: 'High-intensity cardio exercise for both dog and owner',
     tags: ['running', 'cardio', 'outdoor'],
@@ -125,8 +125,8 @@ export const physicalActivities: ActivityLibraryItem[] = [
       'Start with 3-4 steps up and down, moving slowly to prevent slipping',
       'Keep dog on leash for control and safety - they shouldn\'t rush or jump',
       'Watch for heavy panting, reluctance to continue, or favoring any leg',
-      'Take 1-2 minute rest breaks between sets if dog shows any fatigue',
-      'Build to maximum 8-10 step repetitions over several weeks',
+      'Take rest breaks whenever dog shows any fatigue signs',
+      'Progress very slowly over weeks, always prioritizing safety over repetitions',
       'Stop immediately if dog slips, seems unsteady, or shows any discomfort'
     ],
     benefits: 'Builds leg strength and cardiovascular fitness',
@@ -148,8 +148,8 @@ export const physicalActivities: ActivityLibraryItem[] = [
       'Support dog gently by holding their side/chest as they step onto disc',
       'Reward any attempt to step on disc, even just front paws for first few tries',
       'If dog seems scared, practice with disc turned upside down (stable side) first',
-      'Build up to 10-30 seconds of standing on disc before asking for movement',
-      'Complete when dog can stand confidently for 30 seconds without support'
+      'Gradually increase time as dog gains confidence, never forcing longer sessions',
+      'End when dog shows confidence and balance - timing matters less than comfort'
     ],
     benefits: 'Improves core strength and proprioception',
     tags: ['balance', 'core', 'rehabilitation'],

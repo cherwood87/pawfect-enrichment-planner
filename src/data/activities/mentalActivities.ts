@@ -16,7 +16,7 @@ export const mentalActivities: ActivityLibraryItem[] = [
       'Let your dog figure out how to get the food out - resist the urge to help for first 5 minutes',
       'Supervise closely and encourage with verbal praise, but avoid physical assistance',
       'If dog struggles after 10 minutes, briefly show them one piece coming out, then let them continue',
-      'Complete when all food is retrieved or dog loses interest (typically 10-15 minutes)',
+      'Complete when all food is retrieved or dog loses interest - watch for signs of frustration',
       'Clean feeder after use to maintain hygiene and prevent food buildup'
     ],
     benefits: 'Slows down eating, provides mental stimulation, and builds problem-solving skills',
@@ -56,7 +56,7 @@ export const mentalActivities: ActivityLibraryItem[] = [
     emotionalGoals: ['Focus', 'Bonding'],
     instructions: [
       'Choose 2-3 commands to focus on (sit, stay, come) - avoid overwhelming with too many',
-      'Start with 5-minute sessions, building to 15 minutes maximum to maintain attention',
+      'Keep sessions very short (2-5 minutes) to maintain attention and prevent frustration',
       'Use high-value treats (small pieces) and deliver within 1-2 seconds of correct behavior',
       'Practice each command 5-8 times before moving to the next one',
       'If dog struggles with a command, break it into smaller steps or return to easier version',
@@ -82,7 +82,7 @@ export const mentalActivities: ActivityLibraryItem[] = [
       'Reward each small step with treats and praise within 2 seconds of the action',
       'Practice 5-7 repetitions per step, then move to next step only when current step is consistent',
       'If dog gets frustrated or stops responding, take a 5-minute play break and return',
-      'Complete when dog can perform full trick on command 3 times in a row',
+      'End when dog performs trick successfully 2-3 times - always finish on success',
       'End with extra treats and enthusiastic praise to build positive association'
     ],
     benefits: 'Builds confidence, strengthens bond, and provides mental challenge',
@@ -103,7 +103,7 @@ export const mentalActivities: ActivityLibraryItem[] = [
       'Place mat on floor in quiet area and let your dog sniff and forage naturally at their own pace',
       'Supervise closely to ensure they don\'t bite, chew, or eat the mat material',
       'If dog tries to flip or shake mat, guide them back to gentle sniffing behavior',
-      'Activity is complete when most treats are found or dog naturally stops searching (usually 10-15 minutes)',
+      'Activity is complete when most treats are found or dog naturally stops searching',
       'Remove mat when finished and shake out any remaining treats outside',
       'Wash mat weekly or when visibly dirty to prevent bacteria buildup'
     ],
@@ -126,8 +126,7 @@ export const mentalActivities: ActivityLibraryItem[] = [
       'If dog chooses wrong shape, simply say "try again" and guide them to correct one without punishment',
       'Practice with same 2 shapes for 8-10 successful attempts before adding a third shape',
       'If dog seems confused, increase distance between shapes or make them more visually different',
-      'Complete when dog can identify correct shape 5 times in a row without guidance',
-      'End session after 20 minutes maximum to prevent mental fatigue and frustration'
+      'End when dog succeeds 3-4 times or shows any signs of frustration or confusion'
     ],
     benefits: 'Advanced cognitive training and problem-solving skills',
     tags: ['cognitive', 'advanced', 'indoor'],
@@ -149,7 +148,7 @@ export const mentalActivities: ActivityLibraryItem[] = [
       'If dog brings correct toy, reward immediately with treats and enthusiastic praise',
       'If dog brings wrong item or seems confused, walk with them to correct toy and repeat name',
       'Add second toy only after dog consistently identifies first toy 8 out of 10 times',
-      'Complete daily session when dog successfully identifies the toy 3 times in a row'
+      'End session when dog successfully identifies the toy 2-3 times - always finish on success'
     ],
     benefits: 'Builds vocabulary and listening skills',
     tags: ['vocabulary', 'learning', 'indoor'],
@@ -171,7 +170,7 @@ export const mentalActivities: ActivityLibraryItem[] = [
       'If correct, immediately reward with the hidden treat plus an extra treat for success',
       'If incorrect, show them the correct cup, let them have the treat, and start over',
       'Gradually increase mixing time to 8-10 seconds as dog improves',
-      'Complete when dog succeeds 4 out of 5 attempts, or after 15 minutes to prevent frustration'
+      'End when dog succeeds several times or shows any signs of frustration - keep it positive'
     ],
     benefits: 'Develops memory and observation skills',
     tags: ['memory', 'observation', 'indoor'],

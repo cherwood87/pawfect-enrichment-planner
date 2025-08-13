@@ -16,7 +16,7 @@ export const instinctualActivities: ActivityLibraryItem[] = [
       'Encourage digging by scratching at the surface yourself and saying "dig" enthusiastically',
       'Supervise closely to ensure dog doesn\'t eat the digging material or try to escape the designated area',
       'If dog tries to dig elsewhere after this activity, redirect them back to the box',
-      'Activity is complete when dog has found most hidden items or naturally stops digging',
+      'End when dog has found items and shows satisfaction or naturally stops digging',
       'Clean paws thoroughly after digging and store box in dry location to prevent mold'
     ],
     benefits: 'Satisfies natural digging instincts in appropriate way',
@@ -39,7 +39,7 @@ export const instinctualActivities: ActivityLibraryItem[] = [
       'If dog doesn\'t understand initially, hold scented swab near their nose first, then place in container',
       'Practice with same scent for 5-7 successful finds before changing scents or adding complexity',
       'Gradually add difficulty: more containers, weaker scents, or multiple correct containers',
-      'Complete session when dog can identify correct scent 4 out of 5 times consistently'
+      'End when dog shows understanding and success - progress over perfection'
     ],
     benefits: 'Engages powerful sense of smell for mental stimulation',
     tags: ['scent', 'nose work', 'indoor'],
@@ -61,7 +61,7 @@ export const instinctualActivities: ActivityLibraryItem[] = [
       'Let dog work at their own pace - resist urge to help or guide too much',
       'If dog loses scent, bring them back to last known treat location and start again',
       'Gradually increase trail length to 50+ feet and add gentle curves once dog understands concept',
-      'Complete when dog can follow entire trail from start to finish independently'
+      'End when dog shows confident tracking behavior and natural satisfaction'
     ],
     benefits: 'Develops natural tracking abilities and provides mental challenge',
     tags: ['tracking', 'scent', 'outdoor'],
@@ -83,7 +83,7 @@ export const instinctualActivities: ActivityLibraryItem[] = [
       'Start with 10-15 minute sessions to prevent overexertion - herding can be very intense exercise',
       'Watch for signs of obsessive behavior: inability to stop, ignoring commands, excessive panting',
       'If dog becomes overstimulated, take 5-minute breaks and practice basic commands',
-      'Complete when dog shows controlled herding behavior and responds to "stop" command'
+      'End when dog shows natural herding satisfaction while maintaining control and responsiveness'
     ],
     benefits: 'Satisfies herding instincts in controlled environment',
     tags: ['herding', 'ball', 'instinct'],
@@ -105,7 +105,7 @@ export const instinctualActivities: ActivityLibraryItem[] = [
       'Let dog "win" about 30% of the time to maintain their interest and confidence',
       'Watch for overexcitement: growling that doesn\'t sound playful, inability to release toy, or snapping',
       'If dog becomes too intense, immediately stop game and practice calm behaviors',
-      'Complete session with successful "drop it" command and calm settling behavior'
+      'End with successful "drop it" command while dog is still enjoying the game'
     ],
     benefits: 'Satisfies prey drive and builds jaw strength',
     tags: ['tug', 'play', 'indoor'],
@@ -127,7 +127,7 @@ export const instinctualActivities: ActivityLibraryItem[] = [
       'Use catches as rewards for good behavior: coming when called, sitting on command',
       'Watch for signs of overheating: excessive panting, slowing down, or tongue hanging very low',
       'If dog becomes overstimulated or aggressive toward toy, take immediate break and practice calm commands',
-      'End session while dog is still interested but not overtired to maintain positive association'
+      'End while dog is still engaged but before any signs of overstimulation appear'
     ],
     benefits: 'Satisfies prey drive in controlled manner',
     tags: ['prey drive', 'chase', 'exercise'],
@@ -149,7 +149,7 @@ export const instinctualActivities: ActivityLibraryItem[] = [
       'Let dog arrange bedding naturally - many dogs will circle, scratch, and "nest" before settling',
       'Don\'t force dog into den - let them discover and choose to use it when they feel like it',
       'Make space just big enough for dog to turn around comfortably - too large defeats "den" purpose',
-      'Complete setup when dog voluntarily uses space for resting and shows relaxed body language there'
+      'Success is when dog chooses to use the den and shows relaxed, comfortable body language'
     ],
     benefits: 'Satisfies denning instincts and provides security',
     tags: ['den', 'comfort', 'security'],
