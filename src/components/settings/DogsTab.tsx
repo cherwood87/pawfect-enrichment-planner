@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Edit, Trash2, Dog, Star, Brain, Target } from 'lucide-react';
+import { Plus, Edit, Trash2, Dog, Star, Brain, Target, BookOpen } from 'lucide-react';
 import { useDog } from '@/contexts/DogContext';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -103,6 +103,11 @@ const DogsTab = () => {
   const closeQuizResults = () => {
     setShowQuizResults(false);
     setSelectedDog(null);
+  };
+
+  const handleChooseActivity = (dog: DogType) => {
+    setCurrentDog(dog.id);
+    navigate('/activity-library');
   };
 
   const getActivityLevelColor = (level: string) => {
@@ -235,6 +240,17 @@ const DogsTab = () => {
                             Make Primary
                           </Button>
                         )}
+                        
+                        {/* Choose Activity Button */}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleChooseActivity(dog)}
+                          className="rounded-xl border-blue-300 text-blue-700 hover:bg-blue-100 flex items-center space-x-1"
+                        >
+                          <BookOpen className="w-3 h-3" />
+                          <span>Choose an Activity</span>
+                        </Button>
                         
                         {/* Quiz Button */}
                         {dog.quizResults ? (
