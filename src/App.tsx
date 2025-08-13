@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { DogProvider } from "@/contexts/DogContext";
 import { ActivityProvider } from "@/contexts/ActivityContext";
@@ -13,6 +13,7 @@ import NetworkErrorBoundary from "@/components/error/NetworkErrorBoundary";
 import { Suspense, lazy } from "react";
 import SubscriptionGuard from "@/components/SubscriptionGuard";
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
+import { FLAGS } from "@/constants/flags";
 
 // Lazy load all pages for better bundle splitting
 const Index = lazy(() => import("./pages/Index"));
@@ -107,27 +108,23 @@ const App = () => (
                             </SubscriptionGuard>
                           </ProtectedRoute>
                         } />
-                        <Route path="/activities" element={
+                        <Route path="/activities" element={<Navigate to="/activity-library" replace />} />
+                        <Route path="/app" element={
                           <ProtectedRoute>
                             <SubscriptionGuard>
                               <ErrorBoundary>
-                                <ActivityLibraryPage />
+                                <Index />
                               </ErrorBoundary>
                             </SubscriptionGuard>
                           </ProtectedRoute>
                         } />
-                        <Route path="/app" element={
-                          <ProtectedRoute>
-                            <ErrorBoundary>
-                              <Index />
-                            </ErrorBoundary>
-                          </ProtectedRoute>
-                        } />
                         <Route path="/coach" element={
                           <ProtectedRoute>
-                            <ErrorBoundary>
-                              <Coach />
-                            </ErrorBoundary>
+                            <SubscriptionGuard>
+                              <ErrorBoundary>
+                                <Coach />
+                              </ErrorBoundary>
+                            </SubscriptionGuard>
                           </ProtectedRoute>
                         } />
                         <Route path="/activity-library" element={
@@ -139,25 +136,25 @@ const App = () => (
                             </SubscriptionGuard>
                           </ProtectedRoute>
                         } />
-                        <Route path="/weekly-planner" element={
-                          <ProtectedRoute>
-                            <ErrorBoundary>
-                              <WeeklyPlannerPage />
-                            </ErrorBoundary>
-                          </ProtectedRoute>
-                        } />
-                        <Route path="/dog-profile-dashboard/activity-library" element={
-                          <ProtectedRoute>
-                            <ErrorBoundary>
-                              <ActivityLibraryPage />
-                            </ErrorBoundary>
-                          </ProtectedRoute>
-                        } />
+                        {FLAGS.ENABLE_WEEKLY_PLANNER && (
+                          <Route path="/weekly-planner" element={
+                            <ProtectedRoute>
+                              <SubscriptionGuard>
+                                <ErrorBoundary>
+                                  <WeeklyPlannerPage />
+                                </ErrorBoundary>
+                              </SubscriptionGuard>
+                            </ProtectedRoute>
+                          } />
+                        )}
+                        <Route path="/dog-profile-dashboard/activity-library" element={<Navigate to="/activity-library" replace />} />
                         <Route path="/dog-profile-quiz" element={
                           <ProtectedRoute>
-                            <ErrorBoundary>
-                              <DogProfileQuizPage />
-                            </ErrorBoundary>
+                            <SubscriptionGuard>
+                              <ErrorBoundary>
+                                <DogProfileQuizPage />
+                              </ErrorBoundary>
+                            </SubscriptionGuard>
                           </ProtectedRoute>
                         } />
                         <Route path="/settings" element={
@@ -167,13 +164,15 @@ const App = () => (
                             </ErrorBoundary>
                           </ProtectedRoute>
                         } />
-                        <Route path="/openai-test" element={
-                          <ProtectedRoute>
-                            <ErrorBoundary>
-                              <OpenAITestPage />
-                            </ErrorBoundary>
-                          </ProtectedRoute>
-                        } />
+                        {FLAGS.ENABLE_OPENAI_TEST && (
+                          <Route path="/openai-test" element={
+                            <ProtectedRoute>
+                              <ErrorBoundary>
+                                <OpenAITestPage />
+                              </ErrorBoundary>
+                            </ProtectedRoute>
+                          } />
+                        )}
                         <Route path="/" element={
                           <ErrorBoundary>
                             <Landing />
