@@ -22,9 +22,9 @@ const DashboardBanner: React.FC = () => {
             <p className="text-sm text-blue-100">Continue your dog's enrichment journey</p>
           </div>
         </div>
-        <Link to="/app">
+        <Link to="/activity-library">
           <Button className="bg-white/20 hover:bg-white/30 text-white border-white/30 flex items-center space-x-2">
-            <span>Go to Dashboard</span>
+            <span>Go to Activity Library</span>
             <ArrowRight className="w-4 h-4" />
           </Button>
         </Link>

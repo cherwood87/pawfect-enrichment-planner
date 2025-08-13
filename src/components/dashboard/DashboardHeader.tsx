@@ -49,8 +49,8 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = React.memo(({ onAddDogOp
           <div className="flex items-center">
             <button
               type="button"
-              onClick={() => handleNavigation('/app')}
-              aria-label="Go to Dashboard"
+              onClick={() => handleNavigation('/activity-library')}
+              aria-label="Go to Activity Library"
               className="font-extrabold tracking-tight text-gray-800 text-sm sm:text-base hover:opacity-90 transition"
             >
               Beyond Busy

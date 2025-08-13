@@ -16,7 +16,7 @@ const AccountSettings = () => {
   const [activeTab, setActiveTab] = useState('account');
 
   const handleBack = () => {
-    navigate('/app');
+    navigate('/activity-library');
   };
 
   return (

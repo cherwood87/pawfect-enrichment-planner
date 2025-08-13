@@ -8,12 +8,16 @@ interface ActivityLibraryHeaderProps {
   autoApprovedCount: number;
   isDiscovering: boolean;
   onDiscoverMore: () => void;
+  onChooseForMe?: () => void;
+  canPickSuggested?: boolean;
 }
 
 const ActivityLibraryHeader: React.FC<ActivityLibraryHeaderProps> = ({
   autoApprovedCount,
   isDiscovering,
-  onDiscoverMore
+  onDiscoverMore,
+  onChooseForMe,
+  canPickSuggested
 }) => {
   return (
     <CardHeader className="bg-gradient-to-r from-purple-50 via-cyan-50 to-amber-50 border-b-2 border-purple-200 rounded-t-3xl">
@@ -42,7 +46,17 @@ const ActivityLibraryHeader: React.FC<ActivityLibraryHeaderProps> = ({
           </div>
         </div>
         
-        <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-1 border border-purple-200">
+        <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-1 border border-purple-200 flex items-center gap-2">
+          {onChooseForMe && (
+            <Button
+              onClick={onChooseForMe}
+              disabled={!canPickSuggested}
+              className="modern-button-outline shadow"
+            >
+              <Brain className="w-4 h-4 mr-2" />
+              {canPickSuggested ? 'Choose For Me' : 'Choose For Me (needs quiz)'}
+            </Button>
+          )}
           <Button 
             onClick={onDiscoverMore}
             disabled={isDiscovering}

@@ -163,6 +163,8 @@ const ActivityLibrary = React.memo(() => {
         autoApprovedCount={autoApprovedCount}
         isDiscovering={isDiscovering}
         onDiscoverMore={handleDiscoverMore}
+        onChooseForMe={pickSuggested}
+        canPickSuggested={personalizedActivities.length > 0}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         selectedPillar={selectedPillar}

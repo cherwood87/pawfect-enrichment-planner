@@ -20,7 +20,7 @@ const Coach = () => {
     setIsChatModalOpen(false);
   };
   const handleBackToDashboard = () => {
-    navigate('/app');
+    navigate('/activity-library');
   };
   const benefits = [{
     icon: Brain,

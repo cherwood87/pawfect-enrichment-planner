@@ -11,6 +11,8 @@ interface ActivityLibraryContentProps {
   autoApprovedCount: number;
   isDiscovering: boolean;
   onDiscoverMore: () => void;
+  onChooseForMe?: () => void;
+  canPickSuggested?: boolean;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   selectedPillar: string;
@@ -25,6 +27,8 @@ const ActivityLibraryContent: React.FC<ActivityLibraryContentProps> = memo(({
   autoApprovedCount,
   isDiscovering,
   onDiscoverMore,
+  onChooseForMe,
+  canPickSuggested,
   searchQuery,
   setSearchQuery,
   selectedPillar,
@@ -40,6 +44,8 @@ const ActivityLibraryContent: React.FC<ActivityLibraryContentProps> = memo(({
         autoApprovedCount={autoApprovedCount}
         isDiscovering={isDiscovering}
         onDiscoverMore={onDiscoverMore}
+        onChooseForMe={onChooseForMe}
+        canPickSuggested={canPickSuggested}
       />
       <CardContent className="space-y-6">
         <ActivityLibraryFilters

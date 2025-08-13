@@ -24,7 +24,7 @@ const ActivityLibraryPage = () => {
   }, []);
 
   const handleBackClick = useCallback(() => {
-    navigate('/app');
+    navigate('/activity-library');
   }, [navigate]);
 
   const handleAddDogOpen = useCallback(() => {

@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 const CTA_AddDog: React.FC = () => {
   const navigate = useNavigate();
   const handleGetStarted = () => {
-    navigate('/app');
+    navigate('/activity-library');
   };
   return <section className="py-20 px-6 bg-gradient-to-r from-purple-600 via-cyan-600 to-purple-600">
       <div className="max-w-4xl mx-auto text-center">

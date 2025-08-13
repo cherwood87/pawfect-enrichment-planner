@@ -32,6 +32,7 @@ const DogsTab = () => {
       title: "Primary dog updated",
       description: "This dog is now your primary profile.",
     });
+    navigate('/activity-library');
   };
 
   const handleEditDog = (dog: DogType) => {

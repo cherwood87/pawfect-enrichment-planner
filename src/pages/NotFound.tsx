@@ -58,10 +58,10 @@ const NotFound = () => {
                 </Button>
               </Link>
               
-              <Link to="/app">
+              <Link to="/activity-library">
                 <Button className="modern-button-outline px-8 py-3">
                   <Search className="w-5 h-5 mr-2" />
-                  Go to Dashboard
+                  Go to Activity Library
                 </Button>
               </Link>
             </div>
@@ -73,10 +73,10 @@ const NotFound = () => {
               </p>
               <div className="flex flex-wrap justify-center gap-4 text-sm">
                 <Link 
-                  to="/app" 
+                  to="/activity-library" 
                   className="text-purple-600 hover:text-purple-800 underline underline-offset-4 hover:underline-offset-2 transition-all"
                 >
-                  Dashboard
+                  Activity Library
                 </Link>
                 <Link 
                   to="/activity-library" 
