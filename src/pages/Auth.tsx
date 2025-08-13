@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSubscription } from '@/contexts/SubscriptionContext';
 import { toast } from '@/hooks/use-toast';
 import { Heart, Mail, Lock, User, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -20,6 +21,7 @@ const Auth: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { signIn, signUp, user, session } = useAuth();
+  const { isActive } = useSubscription();
   const navigate = useNavigate();
 
   const { retry, isRetrying, attempt } = useRetry({
@@ -29,9 +31,9 @@ const Auth: React.FC = () => {
 
   useEffect(() => {
     if (user && session) {
-      navigate('/dogs', { replace: true });
+      navigate(isActive ? '/dogs' : '/subscribe', { replace: true });
     }
-  }, [user, session, navigate]);
+  }, [user, session, isActive, navigate]);
 
   const validateForm = (): string | null => {
     if (!email || !password) return 'Please fill in all fields';
@@ -63,7 +65,7 @@ const Auth: React.FC = () => {
         await new Promise((res) => setTimeout(res, 250));
         waitCount++;
       }
-      navigate('/dogs', { replace: true });
+      navigate(isActive ? '/dogs' : '/subscribe', { replace: true });
     } catch (error: any) {
       const friendlyMessage = getUserFriendlyMessage(error);
       setError(friendlyMessage);

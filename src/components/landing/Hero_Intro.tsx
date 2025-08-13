@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 const Hero_Intro: React.FC = () => {
   const navigate = useNavigate();
   const handleGetStarted = () => {
-    navigate('/app');
+    navigate('/subscribe');
   };
   return <section className="py-12 px-6 min-h-screen flex items-center">
       <div className="max-w-6xl mx-auto text-center w-full">
@@ -69,8 +69,8 @@ const Hero_Intro: React.FC = () => {
               </p>
 
               <div className="flex justify-center lg:justify-start">
-                <Button onClick={handleGetStarted} size="lg" className="bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 text-lg px-8 py-4 rounded-2xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300">
-                  Get Started Today
+                <Button data-testid="landing-cta-start" onClick={handleGetStarted} size="lg" className="bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 text-lg px-8 py-4 rounded-2xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300">
+                  Start for $5.99/mo
                 </Button>
               </div>
             </div>

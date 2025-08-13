@@ -178,6 +178,7 @@ const ActivityLibrary = React.memo(() => {
         <button
           type="button"
           onClick={pickSuggested}
+          data-testid="choose-for-me"
           className="modern-button-primary px-4 py-2 rounded-xl"
           disabled={personalizedActivities.length === 0}
         >
@@ -187,6 +188,7 @@ const ActivityLibrary = React.memo(() => {
           <button
             type="button"
             onClick={pickSuggested}
+            data-testid="choose-for-me-respin"
             className="modern-button-outline px-4 py-2 rounded-xl"
           >
             Re‑spin

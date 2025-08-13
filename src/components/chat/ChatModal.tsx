@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Send, Loader2, MessageCircle } from 'lucide-react';
 import { useChat } from '@/contexts/ChatContext';
+import { useDog } from '@/contexts/DogContext';
 
 interface ChatMessage {
   id: string;
@@ -41,6 +42,7 @@ function stripJsonBlocks(text: string): string {
 const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, chatContext }) => {
   const [input, setInput] = useState('');
   const { currentConversation, isLoading, sendMessage } = useChat();
+  const { currentDog } = useDog();
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Send initial message with activity context when modal opens
@@ -92,6 +94,19 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, chatContext }) =
         <div className="flex-1 flex flex-col min-h-0">
           <ScrollArea className="flex-1 p-4">
             <div className="space-y-4">
+              {(!currentDog || !currentDog.quizResults) && (!currentConversation || currentConversation.messages.length === 0) && (
+                <div data-testid="chat-empty-state" className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                  <p className="text-sm text-gray-700 mb-3">
+                    I can help with enrichment ideas. Select a dog and take the quick quiz for personalized tips — or ask a general question now:
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    <Button variant="outline" size="sm" onClick={() => setInput('What are 3 quick indoor activities for my dog?')}>Indoor quick ideas</Button>
+                    <Button variant="outline" size="sm" onClick={() => setInput('Suggest a low-energy activity for a short walk today.')}>Low-energy suggestion</Button>
+                    <Button variant="outline" size="sm" onClick={() => setInput('How do I enrich my dog socially if they are shy?')}>Shy/social help</Button>
+                  </div>
+                </div>
+              )}
+
               {currentConversation?.messages.map((message) => (
                 <div
                   key={message.id}

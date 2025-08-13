@@ -145,6 +145,7 @@ const DogsTab = () => {
         </div>
         <Button
           onClick={() => setIsAddModalOpen(true)}
+          data-testid="add-dog-button"
           className="bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700 rounded-xl"
         >
           <Plus className="w-4 h-4 mr-2" />
