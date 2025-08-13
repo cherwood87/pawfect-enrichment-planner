@@ -107,7 +107,7 @@ export async function getCombinedActivities(discoveredActivities: DiscoveredActi
     combined.push(...dbActivities.user);
     
   } catch (error) {
-    console.log('Using static activities only - database not available:', error);
+    // Database not available, using static activities only
   }
 
   // De-duplicate by id and normalized title while preserving order (prefer library entries)

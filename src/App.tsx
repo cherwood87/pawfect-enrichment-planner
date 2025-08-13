@@ -14,7 +14,7 @@ import SubscriptionGuard from "@/components/SubscriptionGuard";
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import { FLAGS } from "@/constants/flags";
 
-// Lazy load all pages for better bundle splitting
+// Lazy load all pages for better bundle splitting with enhanced error handling
 const Index = lazy(() => import("./pages/Index"));
 const Landing = lazy(() => import("./pages/Landing"));
 const Auth = lazy(() => import("./pages/Auth"));

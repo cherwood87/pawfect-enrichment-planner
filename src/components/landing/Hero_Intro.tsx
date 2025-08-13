@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { OptimizedImage } from '@/components/ui/OptimizedImage';
 import { useNavigate } from 'react-router-dom';
 const Hero_Intro: React.FC = () => {
   const navigate = useNavigate();
@@ -80,7 +81,14 @@ const Hero_Intro: React.FC = () => {
               <div className="relative">
                 {/* Main circular image container */}
                 <div className="w-80 h-80 md:w-96 md:h-96 rounded-full overflow-hidden shadow-2xl border-8 border-white bg-gradient-to-br from-purple-100 to-cyan-100 transform hover:scale-105 transition-all duration-500">
-                  <img alt="Happy dog enjoying enrichment activities" className="w-full h-full object-cover object-center" loading="eager" src="/lovable-uploads/4d858ca5-ffea-48cf-96f6-2d97792b42d1.jpg" />
+                  <OptimizedImage 
+                    src="/lovable-uploads/4d858ca5-ffea-48cf-96f6-2d97792b42d1.jpg"
+                    alt="Happy dog enjoying enrichment activities" 
+                    className="w-full h-full object-cover object-center" 
+                    priority={true}
+                    width={384}
+                    height={384}
+                  />
                 </div>
                 
                 {/* Floating accent circles around the main image */}

@@ -1,4 +1,6 @@
 // Bundle optimization utilities
+import { optimizedLog } from './performanceOptimization';
+
 export const loadComponent = async <T>(
   componentLoader: () => Promise<{ default: T }>,
   fallback?: T
@@ -7,7 +9,7 @@ export const loadComponent = async <T>(
     const module = await componentLoader();
     return module.default;
   } catch (error) {
-    console.error('Failed to load component:', error);
+    optimizedLog.error('Failed to load component:', error);
     if (fallback) {
       return fallback;
     }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { ResponsiveAvatar } from '@/components/ui/ResponsiveAvatar';
 import { Dog } from '@/types/dog';
 import { cn } from '@/lib/utils';
 
@@ -21,20 +21,19 @@ export const DogProfileHero: React.FC<DogProfileHeroProps> = ({ dog, className }
 
   return (
     <header className={cn('flex items-center gap-4 px-1 py-2', className)}>
-      <Avatar className="h-20 w-20 ring-2 ring-purple-200">
-        {imageSrc ? (
-          <AvatarImage src={imageSrc} alt={`Profile photo of ${dog.name}`} />
-        ) : (
-          <AvatarFallback className="text-xl font-semibold">
-            {dog.name?.charAt(0)?.toUpperCase() || '🐾'}
-          </AvatarFallback>
-        )}
-      </Avatar>
+      <ResponsiveAvatar 
+        src={imageSrc}
+        alt={`Profile photo of ${dog.name}`}
+        fallback={dog.name?.charAt(0)?.toUpperCase() || '🐾'}
+        size="xl"
+        className="ring-2 ring-purple-200"
+        priority={true}
+      />
       <div className="flex-1">
         <h1 className="text-2xl font-bold tracking-tight">
           {greeting}, {dog.name}!
         </h1>
-        <p className="text-sm text-muted-foreground">Here’s your enrichment plan for today</p>
+        <p className="text-sm text-muted-foreground">Here's your enrichment plan for today</p>
       </div>
     </header>
   );
