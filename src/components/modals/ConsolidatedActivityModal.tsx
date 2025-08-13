@@ -5,7 +5,6 @@ import { ScheduledActivity, ActivityLibraryItem, UserActivity } from '@/types/ac
 import { DiscoveredActivity } from '@/types/discovery';
 import { ActivityHelpContext } from '@/types/activityContext';
 import { useActivityModalState } from '@/hooks/useActivityModalState';
-import { useActivityStepTracker } from '@/hooks/useActivityStepTracker';
 import ActivityModalHeader from '@/components/modals/ActivityModalHeader';
 import ActivityModalContent from '@/components/modals/ActivityModalContent';
 import ActivityModalActions from '@/components/modals/ActivityModalActions';
@@ -28,7 +27,7 @@ const ConsolidatedActivityModal: React.FC<ConsolidatedActivityModalProps> = ({
   onToggleCompletion,
   mode = 'library'
 }) => {
-  const [isStepMode, setIsStepMode] = useState(false);
+  const [isStartActivity, setIsStartActivity] = useState(false);
   
   const {
     isFavouriting,
@@ -38,34 +37,18 @@ const ConsolidatedActivityModal: React.FC<ConsolidatedActivityModalProps> = ({
     handleAddToFavourites
   } = useActivityModalState(activityDetails, onClose);
 
-  // Initialize step tracker for activities with array instructions
-  const hasStepInstructions = activityDetails && Array.isArray(activityDetails.instructions) && activityDetails.instructions.length > 1;
+  // Check if activity has detailed instructions for Start Activity mode
+  const hasDetailedInstructions = activityDetails && Array.isArray(activityDetails.instructions) && activityDetails.instructions.length > 1;
   
-  const stepTracker = useActivityStepTracker({
-    instructions: hasStepInstructions ? activityDetails.instructions : [],
-    onFinish: useCallback(() => {
-      // Optionally auto-complete scheduled activities
-      if (mode === 'scheduled' && scheduledActivity && onToggleCompletion) {
-        onToggleCompletion(scheduledActivity.id, 'Completed using step-by-step guide');
-      }
-      setIsStepMode(false);
-    }, [mode, scheduledActivity, onToggleCompletion])
-  });
-
-  const handleToggleStepMode = useCallback(() => {
-    if (!hasStepInstructions) return;
-    
-    if (!isStepMode) {
-      stepTracker.resetProgress();
-    }
-    setIsStepMode(!isStepMode);
-  }, [isStepMode, hasStepInstructions, stepTracker]);
+  const handleToggleStartActivity = useCallback(() => {
+    if (!hasDetailedInstructions) return;
+    setIsStartActivity(!isStartActivity);
+  }, [isStartActivity, hasDetailedInstructions]);
 
   const handleClose = useCallback(() => {
-    setIsStepMode(false);
-    stepTracker.resetProgress();
+    setIsStartActivity(false);
     onClose();
-  }, [onClose, stepTracker]);
+  }, [onClose]);
 
   if (!activityDetails) return null;
 
@@ -93,15 +76,7 @@ const ConsolidatedActivityModal: React.FC<ConsolidatedActivityModalProps> = ({
             activityDetails={activityDetails}
             mode={mode}
             scheduledActivity={scheduledActivity}
-            isStepMode={isStepMode}
-            stepState={isStepMode ? {
-              currentStep: stepTracker.currentStep,
-              completedSteps: stepTracker.completedSteps,
-              onStepComplete: stepTracker.onStepComplete,
-              onPreviousStep: stepTracker.onPreviousStep,
-              onNextStep: stepTracker.onNextStep,
-              onFinishActivity: stepTracker.onFinishActivity
-            } : undefined}
+            isStartActivity={isStartActivity}
           />
 
           <ActivityModalActions
@@ -109,9 +84,9 @@ const ConsolidatedActivityModal: React.FC<ConsolidatedActivityModalProps> = ({
             isFavouriting={isFavouriting}
             onAddToFavourites={handleAddToFavourites}
             onClose={handleClose}
-            isStepMode={isStepMode}
-            onToggleStepMode={hasStepInstructions ? handleToggleStepMode : undefined}
-            canStartActivity={hasStepInstructions}
+            isStartActivity={isStartActivity}
+            onToggleStartActivity={hasDetailedInstructions ? handleToggleStartActivity : undefined}
+            canStartActivity={hasDetailedInstructions}
           />
         </DialogContent>
       </Dialog>

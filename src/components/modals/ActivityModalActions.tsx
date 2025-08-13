@@ -1,13 +1,14 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Heart, Play, Eye } from 'lucide-react';
+
 interface ActivityModalActionsProps {
   mode: 'scheduled' | 'library';
   isFavouriting: boolean;
   onAddToFavourites: () => void;
   onClose: () => void;
-  isStepMode?: boolean;
-  onToggleStepMode?: () => void;
+  isStartActivity?: boolean;
+  onToggleStartActivity?: () => void;
   canStartActivity?: boolean;
 }
 const ActivityModalActions: React.FC<ActivityModalActionsProps> = ({
@@ -15,23 +16,24 @@ const ActivityModalActions: React.FC<ActivityModalActionsProps> = ({
   isFavouriting,
   onAddToFavourites,
   onClose,
-  isStepMode = false,
-  onToggleStepMode,
+  isStartActivity = false,
+  onToggleStartActivity,
   canStartActivity = true
 }) => {
-  return <>
+  return (
+    <>
       {/* Start Activity / View Instructions Toggle */}
-      {canStartActivity && onToggleStepMode && (
+      {canStartActivity && onToggleStartActivity && (
         <div className="flex justify-center gap-3 pt-4 border-t border-purple-200/50">
           <Button 
-            onClick={onToggleStepMode}
+            onClick={onToggleStartActivity}
             className={`rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 px-6 ${
-              isStepMode 
+              isStartActivity 
                 ? 'bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 text-white'
                 : 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white'
             }`}
           >
-            {isStepMode ? (
+            {isStartActivity ? (
               <>
                 <Eye className="w-4 h-4 mr-2" />
                 View Instructions
@@ -58,10 +60,14 @@ const ActivityModalActions: React.FC<ActivityModalActionsProps> = ({
         </div>
       )}
 
-      {/* Fallback for non-step mode activities */}
-      {(!canStartActivity || !onToggleStepMode) && mode === 'library' && (
+      {/* Fallback for non-activity mode */}
+      {(!canStartActivity || !onToggleStartActivity) && mode === 'library' && (
         <div className="flex justify-center pt-4 border-t border-purple-200/50">
-          <Button onClick={onAddToFavourites} className="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 px-8" disabled={isFavouriting}>
+          <Button 
+            onClick={onAddToFavourites} 
+            className="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 px-8" 
+            disabled={isFavouriting}
+          >
             <Heart className="w-4 h-4 mr-2" />
             {isFavouriting ? 'Adding...' : 'Add to Favorites'}
           </Button>
@@ -73,6 +79,7 @@ const ActivityModalActions: React.FC<ActivityModalActionsProps> = ({
           Close
         </Button>
       </div>
-    </>;
+    </>
+  );
 };
 export default ActivityModalActions;
