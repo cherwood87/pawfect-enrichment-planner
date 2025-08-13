@@ -5,7 +5,7 @@ const Benefits_Overview: React.FC = () => {
   const benefits = [{
     icon: Brain,
     title: "Never Run Out of Ideas",
-    description: "From 5-minute brain games to weekend adventures, discover activities you never thought of trying with your dog.",
+    description: "From brain games to weekend adventures, discover activities you never thought of trying with your dog.",
     color: "purple",
     bgGradient: "from-purple-100 to-purple-200",
     iconBg: "bg-purple-100",
