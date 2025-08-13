@@ -1,59 +1,44 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { AuthSecurityService } from '@/services/security/AuthSecurityService';
 
 /**
- * Comprehensive auth state cleanup utility
- * Removes all Supabase auth-related keys from localStorage and sessionStorage
+ * Enhanced auth state cleanup utility with security improvements
  */
 export const cleanupAuthState = () => {
-  console.log('🧹 Starting auth state cleanup...');
-  
-  try {
-    // Remove standard auth tokens
-    localStorage.removeItem('supabase.auth.token');
-    
-    // Remove all Supabase auth keys from localStorage
-    Object.keys(localStorage).forEach((key) => {
-      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-        console.log(`🗑️ Removing localStorage key: ${key}`);
-        localStorage.removeItem(key);
-      }
-    });
-    
-    // Remove from sessionStorage if it exists
-    if (typeof sessionStorage !== 'undefined') {
-      Object.keys(sessionStorage).forEach((key) => {
-        if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-          console.log(`🗑️ Removing sessionStorage key: ${key}`);
-          sessionStorage.removeItem(key);
-        }
-      });
-    }
-    
-    console.log('✅ Auth state cleanup completed');
-  } catch (error) {
-    console.error('❌ Error during auth state cleanup:', error);
-  }
+  console.log('🧹 Starting enhanced auth state cleanup...');
+  AuthSecurityService.enhancedAuthCleanup();
 };
 
 /**
- * Enhanced sign-in function with timeout for better performance
+ * Enhanced sign-in function with security and timeout improvements
  */
 export const robustSignIn = async (email: string, password: string) => {
   console.log('🔐 Starting robust sign-in process...');
   
   try {
-    // Step 1: Clean up existing state first
+    // Step 1: Validate inputs
+    if (!AuthSecurityService.isValidEmail(email)) {
+      throw new Error('Invalid email format');
+    }
+
+    // Step 2: Check for rate limiting
+    if (AuthSecurityService.isLockedOut(email)) {
+      const remainingTime = AuthSecurityService.getRemainingLockoutTime(email);
+      throw new Error(`Too many failed attempts. Try again in ${remainingTime} minutes.`);
+    }
+
+    // Step 3: Clean up existing state first
     cleanupAuthState();
     
-    // Step 2: Attempt global sign out to clear any lingering sessions
+    // Step 4: Attempt global sign out to clear any lingering sessions
     try {
       await supabase.auth.signOut({ scope: 'global' });
     } catch (err) {
       console.warn('⚠️ Pre-signin cleanup sign-out failed (continuing):', err);
     }
     
-    // Step 3: Sign in with email/password with timeout
+    // Step 5: Sign in with email/password with timeout
     console.log('📧 Attempting sign in with timeout...');
     
     const signInPromise = supabase.auth.signInWithPassword({
@@ -70,11 +55,13 @@ export const robustSignIn = async (email: string, password: string) => {
     
     if (error) {
       console.error('❌ Sign in error:', error);
+      AuthSecurityService.recordFailedAttempt(email);
       throw error;
     }
     
     if (data.user) {
       console.log('✅ Sign in successful, user:', data.user.email);
+      AuthSecurityService.clearFailedAttempts(email);
       return { data, error: null };
     }
     
@@ -86,19 +73,29 @@ export const robustSignIn = async (email: string, password: string) => {
 };
 
 /**
- * Enhanced sign-up function with timeout
+ * Enhanced sign-up function with validation and timeout
  */
 export const robustSignUp = async (email: string, password: string) => {
   console.log('🔐 Starting robust sign-up process...');
   
   try {
-    // Step 1: Clean up existing state first
+    // Step 1: Validate inputs
+    if (!AuthSecurityService.isValidEmail(email)) {
+      throw new Error('Invalid email format');
+    }
+
+    const passwordValidation = AuthSecurityService.validatePassword(password);
+    if (!passwordValidation.isValid) {
+      throw new Error(passwordValidation.errors.join('. '));
+    }
+
+    // Step 2: Clean up existing state first
     cleanupAuthState();
     
-    // Step 2: Sign up with email/password with timeout
+    // Step 3: Sign up with email/password with timeout
     console.log('📧 Attempting sign up with timeout...');
     
-  const signUpPromise = supabase.auth.signUp({
+    const signUpPromise = supabase.auth.signUp({
       email,
       password,
       options: {

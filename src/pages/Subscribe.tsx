@@ -8,12 +8,16 @@ import { Check, Lock } from 'lucide-react';
 
 const Subscribe: React.FC = () => {
   const { user, session } = useAuth();
-  const { isActive, activate, cancel } = useSubscription();
+  const { isActive, activate, cancel, isLoading, error, tier } = useSubscription();
   const navigate = useNavigate();
 
-  const handleActivate = () => {
-    activate();
-    navigate('/settings?tab=dogs', { replace: true });
+  const handleActivate = async () => {
+    try {
+      await activate();
+      navigate('/settings?tab=dogs', { replace: true });
+    } catch (err) {
+      console.error('Activation failed:', err);
+    }
   };
 
   return (
@@ -34,6 +38,12 @@ const Subscribe: React.FC = () => {
             <li className="flex items-center gap-2 text-muted-foreground"><Check className="h-4 w-4 text-primary" /> Floating AI coach</li>
           </ul>
 
+          {error && (
+            <div className="p-3 rounded-md bg-destructive/10 text-destructive text-sm">
+              {error}
+            </div>
+          )}
+
           {!user || !session ? (
             <Link to="/auth">
               <Button className="w-full modern-button-primary">Sign up to Subscribe</Button>
@@ -41,17 +51,35 @@ const Subscribe: React.FC = () => {
           ) : (
             <div className="space-y-2">
               {!isActive ? (
-                <Button onClick={handleActivate} className="w-full modern-button-primary">Activate Subscription</Button>
+                <Button 
+                  onClick={handleActivate} 
+                  className="w-full modern-button-primary"
+                  disabled={isLoading}
+                >
+                  {isLoading ? 'Activating...' : 'Activate Subscription'}
+                </Button>
               ) : (
                 <div className="space-y-2">
+                  {tier && (
+                    <div className="p-3 rounded-md bg-primary/10 text-primary text-sm text-center">
+                      Current Plan: {tier}
+                    </div>
+                  )}
                   <Button onClick={() => navigate('/settings?tab=dogs')} className="w-full" variant="secondary">Go to Dogs</Button>
-                  <Button onClick={cancel} variant="outline" className="w-full">Cancel (dev)</Button>
+                  <Button 
+                    onClick={cancel} 
+                    variant="outline" 
+                    className="w-full"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? 'Cancelling...' : 'Cancel (dev)'}
+                  </Button>
                 </div>
               )}
             </div>
           )}
 
-          <p className="text-xs text-muted-foreground">Note: Billing integration coming soon. This is a temporary activation screen.</p>
+          <p className="text-xs text-muted-foreground">Note: This is a demo subscription system. Real Stripe integration available on request.</p>
         </CardContent>
       </Card>
     </div>
