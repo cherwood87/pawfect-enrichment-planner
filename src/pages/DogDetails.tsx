@@ -4,6 +4,7 @@ import { useDog } from '@/contexts/DogContext';
 import DogProfile from '@/components/DogProfile';
 import FloatingChatButton from '@/components/dashboard/FloatingChatButton';
 import ChatModal from '@/components/chat/ChatModal';
+import DashboardHeader from '@/components/dashboard/DashboardHeader';
 
 const DogDetails: React.FC = () => {
   const { id } = useParams();
@@ -12,6 +13,7 @@ const DogDetails: React.FC = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const openChat = useCallback(() => setIsChatOpen(true), []);
   const closeChat = useCallback(() => setIsChatOpen(false), []);
+  const handleAddDogOpen = useCallback(() => navigate('/settings?tab=dogs'), [navigate]);
 
   useEffect(() => {
     if (!id) return;
@@ -26,6 +28,7 @@ const DogDetails: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-orange-50 mobile-safe">
+      <DashboardHeader onChatOpen={openChat} onAddDogOpen={handleAddDogOpen} />
       <div className="container mx-auto py-6 px-4">
         <DogProfile onEditDogOpen={() => { /* uses internal dialogs */ }} />
       </div>
