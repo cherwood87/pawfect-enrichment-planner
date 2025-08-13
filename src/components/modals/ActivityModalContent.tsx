@@ -4,17 +4,29 @@ import { Badge } from '@/components/ui/badge';
 import { Clock, Star } from 'lucide-react';
 import { ScheduledActivity, ActivityLibraryItem, UserActivity } from '@/types/activity';
 import { DiscoveredActivity } from '@/types/discovery';
+import ActivityStepTracker from '@/components/activity/ActivityStepTracker';
 
 interface ActivityModalContentProps {
   activityDetails: ActivityLibraryItem | UserActivity | DiscoveredActivity;
   mode: 'scheduled' | 'library';
   scheduledActivity?: ScheduledActivity | null;
+  isStepMode?: boolean;
+  stepState?: {
+    currentStep: number;
+    completedSteps: boolean[];
+    onStepComplete: (stepIndex: number) => void;
+    onPreviousStep: () => void;
+    onNextStep: () => void;
+    onFinishActivity: () => void;
+  };
 }
 
 const ActivityModalContent: React.FC<ActivityModalContentProps> = ({
   activityDetails,
   mode,
-  scheduledActivity
+  scheduledActivity,
+  isStepMode = false,
+  stepState
 }) => {
   const getPillarColor = (pillar: string) => {
     const colors = {
@@ -33,6 +45,49 @@ const ActivityModalContent: React.FC<ActivityModalContentProps> = ({
       <Star key={i} className={`w-4 h-4 ${i < level ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
     ));
   };
+
+  // Show step-by-step tracker if in step mode
+  if (isStepMode && stepState && Array.isArray(activityDetails.instructions)) {
+    return (
+      <div className="space-y-6">
+        <div className="flex flex-wrap items-center gap-3">
+          <Badge className={`${getPillarColor(activityDetails.pillar)} rounded-2xl px-4 py-2 font-semibold`}>
+            {activityDetails.pillar.charAt(0).toUpperCase() + activityDetails.pillar.slice(1)}
+          </Badge>
+          <div className="flex items-center space-x-1 text-sm text-purple-700 bg-purple-100 rounded-2xl px-3 py-2">
+            <Clock className="w-4 h-4" />
+            <span>{activityDetails.duration} minutes</span>
+          </div>
+          <div className="flex items-center space-x-1 bg-cyan-100 rounded-2xl px-3 py-2">
+            <span className="text-sm text-cyan-700 mr-1">Difficulty:</span>
+            {getDifficultyStars(activityDetails.difficulty)}
+          </div>
+        </div>
+
+        <ActivityStepTracker
+          instructions={activityDetails.instructions}
+          duration={activityDetails.duration}
+          currentStep={stepState.currentStep}
+          completedSteps={stepState.completedSteps}
+          onStepComplete={stepState.onStepComplete}
+          onPreviousStep={stepState.onPreviousStep}
+          onNextStep={stepState.onNextStep}
+          onFinishActivity={stepState.onFinishActivity}
+        />
+
+        {activityDetails.materials && activityDetails.materials.length > 0 && (
+          <div className="bg-white/70 rounded-3xl p-6 border border-emerald-200">
+            <h3 className="text-lg font-semibold text-purple-800 mb-3">Materials Needed</h3>
+            <ul className="list-disc list-inside text-gray-700 space-y-1">
+              {activityDetails.materials.map((item, index) => (
+                <li key={index}>{item}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
