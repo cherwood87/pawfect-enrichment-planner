@@ -5,94 +5,71 @@ import { DiscoveredActivity } from '@/types/discovery';
 import { useActivity } from '@/contexts/ActivityContext';
 import { useDog } from '@/contexts/DogContext';
 import { useActivityFiltering } from '@/hooks/useActivityFiltering';
-import ActivityCard from '@/components/ActivityCard';
-import ConsolidatedActivityModal from '@/components/modals/ConsolidatedActivityModal';
-import PillarSelectionCards from '@/components/PillarSelectionCards';
-import ActivityLibraryContent from '@/components/ActivityLibraryContent';
-import ActivityLibraryDebug from '@/components/ActivityLibraryDebug';
 import ActivityLibraryGrid from '@/components/ActivityLibraryGrid';
-import { PersonalizedActivityBanner } from '@/components/PersonalizedActivityBanner';
-import { QuizPromptCard } from '@/components/QuizPromptCard';
+import ConsolidatedActivityModal from '@/components/modals/ConsolidatedActivityModal';
 import { usePersonalizedActivities } from '@/hooks/usePersonalizedActivities';
-import { activityLibrary } from '@/data/activityLibrary';
+import ActivityLibraryFilters from '@/components/ActivityLibraryFilters';
+import ActivityLibraryActionsBar from '@/components/ActivityLibraryActionsBar';
 
 // Energy level normalization function
-const normalizeEnergyLevel = (level: string): "Low" | "Medium" | "High" => {
-  if (!level) return "Medium";
+const normalizeEnergyLevel = (level: string): 'Low' | 'Medium' | 'High' => {
+  if (!level) return 'Medium';
   const l = level.toLowerCase();
-  if (l.includes("very low")) return "Low";
-  if (l.includes("low") && l.includes("moderate")) return "Medium";
-  if (l.includes("low")) return "Low";
-  if (l.includes("moderate") && l.includes("high")) return "High";
-  if (l.includes("moderate")) return "Medium";
-  if (l.includes("high")) return "High";
-  return "Medium";
+  if (l.includes('very low')) return 'Low';
+  if (l.includes('low') && l.includes('moderate')) return 'Medium';
+  if (l.includes('low')) return 'Low';
+  if (l.includes('moderate') && l.includes('high')) return 'High';
+  if (l.includes('moderate')) return 'Medium';
+  if (l.includes('high')) return 'High';
+  return 'Medium';
 };
 
 const ActivityLibrary = React.memo(() => {
-  const { 
-    getCombinedActivityLibrary, 
-    discoveredActivities, 
-    discoverNewActivities, 
-    isDiscovering, 
-    checkAndRunAutoDiscovery,
-    isSyncing,
-    lastSyncTime,
-    syncToSupabase
+  const {
+    getCombinedActivityLibrary,
+    discoveredActivities,
+    discoverNewActivities,
+    isDiscovering,
   } = useActivity();
-  
+
   const { currentDog } = useDog();
-  
-  const [searchQuery, setSearchQuery] = useState('');
+
   const [selectedPillar, setSelectedPillar] = useState<string>('all');
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all');
+  const [selectedDuration, setSelectedDuration] = useState<string>('all');
   const [selectedActivity, setSelectedActivity] = useState<ActivityLibraryItem | DiscoveredActivity | null>(null);
   const [currentActivities, setCurrentActivities] = useState<(ActivityLibraryItem | DiscoveredActivity)[]>([]);
-  const [suggestIndex, setSuggestIndex] = useState(0);
+  const [topPicks, setTopPicks] = useState<(ActivityLibraryItem | DiscoveredActivity)[]>([]);
 
-  // Memoize normalized activities to prevent unnecessary recalculations
+  // Memoize normalized activities
   const normalizedActivities = useMemo(() => {
-    return getCombinedActivityLibrary().map(activity =>
+    return getCombinedActivityLibrary().map((activity) =>
       activity && typeof activity.energyLevel === 'string'
         ? { ...activity, energyLevel: normalizeEnergyLevel(activity.energyLevel) }
         : activity
     );
   }, [getCombinedActivityLibrary]);
 
-  // Initialize activities with weighted shuffling
+  // Initialize activities
   useEffect(() => {
     setCurrentActivities(normalizedActivities);
   }, [normalizedActivities]);
 
-  // Check for auto-discovery on component mount
-  useEffect(() => {
-    if (checkAndRunAutoDiscovery) {
-      checkAndRunAutoDiscovery();
-    }
-  }, [checkAndRunAutoDiscovery]);
-
-  // Use the filtering hook with dog context for personalization
+  // Filtering hook (no search, unified feed)
   const filteredActivities = useActivityFiltering(
-    searchQuery,
     selectedPillar,
     selectedDifficulty,
+    selectedDuration,
     currentActivities,
-    discoveredActivities,
     currentDog
   );
 
-  // Memoize callback functions to prevent unnecessary re-renders
-  const handleActivitiesReorder = useCallback((reorderedActivities: (ActivityLibraryItem | DiscoveredActivity)[]) => {
-    setCurrentActivities(reorderedActivities);
-  }, []);
+  // Personalized picks
+  const { personalizedActivities } = usePersonalizedActivities(currentActivities, currentDog, currentActivities.length || 20);
 
   const handleDiscoverMore = useCallback(async () => {
     await discoverNewActivities();
   }, [discoverNewActivities]);
-
-  const handleManualSync = useCallback(async () => {
-    await syncToSupabase();
-  }, [syncToSupabase]);
 
   const handleActivitySelect = useCallback((activity: ActivityLibraryItem | DiscoveredActivity) => {
     setSelectedActivity(activity);
@@ -102,111 +79,58 @@ const ActivityLibrary = React.memo(() => {
     setSelectedActivity(null);
   }, []);
 
-  const handleTakeQuiz = useCallback(() => {
-    window.location.href = '/quiz';
+  const shuffleArray = useCallback((list: (ActivityLibraryItem | DiscoveredActivity)[]) => {
+    const arr = [...list];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
   }, []);
 
-  const handlePillarSelect = useCallback((pillar: string) => {
-    setSelectedPillar(pillar);
-  }, []);
+  const handleShuffle = useCallback(() => {
+    setTopPicks([]); // clear picks when shuffling entire library
+    setCurrentActivities((prev) => shuffleArray(prev));
+  }, [shuffleArray]);
 
-  // Memoize counts for header/stats
-  const { autoApprovedCount, curatedCount } = useMemo(() => {
-    return {
-      autoApprovedCount: discoveredActivities.filter(a => a.approved).length,
-      curatedCount: activityLibrary.length, // static curated library count (e.g., 36)
-    };
-  }, [discoveredActivities]);
+  const handleChooseForMe = useCallback(() => {
+    const picks = personalizedActivities.slice(0, 3);
+    setTopPicks(picks);
+  }, [personalizedActivities]);
 
-  // Check if activities are personalized (no filters and quiz results exist)
-  const isPersonalized = selectedPillar === 'all' && selectedDifficulty === 'all' && !searchQuery && !!currentDog?.quizResults;
-
-  // Build a personalized list for "Choose For Me"
-  const { personalizedActivities } = usePersonalizedActivities(currentActivities, currentDog, currentActivities.length || 20);
-
-  const pickSuggested = useCallback(() => {
-    if (personalizedActivities.length === 0) return;
-    const next = personalizedActivities[suggestIndex % personalizedActivities.length];
-    setSelectedActivity(next);
-    setSuggestIndex((i) => i + 1);
-  }, [personalizedActivities, suggestIndex]);
+  // Compose displayed list: top picks (if any) followed by rest (deduped)
+  const displayedActivities = useMemo(() => {
+    if (topPicks.length === 0) return filteredActivities;
+    const pickIds = new Set(topPicks.map((a) => a.id));
+    const rest = filteredActivities.filter((a) => !pickIds.has(a.id));
+    return [...topPicks, ...rest];
+  }, [topPicks, filteredActivities]);
 
   return (
     <div className="mobile-space-y">
-      <PillarSelectionCards
-        selectedPillar={selectedPillar}
-        onPillarSelect={handlePillarSelect}
-        onManualSync={handleManualSync}
-        isSyncing={isSyncing}
-        lastSyncTime={lastSyncTime}
-      />
-
-      {/* Show personalization banner when appropriate */}
-      {currentDog && isPersonalized && (
-        <PersonalizedActivityBanner 
-          currentDog={currentDog} 
-          isPersonalized={isPersonalized}
-        />
-      )}
-
-      {/* Show quiz prompt for dogs without quiz results */}
-      {currentDog && !currentDog.quizResults && (
-        <QuizPromptCard 
-          currentDog={currentDog}
-          onTakeQuiz={handleTakeQuiz}
-        />
-      )}
-      
-      <ActivityLibraryContent
-        autoApprovedCount={autoApprovedCount}
-        curatedCount={curatedCount}
+      {/* Actions */}
+      <ActivityLibraryActionsBar
+        onChooseForMe={handleChooseForMe}
+        onDiscoverNew={handleDiscoverMore}
+        onShuffle={handleShuffle}
+        canChoose={personalizedActivities.length > 0}
         isDiscovering={isDiscovering}
-        onDiscoverMore={handleDiscoverMore}
-        onChooseForMe={pickSuggested}
-        canPickSuggested={personalizedActivities.length > 0}
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        selectedPillar={selectedPillar}
-        setSelectedPillar={setSelectedPillar}
-        selectedDifficulty={selectedDifficulty}
-        setSelectedDifficulty={setSelectedDifficulty}
-        filteredActivitiesCount={filteredActivities.length}
       />
 
-      {/* Simple inline "Choose For Me" control */}
-      <div className="flex items-center gap-3 px-2">
-        <button
-          type="button"
-          onClick={pickSuggested}
-          data-testid="choose-for-me"
-          className="modern-button-primary px-4 py-2 rounded-xl"
-          disabled={personalizedActivities.length === 0}
-        >
-          {personalizedActivities.length === 0 ? 'Choose For Me (needs quiz)' : 'Choose For Me'}
-        </button>
-        {selectedActivity && (
-          <button
-            type="button"
-            onClick={pickSuggested}
-            data-testid="choose-for-me-respin"
-            className="modern-button-outline px-4 py-2 rounded-xl"
-          >
-            Re‑spin
-          </button>
-        )}
+      {/* Single filter bar */}
+      <div className="mt-2">
+        <ActivityLibraryFilters
+          selectedPillar={selectedPillar}
+          setSelectedPillar={setSelectedPillar}
+          selectedDifficulty={selectedDifficulty}
+          setSelectedDifficulty={setSelectedDifficulty}
+          selectedDuration={selectedDuration}
+          setSelectedDuration={setSelectedDuration}
+        />
       </div>
 
-      {/* Weighted Shuffling Debug Component */}
-      <ActivityLibraryDebug 
-        activities={currentActivities}
-        onActivitiesReorder={handleActivitiesReorder}
-      />
-
-      {/* Activity Grid */}
-      <ActivityLibraryGrid
-        activities={filteredActivities}
-        onActivitySelect={handleActivitySelect}
-      />
+      {/* Unified grid (top picks are injected above automatically) */}
+      <ActivityLibraryGrid activities={displayedActivities} onActivitySelect={handleActivitySelect} />
 
       {/* Activity Detail Modal */}
       {selectedActivity && (

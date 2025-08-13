@@ -1,8 +1,6 @@
 
 import React, { memo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { ActivityLibraryItem } from '@/types/activity';
-import { DiscoveredActivity } from '@/types/discovery';
 import ActivityLibraryHeader from '@/components/ActivityLibraryHeader';
 import ActivityLibraryFilters from '@/components/ActivityLibraryFilters';
 import ActivityLibraryStats from '@/components/ActivityLibraryStats';
@@ -14,12 +12,12 @@ interface ActivityLibraryContentProps {
   onDiscoverMore: () => void;
   onChooseForMe?: () => void;
   canPickSuggested?: boolean;
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
   selectedPillar: string;
   setSelectedPillar: (pillar: string) => void;
   selectedDifficulty: string;
   setSelectedDifficulty: (difficulty: string) => void;
+  selectedDuration: string;
+  setSelectedDuration: (duration: string) => void;
   filteredActivitiesCount: number;
 }
 
@@ -30,12 +28,12 @@ const ActivityLibraryContent: React.FC<ActivityLibraryContentProps> = memo(({
   onDiscoverMore,
   onChooseForMe,
   canPickSuggested,
-  searchQuery,
-  setSearchQuery,
   selectedPillar,
   setSelectedPillar,
   selectedDifficulty,
   setSelectedDifficulty,
+  selectedDuration,
+  setSelectedDuration,
   filteredActivitiesCount
 }) => {
   return (
@@ -50,12 +48,12 @@ const ActivityLibraryContent: React.FC<ActivityLibraryContentProps> = memo(({
       />
       <CardContent className="space-y-6">
         <ActivityLibraryFilters
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
           selectedPillar={selectedPillar}
           setSelectedPillar={setSelectedPillar}
           selectedDifficulty={selectedDifficulty}
           setSelectedDifficulty={setSelectedDifficulty}
+          selectedDuration={selectedDuration}
+          setSelectedDuration={setSelectedDuration}
         />
 
         <ActivityLibraryStats
