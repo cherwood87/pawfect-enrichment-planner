@@ -58,16 +58,14 @@ const Hero_Intro: React.FC = () => {
             {/* Left Content */}
             <div className="flex-1 max-w-lg text-left lg:text-left">
               <h1 className="text-3xl md:text-5xl font-bold text-purple-800 mb-6 leading-tight">
-                250+ Fun Activities to
+                280+ Fun Activities to
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-cyan-600">
                   {" "}Keep Your Dog{" "}
                 </span>
                 Happy & Entertained
               </h1>
               
-              <p className="text-lg md:text-xl text-gray-600 mb-8 leading-relaxed">
-                Take a quick quiz, get simple activity ideas perfect for your dog, plus an AI coach for instant help.
-              </p>
+              <p className="text-lg md:text-xl text-gray-600 mb-8 leading-relaxed">Take a quick quiz, get simple enrichment activity ideas perfect for your dog, plus an AI coach for instant help.</p>
 
               <div className="flex justify-center lg:justify-start">
                 <Button data-testid="landing-cta-start" onClick={handleGetStarted} size="lg" className="bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 text-lg px-8 py-4 rounded-2xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300">
@@ -81,14 +79,7 @@ const Hero_Intro: React.FC = () => {
               <div className="relative">
                 {/* Main circular image container */}
                 <div className="w-80 h-80 md:w-96 md:h-96 rounded-full overflow-hidden shadow-2xl border-8 border-white bg-gradient-to-br from-purple-100 to-cyan-100 transform hover:scale-105 transition-all duration-500">
-                  <OptimizedImage 
-                    src="/lovable-uploads/4d858ca5-ffea-48cf-96f6-2d97792b42d1.jpg"
-                    alt="Happy dog enjoying enrichment activities" 
-                    className="w-full h-full object-cover object-center" 
-                    priority={true}
-                    width={384}
-                    height={384}
-                  />
+                  <OptimizedImage src="/lovable-uploads/4d858ca5-ffea-48cf-96f6-2d97792b42d1.jpg" alt="Happy dog enjoying enrichment activities" className="w-full h-full object-cover object-center" priority={true} width={384} height={384} />
                 </div>
                 
                 {/* Floating accent circles around the main image */}
