@@ -2,6 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { Dog } from '@/types/dog';
 import { time, end } from '@/utils/perf';
+import { CacheManager } from '@/services/core/CacheManager';
 
 export interface DatabaseDog {
   id: string;
@@ -25,24 +26,42 @@ export interface DatabaseDog {
 }
 
 export class DogService {
-  // Cache for dog queries to reduce repeated database calls
-  private static _dogCache: Map<string, { dogs: Dog[], timestamp: number }> = new Map();
-  private static readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+  private static readonly CACHE_NAMESPACE = 'dogs';
+  private static readonly CACHE_TTL = 10 * 60 * 1000; // 10 minutes
 
+  // Enhanced cache management with TTL and invalidation
   private static getCachedDogs(userId: string): Dog[] | null {
-    const cached = this._dogCache.get(userId);
-    if (cached && Date.now() - cached.timestamp < this.CACHE_DURATION) {
-      return cached.dogs;
-    }
-    return null;
+    return CacheManager.get<Dog[]>(this.CACHE_NAMESPACE, userId);
   }
 
   private static setCachedDogs(userId: string, dogs: Dog[]): void {
-    this._dogCache.set(userId, { dogs, timestamp: Date.now() });
+    CacheManager.set(this.CACHE_NAMESPACE, userId, dogs, { ttl: this.CACHE_TTL });
   }
 
-  static clearDogCache(): void {
-    this._dogCache.clear();
+  static clearDogCache(userId?: string): void {
+    if (userId) {
+      CacheManager.invalidate(this.CACHE_NAMESPACE, userId);
+    } else {
+      CacheManager.invalidate(this.CACHE_NAMESPACE);
+    }
+  }
+
+  // Optimistic update wrapper
+  private static async optimisticUpdate<T>(
+    userId: string,
+    updateFn: (dogs: Dog[]) => Dog[],
+    persistFn: () => Promise<T>
+  ): Promise<T> {
+    return CacheManager.optimisticUpdate(
+      this.CACHE_NAMESPACE,
+      userId,
+      updateFn,
+      async (updatedDogs) => {
+        const result = await persistFn();
+        return result;
+      },
+      { ttl: this.CACHE_TTL }
+    );
   }
 
   static async createDog(dogData: Omit<Dog, 'id' | 'dateAdded' | 'lastUpdated'>, userId: string): Promise<Dog> {
@@ -75,9 +94,15 @@ export class DogService {
       throw new Error('Failed to create dog: ' + error.message);
     }
 
-    // Clear cache for this user when creating a new dog
-    this.clearDogCache();
-    return this.mapToDog(data);
+    const newDog = this.mapToDog(data);
+    
+    // Update cache optimistically
+    const cachedDogs = this.getCachedDogs(userId);
+    if (cachedDogs) {
+      this.setCachedDogs(userId, [newDog, ...cachedDogs]);
+    }
+    
+    return newDog;
   }
 
   static async getAllDogs(userId: string): Promise<Dog[]> {
@@ -86,32 +111,28 @@ export class DogService {
       return [];
     }
 
-    // Check cache first
-    const cached = this.getCachedDogs(userId);
-    if (cached) {
-      console.log('🎯 DogService: Returning cached dogs');
-      return cached;
-    }
+    // Use stale-while-revalidate for better UX
+    return CacheManager.staleWhileRevalidate(
+      this.CACHE_NAMESPACE,
+      userId,
+      async () => {
+        time('DB:getAllDogs');
+        const { data, error } = await supabase
+          .from('dogs')
+          .select('id, name, breed, age, weight, activity_level, special_needs, gender, breed_group, mobility_issues, image, notes, quiz_results, date_added, last_updated, created_at, updated_at, user_id')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false });
+        end('DB:getAllDogs');
 
-    time('DB:getAllDogs');
-    const { data, error } = await supabase
-      .from('dogs')
-      .select('id, name, breed, age, weight, activity_level, special_needs, gender, breed_group, mobility_issues, image, notes, quiz_results, date_added, last_updated, created_at, updated_at, user_id')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false });
-    end('DB:getAllDogs');
+        if (error) {
+          console.error('Error fetching dogs:', error);
+          throw new Error('Failed to fetch dogs: ' + error.message);
+        }
 
-    if (error) {
-      console.error('Error fetching dogs:', error);
-      throw new Error('Failed to fetch dogs: ' + error.message);
-    }
-
-    const dogs = (data || []).map(dog => this.mapToDog(dog));
-    
-    // Cache the results
-    this.setCachedDogs(userId, dogs);
-    
-    return dogs;
+        return (data || []).map(dog => this.mapToDog(dog));
+      },
+      { ttl: this.CACHE_TTL }
+    );
   }
 
   static async updateDog(dog: Dog, userId: string): Promise<Dog> {
@@ -145,9 +166,16 @@ export class DogService {
       throw new Error('Failed to update dog: ' + error.message);
     }
 
-    // Clear cache when updating
-    this.clearDogCache();
-    return this.mapToDog(data);
+    const updatedDog = this.mapToDog(data);
+    
+    // Update cache optimistically
+    const cachedDogs = this.getCachedDogs(userId);
+    if (cachedDogs) {
+      const updatedDogs = cachedDogs.map(d => d.id === updatedDog.id ? updatedDog : d);
+      this.setCachedDogs(userId, updatedDogs);
+    }
+    
+    return updatedDog;
   }
 
   static async deleteDog(id: string, userId: string): Promise<void> {
@@ -166,8 +194,12 @@ export class DogService {
       throw new Error('Failed to delete dog: ' + error.message);
     }
 
-    // Clear cache when deleting
-    this.clearDogCache();
+    // Update cache optimistically
+    const cachedDogs = this.getCachedDogs(userId);
+    if (cachedDogs) {
+      const updatedDogs = cachedDogs.filter(d => d.id !== id);
+      this.setCachedDogs(userId, updatedDogs);
+    }
   }
 
   private static mapToDog(dbDog: DatabaseDog): Dog {

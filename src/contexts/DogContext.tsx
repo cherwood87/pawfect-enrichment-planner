@@ -4,6 +4,7 @@ import { DogService } from '@/services/dogService';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { time, end } from '@/utils/perf';
+import { CacheManager } from '@/services/core/CacheManager';
 
 interface DogState {
   dogs: Dog[];
@@ -92,7 +93,7 @@ export const DogProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       dispatch({ type: 'SET_DOGS', payload: [] });
       dispatch({ type: 'SET_CURRENT_DOG', payload: null });
       dispatch({ type: 'SET_LOADING', payload: false });
-      DogService.clearDogCache();
+      CacheManager.invalidate('dogs');
       return;
     }
 
