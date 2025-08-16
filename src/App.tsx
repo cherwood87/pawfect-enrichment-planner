@@ -27,6 +27,7 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const Subscribe = lazy(() => import("./pages/Subscribe"));
 const DogDetails = lazy(() => import("./pages/DogDetails"));
 const DogQuizRoute = lazy(() => import("./pages/DogQuizRoute"));
+const ChatSafetyTest = lazy(() => import("./pages/ChatSafetyTest"));
 
 // Loading fallback component
 const PageLoader = () => (
@@ -153,13 +154,20 @@ const App = () => (
                             </SubscriptionGuard>
                           </ProtectedRoute>
                         } />
-                        <Route path="/settings" element={
-                          <ProtectedRoute>
-                            <UnifiedErrorBoundary context="Settings">
-                              <AccountSettings />
-                            </UnifiedErrorBoundary>
-                          </ProtectedRoute>
-                        } />
+                         <Route path="/settings" element={
+                           <ProtectedRoute>
+                             <UnifiedErrorBoundary context="Settings">
+                               <AccountSettings />
+                             </UnifiedErrorBoundary>
+                           </ProtectedRoute>
+                         } />
+                         <Route path="/chat-safety-test" element={
+                           <ProtectedRoute>
+                             <UnifiedErrorBoundary context="Chat Safety Test">
+                               <ChatSafetyTest />
+                             </UnifiedErrorBoundary>
+                           </ProtectedRoute>
+                         } />
                         <Route path="/" element={
                           <UnifiedErrorBoundary context="Landing">
                             <Landing />
