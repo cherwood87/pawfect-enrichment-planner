@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "13.0.4"
@@ -1047,11 +1047,11 @@ export type Database = {
     }
     Functions: {
       calculate_pillar_preferences: {
-        Args: { p_user_id: string; p_dog_id: string }
+        Args: { p_dog_id: string; p_user_id: string }
         Returns: {
+          confidence: number
           pillar: string
           preference_score: number
-          confidence: number
         }[]
       }
       enable_rls_for_table: {
@@ -1060,69 +1060,78 @@ export type Database = {
       }
       generate_smart_recommendations: {
         Args: {
-          p_user_id: string
           p_dog_id: string
-          p_recommendation_type?: string
           p_limit?: number
+          p_recommendation_type?: string
+          p_user_id: string
         }
         Returns: {
           activity_id: string
-          recommendation_score: number
           reason: string
+          recommendation_score: number
         }[]
       }
       get_kajabi_settings: {
         Args: { p_user_id: string }
         Returns: Json
       }
+      get_user_subscription_status: {
+        Args: { p_user_id: string }
+        Returns: {
+          subscribed: boolean
+          subscription_end: string
+          subscription_status: string
+          subscription_tier: string
+        }[]
+      }
       resolve_scheduled_activity_duplicates: {
         Args: Record<PropertyKey, never>
         Returns: {
-          resolved_count: number
           details: Json
+          resolved_count: number
         }[]
       }
       safe_upsert_scheduled_activity: {
         Args: {
-          p_dog_id: string
           p_activity_id: string
-          p_scheduled_date: string
-          p_week_number?: number
-          p_day_of_week?: number
-          p_notes?: string
           p_completion_notes?: string
+          p_day_of_week?: number
+          p_dog_id: string
+          p_notes?: string
           p_reminder_enabled?: boolean
+          p_scheduled_date: string
           p_source?: string
+          p_week_number?: number
         }
         Returns: string
       }
       search_knowledge_base_files: {
-        Args: { p_user_id: string; p_search_terms: string; p_limit?: number }
+        Args: { p_limit?: number; p_search_terms: string; p_user_id: string }
         Returns: {
-          id: string
+          content_excerpt: string
           file_name: string
           file_type: string
-          content_excerpt: string
+          id: string
           relevance_score: number
           tags: string[]
         }[]
       }
       search_knowledge_base_with_courses: {
         Args: {
-          p_user_id: string
-          p_search_terms: string
           p_content_type?: string
           p_limit?: number
+          p_search_terms: string
+          p_user_id: string
         }
         Returns: {
-          id: string
+          content_excerpt: string
+          course_reference: string
           file_name: string
           file_type: string
-          content_excerpt: string
+          id: string
           relevance_score: number
-          tags: string[]
           source: string
-          course_reference: string
+          tags: string[]
         }[]
       }
       user_owns_dog: {
