@@ -11,6 +11,7 @@ interface ChatContextType {
   currentConversation: ChatConversation | null;
   isLoading: boolean;
   sendMessage: (content: string, activityContext?: any) => Promise<void>;
+  sendMessageAwait: (content: string, activityContext?: any) => Promise<ChatMessage>;
   startNewConversation: (type?: ConversationType) => void;
   loadConversation: (dogId: string, type?: ConversationType) => void;
 }
@@ -225,11 +226,142 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+  const sendMessageAwait = async (content: string, activityContext?: any): Promise<ChatMessage> => {
+    if (!currentConversation || !currentDog) {
+      throw new Error('Cannot send message: missing conversation or dog');
+    }
+
+    if (isLoading) {
+      throw new Error('Chat is currently busy');
+    }
+
+    setIsLoading(true);
+
+    try {
+      // Add user message
+      const userMessage: ChatMessage = {
+        id: generateId(),
+        role: 'user',
+        content,
+        timestamp: new Date()
+      };
+
+      const updatedMessages = [...currentConversation.messages, userMessage];
+
+      // Update conversation with user message
+      const updatedConversation = {
+        ...currentConversation,
+        messages: updatedMessages,
+        lastUpdated: new Date()
+      };
+
+      setCurrentConversation(updatedConversation);
+      
+      // Only update stored conversations for general chat
+      const isGeneralChat = !currentConversation.dogId.includes('-activity-help');
+      if (isGeneralChat) {
+        setConversations(prev => 
+          prev.map(conv => conv.id === updatedConversation.id ? updatedConversation : conv)
+        );
+      }
+
+      // Prepare context for AI
+      const pillarBalance = getPillarBalance();
+      const todaysActivities = getTodaysActivities();
+
+      // Call enrichment coach function
+      const { supabase } = await import('@/integrations/supabase/client');
+      const { data, error } = await supabase.functions.invoke('enrichment-coach-enhanced', {
+        body: {
+          messages: updatedMessages.map(msg => ({
+            role: msg.role,
+            content: msg.content
+          })),
+          dogProfile: currentDog,
+          activityHistory: {
+            todaysActivities,
+            totalActivitiesCompleted: todaysActivities.filter(a => a.completed).length
+          },
+          pillarBalance,
+          activityContext // Pass activity context if provided
+        }
+      });
+
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw error;
+      }
+
+      if (!data || !data.reply) {
+        throw new Error('Invalid response from enrichment coach');
+      }
+
+      // Add AI response (now supporting activities!)
+      const assistantMessage: ChatMessage = {
+        id: generateId(),
+        role: 'assistant',
+        content: data.reply,
+        timestamp: new Date(),
+        activities: Array.isArray(data.activities) ? data.activities : undefined
+      };
+
+      const finalMessages = [...updatedMessages, assistantMessage];
+      const finalConversation = {
+        ...updatedConversation,
+        messages: finalMessages,
+        lastUpdated: new Date()
+      };
+
+      setCurrentConversation(finalConversation);
+      
+      // Only update stored conversations for general chat
+      if (isGeneralChat) {
+        setConversations(prev => 
+          prev.map(conv => conv.id === finalConversation.id ? finalConversation : conv)
+        );
+      }
+
+      return assistantMessage;
+
+    } catch (error) {
+      console.error('Error sending message:', error);
+      
+      // Add error message
+      const errorMessage: ChatMessage = {
+        id: generateId(),
+        role: 'assistant',
+        content: `Sorry, I encountered an error while processing your request: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`,
+        timestamp: new Date()
+      };
+
+      const errorConversation = {
+        ...currentConversation,
+        messages: [...currentConversation.messages, errorMessage],
+        lastUpdated: new Date()
+      };
+
+      setCurrentConversation(errorConversation);
+      
+      // Only update stored conversations for general chat
+      const isGeneralChat = !currentConversation.dogId.includes('-activity-help');
+      if (isGeneralChat) {
+        setConversations(prev => 
+          prev.map(conv => conv.id === errorConversation.id ? errorConversation : conv)
+        );
+      }
+
+      return errorMessage;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const value: ChatContextType = {
     conversations,
     currentConversation,
     isLoading,
     sendMessage,
+    sendMessageAwait,
     startNewConversation,
     loadConversation
   };

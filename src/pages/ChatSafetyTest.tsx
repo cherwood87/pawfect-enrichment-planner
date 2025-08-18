@@ -2,7 +2,7 @@ import React from 'react';
 import { DogProvider } from '@/contexts/DogContext';
 import { ActivityProvider } from '@/contexts/ActivityContext';
 import { ChatProvider } from '@/contexts/ChatContext';
-import ChatSafetyTester from '@/components/testing/ChatSafetyTester';
+import ChatSafetyTesterHardened from '@/components/testing/ChatSafetyTesterHardened';
 
 const ChatSafetyTest: React.FC = () => {
   return (
@@ -10,7 +10,7 @@ const ChatSafetyTest: React.FC = () => {
       <ActivityProvider>
         <ChatProvider>
           <div className="min-h-screen bg-background">
-            <ChatSafetyTester />
+            <ChatSafetyTesterHardened />
           </div>
         </ChatProvider>
       </ActivityProvider>
