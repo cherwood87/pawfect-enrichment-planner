@@ -6,15 +6,18 @@ import ChatSafetyTesterHardened from '@/components/testing/ChatSafetyTesterHarde
 
 const ChatSafetyTest: React.FC = () => {
   return (
-    <DogProvider>
-      <ActivityProvider>
-        <ChatProvider>
-          <div className="min-h-screen bg-background">
-            <ChatSafetyTesterHardened />
-          </div>
-        </ChatProvider>
-      </ActivityProvider>
-    </DogProvider>
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto py-8">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-foreground mb-2">AI Chat Safety Testing</h1>
+          <p className="text-muted-foreground">
+            Comprehensive safety testing for the enrichment coach AI system. This tool tests medical safety, 
+            training advice accuracy, information verification, contextual responses, and edge case handling.
+          </p>
+        </div>
+        <ChatSafetyTesterHardened />
+      </div>
+    </div>
   );
 };
 
