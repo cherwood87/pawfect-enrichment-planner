@@ -15,41 +15,15 @@ const CTA_AddDog: React.FC = () => {
               Ready to Try Something New?
             </h2>
             
-            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-              Join dog owners who never run out of fun activity ideas. Get started in under 2 minutes.
-            </p>
+            
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="text-center transform hover:scale-105 transition-all duration-300">
-                <div className="w-16 h-16 bg-gradient-to-br from-purple-100 to-purple-200 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg border-2 border-purple-300">
-                  <span className="text-2xl font-bold text-purple-600">1</span>
-                </div>
-                <h3 className="font-semibold text-purple-800 mb-2">Tell Us About Your Dog</h3>
-                <p className="text-sm text-gray-600">Name, breed, age, and energy level</p>
-              </div>
-              <div className="text-center transform hover:scale-105 transition-all duration-300">
-                <div className="w-16 h-16 bg-gradient-to-br from-cyan-100 to-cyan-200 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg border-2 border-cyan-300">
-                  <span className="text-2xl font-bold text-cyan-600">2</span>
-                </div>
-                <h3 className="font-semibold text-purple-800 mb-2">Quick 2-Minute Quiz</h3>
-                <p className="text-sm text-gray-600">What activities does your dog love?</p>
-              </div>
-              <div className="text-center transform hover:scale-105 transition-all duration-300">
-                <div className="w-16 h-16 bg-gradient-to-br from-amber-100 to-amber-200 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg border-2 border-amber-300">
-                  <span className="text-2xl font-bold text-amber-600">3</span>
-                </div>
-                <h3 className="font-semibold text-purple-800 mb-2">Get Ideas & Start Playing</h3>
-                <p className="text-sm text-gray-600">Fun activities perfect for your dog</p>
-              </div>
-            </div>
+            
 
             <Button onClick={() => navigate('/subscribe')} size="lg" className="bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 text-xl px-12 py-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
               Get Premium Access - $5.99/mo
             </Button>
             
-            <p className="text-sm text-gray-500 mt-4">
-              No credit card required • Set up in under 2 minutes • Works for all dogs
-            </p>
+            <p className="text-sm text-gray-500 mt-4">Set up in under 2 minutes • Works for all dogs</p>
 
             <div className="mt-8 pt-8 border-t border-purple-200">
               <p className="text-lg font-semibold text-purple-800 mb-4">Join the Pack! </p>
