@@ -3,7 +3,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { DogService } from '@/services/dogService';
-import { cleanupAuthState, robustSignOut, robustSignIn, robustSignUp } from '@/utils/authUtils';
+import { cleanupAuthState, robustSignOut, robustSignIn, robustSignUp, requestPasswordReset, updatePassword } from '@/utils/authUtils';
 import { logger } from '@/utils/logger';
 
 interface AuthContextType {
@@ -14,6 +14,8 @@ interface AuthContextType {
   signUp: (email: string, password: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
+  updateUserPassword: (newPassword: string) => Promise<void>;
   clearError: () => void;
 }
 
@@ -126,6 +128,36 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+  const resetPassword = async (email: string) => {
+    setError(null);
+    
+    try {
+      const { error } = await requestPasswordReset(email);
+      if (error) {
+        throw new Error(error.message);
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Password reset failed';
+      setError(errorMessage);
+      throw error;
+    }
+  };
+
+  const updateUserPassword = async (newPassword: string) => {
+    setError(null);
+    
+    try {
+      const { error } = await updatePassword(newPassword);
+      if (error) {
+        throw new Error(error.message);
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Password update failed';
+      setError(errorMessage);
+      throw error;
+    }
+  };
+
   const value: AuthContextType = {
     user,
     session,
@@ -134,6 +166,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     signUp,
     signIn,
     signOut,
+    resetPassword,
+    updateUserPassword,
     clearError,
   };
 

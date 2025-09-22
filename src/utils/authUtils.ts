@@ -124,6 +124,85 @@ export const robustSignUp = async (email: string, password: string) => {
 };
 
 /**
+ * Request password reset email
+ */
+export const requestPasswordReset = async (email: string): Promise<{ error: Error | null }> => {
+  console.log('🔑 Starting password reset request...');
+  
+  try {
+    // Step 1: Validate email format
+    if (!AuthSecurityService.isValidEmail(email)) {
+      throw new Error('Please enter a valid email address');
+    }
+    
+    // Step 2: Call our password reset edge function
+    const response = await fetch('/supabase/functions/v1/password-reset', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: email.toLowerCase().trim(),
+        redirectUrl: `${window.location.origin}/auth?mode=reset`
+      }),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to send reset email');
+    }
+    
+    console.log('✅ Password reset email sent successfully');
+    return { error: null };
+    
+  } catch (error) {
+    console.error('❌ Error during password reset request:', error);
+    return { 
+      error: error instanceof Error ? error : new Error('Password reset failed')
+    };
+  }
+};
+
+/**
+ * Update password with new password
+ */
+export const updatePassword = async (newPassword: string): Promise<{ error: Error | null }> => {
+  console.log('🔑 Starting password update...');
+  
+  try {
+    // Step 1: Validate password
+    const passwordValidation = AuthSecurityService.validatePassword(newPassword);
+    if (!passwordValidation.isValid) {
+      throw new Error(passwordValidation.errors.join('. '));
+    }
+    
+    // Step 2: Update password using Supabase auth with timeout
+    const updatePromise = supabase.auth.updateUser({ 
+      password: newPassword 
+    });
+    
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Password update timeout')), 10000)
+    );
+
+    const { error } = await Promise.race([updatePromise, timeoutPromise]) as any;
+    
+    if (error) {
+      throw new Error(error.message);
+    }
+    
+    console.log('✅ Password updated successfully');
+    return { error: null };
+    
+  } catch (error) {
+    console.error('❌ Error during password update:', error);
+    return { 
+      error: error instanceof Error ? error : new Error('Password update failed')
+    };
+  }
+};
+
+/**
  * Robust sign-out function with timeout
  */
 export const robustSignOut = async () => {
