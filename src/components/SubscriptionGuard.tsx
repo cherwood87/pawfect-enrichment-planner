@@ -12,8 +12,12 @@ const SubscriptionGuard: React.FC<SubscriptionGuardProps> = ({ children }) => {
   const { user } = useAuth();
   const { isActive, isLoading, error } = useSubscription();
 
-  // Show loading while checking subscription status
-  if (isLoading) {
+  // Developer emails that get free access
+  const DEVELOPER_EMAILS = ['cherwood87@gmail.com'];
+  const isDeveloper = user?.email && DEVELOPER_EMAILS.includes(user.email);
+
+  // Show loading while checking subscription status (unless developer)
+  if (isLoading && !isDeveloper) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-orange-50">
         <LoadingSkeleton type="dashboard" />
@@ -24,6 +28,12 @@ const SubscriptionGuard: React.FC<SubscriptionGuardProps> = ({ children }) => {
   // If user is not authenticated, redirect to auth
   if (!user) {
     return <Navigate to="/auth" replace />;
+  }
+
+  // Allow developers to bypass subscription check
+  if (isDeveloper) {
+    console.log('🔧 Developer access granted for:', user.email);
+    return <>{children}</>;
   }
 
   // If subscription check failed, show error and redirect
