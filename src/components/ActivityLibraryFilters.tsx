@@ -71,6 +71,57 @@ const ActivityLibraryFilters: React.FC<ActivityLibraryFiltersProps> = ({
     value: '30plus',
     label: '30+ min'
   }];
-  return;
+
+  return (
+    <div className="flex flex-wrap gap-4 mb-6">
+      {/* Pillar Filter */}
+      <Select value={selectedPillar} onValueChange={setSelectedPillar}>
+        <SelectTrigger className="w-48">
+          <SelectValue placeholder="Select pillar" />
+        </SelectTrigger>
+        <SelectContent>
+          {pillars.map(pillar => {
+            const IconComponent = pillar.icon;
+            return (
+              <SelectItem key={pillar.id} value={pillar.id}>
+                <div className="flex items-center gap-2">
+                  <IconComponent className="w-4 h-4" />
+                  {pillar.name}
+                </div>
+              </SelectItem>
+            );
+          })}
+        </SelectContent>
+      </Select>
+
+      {/* Difficulty Filter */}
+      <Select value={selectedDifficulty} onValueChange={setSelectedDifficulty}>
+        <SelectTrigger className="w-40">
+          <SelectValue placeholder="Difficulty" />
+        </SelectTrigger>
+        <SelectContent>
+          {difficulties.map(difficulty => (
+            <SelectItem key={difficulty.value} value={difficulty.value}>
+              {difficulty.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      {/* Duration Filter */}
+      <Select value={selectedDuration} onValueChange={setSelectedDuration}>
+        <SelectTrigger className="w-40">
+          <SelectValue placeholder="Duration" />
+        </SelectTrigger>
+        <SelectContent>
+          {durations.map(duration => (
+            <SelectItem key={duration.value} value={duration.value}>
+              {duration.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
 };
 export default ActivityLibraryFilters;

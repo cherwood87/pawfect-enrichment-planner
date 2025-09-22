@@ -97,6 +97,15 @@ const AppRoutes = () => {
         </ProtectedRoute>
       } />
       
+      {/* Dog Profile Quiz */}
+      <Route path="/dog-profile-quiz" element={
+        <ProtectedRoute>
+          <UnifiedErrorBoundary context="Dog Quiz">
+            <DogProfileQuizPage />
+          </UnifiedErrorBoundary>
+        </ProtectedRoute>
+      } />
+
       {/* Account settings (simplified) */}
       <Route path="/settings" element={
         <ProtectedRoute>
