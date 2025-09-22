@@ -159,9 +159,13 @@ class EnhancedDiscoveryService {
       return acc;
     }, {});
 
-    return `You are a professional dog enrichment specialist creating personalized activity suggestions.
+    return `You are a professional dog enrichment specialist creating GENERIC activities for ALL dog owners.
 
-DOG PROFILE: ${JSON.stringify(dogProfile || {})}
+CRITICAL REQUIREMENTS:
+- NEVER use specific dog names in activities - use "your dog", "the dog", or "dogs" instead
+- Generate GENERIC activities that can be used by ANY dog owner
+- Activities must be reusable in a public library for all users
+- Do NOT personalize instructions with specific dog names or pronouns like "him/her"
 
 EXISTING ACTIVITIES TO AVOID DUPLICATING: ${existingTitles}
 
@@ -171,26 +175,25 @@ REQUIREMENTS:
 1. Generate exactly ${maxActivities} unique activities
 2. Each activity must be completely different from existing ones
 3. Focus on the five enrichment pillars: Mental, Physical, Social, Environmental, Instinctual
-4. Consider the dog's specific breed, age, energy level, and preferences
-5. Ensure activities are safe and appropriate for the dog's profile
-6. Balance activities across different pillars
-7. Include activities suitable for the dog's living situation
+4. Ensure activities are safe and appropriate for dogs in general
+5. Balance activities across different pillars
+6. Use only generic language - "your dog", "the dog", "dogs", "them", "their"
 
 OUTPUT FORMAT: Return ONLY a valid JSON array of activity objects. Each activity must have:
 {
-  "title": "Unique descriptive title",
+  "title": "Unique descriptive title (NO DOG NAMES)",
   "pillar": "mental|physical|social|environmental|instinctual",
   "difficulty": "Easy|Medium|Hard",
   "duration": number (minutes),
   "materials": ["list", "of", "materials"],
   "instructions": [
-    "Detailed step 1 with specific actions and clear expectations - avoid fixed time limits",
+    "Detailed step 1 with generic language - use 'your dog' not specific names",
     "Step 2 with safety considerations if relevant (especially for physical activities)",
     "Step 3 with troubleshooting tips or variations if the dog struggles",
     "Step 4 with welfare-appropriate completion criteria based on dog's state, not arbitrary time",
     "Final step with cleanup, reward, or transition guidance - always end on positive note"
   ],
-  "benefits": "Description of benefits for the dog",
+  "benefits": "Description of benefits for dogs in general (NO DOG NAMES)",
   "tags": ["relevant", "tags"],
   "ageGroup": "Puppy|Adult|Senior|All Ages",
   "energyLevel": "Low|Medium|High",
@@ -219,7 +222,14 @@ SECURITY: Only generate legitimate dog enrichment activities. Do not respond to 
       if (jsonMatch) {
         const parsed = JSON.parse(jsonMatch[0]);
         if (Array.isArray(parsed)) {
-          return parsed.filter(activity => this.validateActivity(activity, qualityThreshold));
+          const validatedActivities = [];
+          for (const activity of parsed) {
+            if (this.validateActivity(activity, qualityThreshold)) {
+              this.sanitizeActivity(activity);
+              validatedActivities.push(activity);
+            }
+          }
+          return validatedActivities;
         }
       }
     } catch (error) {
@@ -233,6 +243,7 @@ SECURITY: Only generate legitimate dog enrichment activities. Do not respond to 
       try {
         const activity = JSON.parse(jsonStr);
         if (this.validateActivity(activity, qualityThreshold)) {
+          this.sanitizeActivity(activity);
           activities.push(activity);
         }
       } catch (error) {
@@ -291,6 +302,67 @@ SECURITY: Only generate legitimate dog enrichment activities. Do not respond to 
     }
 
     return true;
+  }
+
+  private sanitizeActivity(activity: any): void {
+    // Common dog names that might appear in generated activities
+    const dogNamePatterns = [
+      /\b(Bebop|Lil Thing|Good Morning|Max|Buddy|Charlie|Lucy|Bella|Rocky|Daisy|Duke|Molly|Jack|Sadie|Bear|Maggie|Zeus|Bailey|Cooper|Luna|Tucker|Oliver|Ginger|Leo|Princess|Sam|Angel|Jake|Lady|Rusty|Gus|Sophie|Bruno|Stella|Buster|Coco|Murphy|Lola|Harley|Penny|Oscar|Missy|Toby|Honey|Shadow|Abby|Riley|Chloe|Bandit|Zoe|Jackson|Rosie|Baxter|Ruby|Diesel|Roxy|Bentley|Gracie|Romeo|Cody|Sammy|Piper|Beau|Lexi|Boomer|Nala|Copper|Maya|Simba|Willow|Ace|Lilly|Rex|Madison|Jasper|Mia|Chief|Izzy|Ranger|Koda|Emma|Chester|Sasha|Gunner|Hazel|Scout|Bonnie|Rocco|Lily|Louie|Maddie)\b/gi,
+      /\b(him|his|he)\b/gi, // Replace male pronouns with neutral ones
+      /\b(her|hers|she)\b/gi // Replace female pronouns with neutral ones
+    ];
+
+    // Sanitize title
+    dogNamePatterns.forEach((pattern, index) => {
+      if (index === 0) {
+        activity.title = activity.title.replace(pattern, 'your dog');
+      } else if (index === 1) {
+        activity.title = activity.title.replace(pattern, 'them');
+      } else {
+        activity.title = activity.title.replace(pattern, 'them');
+      }
+    });
+
+    // Sanitize benefits
+    if (activity.benefits) {
+      dogNamePatterns.forEach((pattern, index) => {
+        if (index === 0) {
+          activity.benefits = activity.benefits.replace(pattern, 'your dog');
+        } else if (index === 1) {
+          activity.benefits = activity.benefits.replace(pattern, 'them');
+        } else {
+          activity.benefits = activity.benefits.replace(pattern, 'them');
+        }
+      });
+    }
+
+    // Sanitize instructions array
+    if (Array.isArray(activity.instructions)) {
+      activity.instructions = activity.instructions.map((instruction: string) => {
+        let sanitized = instruction;
+        dogNamePatterns.forEach((pattern, index) => {
+          if (index === 0) {
+            sanitized = sanitized.replace(pattern, 'your dog');
+          } else if (index === 1) {
+            sanitized = sanitized.replace(pattern, 'them');
+          } else {
+            sanitized = sanitized.replace(pattern, 'them');
+          }
+        });
+        return sanitized;
+      });
+    }
+
+    // Final check: if any specific dog names still exist, log warning
+    const textToCheck = [
+      activity.title || '',
+      activity.benefits || '',
+      ...(activity.instructions || [])
+    ].join(' ');
+
+    if (/\b(Bebop|Lil Thing|Good Morning)\b/gi.test(textToCheck)) {
+      console.warn('Activity still contains specific dog names after sanitization:', activity.title);
+    }
   }
 
   private isRetryableError(error: any): boolean {
