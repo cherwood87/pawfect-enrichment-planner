@@ -13,7 +13,7 @@ const SubscriptionGuard: React.FC<SubscriptionGuardProps> = ({ children }) => {
   const { isActive, isLoading, error } = useSubscription();
 
   // Developer emails that get free access
-  const DEVELOPER_EMAILS = ['cherwood87@gmail.com'];
+  const DEVELOPER_EMAILS = ['cherwood87@gmail.com', 'info@streetwisecanine.com'];
   const isDeveloper = user?.email && DEVELOPER_EMAILS.includes(user.email);
 
   // Show loading while checking subscription status (unless developer)

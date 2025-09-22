@@ -36,7 +36,7 @@ const Auth: React.FC = () => {
 
   useEffect(() => {
     if (user && session) {
-      navigate(isActive ? '/settings?tab=dogs' : '/subscribe', { replace: true });
+      navigate(isActive ? '/activity-library' : '/subscribe', { replace: true });
     }
   }, [user, session, isActive, navigate]);
 
@@ -70,7 +70,7 @@ const Auth: React.FC = () => {
         await new Promise((res) => setTimeout(res, 250));
         waitCount++;
       }
-      navigate(isActive ? '/settings?tab=dogs' : '/subscribe', { replace: true });
+      navigate(isActive ? '/activity-library' : '/subscribe', { replace: true });
     } catch (error: any) {
       const friendlyMessage = getUserFriendlyMessage(error);
       setError(friendlyMessage);
@@ -151,7 +151,7 @@ const Auth: React.FC = () => {
           title: 'Password Updated!', 
           description: 'Your password has been successfully updated.' 
         });
-        navigate('/settings?tab=dogs', { replace: true });
+        navigate('/activity-library', { replace: true });
       });
     } catch (error: any) {
       const friendlyMessage = getUserFriendlyMessage(error);
@@ -164,33 +164,6 @@ const Auth: React.FC = () => {
 
   const clearError = () => setError(null);
 
-  // Developer magic link login
-  const handleDeveloperLogin = async () => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email: 'cherwood87@gmail.com',
-        options: {
-          emailRedirectTo: `${window.location.origin}/`,
-        },
-      });
-      
-      if (error) throw error;
-      
-      toast({
-        title: 'Magic Link Sent!',
-        description: 'Check your email for the login link.',
-      });
-    } catch (error: any) {
-      const friendlyMessage = getUserFriendlyMessage(error);
-      setError(friendlyMessage);
-      toast({ title: 'Developer Login Error', description: friendlyMessage, variant: 'destructive' });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // Password Reset Mode UI
   if (mode === 'reset') {
@@ -474,21 +447,6 @@ const Auth: React.FC = () => {
                 </TabsContent>
               </Tabs>
 
-              {/* Developer Login Section */}
-              <div className="mt-6 pt-4 border-t border-gray-200">
-                <div className="text-center">
-                  <p className="text-xs text-gray-500 mb-2">Developer Access</p>
-                  <Button
-                    onClick={handleDeveloperLogin}
-                    variant="outline"
-                    size="sm"
-                    disabled={loading}
-                    className="text-xs px-3 py-1 h-7"
-                  >
-                    {loading ? 'Sending...' : 'Send Magic Link to Developer'}
-                  </Button>
-                </div>
-              </div>
 
               <div className="mt-6 text-center">
                 <p className="text-sm text-gray-600">
