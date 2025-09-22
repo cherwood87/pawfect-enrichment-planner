@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Check, Lock } from 'lucide-react';
 
 const Subscribe: React.FC = () => {
-  const { user, session } = useAuth();
+  const { user, session, signOut } = useAuth();
   const { isActive, activate, cancel, isLoading, error, tier } = useSubscription();
   const navigate = useNavigate();
 
@@ -17,6 +17,15 @@ const Subscribe: React.FC = () => {
       navigate('/settings?tab=dogs', { replace: true });
     } catch (err) {
       console.error('Activation failed:', err);
+    }
+  };
+
+  const handleSwitchAccount = async () => {
+    try {
+      await signOut();
+      navigate('/auth', { replace: true });
+    } catch (e) {
+      console.error('Switch account failed:', e);
     }
   };
 
@@ -76,6 +85,9 @@ const Subscribe: React.FC = () => {
                   </Button>
                 </div>
               )}
+              <div className="pt-1">
+                <Button variant="link" onClick={handleSwitchAccount} className="text-muted-foreground p-0 h-auto">Not you? Switch account</Button>
+              </div>
             </div>
           )}
 
