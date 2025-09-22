@@ -75,7 +75,7 @@ const SimpleNavigation: React.FC = () => {
                       <div className="border-t my-1" />
                       <DropdownMenuItem onClick={() => navigate('/settings')}>
                         <Settings className="mr-2 h-4 w-4" />
-                        <span>Settings</span>
+                        <span>Profile</span>
                       </DropdownMenuItem>
                       {!isActive && <DropdownMenuItem onClick={() => navigate('/subscribe')}>
                           <Sparkles className="mr-2 h-4 w-4" />
