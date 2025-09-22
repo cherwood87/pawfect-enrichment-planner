@@ -17,101 +17,45 @@ export interface SubscriptionData {
 
 export class SafeSubscriptionService {
   /**
-   * Safe upsert that handles race conditions and constraint violations
+   * Secure upsert using the new database security function
    */
   static async safeUpsertSubscription(data: SubscriptionData): Promise<{ success: boolean; error?: string }> {
-    const maxRetries = 3;
-    const baseDelay = 100; // Start with 100ms delay
+    try {
+      // Use the new secure database function
+      const { data: subscriptionId, error } = await supabase
+        .rpc('secure_subscription_upsert', {
+          p_user_id: data.user_id,
+          p_email: data.email,
+          p_subscribed: data.subscribed,
+          p_subscription_tier: data.subscription_tier || null,
+          p_subscription_status: data.subscription_status || 'inactive',
+          p_subscription_end: data.subscription_end || null,
+          p_stripe_customer_id: data.stripe_customer_id || null
+        });
 
-    for (let attempt = 0; attempt < maxRetries; attempt++) {
-      try {
-        // First, try to get existing subscription
-        const { data: existingData, error: fetchError } = await supabase
-          .from('subscribers')
-          .select('*')
-          .eq('user_id', data.user_id)
-          .maybeSingle();
-
-        if (fetchError) {
-          throw fetchError;
-        }
-
-        if (existingData) {
-          // Update existing record
-          const { error: updateError } = await supabase
-            .from('subscribers')
-            .update({
-              email: data.email,
-              subscribed: data.subscribed,
-              subscription_tier: data.subscription_tier,
-              subscription_status: data.subscription_status,
-              subscription_end: data.subscription_end,
-              stripe_customer_id: data.stripe_customer_id,
-              updated_at: new Date().toISOString(),
-            })
-            .eq('user_id', data.user_id);
-
-          if (updateError) {
-            throw updateError;
-          }
-
-          console.log(`✅ Updated subscription for user ${data.user_id}`);
-          return { success: true };
-        } else {
-          // Insert new record
-          const { error: insertError } = await supabase
-            .from('subscribers')
-            .insert({
-              user_id: data.user_id,
-              email: data.email,
-              subscribed: data.subscribed,
-              subscription_tier: data.subscription_tier,
-              subscription_status: data.subscription_status,
-              subscription_end: data.subscription_end,
-              stripe_customer_id: data.stripe_customer_id,
-            });
-
-          if (insertError) {
-            // Check if it's a constraint violation (race condition)
-            if (insertError.message.includes('duplicate key value violates unique constraint')) {
-              console.log(`⚠️ Race condition detected, retrying... (attempt ${attempt + 1})`);
-              
-              // Add exponential backoff delay
-              const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 100;
-              await new Promise(resolve => setTimeout(resolve, delay));
-              continue; // Retry the operation
-            } else {
-              throw insertError;
-            }
-          }
-
-          console.log(`✅ Created subscription for user ${data.user_id}`);
-          return { success: true };
-        }
-      } catch (error) {
-        console.error(`❌ Attempt ${attempt + 1} failed for user ${data.user_id}:`, error);
-        
-        if (attempt === maxRetries - 1) {
-          // Last attempt failed
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-          console.error(`💥 All attempts failed for user ${data.user_id}:`, errorMessage);
-          return { 
-            success: false, 
-            error: `Failed to create/update subscription after ${maxRetries} attempts: ${errorMessage}` 
-          };
-        }
-
-        // Add delay before next retry
-        const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 100;
-        await new Promise(resolve => setTimeout(resolve, delay));
+      if (error) {
+        console.error(`❌ Secure subscription upsert failed:`, error);
+        return { 
+          success: false, 
+          error: `Failed to update subscription: ${error.message}` 
+        };
       }
-    }
 
-    return { success: false, error: 'Unexpected error in retry loop' };
+      console.log(`✅ Securely updated subscription for user ${data.user_id}, ID: ${subscriptionId}`);
+      return { success: true };
+
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error(`💥 Secure subscription upsert error:`, errorMessage);
+      return { 
+        success: false, 
+        error: `Subscription operation failed: ${errorMessage}` 
+      };
+    }
   }
 
   /**
-   * Get subscription status safely
+   * Get subscription status securely using the existing secure database function
    */
   static async getSubscriptionStatus(userId: string): Promise<{
     success: boolean;
@@ -119,19 +63,35 @@ export class SafeSubscriptionService {
     error?: string;
   }> {
     try {
+      // Use the existing secure function
       const { data, error } = await supabase
-        .from('subscribers')
-        .select('*')
-        .eq('user_id', userId)
-        .maybeSingle();
+        .rpc('get_user_subscription_status', {
+          p_user_id: userId
+        });
 
       if (error) {
+        console.error(`❌ Secure subscription status query failed:`, error);
         return { success: false, error: error.message };
       }
 
-      return { success: true, data: data || undefined };
+      // Convert the function result back to our SubscriptionData format
+      if (data && Array.isArray(data) && data.length > 0) {
+        const subscriptionInfo = data[0];
+        const subscriptionData: SubscriptionData = {
+          user_id: userId,
+          email: '', // Email not returned by secure function for privacy
+          subscribed: subscriptionInfo.subscribed,
+          subscription_tier: subscriptionInfo.subscription_tier,
+          subscription_status: subscriptionInfo.subscription_status,
+          subscription_end: subscriptionInfo.subscription_end
+        };
+        return { success: true, data: subscriptionData };
+      }
+
+      return { success: true, data: undefined };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error(`💥 Secure subscription status error:`, errorMessage);
       return { success: false, error: errorMessage };
     }
   }
@@ -141,16 +101,32 @@ export class SafeSubscriptionService {
    */
   static async cancelSubscription(userId: string): Promise<{ success: boolean; error?: string }> {
     try {
+      // Get current subscription first to get the email
+      const currentStatus = await this.getSubscriptionStatus(userId);
+      if (!currentStatus.success) {
+        return { success: false, error: 'Unable to retrieve current subscription' };
+      }
+
+      // Get user email from the current session (secure)
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user?.email || user.id !== userId) {
+        return { success: false, error: 'Authentication required' };
+      }
+
+      // Use the secure database function for cancellation
       const { error } = await supabase
-        .from('subscribers')
-        .update({
-          subscribed: false,
-          subscription_status: 'cancelled',
-          updated_at: new Date().toISOString(),
-        })
-        .eq('user_id', userId);
+        .rpc('secure_subscription_upsert', {
+          p_user_id: userId,
+          p_email: user.email,
+          p_subscribed: false,
+          p_subscription_tier: null,
+          p_subscription_status: 'cancelled',
+          p_subscription_end: null,
+          p_stripe_customer_id: null
+        });
 
       if (error) {
+        console.error(`❌ Secure subscription cancellation failed:`, error);
         return { success: false, error: error.message };
       }
 

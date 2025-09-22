@@ -836,7 +836,7 @@ export type Database = {
           subscription_status: string | null
           subscription_tier: string | null
           updated_at: string
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           created_at?: string
@@ -848,7 +848,7 @@ export type Database = {
           subscription_status?: string | null
           subscription_tier?: string | null
           updated_at?: string
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           created_at?: string
@@ -860,7 +860,40 @@ export type Database = {
           subscription_status?: string | null
           subscription_tier?: string | null
           updated_at?: string
-          user_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      subscribers_audit_log: {
+        Row: {
+          id: string
+          new_values: Json | null
+          old_values: Json | null
+          operation: string
+          performed_at: string | null
+          performed_by: string | null
+          session_info: Json | null
+          subscriber_id: string
+        }
+        Insert: {
+          id?: string
+          new_values?: Json | null
+          old_values?: Json | null
+          operation: string
+          performed_at?: string | null
+          performed_by?: string | null
+          session_info?: Json | null
+          subscriber_id: string
+        }
+        Update: {
+          id?: string
+          new_values?: Json | null
+          old_values?: Json | null
+          operation?: string
+          performed_at?: string | null
+          performed_by?: string | null
+          session_info?: Json | null
+          subscriber_id?: string
         }
         Relationships: []
       }
@@ -1133,6 +1166,18 @@ export type Database = {
           source: string
           tags: string[]
         }[]
+      }
+      secure_subscription_upsert: {
+        Args: {
+          p_email: string
+          p_stripe_customer_id?: string
+          p_subscribed: boolean
+          p_subscription_end?: string
+          p_subscription_status?: string
+          p_subscription_tier?: string
+          p_user_id: string
+        }
+        Returns: string
       }
       user_owns_dog: {
         Args: { dog_uuid: string }
