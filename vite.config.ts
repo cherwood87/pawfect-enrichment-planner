@@ -47,14 +47,7 @@ export default defineConfig(({ mode }) => ({
         }
       }
     },
-    // Enable tree shaking
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: mode === 'production',
-        drop_debugger: true,
-        pure_funcs: mode === 'production' ? ['console.log', 'console.info'] : []
-      }
-    }
+    // Use default minification (esbuild) which is faster and doesn't require extra dependencies
+    minify: mode === 'production'
   }
 }));
