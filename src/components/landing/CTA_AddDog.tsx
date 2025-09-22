@@ -25,23 +25,7 @@ const CTA_AddDog: React.FC = () => {
             
             <p className="text-sm text-gray-500 mt-4">Set up in under 2 minutes • Works for all dogs</p>
 
-            <div className="mt-8 pt-8 border-t border-purple-200">
-              <p className="text-lg font-semibold text-purple-800 mb-4">Join the Pack! </p>
-              <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-600">
-                <div className="flex items-center bg-white/50 rounded-full px-4 py-2">
-                  <div className="w-2 h-2 bg-emerald-400 rounded-full mr-2"></div>
-                  280+ activity ideas
-                </div>
-                <div className="flex items-center bg-white/50 rounded-full px-4 py-2">
-                  <div className="w-2 h-2 bg-cyan-400 rounded-full mr-2"></div>
-                  5-minute setup
-                </div>
-                <div className="flex items-center bg-white/50 rounded-full px-4 py-2">
-                  <div className="w-2 h-2 bg-purple-400 rounded-full mr-2"></div>
-                  Instant AI help
-                </div>
-              </div>
-            </div>
+            
           </CardContent>
         </Card>
       </div>
