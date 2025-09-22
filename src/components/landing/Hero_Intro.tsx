@@ -65,7 +65,7 @@ const Hero_Intro: React.FC = () => {
                 Happy & Entertained
               </h1>
               
-              <p className="text-lg md:text-xl text-gray-600 mb-8 leading-relaxed">Take a quick quiz, get simple enrichment activity ideas perfect for your dog, plus an AI coach for instant help.</p>
+              <p className="text-lg md:text-xl text-gray-600 mb-8 leading-relaxed">Get simple enrichment activity ideas perfect for your dog, plus an AI coach for instant help.</p>
 
               <div className="flex justify-center lg:justify-start">
                 <Button data-testid="landing-cta-start" onClick={handleGetStarted} size="lg" className="bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 text-lg px-8 py-4 rounded-2xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300">
