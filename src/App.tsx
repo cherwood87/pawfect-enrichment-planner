@@ -69,108 +69,56 @@ const AppRoutes = () => {
   
   return (
     <Routes>
-                        <Route path="/auth" element={
-                          <UnifiedErrorBoundary context="Auth">
-                            <Auth />
-                          </UnifiedErrorBoundary>
-                        } />
-                        <Route path="/subscribe" element={
-                          <UnifiedErrorBoundary context="Subscribe">
-                            <Subscribe />
-                          </UnifiedErrorBoundary>
-                        } />
-                        <Route path="/dogs" element={<Navigate to="/settings?tab=dogs" replace />} />
-                        <Route path="/dogs/:id" element={
-                          <ProtectedRoute>
-                            <SubscriptionGuard>
-                              <UnifiedErrorBoundary context="Dog Details">
-                                <DogDetails />
-                              </UnifiedErrorBoundary>
-                            </SubscriptionGuard>
-                          </ProtectedRoute>
-                        } />
-                        <Route path="/dogs/:id/quiz" element={
-                          <ProtectedRoute>
-                            <SubscriptionGuard>
-                              <UnifiedErrorBoundary context="Dog Quiz">
-                                <DogQuizRoute />
-                              </UnifiedErrorBoundary>
-                            </SubscriptionGuard>
-                          </ProtectedRoute>
-                        } />
-                        <Route path="/activities" element={<Navigate to="/activity-library" replace />} />
-                        <Route path="/app" element={
-                          <ProtectedRoute>
-                            <SubscriptionGuard>
-                              <UnifiedErrorBoundary context="Dashboard">
-                                <Index />
-                              </UnifiedErrorBoundary>
-                            </SubscriptionGuard>
-                          </ProtectedRoute>
-                        } />
-                        <Route path="/coach" element={
-                          <ProtectedRoute>
-                            <SubscriptionGuard>
-                              <UnifiedErrorBoundary context="Coach">
-                                <Coach />
-                              </UnifiedErrorBoundary>
-                            </SubscriptionGuard>
-                          </ProtectedRoute>
-                        } />
-                        <Route path="/activity-library" element={
-                          <ProtectedRoute>
-                            <SubscriptionGuard>
-                              <UnifiedErrorBoundary context="Activity Library">
-                                <ActivityLibraryPage />
-                              </UnifiedErrorBoundary>
-                            </SubscriptionGuard>
-                          </ProtectedRoute>
-                        } />
-                        {FLAGS.ENABLE_WEEKLY_PLANNER && (
-                          <Route path="/weekly-planner" element={
-                            <ProtectedRoute>
-                              <SubscriptionGuard>
-                                <UnifiedErrorBoundary context="Weekly Planner">
-                                  <WeeklyPlannerPage />
-                                </UnifiedErrorBoundary>
-                              </SubscriptionGuard>
-                            </ProtectedRoute>
-                          } />
-                        )}
-                        <Route path="/dog-profile-dashboard/activity-library" element={<Navigate to="/activity-library" replace />} />
-                        <Route path="/dog-profile-quiz" element={
-                          <ProtectedRoute>
-                            <SubscriptionGuard>
-                              <UnifiedErrorBoundary context="Dog Profile Quiz">
-                                <DogProfileQuizPage />
-                              </UnifiedErrorBoundary>
-                            </SubscriptionGuard>
-                          </ProtectedRoute>
-                        } />
-                         <Route path="/settings" element={
-                           <ProtectedRoute>
-                             <UnifiedErrorBoundary context="Settings">
-                               <AccountSettings />
-                             </UnifiedErrorBoundary>
-                           </ProtectedRoute>
-                         } />
-                         <Route path="/chat-safety-test" element={
-                           <ProtectedRoute>
-                             <UnifiedErrorBoundary context="Chat Safety Test">
-                               <ChatSafetyTest />
-                             </UnifiedErrorBoundary>
-                           </ProtectedRoute>
-                         } />
-                        <Route path="/" element={
-                          <UnifiedErrorBoundary context="Landing">
-                            <Landing />
-                          </UnifiedErrorBoundary>
-                        } />
-                        <Route path="*" element={
-                          <UnifiedErrorBoundary context="Not Found">
-                            <NotFound />
-                          </UnifiedErrorBoundary>
-                        } />
+      {/* Public routes */}
+      <Route path="/" element={
+        <UnifiedErrorBoundary context="Landing">
+          <Landing />
+        </UnifiedErrorBoundary>
+      } />
+      <Route path="/auth" element={
+        <UnifiedErrorBoundary context="Auth">
+          <Auth />
+        </UnifiedErrorBoundary>
+      } />
+      <Route path="/subscribe" element={
+        <UnifiedErrorBoundary context="Subscribe">
+          <Subscribe />
+        </UnifiedErrorBoundary>
+      } />
+      
+      {/* Main app - Activity Library */}
+      <Route path="/activity-library" element={
+        <ProtectedRoute>
+          <SubscriptionGuard>
+            <UnifiedErrorBoundary context="Activity Library">
+              <ActivityLibraryPage />
+            </UnifiedErrorBoundary>
+          </SubscriptionGuard>
+        </ProtectedRoute>
+      } />
+      
+      {/* Account settings (simplified) */}
+      <Route path="/settings" element={
+        <ProtectedRoute>
+          <UnifiedErrorBoundary context="Settings">
+            <AccountSettings />
+          </UnifiedErrorBoundary>
+        </ProtectedRoute>
+      } />
+
+      {/* Redirects from old routes */}
+      <Route path="/app" element={<Navigate to="/activity-library" replace />} />
+      <Route path="/activities" element={<Navigate to="/activity-library" replace />} />
+      <Route path="/dogs/*" element={<Navigate to="/activity-library" replace />} />
+      <Route path="/coach" element={<Navigate to="/activity-library" replace />} />
+      <Route path="/weekly-planner" element={<Navigate to="/activity-library" replace />} />
+      
+      {/* 404 */}
+      <Route path="*" element={
+        <UnifiedErrorBoundary context="Not Found">
+          <NotFound />
+        </UnifiedErrorBoundary>
+      } />
     </Routes>
   );
 };

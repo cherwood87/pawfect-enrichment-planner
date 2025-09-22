@@ -34,19 +34,26 @@ const Landing: React.FC = () => {
       {/* Header with Sign In button (only for unauthenticated users) */}
       {!user && !session && (
         <header className="absolute top-0 right-0 p-6 z-10">
-          <Link to="/auth">
-            <Button className="modern-button-outline flex items-center space-x-2 shadow-lg hover:shadow-xl">
-              <LogIn className="w-4 h-4" />
-              <span>Sign In</span>
-            </Button>
-          </Link>
+          <div className="flex gap-3">
+            <Link to="/auth">
+              <Button variant="outline" className="flex items-center space-x-2">
+                <LogIn className="w-4 h-4" />
+                <span>Sign In</span>
+              </Button>
+            </Link>
+            <Link to="/subscribe">
+              <Button className="flex items-center space-x-2">
+                <span>Get Started</span>
+              </Button>
+            </Link>
+          </div>
         </header>
       )}
       
       {/* Simple pricing ribbon */}
       <div className="container mx-auto px-6 pt-20">
         <div className="rounded-xl border border-primary/20 bg-white/70 backdrop-blur p-3 text-center text-sm">
-          Premium enrichment for your dog — just <span className="font-semibold text-primary">$5.99/mo</span>
+          Premium enrichment activities for your dog — just <span className="font-semibold text-primary">$9.99/mo</span>
         </div>
       </div>
       

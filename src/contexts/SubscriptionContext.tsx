@@ -33,7 +33,7 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
   const [endDate, setEndDate] = useState<string>();
   const [error, setError] = useState<string>();
 
-  // Check subscription from database
+  // Check subscription from Stripe via edge function
   const checkSubscription = async () => {
     if (!user || !session) {
       setStatus('inactive');
@@ -46,32 +46,20 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
     setError(undefined);
 
     try {
-      const { data, error: dbError } = await supabase
-        .from('subscribers')
-        .select('subscribed, subscription_tier, subscription_end, subscription_status')
-        .eq('user_id', user.id)
-        .maybeSingle();
+      const { data, error: fnError } = await supabase.functions.invoke('check-subscription');
 
-      if (dbError) {
-        console.error('Error fetching subscription:', dbError);
+      if (fnError) {
+        console.error('Error checking subscription:', fnError);
         setError('Failed to check subscription status');
         setStatus('inactive');
         return;
       }
 
-      if (data) {
-        const isActive = data.subscribed && 
-                        (!data.subscription_end || new Date(data.subscription_end) > new Date());
-        
-        setStatus(isActive ? 'active' : 'inactive');
-        setTier(data.subscription_tier || undefined);
-        setEndDate(data.subscription_end || undefined);
-      } else {
-        // No subscription record found
-        setStatus('inactive');
-        setTier(undefined);
-        setEndDate(undefined);
-      }
+      const isActive = data?.subscribed || false;
+      setStatus(isActive ? 'active' : 'inactive');
+      setTier(data?.product_id || undefined);
+      setEndDate(data?.subscription_end || undefined);
+
     } catch (err) {
       console.error('Subscription check error:', err);
       setError('Failed to verify subscription');
@@ -87,38 +75,8 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
   }, [user, session]);
 
   const activate = async () => {
-    if (!user) {
-      setError('User must be authenticated');
-      return;
-    }
-
-    setIsLoading(true);
-    setError(undefined);
-
-    try {
-      // For demo purposes - insert/update subscription record
-      const { error: upsertError } = await supabase
-        .from('subscribers')
-        .upsert({
-          user_id: user.id,
-          email: user.email!,
-          subscribed: true,
-          subscription_tier: 'Premium',
-          subscription_status: 'active',
-          subscription_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
-        });
-
-      if (upsertError) {
-        throw upsertError;
-      }
-
-      await checkSubscription();
-    } catch (err) {
-      console.error('Activation error:', err);
-      setError('Failed to activate subscription');
-    } finally {
-      setIsLoading(false);
-    }
+    // Refresh subscription status from Stripe
+    await checkSubscription();
   };
 
   const cancel = async () => {
@@ -131,6 +89,7 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
     setError(undefined);
 
     try {
+      // For demo purposes - update local subscription record
       const { error: updateError } = await supabase
         .from('subscribers')
         .update({
@@ -140,9 +99,10 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
         .eq('user_id', user.id);
 
       if (updateError) {
-        throw updateError;
+        console.warn('Local update error:', updateError);
       }
 
+      // Refresh from Stripe
       await checkSubscription();
     } catch (err) {
       console.error('Cancellation error:', err);

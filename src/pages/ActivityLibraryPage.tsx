@@ -1,61 +1,37 @@
 
-import React, { useState, useCallback, lazy, Suspense } from 'react';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft, Brain, BookOpen, Sparkles } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import EducationalContent from '@/components/EducationalContent';
-import FloatingChatButton from '@/components/dashboard/FloatingChatButton';
-import ChatModal from '@/components/chat/ChatModal';
-import DashboardHeader from '@/components/dashboard/DashboardHeader';
-import Breadcrumbs from '@/components/navigation/Breadcrumbs';
+import React, { Suspense, lazy } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import SimpleNavigation from "@/components/SimpleNavigation";
+import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 
-// Lazy load the heavy ActivityLibrary component
-const ActivityLibrary = lazy(() => import('@/components/ActivityLibrary'));
+// Lazy load ActivityLibrary for performance
+const ActivityLibrary = lazy(() => import("@/components/ActivityLibrary"));
 
-const ActivityLibraryPage = () => {
-  const navigate = useNavigate();
-  const [isChatModalOpen, setIsChatModalOpen] = useState(false);
+const ActivityLibraryPage: React.FC = () => {
+  const { user } = useAuth();
 
-  const handleChatModalOpen = useCallback(() => {
-    setIsChatModalOpen(true);
-  }, []);
-
-  const handleChatModalClose = useCallback(() => {
-    setIsChatModalOpen(false);
-  }, []);
-
-  const handleBackClick = useCallback(() => {
-    navigate('/activity-library');
-  }, [navigate]);
-
-  const handleAddDogOpen = useCallback(() => {
-    navigate('/settings?tab=dogs');
-  }, [navigate]);
+  if (!user) {
+    return <div>Please log in to access the activity library.</div>;
+  }
 
   return (
-    <div className="min-h-screen bg-background">
-      <DashboardHeader onChatOpen={handleChatModalOpen} onAddDogOpen={handleAddDogOpen} />
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-orange-50">
+      <SimpleNavigation />
+      
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Activity Library
+          </h1>
+          <p className="text-lg text-gray-600">
+            Discover enrichment activities perfect for your dog
+          </p>
+        </div>
 
-      <div className="max-w-screen-lg mx-auto mobile-container py-8 mobile-space-y pb-20 sm:pb-8">
-        <Breadcrumbs className="mb-4" />
-        
-        {/* Activity Library with Suspense for lazy loading */}
-        <Suspense
-          fallback={
-            <div className="flex items-center justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2" />
-            </div>
-          }
-        >
+        <Suspense fallback={<LoadingSkeleton type="dashboard" />}>
           <ActivityLibrary />
         </Suspense>
-      </div>
-
-      {/* Floating Chat Button */}
-      <FloatingChatButton onChatOpen={handleChatModalOpen} />
-
-      {/* Chat Modal */}
-      <ChatModal isOpen={isChatModalOpen} onClose={handleChatModalClose} />
+      </main>
     </div>
   );
 };
