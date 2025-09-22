@@ -166,7 +166,7 @@ export class OfflineOperationQueue {
   private static async executeOperation(item: OperationQueueItem): Promise<boolean> {
     try {
       // Import SupabaseAdapter dynamically to avoid circular dependencies
-      const { SupabaseAdapter } = await import('../integration/SupabaseAdapter');
+      const { SupabaseAdapter } = await import('@/services/integration/SupabaseAdapter');
       
       switch (item.type) {
         case 'CREATE':
