@@ -1,3 +1,4 @@
+import React, { Suspense, lazy, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,11 +10,11 @@ import { ActivityProvider } from "@/contexts/ActivityContext";
 import { ChatProvider } from "@/contexts/ChatContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import UnifiedErrorBoundary from "@/components/error/UnifiedErrorBoundary";
-import { Suspense, lazy } from "react";
 import SubscriptionGuard from "@/components/SubscriptionGuard";
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import { FLAGS } from "@/constants/flags";
 import { useRouteAnalytics } from "@/hooks/useRouteAnalytics";
+import { preloadCriticalDependencies, preloadNonCriticalDependencies } from "@/utils/lazyImports";
 
 // Lazy load all pages for better bundle splitting with enhanced error handling
 const Index = lazy(() => import("./pages/Index"));
@@ -174,30 +175,40 @@ const AppRoutes = () => {
   );
 };
 
-const App = () => (
-  <UnifiedErrorBoundary context="App Root">
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <AuthProvider>
-          <DogProvider>
-            <ActivityProvider>
-              <ChatProvider>
-                <SubscriptionProvider>
-                  <Toaster />
-                  <Sonner />
-                  <BrowserRouter>
-                    <Suspense fallback={<PageLoader />}>
-                      <AppRoutes />
-                    </Suspense>
-                  </BrowserRouter>
-                </SubscriptionProvider>
-              </ChatProvider>
-            </ActivityProvider>
-          </DogProvider>
-        </AuthProvider>
-      </TooltipProvider>
-    </QueryClientProvider>
-  </UnifiedErrorBoundary>
-);
+const App = () => {
+  useEffect(() => {
+    // Preload critical dependencies after initial render
+    preloadCriticalDependencies();
+    
+    // Load non-critical dependencies after a delay
+    setTimeout(preloadNonCriticalDependencies, 2000);
+  }, []);
+
+  return (
+    <UnifiedErrorBoundary context="App Root">
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <AuthProvider>
+            <DogProvider>
+              <ActivityProvider>
+                <ChatProvider>
+                  <SubscriptionProvider>
+                    <Toaster />
+                    <Sonner />
+                    <BrowserRouter>
+                      <Suspense fallback={<PageLoader />}>
+                        <AppRoutes />
+                      </Suspense>
+                    </BrowserRouter>
+                  </SubscriptionProvider>
+                </ChatProvider>
+              </ActivityProvider>
+            </DogProvider>
+          </AuthProvider>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </UnifiedErrorBoundary>
+  );
+};
 
 export default App;

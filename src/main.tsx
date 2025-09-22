@@ -1,9 +1,20 @@
 import { createRoot } from 'react-dom/client'
-import App from './App.tsx'
 import './index.css'
-import { initializePerformanceMonitoring } from '@/utils/performanceOptimization'
 
-// Initialize performance monitoring
-initializePerformanceMonitoring();
+// Dynamically import App and performance monitoring to reduce initial bundle
+const loadApp = async () => {
+  const [{ default: App }, { initializePerformanceMonitoring }] = await Promise.all([
+    import('./App.tsx'),
+    import('@/utils/performanceOptimization')
+  ]);
+  
+  // Initialize performance monitoring after app loads
+  initializePerformanceMonitoring();
+  
+  return App;
+};
 
-createRoot(document.getElementById("root")!).render(<App />);
+// Render app with dynamic loading
+loadApp().then(App => {
+  createRoot(document.getElementById("root")!).render(<App />);
+});
