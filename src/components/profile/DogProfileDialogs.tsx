@@ -1,7 +1,7 @@
 
 import React from 'react';
 import DogPersonalityQuiz from '@/components/DogPersonalityQuiz';
-import QuizResultsComponent from '@/components/DogProfileQuiz';
+import QuizResultsComponent from '@/components/QuizResults';
 import { QuizResults } from '@/types/quiz';
 import { Dog } from '@/types/dog';
 
@@ -46,7 +46,6 @@ const DogProfileDialogs: React.FC<DogProfileDialogsProps> = ({
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <QuizResultsComponent
           results={currentDog.quizResults}
-          dogName={currentDog.name}
           onRetakeQuiz={onRetakeQuiz}
           onClose={onCloseResults}
         />
