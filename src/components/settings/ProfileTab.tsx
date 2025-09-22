@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -6,16 +5,16 @@ import { User, Calendar, Activity, TrendingUp } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDog } from '@/contexts/DogContext';
 import { format } from 'date-fns';
-
 const ProfileTab = () => {
-  const { user } = useAuth();
-  const { state } = useDog();
-
+  const {
+    user
+  } = useAuth();
+  const {
+    state
+  } = useDog();
   const totalDogs = state.dogs.length;
   const joinDate = user?.created_at ? new Date(user.created_at) : null;
-
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       {/* User Information */}
       <Card className="border border-purple-200 rounded-2xl bg-white/60 backdrop-blur-sm">
         <CardHeader>
@@ -51,40 +50,12 @@ const ProfileTab = () => {
 
       {/* Usage Statistics */}
       <Card className="border border-purple-200 rounded-2xl bg-white/60 backdrop-blur-sm">
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2 text-purple-800">
-            <TrendingUp className="w-5 h-5" />
-            <span>Usage Statistics</span>
-          </CardTitle>
-          <CardDescription>
-            Your activity on the platform
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="text-center p-4 bg-gradient-to-br from-purple-100 to-purple-200 rounded-2xl">
-              <div className="text-2xl font-bold text-purple-800">{totalDogs}</div>
-              <div className="text-sm text-purple-600">
-                {totalDogs === 1 ? 'Dog Profile' : 'Dog Profiles'}
-              </div>
-            </div>
-            
-            <div className="text-center p-4 bg-gradient-to-br from-cyan-100 to-cyan-200 rounded-2xl">
-              <div className="text-2xl font-bold text-cyan-800">0</div>
-              <div className="text-sm text-cyan-600">Activities Completed</div>
-            </div>
-            
-            <div className="text-center p-4 bg-gradient-to-br from-amber-100 to-amber-200 rounded-2xl">
-              <div className="text-2xl font-bold text-amber-800">0</div>
-              <div className="text-sm text-amber-600">Current Streak</div>
-            </div>
-          </div>
-        </CardContent>
+        
+        
       </Card>
 
       {/* Dog Profiles Summary */}
-      {totalDogs > 0 && (
-        <Card className="border border-purple-200 rounded-2xl bg-white/60 backdrop-blur-sm">
+      {totalDogs > 0 && <Card className="border border-purple-200 rounded-2xl bg-white/60 backdrop-blur-sm">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2 text-purple-800">
               <Activity className="w-5 h-5" />
@@ -96,11 +67,7 @@ const ProfileTab = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {state.dogs.map((dog) => (
-                <div 
-                  key={dog.id} 
-                  className="flex items-center justify-between p-3 bg-gradient-to-r from-purple-50 to-cyan-50 rounded-xl border border-purple-200"
-                >
+              {state.dogs.map(dog => <div key={dog.id} className="flex items-center justify-between p-3 bg-gradient-to-r from-purple-50 to-cyan-50 rounded-xl border border-purple-200">
                   <div className="flex items-center space-x-3">
                     <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-cyan-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
                       {dog.name.charAt(0).toUpperCase()}
@@ -118,14 +85,10 @@ const ProfileTab = () => {
                       {dog.activityLevel}
                     </Badge>
                   </div>
-                </div>
-              ))}
+                </div>)}
             </div>
           </CardContent>
-        </Card>
-      )}
-    </div>
-  );
+        </Card>}
+    </div>;
 };
-
 export default ProfileTab;
