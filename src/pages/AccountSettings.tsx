@@ -10,6 +10,7 @@ import ChatModal from '@/components/chat/ChatModal';
 import AccountTab from '@/components/settings/AccountTab';
 import DogsTab from '@/components/settings/DogsTab';
 import ProfileTab from '@/components/settings/ProfileTab';
+import Breadcrumbs from '@/components/navigation/Breadcrumbs';
 
 const AccountSettings = () => {
   const { user } = useAuth();
@@ -39,6 +40,8 @@ const AccountSettings = () => {
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-cyan-50 to-amber-50">
       <DashboardHeader onChatOpen={handleChatOpen} onAddDogOpen={handleAddDogOpen} />
       <div className="max-w-4xl mx-auto p-4 space-y-6">
+        
+        <Breadcrumbs />
 
         {/* Main Content */}
         <Card className="border-2 border-purple-200 rounded-3xl bg-white/80 backdrop-blur-sm shadow-lg">

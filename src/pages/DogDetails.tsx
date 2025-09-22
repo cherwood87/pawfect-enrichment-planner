@@ -5,6 +5,7 @@ import DogProfile from '@/components/DogProfile';
 import FloatingChatButton from '@/components/dashboard/FloatingChatButton';
 import ChatModal from '@/components/chat/ChatModal';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
+import Breadcrumbs from '@/components/navigation/Breadcrumbs';
 
 const DogDetails: React.FC = () => {
   const { id } = useParams();
@@ -28,10 +29,13 @@ const DogDetails: React.FC = () => {
     }
   }, [id, state.dogs, state.isLoading, setCurrentDog, navigate]);
 
+  const currentDog = state.dogs.find(d => d.id === state.currentDogId);
+  
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-orange-50 mobile-safe">
       <DashboardHeader onChatOpen={openChat} onAddDogOpen={handleAddDogOpen} />
       <div className="container mx-auto py-6 px-4">
+        <Breadcrumbs dogName={currentDog?.name} />
         <DogProfile onEditDogOpen={() => { /* uses internal dialogs */ }} />
       </div>
       <FloatingChatButton onChatOpen={openChat} />

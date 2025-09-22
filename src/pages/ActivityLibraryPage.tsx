@@ -7,6 +7,7 @@ import EducationalContent from '@/components/EducationalContent';
 import FloatingChatButton from '@/components/dashboard/FloatingChatButton';
 import ChatModal from '@/components/chat/ChatModal';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
+import Breadcrumbs from '@/components/navigation/Breadcrumbs';
 
 // Lazy load the heavy ActivityLibrary component
 const ActivityLibrary = lazy(() => import('@/components/ActivityLibrary'));
@@ -36,6 +37,8 @@ const ActivityLibraryPage = () => {
       <DashboardHeader onChatOpen={handleChatModalOpen} onAddDogOpen={handleAddDogOpen} />
 
       <div className="max-w-screen-lg mx-auto mobile-container py-8 mobile-space-y pb-20 sm:pb-8">
+        <Breadcrumbs className="mb-4" />
+        
         {/* Activity Library with Suspense for lazy loading */}
         <Suspense
           fallback={

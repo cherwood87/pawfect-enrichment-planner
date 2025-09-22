@@ -13,6 +13,7 @@ import { Suspense, lazy } from "react";
 import SubscriptionGuard from "@/components/SubscriptionGuard";
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import { FLAGS } from "@/constants/flags";
+import { useRouteAnalytics } from "@/hooks/useRouteAnalytics";
 
 // Lazy load all pages for better bundle splitting with enhanced error handling
 const Index = lazy(() => import("./pages/Index"));
@@ -62,20 +63,11 @@ const queryClient = new QueryClient({
   },
 });
 
-const App = () => (
-  <UnifiedErrorBoundary context="App Root">
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <AuthProvider>
-          <DogProvider>
-            <ActivityProvider>
-              <ChatProvider>
-                <SubscriptionProvider>
-                  <Toaster />
-                  <Sonner />
-                  <BrowserRouter>
-                    <Suspense fallback={<PageLoader />}>
-                      <Routes>
+const AppRoutes = () => {
+  useRouteAnalytics(); // Track route changes
+  
+  return (
+    <Routes>
                         <Route path="/auth" element={
                           <UnifiedErrorBoundary context="Auth">
                             <Auth />
@@ -178,7 +170,24 @@ const App = () => (
                             <NotFound />
                           </UnifiedErrorBoundary>
                         } />
-                      </Routes>
+    </Routes>
+  );
+};
+
+const App = () => (
+  <UnifiedErrorBoundary context="App Root">
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <AuthProvider>
+          <DogProvider>
+            <ActivityProvider>
+              <ChatProvider>
+                <SubscriptionProvider>
+                  <Toaster />
+                  <Sonner />
+                  <BrowserRouter>
+                    <Suspense fallback={<PageLoader />}>
+                      <AppRoutes />
                     </Suspense>
                   </BrowserRouter>
                 </SubscriptionProvider>
