@@ -32,10 +32,20 @@ interface ChatModalProps {
 
 function stripJsonBlocks(text: string): string {
   return text
-    .replace(/(\{[\s\S]*?"title":\s*".+?[\s\S]*?"energyLevel":\s*".+?"[\s\S]*?\})/g, '')
+    // Remove JSON objects with various patterns
+    .replace(/\{[\s\S]*?"title"[\s\S]*?\}/g, '')
+    .replace(/\{[\s\S]*?"pillar"[\s\S]*?\}/g, '')
+    .replace(/\{[\s\S]*?"difficulty"[\s\S]*?\}/g, '')
+    .replace(/\{[\s\S]*?"duration"[\s\S]*?\}/g, '')
+    .replace(/\{[\s\S]*?"materials"[\s\S]*?\}/g, '')
+    .replace(/\{[\s\S]*?"instructions"[\s\S]*?\}/g, '')
+    .replace(/\{[\s\S]*?"benefits"[\s\S]*?\}/g, '')
+    // Remove markdown formatting
     .replace(/\*\*(.*?)\*\*/g, '$1')
     .replace(/\*(.*?)\*/g, '$1')
     .replace(/^#+\s*/gm, '')
+    // Clean up multiple line breaks
+    .replace(/\n\s*\n\s*\n/g, '\n\n')
     .trim();
 }
 
@@ -116,7 +126,7 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, chatContext }) =
                     className={`max-w-[80%] p-3 rounded-lg ${
                       message.role === 'user'
                         ? 'bg-blue-500 text-white rounded-br-sm'
-                        : 'bg-gray-100 text-gray-800 rounded-bl-sm'
+                        : 'bg-white text-gray-900 border border-gray-200 rounded-bl-sm shadow-sm'
                     }`}
                   >
                     <p className="text-sm whitespace-pre-wrap">
@@ -130,7 +140,7 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, chatContext }) =
 
               {isLoading && (
                 <div className="flex justify-start">
-                  <div className="bg-gray-100 text-gray-800 rounded-lg rounded-bl-sm p-3">
+                  <div className="bg-white text-gray-900 border border-gray-200 rounded-lg rounded-bl-sm p-3 shadow-sm">
                     <div className="flex items-center space-x-2">
                       <Loader2 className="w-4 h-4 animate-spin" />
                       <span className="text-sm">Thinking...</span>
