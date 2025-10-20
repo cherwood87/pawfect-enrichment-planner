@@ -48,7 +48,7 @@ const Landing: React.FC = () => {
       {/* Simple pricing ribbon */}
       <div className="container mx-auto px-6 pt-20">
         <div className="rounded-xl border border-primary/20 bg-white/70 backdrop-blur p-3 text-center text-sm">
-          Premium enrichment activities for your dog — just <span className="font-semibold text-primary">$5.99/mo</span>
+          Premium enrichment activities for your dog — just <span className="font-semibold text-primary">$9.99/mo</span>
         </div>
       </div>
       

@@ -20,7 +20,7 @@ const CTA_AddDog: React.FC = () => {
             
 
             <Button onClick={() => navigate('/subscribe')} size="lg" className="bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 text-xl px-12 py-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
-              Get Premium Access - $5.99/mo
+              Get Premium Access - $9.99/mo
             </Button>
             
             <p className="text-sm text-gray-500 mt-4">Set up in under 2 minutes • Works for all dogs</p>

@@ -42,6 +42,27 @@ const Subscribe: React.FC = () => {
     }
   };
 
+  const handleManageSubscription = async () => {
+    try {
+      setIsCreatingCheckout(true);
+      const { data, error } = await supabase.functions.invoke('customer-portal');
+      
+      if (error) throw error;
+      if (data?.url) {
+        window.open(data.url, '_blank');
+      }
+    } catch (err: any) {
+      console.error('Error opening customer portal:', err);
+      toast({
+        title: "Error",
+        description: "Failed to open subscription management. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsCreatingCheckout(false);
+    }
+  };
+
   const handleSwitchAccount = async () => {
     try {
       await signOut();
@@ -114,12 +135,12 @@ const Subscribe: React.FC = () => {
                     Go to Activity Library
                   </Button>
                   <Button 
-                    onClick={cancel} 
+                    onClick={handleManageSubscription}
+                    disabled={isCreatingCheckout}
                     variant="outline" 
                     className="w-full"
-                    disabled={isLoading}
                   >
-                    {isLoading ? 'Cancelling...' : 'Cancel Subscription'}
+                    {isCreatingCheckout ? 'Opening portal...' : 'Manage Subscription'}
                   </Button>
                 </div>
               )}
