@@ -15,6 +15,16 @@ interface PasswordResetRequest {
   redirectUrl?: string;
 }
 
+interface RateLimitEntry {
+  email: string;
+  attempts: number;
+  first_attempt: string;
+  last_attempt: string;
+}
+
+const RATE_LIMIT_MAX_ATTEMPTS = 3;
+const RATE_LIMIT_WINDOW_HOURS = 1;
+
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -39,6 +49,54 @@ const handler = async (req: Request): Promise<Response> => {
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
+
+    // Rate limiting check
+    const rateLimitKey = `password_reset_${email.toLowerCase()}`;
+    const now = new Date().toISOString();
+    const windowStart = new Date(Date.now() - RATE_LIMIT_WINDOW_HOURS * 60 * 60 * 1000).toISOString();
+
+    // Check existing rate limit entries
+    const { data: existingLimit, error: limitCheckError } = await supabase
+      .from('rate_limits')
+      .select('*')
+      .eq('key', rateLimitKey)
+      .gte('last_attempt', windowStart)
+      .single();
+
+    if (existingLimit && existingLimit.attempts >= RATE_LIMIT_MAX_ATTEMPTS) {
+      const resetTime = new Date(new Date(existingLimit.first_attempt).getTime() + RATE_LIMIT_WINDOW_HOURS * 60 * 60 * 1000);
+      const minutesRemaining = Math.ceil((resetTime.getTime() - Date.now()) / 60000);
+      
+      return new Response(
+        JSON.stringify({ 
+          error: `Too many password reset attempts. Please try again in ${minutesRemaining} minute(s).` 
+        }),
+        {
+          status: 429,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
+
+    // Update or create rate limit entry
+    if (existingLimit) {
+      await supabase
+        .from('rate_limits')
+        .update({ 
+          attempts: existingLimit.attempts + 1, 
+          last_attempt: now 
+        })
+        .eq('key', rateLimitKey);
+    } else {
+      await supabase
+        .from('rate_limits')
+        .insert({ 
+          key: rateLimitKey, 
+          attempts: 1, 
+          first_attempt: now, 
+          last_attempt: now 
+        });
+    }
 
     // Generate password reset link using Supabase Auth
     const { data, error } = await supabase.auth.admin.generateLink({
