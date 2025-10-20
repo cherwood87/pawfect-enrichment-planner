@@ -683,6 +683,33 @@ export type Database = {
           },
         ]
       }
+      rate_limits: {
+        Row: {
+          attempts: number
+          created_at: string
+          first_attempt: string
+          id: string
+          key: string
+          last_attempt: string
+        }
+        Insert: {
+          attempts?: number
+          created_at?: string
+          first_attempt?: string
+          id?: string
+          key: string
+          last_attempt?: string
+        }
+        Update: {
+          attempts?: number
+          created_at?: string
+          first_attempt?: string
+          id?: string
+          key?: string
+          last_attempt?: string
+        }
+        Relationships: []
+      }
       recommendation_logs: {
         Row: {
           algorithm_version: string | null
@@ -1086,6 +1113,10 @@ export type Database = {
           pillar: string
           preference_score: number
         }[]
+      }
+      cleanup_old_rate_limits: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       enable_rls_for_table: {
         Args: { table_name: string }
